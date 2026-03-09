@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add -u)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git add \"功能规划/PC版备案审核原型设计要点.md\")"
+    ]
+  }
+}

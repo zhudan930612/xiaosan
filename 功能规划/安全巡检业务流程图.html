@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>安全巡检业务流程图</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    background: #f7f8fa;
+    color: #333;
+    padding: 40px 24px;
+    font-size: 13px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 40px;
+  }
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 20px;
+    padding-left: 10px;
+    border-left: 3px solid #d9d9d9;
+  }
+
+  /* ── 通用节点 ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+    min-width: 110px;
+    white-space: nowrap;
+  }
+  .node-start  { background:#e6f7ff; border:1px solid #91caff; color:#1677ff; border-radius:20px; }
+  .node-action { background:#fff;    border:1px solid #d9d9d9; color:#333; }
+  .node-state-normal   { background:#f6ffed; border:1px solid #b7eb8f; color:#389e0d; }
+  .node-state-onsite   { background:#fff7e6; border:1px solid #ffd591; color:#d46b08; }
+  .node-state-suspend  { background:#fff1f0; border:1px solid #ffa39e; color:#cf1322; }
+  .node-state-closed   { background:#f5f5f5; border:1px solid #d9d9d9; color:#888; }
+  .node-decision { background:#fffbe6; border:1px solid #ffe58f; color:#7c6300; border-radius:4px; }
+  .node-end      { background:#f9f9f9; border:1px solid #d9d9d9; color:#999; border-radius:20px; }
+  .node-warn     { background:#fff2e8; border:1px solid #ffbb96; color:#c44f00; }
+  .node-score    { background:#f0f5ff; border:1px solid #adc6ff; color:#2f54eb; }
+
+  /* ── 箭头线 ── */
+  .arrow {
+    width: 1px;
+    height: 20px;
+    background: #bbb;
+    position: relative;
+    margin: 0 auto;
+  }
+  .arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top: 6px solid #bbb;
+  }
+  .arrow-label {
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    margin: 2px 0;
+  }
+
+  /* ── 分叉容器 ── */
+  .fork {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    position: relative;
+  }
+  .fork::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 20px;
+    background: #bbb;
+  }
+  .branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    padding-top: 20px;
+  }
+  /* 横线连接分叉 */
+  .fork-line {
+    position: absolute;
+    top: 0;
+    height: 1px;
+    background: #bbb;
+  }
+  /* 左分支横线：从中心到左边中点 */
+  .branch-left  .fork-line { right: 50%; left: 0; }
+  .branch-right .fork-line { left: 50%; right: 0; }
+  .branch-mid   .fork-line { left: 0; right: 0; }
+  /* 下竖线 */
+  .branch::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 20px;
+    background: #bbb;
+    transform: translateX(-50%);
+  }
+  .branch-label {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 6px;
+    background: #f7f8fa;
+    padding: 0 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── 回环箭头（驳回） ── */
+  .loop-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #cf1322;
+    background: #fff1f0;
+    border: 1px dashed #ffa39e;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-top: 4px;
+  }
+  .loop-box::before { content: '↺'; font-size: 14px; }
+
+  /* ── 工程状态流转图 ── */
+  .state-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+  }
+  .state-arrow {
+    font-size: 18px;
+    color: #bbb;
+  }
+  .state-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .state-note {
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+  }
+
+  /* ── 逾期处理 ── */
+  .overdue-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 8px;
+  }
+  .overdue-cond {
+    min-width: 130px;
+    text-align: right;
+    font-size: 12px;
+    color: #888;
+    padding-right: 12px;
+  }
+  .overdue-arrow-h {
+    width: 24px;
+    height: 1px;
+    background: #bbb;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .overdue-arrow-h::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left: 6px solid #bbb;
+  }
+
+  /* ── 整体卡片 ── */
+  .card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 28px 32px;
+    max-width: 860px;
+    margin: 0 auto 32px;
+  }
+</style>
+</head>
+<body>
+
+<h1>安全巡检业务流程图</h1>
+<p class="subtitle">小型工程管理系统 · 安全巡检模块</p>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 1. 工程状态流转 -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-title">工程状态流转</div>
+  <div class="state-flow">
+    <div class="state-group">
+      <div class="node node-start">开工</div>
+      <div class="state-note">初始</div>
+    </div>
+    <span class="state-arrow">→</span>
+    <div class="state-group">
+      <div class="node node-state-normal">正常施工</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <span class="state-arrow">→</span>
+      <span style="font-size:11px;color:#999">违规·现场整改</span>
+      <span class="state-arrow" style="opacity:0">→</span>
+      <span style="font-size:11px;color:#999">违规·停工整改</span>
+      <span class="state-arrow" style="opacity:0">→</span>
+      <span style="font-size:11px;color:#999">完工核销</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="node node-state-onsite" style="min-width:90px">现场整改</div>
+        <span style="font-size:16px;color:#bbb">→</span>
+        <span style="font-size:11px;color:#888">整改通过</span>
+        <span style="font-size:16px;color:#bbb">→</span>
+        <div class="node node-state-normal" style="min-width:90px">正常施工</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="node node-state-suspend" style="min-width:90px">停工整改</div>
+        <span style="font-size:16px;color:#bbb">→</span>
+        <span style="font-size:11px;color:#888">整改通过</span>
+        <span style="font-size:16px;color:#bbb">→</span>
+        <div class="node node-state-normal" style="min-width:90px">正常施工</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+        <div class="node node-state-closed" style="min-width:90px">已核销</div>
+        <span style="font-size:11px;color:#999;margin-left:4px">终态，不可撤销</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 2. 巡查主流程 -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-title">巡查主流程</div>
+  <div class="flow">
+
+    <div class="node node-start">发起巡查</div>
+    <div class="arrow"></div>
+    <div class="node node-decision">发现违法违规？</div>
+
+    <!-- 分叉：未发现 / 发现 -->
+    <div class="fork" style="width:100%;max-width:700px;min-height:200px;">
+
+      <!-- 左：未发现 -->
+      <div class="branch branch-left">
+        <div class="fork-line"></div>
+        <div class="branch-label">未发现违规</div>
+        <div class="node node-action">提交巡查记录</div>
+        <div class="arrow"></div>
+        <div class="node node-end">结束，不改变工程状态</div>
+      </div>
+
+      <!-- 右：发现违规 -->
+      <div class="branch branch-right">
+        <div class="fork-line"></div>
+        <div class="branch-label">发现违规</div>
+        <div class="node node-decision">需要限时整改？</div>
+
+        <!-- 内部分叉 -->
+        <div class="fork" style="width:100%;max-width:580px;min-height:300px;margin-top:0;">
+
+          <!-- 不需要限时整改 -->
+          <div class="branch branch-left">
+            <div class="fork-line"></div>
+            <div class="branch-label">不需要</div>
+            <div class="node node-action">提交违规记录</div>
+            <div class="arrow"></div>
+            <div class="node node-action">审核</div>
+            <div class="fork" style="max-width:280px;min-height:80px;">
+              <div class="branch branch-left">
+                <div class="fork-line"></div>
+                <div class="branch-label">通过</div>
+                <div class="node node-score">加分</div>
+                <div class="arrow"></div>
+                <div class="node node-end">结束</div>
+              </div>
+              <div class="branch branch-right">
+                <div class="fork-line"></div>
+                <div class="branch-label">驳回</div>
+                <div class="node node-end">结束，不加分</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 需要限时整改 -->
+          <div class="branch branch-right">
+            <div class="fork-line"></div>
+            <div class="branch-label">需要</div>
+            <div class="node node-decision">处置方式</div>
+            <!-- 现场 / 停工 分叉 -->
+            <div class="fork" style="max-width:360px;min-height:260px;">
+
+              <div class="branch branch-left">
+                <div class="fork-line"></div>
+                <div class="branch-label">现场整改</div>
+                <div class="node node-state-onsite">工程→现场整改</div>
+                <div class="arrow"></div>
+                <div class="node node-action">施工方提交整改</div>
+                <div class="arrow"></div>
+                <div class="node node-action">审核员审核</div>
+                <div class="fork" style="max-width:280px;min-height:80px;">
+                  <div class="branch branch-left">
+                    <div class="fork-line"></div>
+                    <div class="branch-label">通过</div>
+                    <div class="node node-score">加分</div>
+                    <div class="arrow"></div>
+                    <div class="node node-state-normal">工程→正常施工</div>
+                  </div>
+                  <div class="branch branch-right">
+                    <div class="fork-line"></div>
+                    <div class="branch-label">驳回</div>
+                    <div class="loop-box">重新提交整改</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="branch branch-right">
+                <div class="fork-line"></div>
+                <div class="branch-label">停工整改</div>
+                <div class="node node-state-suspend">工程→停工整改</div>
+                <div class="arrow"></div>
+                <div class="node node-action">施工方提交整改</div>
+                <div class="arrow"></div>
+                <div class="node node-action">审核员审核</div>
+                <div class="fork" style="max-width:280px;min-height:80px;">
+                  <div class="branch branch-left">
+                    <div class="fork-line"></div>
+                    <div class="branch-label">通过</div>
+                    <div class="node node-score">加分</div>
+                    <div class="arrow"></div>
+                    <div class="node node-state-normal">工程→正常施工</div>
+                  </div>
+                  <div class="branch branch-right">
+                    <div class="fork-line"></div>
+                    <div class="branch-label">驳回</div>
+                    <div class="loop-box">重新提交整改</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 3. 整改逾期处理流程 -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-title">整改逾期处理流程</div>
+  <div class="flow">
+    <div class="node node-state-onsite" style="min-width:160px">整改期限到期</div>
+    <div class="arrow"></div>
+    <div class="node node-decision">施工方是否已提交整改？</div>
+
+    <div class="fork" style="max-width:640px;min-height:220px;">
+
+      <div class="branch branch-left">
+        <div class="fork-line"></div>
+        <div class="branch-label">已提交</div>
+        <div class="node node-action">等待审核员审核</div>
+        <div class="arrow"></div>
+        <div class="node node-end">进入审核流程</div>
+      </div>
+
+      <div class="branch branch-right">
+        <div class="fork-line"></div>
+        <div class="branch-label">未提交</div>
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding-left:8px;">
+          <div class="overdue-row">
+            <div class="overdue-cond">逾期 1–3 天</div>
+            <div class="overdue-arrow-h"></div>
+            <div class="node node-warn" style="margin-left:8px">系统自动发送催办通知</div>
+          </div>
+          <div class="overdue-row">
+            <div class="overdue-cond">逾期 3–7 天</div>
+            <div class="overdue-arrow-h"></div>
+            <div class="node node-warn" style="margin-left:8px">监管人员电话催办</div>
+          </div>
+          <div class="overdue-row">
+            <div class="overdue-cond">逾期 &gt; 7 天</div>
+            <div class="overdue-arrow-h"></div>
+            <div class="node node-state-suspend" style="margin-left:8px">移交执法部门</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 4. 工程核销流程 -->
+<!-- ══════════════════════════════════════════ -->
+<div class="card">
+  <div class="section-title">工程核销流程</div>
+  <div class="flow">
+    <div class="node node-state-normal" style="min-width:180px">工程处于正常施工状态</div>
+    <div class="arrow"></div>
+    <div class="node node-decision">核销发起方式</div>
+
+    <div class="fork" style="max-width:560px;min-height:180px;">
+
+      <div class="branch branch-left">
+        <div class="fork-line"></div>
+        <div class="branch-label">监管主动核销</div>
+        <div class="node node-action">监管提交完工记录</div>
+        <div class="arrow"></div>
+        <div class="node node-state-closed">工程→已核销</div>
+        <div class="arrow"></div>
+        <div class="node node-end">结束（终态）</div>
+      </div>
+
+      <div class="branch branch-right">
+        <div class="fork-line"></div>
+        <div class="branch-label">施工方申请</div>
+        <div class="node node-action">施工方发起核销申请</div>
+        <div class="arrow"></div>
+        <div class="node node-action">监管人员审核</div>
+        <div class="fork" style="max-width:300px;min-height:80px;">
+          <div class="branch branch-left">
+            <div class="fork-line"></div>
+            <div class="branch-label">通过</div>
+            <div class="node node-state-closed">工程→已核销</div>
+            <div class="arrow"></div>
+            <div class="node node-end">结束（终态）</div>
+          </div>
+          <div class="branch branch-right">
+            <div class="fork-line"></div>
+            <div class="branch-label">驳回</div>
+            <div class="node node-end">通知施工方，结束</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:24px;background:#fafafa;border:1px solid #eee;border-radius:6px;padding:12px 20px;font-size:12px;color:#888;max-width:500px;line-height:1.8;">
+      <b style="color:#555">核销后说明：</b><br>
+      · 已核销为终态，不可撤销<br>
+      · 未完成整改仍可继续提交 → 审核通过 → 积分恢复<br>
+      · 不可发起新的巡查记录
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

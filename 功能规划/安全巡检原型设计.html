@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>安全巡检原型设计</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  background: #e8edf2;
+  padding: 40px 32px 60px;
+  color: #333;
+  font-size: 13px;
+}
+h1 { text-align: center; font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+.meta { text-align: center; color: #999; font-size: 12px; margin-bottom: 36px; }
+
+.group-title {
+  font-size: 13px; font-weight: 600; color: #666;
+  margin: 32px 0 16px;
+  padding-left: 10px; border-left: 3px solid #91caff;
+}
+
+/* ── 手机外壳 ── */
+.screens { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.phone-label { font-size: 11px; color: #888; text-align: center; line-height: 1.5; }
+.phone {
+  width: 320px; background: #fff;
+  border-radius: 36px; border: 8px solid #1a1a1a;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08);
+  overflow: hidden; position: relative;
+}
+.phone-notch { height: 28px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; }
+.phone-notch-inner { width: 80px; height: 14px; background: #1a1a1a; border-radius: 8px; }
+.phone-screen { background: #f5f7fa; min-height: 560px; overflow: hidden; display: flex; flex-direction: column; }
+.phone-home { height: 20px; background: #fff; display: flex; align-items: center; justify-content: center; }
+.phone-home-bar { width: 80px; height: 4px; background: #333; border-radius: 2px; }
+
+/* ── 状态栏 ── */
+.status-bar {
+  background: #fff; padding: 6px 16px 4px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 10px; color: #333; font-weight: 500; flex-shrink: 0;
+}
+
+/* ── 导航栏 ── */
+.nav-bar {
+  background: #fff; padding: 10px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid #f0f0f0; flex-shrink: 0;
+}
+.nav-back { font-size: 18px; color: #1677ff; line-height: 1; flex-shrink: 0; }
+.nav-title { font-size: 16px; font-weight: 600; color: #1a1a1a; flex: 1; }
+.nav-action { font-size: 13px; color: #1677ff; flex-shrink: 0; }
+
+/* ── 滚动内容区 ── */
+.scroll-area { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+
+/* ── 通用卡片 ── */
+.card { background: #fff; border-radius: 10px; margin: 10px 12px 0; overflow: hidden; }
+.card-header {
+  padding: 10px 14px 8px; font-size: 13px; font-weight: 600; color: #333;
+  border-bottom: 1px solid #f5f5f5;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 10px 14px; }
+
+/* ── 标签 ── */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 500; line-height: 1.6; white-space: nowrap;
+}
+.tag-green  { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag-orange { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+.tag-red    { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.tag-gray   { background: #f5f5f5; color: #888;    border: 1px solid #d9d9d9; }
+.tag-blue   { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+
+/* ── 分割线 ── */
+.divider { height: 1px; background: #f0f0f0; margin: 8px 0; }
+
+/* ── 字段行 ── */
+.field-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: flex-start; font-size: 12px; }
+.field-label { color: #999; flex-shrink: 0; min-width: 56px; }
+.field-value { color: #333; flex: 1; line-height: 1.5; }
+
+/* ── 按钮 ── */
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px 16px; border-radius: 6px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: none; line-height: 1.4;
+}
+.btn-primary { background: #1677ff; color: #fff; }
+.btn-danger  { background: #ff4d4f; color: #fff; }
+.btn-orange  { background: #fa8c16; color: #fff; }
+.btn-green   { background: #52c41a; color: #fff; }
+.btn-default { background: #fff; color: #333; border: 1px solid #d9d9d9; }
+.btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 5px; }
+.btn-block { width: 100%; }
+
+/* ── 底部操作栏 ── */
+.bottom-bar {
+  position: absolute; bottom: 24px; left: 0; right: 0;
+  padding: 10px 16px; background: #fff;
+  border-top: 1px solid #f0f0f0; display: flex; gap: 8px;
+}
+
+/* ── 输入 ── */
+.input-field {
+  width: 100%; padding: 8px 10px;
+  border: 1px solid #d9d9d9; border-radius: 6px;
+  font-size: 12px; color: #333; background: #fafafa; line-height: 1.5;
+}
+.input-textarea {
+  width: 100%; padding: 8px 10px;
+  border: 1px solid #d9d9d9; border-radius: 6px;
+  font-size: 12px; color: #333; background: #fafafa;
+  height: 60px; resize: none; line-height: 1.5;
+}
+.input-label { font-size: 12px; color: #555; margin-bottom: 5px; font-weight: 500; }
+.input-required::after { content: ' *'; color: #ff4d4f; }
+.input-group { margin-bottom: 12px; }
+
+/* ── 单选 ── */
+.radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 6px;
+  border: 1px solid #d9d9d9; background: #fff;
+  font-size: 12px; color: #333; cursor: pointer;
+}
+.radio-item.sel-blue   { border-color: #1677ff; background: #e6f4ff; color: #1677ff; }
+.radio-item.sel-red    { border-color: #ff4d4f; background: #fff1f0; color: #cf1322; }
+.radio-item.sel-orange { border-color: #fa8c16; background: #fff7e6; color: #d46b08; }
+.radio-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #d9d9d9; background: #fff; flex-shrink: 0; }
+.radio-dot.on-blue   { border-color: #1677ff; background: #1677ff; }
+.radio-dot.on-red    { border-color: #ff4d4f; background: #ff4d4f; }
+
+/* ── Tab ── */
+.tab-bar {
+  display: flex; background: #fff;
+  border-bottom: 1px solid #f0f0f0; padding: 0 4px;
+  overflow-x: auto; flex-shrink: 0;
+}
+.tab-item {
+  padding: 8px 10px; font-size: 12px; color: #888;
+  white-space: nowrap; border-bottom: 2px solid transparent;
+  cursor: pointer; flex-shrink: 0;
+}
+.tab-item.active { color: #1677ff; border-bottom-color: #1677ff; font-weight: 500; }
+
+/* ── 搜索框 ── */
+.search-bar { background: #fff; padding: 8px 12px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%; padding: 7px 10px 7px 30px;
+  border: 1px solid #e8e8e8; border-radius: 18px;
+  font-size: 12px; color: #333; background: #f5f7fa;
+}
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #bbb; }
+
+/* ── 工程卡片 ── */
+.proj-card {
+  background: #fff; border-radius: 10px;
+  margin: 0 12px 10px; padding: 12px 14px;
+  border-left: 3px solid #d9d9d9;
+}
+.proj-card.normal  { border-left-color: #52c41a; }
+.proj-card.onsite  { border-left-color: #fa8c16; }
+.proj-card.suspend { border-left-color: #ff4d4f; }
+.proj-name {
+  font-size: 14px; font-weight: 600; color: #1a1a1a;
+  margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;
+}
+.proj-info { font-size: 11px; color: #888; line-height: 1.8; }
+.proj-footer {
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid #f5f5f5;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* ── 统计 ── */
+.big-stat {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff4d4f 100%);
+  border-radius: 10px; margin: 10px 12px 0; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.big-stat-num { font-size: 36px; font-weight: 700; color: #fff; line-height: 1; }
+.big-stat-label { font-size: 12px; color: rgba(255,255,255,.85); margin-top: 4px; }
+.big-stat-icon { font-size: 40px; opacity: .3; }
+
+/* ── 快捷入口 ── */
+.quick-btns { display: flex; gap: 10px; padding: 10px 12px 0; }
+.quick-btn {
+  flex: 1; background: #fff; border-radius: 10px;
+  padding: 14px 8px; text-align: center;
+  border: 1px solid #f0f0f0; position: relative;
+}
+.quick-btn-icon { font-size: 22px; margin-bottom: 4px; }
+.quick-btn-label { font-size: 11px; color: #555; }
+.badge {
+  position: absolute; top: 6px; right: 10px;
+  background: #ff4d4f; color: #fff;
+  font-size: 10px; padding: 1px 5px; border-radius: 8px; font-weight: 500;
+}
+
+/* ── 记录列表条目 ── */
+.record-item {
+  padding: 10px 0; border-bottom: 1px solid #f5f5f5;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.record-item:last-child { border-bottom: none; }
+.record-dot { width: 8px; height: 8px; border-radius: 50%; background: #1677ff; margin-top: 4px; flex-shrink: 0; }
+.record-main { flex: 1; }
+.record-title { font-size: 12px; font-weight: 500; color: #333; margin-bottom: 3px; }
+.record-sub { font-size: 11px; color: #999; line-height: 1.5; }
+
+/* ── 违规卡片 ── */
+.vio-card {
+  background: #fff; border-radius: 10px;
+  margin: 0 12px 10px; border: 1px solid #ffe58f; overflow: hidden;
+}
+.vio-card-header {
+  background: #fffbe6; padding: 8px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; font-weight: 600; color: #7c6300;
+  border-bottom: 1px solid #ffe58f;
+}
+.vio-card-body { padding: 10px 14px; }
+
+/* ── 地图占位 ── */
+.map-placeholder {
+  height: 100px; background: #e8f4e8;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #52c41a; gap: 6px; flex-shrink: 0;
+  border-top: 1px solid #b7eb8f; border-bottom: 1px solid #b7eb8f;
+}
+
+/* ── 照片上传 ── */
+.photo-upload { display: flex; gap: 6px; flex-wrap: wrap; }
+.photo-thumb {
+  width: 52px; height: 52px; border-radius: 6px;
+  background: #e8f4e8; border: 1px solid #b7eb8f;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.photo-add {
+  width: 52px; height: 52px; border-radius: 6px;
+  border: 1px dashed #d9d9d9; background: #fafafa;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #bbb;
+}
+
+/* ── 通知条 ── */
+.alert { margin: 8px 12px 0; padding: 8px 12px; border-radius: 6px; font-size: 11px; line-height: 1.5; }
+.alert-danger { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.alert-info   { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+
+/* ── 审核 tab ── */
+.review-tabs { display: flex; border: 1px solid #d9d9d9; border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+.review-tab { flex: 1; padding: 7px; text-align: center; font-size: 12px; font-weight: 500; color: #888; background: #fafafa; }
+.review-tab.pass   { background: #f6ffed; color: #389e0d; border-right: 1px solid #b7eb8f; }
+.review-tab.reject { background: #fff1f0; color: #cf1322; }
+
+/* ── 节标题 ── */
+.section-title {
+  padding: 10px 14px 6px;
+  font-size: 12px; font-weight: 600; color: #555;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* ── 工程详情头部 ── */
+.proj-header { background: #fff; padding: 12px 14px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+.proj-header-name { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.proj-header-info { font-size: 11px; color: #888; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<h1>安全巡检原型设计</h1>
+<p class="meta">小型工程管理系统 · 安全巡检模块 · 共 9 个页面</p>
+
+<!-- ══════════ 第一组：主流程 ══════════ -->
+<div class="group-title">主流程：首页 → 工程列表 → 工程详情</div>
+<div class="screens">
+
+<!-- P1 首页 -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar"><div class="nav-title">安全巡检</div></div>
+      <div class="scroll-area">
+
+        <!-- 在建工程统计 -->
+        <div class="card">
+          <div class="card-header">在建工程统计</div>
+          <div style="display:flex;gap:0;padding:10px 10px;">
+            <div style="flex:1;text-align:center;padding:8px 4px;">
+              <div style="font-size:22px;font-weight:700;color:#1677ff;">8</div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">小型工程</div>
+            </div>
+            <div style="width:1px;background:#f0f0f0;margin:4px 0;"></div>
+            <div style="flex:1;text-align:center;padding:8px 4px;">
+              <div style="font-size:22px;font-weight:700;color:#52c41a;">23</div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">住宅装修</div>
+            </div>
+            <div style="width:1px;background:#f0f0f0;margin:4px 0;"></div>
+            <div style="flex:1;text-align:center;padding:8px 4px;">
+              <div style="font-size:22px;font-weight:700;color:#fa8c16;">11</div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">零星作业</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 待巡查大卡片 -->
+        <div class="big-stat">
+          <div>
+            <div class="big-stat-num">7</div>
+            <div class="big-stat-label">个工程待巡查（超出频次要求）</div>
+          </div>
+          <div class="big-stat-icon">📋</div>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="quick-btns">
+          <div class="quick-btn">
+            <div class="badge">7</div>
+            <div class="quick-btn-icon">⏰</div>
+            <div class="quick-btn-label">待巡查</div>
+          </div>
+          <div class="quick-btn">
+            <div class="quick-btn-icon">🏗</div>
+            <div class="quick-btn-label">全部工程</div>
+          </div>
+          <div class="quick-btn">
+            <div class="badge">3</div>
+            <div class="quick-btn-icon">📝</div>
+            <div class="quick-btn-label">整改跟踪</div>
+          </div>
+        </div>
+
+        <!-- 工程状态汇总 -->
+        <div class="card">
+          <div class="card-header">工程状态汇总</div>
+          <div style="display:flex;padding:10px 14px;gap:0;">
+            <div style="flex:1;text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:#52c41a;">35</div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">正常施工</div>
+            </div>
+            <div style="width:1px;background:#f0f0f0;margin:4px 0;"></div>
+            <div style="flex:1;text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:#fa8c16;">4</div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">现场整改</div>
+            </div>
+            <div style="width:1px;background:#f0f0f0;margin:4px 0;"></div>
+            <div style="flex:1;text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:#ff4d4f;">3</div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">停工整改</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P1 · 安全巡检首页<br>巡查人员视角</div>
+</div>
+
+<!-- P2 工程列表 -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">全部工程</div>
+      </div>
+      <div class="search-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" placeholder="搜索工程名称或地址">
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item active">全部</div>
+        <div class="tab-item">小型工程</div>
+        <div class="tab-item">住宅装修</div>
+        <div class="tab-item">零星作业</div>
+      </div>
+      <div class="tab-bar" style="border-top:1px solid #f5f5f5;">
+        <div class="tab-item active">全部</div>
+        <div class="tab-item" style="color:#389e0d;">正常</div>
+        <div class="tab-item" style="color:#d46b08;">现场整改</div>
+        <div class="tab-item" style="color:#cf1322;">停工</div>
+        <div class="tab-item" style="color:#888;">已核销</div>
+      </div>
+      <div class="scroll-area" style="padding-top:10px;">
+
+        <div class="proj-card suspend">
+          <div class="proj-name">
+            <span style="font-size:13px;">福田某住宅楼改造工程</span>
+            <span class="tag tag-red">停工整改</span>
+          </div>
+          <div class="proj-info">
+            📍 福田区园岭街道中心路88号<br>
+            🏢 深圳市XX建设有限公司
+          </div>
+          <div class="proj-footer">
+            <span style="font-size:11px;color:#ff4d4f;">⚠ 超期5天未巡查</span>
+            <span style="font-size:11px;color:#999;">最近：3天前</span>
+          </div>
+        </div>
+
+        <div class="proj-card onsite">
+          <div class="proj-name">
+            <span style="font-size:13px;">南山某商铺装修工程</span>
+            <span class="tag tag-orange">现场整改</span>
+          </div>
+          <div class="proj-info">
+            📍 南山区科技园南路22号<br>
+            🏢 深圳市YY装饰有限公司
+          </div>
+          <div class="proj-footer">
+            <span style="font-size:11px;color:#fa8c16;">整改中，剩余3天</span>
+            <span style="font-size:11px;color:#999;">最近：1天前</span>
+          </div>
+        </div>
+
+        <div class="proj-card normal">
+          <div class="proj-name">
+            <span style="font-size:13px;">宝安某小区外墙修缮</span>
+            <span class="tag tag-green">正常施工</span>
+          </div>
+          <div class="proj-info">
+            📍 宝安区新安街道海城路15号<br>
+            🏢 深圳市ZZ工程有限公司
+          </div>
+          <div class="proj-footer">
+            <span style="font-size:11px;color:#888;">施工中</span>
+            <span style="font-size:11px;color:#999;">最近：2天前</span>
+          </div>
+        </div>
+
+        <div class="proj-card normal">
+          <div class="proj-name">
+            <span style="font-size:13px;">龙华某住宅室内装修</span>
+            <span class="tag tag-green">正常施工</span>
+          </div>
+          <div class="proj-info">
+            📍 龙华区民治街道民旺路58号<br>
+            🏢 深圳市WW家居有限公司
+          </div>
+          <div class="proj-footer">
+            <span style="font-size:11px;color:#fa8c16;">⚠ 超期2天未巡查</span>
+            <span style="font-size:11px;color:#999;">尚未巡查</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P2 · 工程列表<br>双 Tab 筛选</div>
+</div>
+
+<!-- P3 工程详情（停工整改，巡查人员） -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen" style="position:relative;">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">工程详情</div>
+        <div class="nav-action">查看完整备案</div>
+      </div>
+      <div class="scroll-area">
+
+        <!-- 工程头部 -->
+        <div class="proj-header">
+          <div class="proj-header-name">
+            福田区某住宅楼改造工程
+            <span class="tag tag-red">停工整改</span>
+          </div>
+          <div class="proj-header-info">
+            📍 福田区园岭街道中心路88号 · 小型工程<br>
+            🏢 深圳市XX建设有限公司<br>
+            👤 张负责人 18800001234<br>
+            📅 2025-12-01 ~ 2026-06-30
+          </div>
+        </div>
+
+        <!-- 地图 -->
+        <div class="map-placeholder">🗺 点击查看地图导航</div>
+
+        <!-- 违规整改 -->
+        <div class="section-title">
+          <span>违规整改记录</span>
+          <span style="font-size:11px;color:#ff4d4f;font-weight:500;">2条待处理</span>
+        </div>
+        <div style="padding:0 12px;">
+          <div style="background:#fff;border-radius:8px;border:1px solid #ffa39e;overflow:hidden;margin-bottom:8px;">
+            <div style="padding:8px 12px;background:#fff1f0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffa39e;">
+              <span style="font-size:12px;font-weight:600;color:#cf1322;">⛔ 高空作业违规</span>
+              <span class="tag tag-orange">待整改</span>
+            </div>
+            <div style="padding:8px 12px;">
+              <div class="field-row"><span class="field-label">整改期限</span><span class="field-value" style="color:#ff4d4f;">2026-03-15（剩余5天）</span></div>
+              <div class="field-row"><span class="field-label">登记时间</span><span class="field-value">2026-03-10 李巡查员</span></div>
+            </div>
+          </div>
+          <div style="background:#fff;border-radius:8px;border:1px solid #91caff;overflow:hidden;">
+            <div style="padding:8px 12px;background:#e6f4ff;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #91caff;">
+              <span style="font-size:12px;font-weight:600;color:#0958d9;">⚠ 未佩戴安全帽</span>
+              <span class="tag tag-blue">整改中·待审核</span>
+            </div>
+            <div style="padding:8px 12px;">
+              <div class="field-row"><span class="field-label">提交时间</span><span class="field-value">2026-03-11</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 巡查记录 -->
+        <div class="section-title">
+          <span>巡查记录</span>
+          <span style="font-size:11px;color:#1677ff;">全部 ›</span>
+        </div>
+        <div class="card" style="margin-top:0;">
+          <div class="card-body" style="padding:4px 14px;">
+            <div class="record-item">
+              <div class="record-dot" style="background:#ff4d4f;"></div>
+              <div class="record-main">
+                <div class="record-title">发现违规 2 条</div>
+                <div class="record-sub">2026-03-10 · 李巡查员 · 施工中</div>
+              </div>
+              <span style="font-size:11px;color:#bbb;">›</span>
+            </div>
+            <div class="record-item">
+              <div class="record-dot" style="background:#52c41a;"></div>
+              <div class="record-main">
+                <div class="record-title">未发现违规</div>
+                <div class="record-sub">2026-02-28 · 王巡查员 · 施工中</div>
+              </div>
+              <span style="font-size:11px;color:#bbb;">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:80px;"></div>
+      </div>
+      <div class="bottom-bar">
+        <div class="btn btn-primary btn-block" style="font-size:14px;">发起巡查</div>
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P3 · 工程详情<br>停工整改 · 巡查人员</div>
+</div>
+
+</div><!-- /screens -->
+
+<!-- ══════════ 第二组：巡查流程 ══════════ -->
+<div class="group-title">巡查流程：发起巡查 → 违规登记</div>
+<div class="screens">
+
+<!-- P4 发起巡查 -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen" style="position:relative;">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">发起巡查</div>
+      </div>
+      <!-- 工程信息条 -->
+      <div style="background:#e6f4ff;padding:8px 14px;font-size:12px;color:#0958d9;border-bottom:1px solid #91caff;flex-shrink:0;">
+        🏗 福田区某住宅楼改造工程 · 福田区园岭街道中心路88号
+      </div>
+      <div class="scroll-area">
+        <div class="card">
+          <div class="card-body">
+
+            <div class="input-group">
+              <div class="input-label">巡查时间</div>
+              <input class="input-field" value="2026-03-10  09:41">
+            </div>
+
+            <div class="input-group">
+              <div class="input-label">巡查人员</div>
+              <input class="input-field" value="李巡查员（当前用户）" disabled style="background:#f5f5f5;color:#999;">
+            </div>
+
+            <div class="input-group">
+              <div class="input-label input-required">是否施工中</div>
+              <div class="radio-group">
+                <div class="radio-item sel-blue">
+                  <div class="radio-dot on-blue"></div> 是
+                </div>
+                <div class="radio-item">
+                  <div class="radio-dot"></div> 否
+                </div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <div class="input-label">现场施工人员</div>
+              <input class="input-field" value="张三、李四、王五" placeholder="点击选择（可多选）">
+              <div style="font-size:10px;color:#bbb;margin-top:3px;">已选 3 人</div>
+            </div>
+
+            <div class="divider" style="margin:12px 0;"></div>
+
+            <div class="input-group" style="margin-bottom:0;">
+              <div class="input-label input-required">巡查结果</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+                <div class="radio-item" style="justify-content:flex-start;gap:10px;padding:10px 12px;">
+                  <div class="radio-dot"></div>
+                  <div>
+                    <div style="font-size:12px;font-weight:500;">未发现违法违规</div>
+                    <div style="font-size:11px;color:#999;margin-top:2px;">直接提交，不改变工程状态</div>
+                  </div>
+                </div>
+                <div class="radio-item sel-red" style="justify-content:flex-start;gap:10px;padding:10px 12px;">
+                  <div class="radio-dot on-red"></div>
+                  <div>
+                    <div style="font-size:12px;font-weight:500;color:#cf1322;">发现违法违规行为</div>
+                    <div style="font-size:11px;color:#ff7875;margin-top:2px;">下一步填写违规详情</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div style="height:80px;"></div>
+      </div>
+      <div class="bottom-bar">
+        <div class="btn btn-default" style="flex:1;">取消</div>
+        <div class="btn btn-danger" style="flex:2;">下一步：填写违规</div>
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P4 · 发起巡查<br>含是否施工中 & 现场人员</div>
+</div>
+
+<!-- P5 违规登记 -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen" style="position:relative;">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">违规登记</div>
+        <div class="nav-action" style="color:#ff4d4f;font-size:12px;">已填 2 条</div>
+      </div>
+      <div style="background:#fff7e6;padding:6px 14px;font-size:11px;color:#d46b08;border-bottom:1px solid #ffd591;flex-shrink:0;">
+        🏗 福田区某住宅楼改造工程 · 每条违规独立登记
+      </div>
+      <div class="scroll-area">
+
+        <!-- 违规卡片 1（展开） -->
+        <div class="vio-card" style="margin-top:10px;">
+          <div class="vio-card-header">
+            <span>违规 #1</span>
+            <span style="font-size:11px;font-weight:normal;color:#999;">折叠 ▲</span>
+          </div>
+          <div class="vio-card-body">
+
+            <div class="input-group">
+              <div class="input-label input-required">违规类型</div>
+              <div class="input-field" style="color:#333;">高空作业违规 ▾</div>
+            </div>
+
+            <div class="input-group">
+              <div class="input-label">违规描述</div>
+              <div class="input-textarea" style="color:#555;display:flex;align-items:flex-start;">
+                施工人员在3楼外墙作业时未正确佩戴安全绳...
+              </div>
+            </div>
+
+            <div class="input-group">
+              <div class="input-label input-required">现场照片</div>
+              <div class="photo-upload">
+                <div class="photo-thumb">📷</div>
+                <div class="photo-thumb">📷</div>
+                <div class="photo-add">+</div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <div class="input-label input-required">是否需要限时整改</div>
+              <div class="radio-group">
+                <div class="radio-item sel-red">
+                  <div class="radio-dot on-red"></div> 需要限时整改
+                </div>
+                <div class="radio-item">
+                  <div class="radio-dot"></div> 不需要
+                </div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <div class="input-label input-required">整改期限</div>
+              <input class="input-field" value="2026-03-15">
+            </div>
+
+            <div class="input-group">
+              <div class="input-label">整改要求说明</div>
+              <input class="input-field" placeholder="填写整改具体要求...">
+            </div>
+
+            <div class="input-group" style="margin-bottom:0;">
+              <div class="input-label input-required">处置方式</div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+                <div class="radio-item" style="justify-content:flex-start;gap:8px;">
+                  <div class="radio-dot"></div>
+                  <span>现场整改</span>
+                  <span style="font-size:10px;color:#999;">→工程状态：现场整改</span>
+                </div>
+                <div class="radio-item sel-red" style="justify-content:flex-start;gap:8px;">
+                  <div class="radio-dot on-red"></div>
+                  <span style="color:#cf1322;">停工整改</span>
+                  <span style="font-size:10px;color:#ff7875;">→工程状态：停工整改</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 违规卡片 2（折叠） -->
+        <div class="vio-card">
+          <div class="vio-card-header">
+            <span>违规 #2 · 未佩戴安全帽</span>
+            <span style="font-size:11px;font-weight:normal;color:#999;">展开 ▼</span>
+          </div>
+        </div>
+
+        <!-- 添加更多 -->
+        <div style="margin:8px 12px;padding:10px;text-align:center;border:1px dashed #d9d9d9;border-radius:8px;font-size:12px;color:#1677ff;background:#fafafa;">
+          ＋ 继续添加违规
+        </div>
+
+        <div style="height:80px;"></div>
+      </div>
+      <div class="bottom-bar">
+        <div class="btn btn-default" style="flex:1;">返回</div>
+        <div class="btn btn-danger" style="flex:2;">提交违规登记（2条）</div>
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P5 · 违规登记<br>逐条登记，可折叠</div>
+</div>
+
+</div><!-- /screens -->
+
+<!-- ══════════ 第三组：整改流程 ══════════ -->
+<div class="group-title">整改流程：施工方提交 → 审核员审核</div>
+<div class="screens">
+
+<!-- P6 整改提交（施工方） -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">提交整改记录</div>
+      </div>
+      <div class="alert alert-danger">
+        ⛔ 工程当前处于<b>停工整改</b>状态，请尽快完成所有违规整改
+      </div>
+      <div class="scroll-area">
+
+        <!-- 违规1：待整改 -->
+        <div style="margin:10px 12px 0;background:#fff;border-radius:10px;border:1px solid #ffa39e;overflow:hidden;">
+          <div style="background:#fff1f0;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffa39e;">
+            <span style="font-size:12px;font-weight:600;color:#cf1322;">⛔ 高空作业违规</span>
+            <span class="tag tag-orange">待整改</span>
+          </div>
+          <div style="padding:10px 14px;">
+            <div class="field-row"><span class="field-label">整改要求</span><span class="field-value">施工人员必须正确穿戴安全绳</span></div>
+            <div class="field-row"><span class="field-label">整改期限</span><span class="field-value" style="color:#ff4d4f;font-weight:500;">2026-03-15（剩余5天）</span></div>
+            <div class="field-row"><span class="field-label">登记人</span><span class="field-value">李巡查员 · 2026-03-10</span></div>
+            <div class="divider"></div>
+            <div class="input-group">
+              <div class="input-label input-required">整改说明</div>
+              <textarea class="input-textarea" placeholder="请填写整改措施和完成情况..."></textarea>
+            </div>
+            <div class="input-group" style="margin-bottom:10px;">
+              <div class="input-label input-required">整改照片</div>
+              <div class="photo-upload">
+                <div class="photo-add">+</div>
+                <div class="photo-add">+</div>
+                <div style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;">最多9张</div>
+              </div>
+            </div>
+            <div class="btn btn-danger btn-block">提交此条整改</div>
+          </div>
+        </div>
+
+        <!-- 违规2：已提交待审核 -->
+        <div style="margin:10px 12px 0;background:#fff;border-radius:10px;border:1px solid #91caff;overflow:hidden;">
+          <div style="background:#e6f4ff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #91caff;">
+            <span style="font-size:12px;font-weight:600;color:#0958d9;">⚠ 未佩戴安全帽</span>
+            <span class="tag tag-blue">待审核</span>
+          </div>
+          <div style="padding:10px 14px;">
+            <div class="field-row"><span class="field-label">整改说明</span><span class="field-value" style="color:#888;">已为所有工人配发安全帽并进行教育...</span></div>
+            <div class="field-row"><span class="field-label">提交时间</span><span class="field-value" style="color:#888;">2026-03-11 14:30</span></div>
+            <div style="font-size:11px;color:#1677ff;background:#f0f7ff;padding:6px 8px;border-radius:4px;margin-top:4px;">
+              等待审核员审核中，请耐心等待
+            </div>
+          </div>
+        </div>
+
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P6 · 整改提交（施工方）<br>逐条提交，互不影响</div>
+</div>
+
+<!-- P7 整改审核（审核员） -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">整改审核</div>
+        <div class="nav-action">1条待审</div>
+      </div>
+      <div class="scroll-area">
+        <div style="margin:10px 12px 0;background:#fff;border-radius:10px;border:1px solid #91caff;overflow:hidden;">
+          <!-- 违规信息 -->
+          <div style="background:#e6f4ff;padding:8px 14px;border-bottom:1px solid #91caff;">
+            <div style="font-size:12px;font-weight:600;color:#0958d9;margin-bottom:3px;">⚠ 未佩戴安全帽 · 待审核</div>
+            <div style="font-size:11px;color:#888;">福田某住宅楼改造工程 · 2026-03-10 登记</div>
+          </div>
+          <div style="padding:10px 14px;">
+
+            <!-- 原始违规 -->
+            <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:6px;">◎ 原始违规记录</div>
+            <div class="field-row"><span class="field-label">违规描述</span><span class="field-value">多名工人进入施工区域时未佩戴安全帽</span></div>
+            <div class="field-row"><span class="field-label">整改要求</span><span class="field-value">为所有施工人员配备安全帽并强制执行</span></div>
+            <div style="margin-bottom:8px;">
+              <div class="field-label" style="font-size:11px;margin-bottom:4px;">违规现场照片</div>
+              <div class="photo-upload">
+                <div class="photo-thumb">📷</div>
+                <div class="photo-thumb">📷</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+
+            <!-- 施工方整改 -->
+            <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:6px;">◎ 施工方整改记录</div>
+            <div class="field-row"><span class="field-label">整改说明</span><span class="field-value">已为所有工人配发安全帽，进行安全教育培训，现场已督查落实</span></div>
+            <div class="field-row"><span class="field-label">提交时间</span><span class="field-value">2026-03-11 14:30</span></div>
+            <div style="margin-bottom:10px;">
+              <div class="field-label" style="font-size:11px;margin-bottom:4px;">整改照片</div>
+              <div class="photo-upload">
+                <div class="photo-thumb">📷</div>
+                <div class="photo-thumb">📷</div>
+                <div class="photo-thumb">📷</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+
+            <!-- 审核操作 -->
+            <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:8px;">◎ 审核操作</div>
+            <div class="review-tabs">
+              <div class="review-tab pass">✓ 审核通过</div>
+              <div class="review-tab">✗ 驳回</div>
+            </div>
+            <div class="input-group">
+              <div class="input-label input-required" style="font-size:11px;">上传验收照片</div>
+              <div class="photo-upload" style="margin-top:4px;">
+                <div class="photo-thumb">📷</div>
+                <div class="photo-add">+</div>
+              </div>
+            </div>
+            <div class="input-group" style="margin-bottom:10px;">
+              <div class="input-label" style="font-size:11px;">验收说明（选填）</div>
+              <textarea class="input-textarea" style="height:50px;" placeholder="填写验收说明..."></textarea>
+            </div>
+            <div class="btn btn-green btn-block">确认通过</div>
+
+          </div>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P7 · 整改审核（审核员）<br>同组织内部审核</div>
+</div>
+
+</div><!-- /screens -->
+
+<!-- ══════════ 第四组：跟踪 & 详情 ══════════ -->
+<div class="group-title">跟踪与详情：整改跟踪 · 巡查详情</div>
+<div class="screens">
+
+<!-- P8 整改跟踪（监管人员） -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">整改跟踪</div>
+      </div>
+      <div class="search-bar">
+        <div class="search-wrap" style="margin-bottom:8px;">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" placeholder="搜索工程名称或地址">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div class="input-field" style="flex:1;padding:5px 8px;font-size:11px;color:#888;">整改状态 全部 ▾</div>
+          <div class="input-field" style="flex:1;padding:5px 8px;font-size:11px;color:#888;">时间范围 ▾</div>
+        </div>
+      </div>
+      <div class="scroll-area">
+
+        <!-- 已逾期 -->
+        <div class="card" style="margin-top:10px;border-left:3px solid #ff4d4f;">
+          <div style="padding:10px 14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:600;">福田某住宅楼改造工程</span>
+              <span class="tag tag-red">已逾期</span>
+            </div>
+            <div class="field-row"><span class="field-label">违规类型</span><span class="field-value">高空作业违规</span></div>
+            <div class="field-row"><span class="field-label">整改期限</span><span class="field-value" style="color:#ff4d4f;">2026-03-08（已逾期2天）</span></div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <div class="btn btn-default btn-sm" style="flex:1;">查看详情</div>
+              <div class="btn btn-orange btn-sm" style="flex:1;">催办整改</div>
+              <div class="btn btn-danger btn-sm" style="flex:1;">移交执法</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 待审核 -->
+        <div class="card" style="border-left:3px solid #1677ff;">
+          <div style="padding:10px 14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:600;">南山某商铺装修工程</span>
+              <span class="tag tag-blue">待审核</span>
+            </div>
+            <div class="field-row"><span class="field-label">违规类型</span><span class="field-value">未佩戴安全帽</span></div>
+            <div class="field-row"><span class="field-label">整改期限</span><span class="field-value">2026-03-15（剩余5天）</span></div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <div class="btn btn-default btn-sm">查看详情</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 待整改 -->
+        <div class="card" style="border-left:3px solid #fa8c16;">
+          <div style="padding:10px 14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:600;">龙华某住宅装修工程</span>
+              <span class="tag tag-orange">待整改</span>
+            </div>
+            <div class="field-row"><span class="field-label">违规类型</span><span class="field-value">动火作业违规</span></div>
+            <div class="field-row"><span class="field-label">整改期限</span><span class="field-value">2026-03-20（剩余10天）</span></div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <div class="btn btn-default btn-sm" style="flex:1;">查看详情</div>
+              <div class="btn btn-orange btn-sm" style="flex:1;">催办整改</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 已完成 -->
+        <div class="card" style="border-left:3px solid #52c41a;opacity:.7;">
+          <div style="padding:10px 14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:600;">宝安某外墙修缮工程</span>
+              <span class="tag tag-green">已完成</span>
+            </div>
+            <div class="field-row"><span class="field-label">违规类型</span><span class="field-value">施工现场脏乱差</span></div>
+            <div class="field-row"><span class="field-label">完成时间</span><span class="field-value">2026-03-09</span></div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <div class="btn btn-default btn-sm">查看详情</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P8 · 整改跟踪<br>监管人员视角</div>
+</div>
+
+<!-- P9 巡查详情 -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><span>🔋⚡</span></div>
+      <div class="nav-bar">
+        <div class="nav-back">‹</div>
+        <div class="nav-title">巡查详情</div>
+      </div>
+      <div class="scroll-area">
+
+        <!-- 基本信息 -->
+        <div class="card">
+          <div class="card-header">巡查信息</div>
+          <div class="card-body">
+            <div class="field-row"><span class="field-label">巡查时间</span><span class="field-value">2026-03-10 09:41</span></div>
+            <div class="field-row"><span class="field-label">巡查人员</span><span class="field-value">李巡查员（福田街道办）</span></div>
+            <div class="field-row">
+              <span class="field-label">是否施工中</span>
+              <span class="field-value"><span class="tag tag-green">是</span></span>
+            </div>
+            <div class="field-row"><span class="field-label">现场人员</span><span class="field-value">张三、李四、王五</span></div>
+          </div>
+        </div>
+
+        <!-- 所属工程 -->
+        <div class="card">
+          <div class="card-header">所属工程</div>
+          <div class="card-body">
+            <div class="field-row"><span class="field-label">工程名称</span><span class="field-value" style="color:#1677ff;">福田区某住宅楼改造工程</span></div>
+            <div class="field-row"><span class="field-label">工程地址</span><span class="field-value">福田区园岭街道中心路88号</span></div>
+          </div>
+        </div>
+
+        <!-- 巡查结果 -->
+        <div class="card">
+          <div class="card-header">
+            巡查结果
+            <span class="tag tag-red">发现违规 2 条</span>
+          </div>
+          <div class="card-body" style="padding:4px 14px;">
+
+            <div class="record-item">
+              <div style="width:20px;height:20px;border-radius:50%;background:#fff1f0;border:1px solid #ffa39e;display:flex;align-items:center;justify-content:center;font-size:10px;color:#cf1322;flex-shrink:0;">1</div>
+              <div class="record-main">
+                <div class="record-title">高空作业违规</div>
+                <div class="record-sub">需要限时整改 · 停工整改 · 期限 2026-03-15</div>
+              </div>
+              <span class="tag tag-orange" style="font-size:10px;">待整改</span>
+            </div>
+
+            <div class="record-item">
+              <div style="width:20px;height:20px;border-radius:50%;background:#fff1f0;border:1px solid #ffa39e;display:flex;align-items:center;justify-content:center;font-size:10px;color:#cf1322;flex-shrink:0;">2</div>
+              <div class="record-main">
+                <div class="record-title">未佩戴安全帽</div>
+                <div class="record-sub">需要限时整改 · 现场整改 · 期限 2026-03-15</div>
+              </div>
+              <span class="tag tag-blue" style="font-size:10px;">待审核</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 现场照片 -->
+        <div class="card">
+          <div class="card-header">现场照片</div>
+          <div class="card-body">
+            <div class="photo-upload">
+              <div class="photo-thumb">📷</div>
+              <div class="photo-thumb">📷</div>
+              <div class="photo-thumb">📷</div>
+              <div class="photo-thumb">📷</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="phone-home"><div class="phone-home-bar"></div></div>
+  </div>
+  <div class="phone-label">P9 · 巡查详情<br>含施工人员 & 是否施工中</div>
+</div>
+
+</div><!-- /screens -->
+
+</body>
+</html>

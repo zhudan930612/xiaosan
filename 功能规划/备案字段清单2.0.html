@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>备案字段清单 2.0 — 三类工程对照</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 13px; background: #f5f6f8; color: #1a1a2e; }
+
+  .header { background: #1a73e8; color: #fff; padding: 18px 28px; }
+  .header h1 { font-size: 18px; font-weight: 600; }
+  .header p { margin-top: 4px; font-size: 12px; opacity: 0.85; }
+  .version-badge { display:inline-block; background:#fbbc04; color:#333; font-size:11px; font-weight:700; padding:2px 8px; border-radius:3px; margin-left:10px; vertical-align:middle; }
+
+  .tab-bar { display: flex; gap: 0; background: #fff; border-bottom: 2px solid #e0e0e0; padding: 0 24px; }
+  .tab-btn {
+    padding: 12px 24px; font-size: 14px; font-weight: 500; color: #666;
+    border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: all .2s;
+  }
+  .tab-btn:hover { color: #1a73e8; }
+  .tab-btn.active { color: #1a73e8; border-bottom-color: #1a73e8; }
+
+  .tab-content { display: none; padding: 20px 24px 40px; }
+  .tab-content.active { display: block; }
+
+  .legend {
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 16px;
+    padding: 10px 16px; background: #fff; border-radius: 8px; border: 1px solid #e8eaed;
+    font-size: 12px;
+  }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-required { background: #ea4335; }
+  .dot-optional { background: #34a853; }
+  .dot-readonly { background: #9aa0a6; }
+  .dot-cond { background: #fbbc04; }
+
+  .section-title {
+    font-size: 13px; font-weight: 700; color: #1a73e8; padding: 8px 12px;
+    background: #e8f0fe; border-left: 4px solid #1a73e8; margin: 20px 0 8px;
+    border-radius: 0 4px 4px 0;
+  }
+  .section-title.orange { color: #b05c00; background: #fff3e0; border-left-color: #e65100; }
+  .section-title.green  { color: #137333; background: #e6f4ea; border-left-color: #137333; }
+  .section-title.purple { color: #5c2eb8; background: #f3e8fd; border-left-color: #5c2eb8; }
+  .section-title:first-of-type { margin-top: 0; }
+
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 4px; }
+  thead tr { background: #f8f9fa; }
+  th { padding: 10px 12px; text-align: left; font-size: 12px; color: #5f6368; font-weight: 600; border-bottom: 2px solid #e0e0e0; white-space: nowrap; }
+  td { padding: 9px 12px; border-bottom: 1px solid #f1f3f4; vertical-align: top; line-height: 1.6; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8faff; }
+
+  .col-no { width: 36px; color: #9aa0a6; font-size: 12px; }
+  .col-name { width: 185px; font-weight: 500; }
+  .col-req { width: 80px; }
+  .col-type { width: 130px; }
+  .col-cond { width: 150px; }
+
+  .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 3px; font-weight: 600; white-space: nowrap; }
+  .tag-required { background: #fce8e6; color: #c5221f; }
+  .tag-optional { background: #e6f4ea; color: #137333; }
+  .tag-readonly { background: #f1f3f4; color: #5f6368; }
+
+  .type-tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 3px; background: #e8f0fe; color: #1557b0; }
+  .type-ocr    { background: #fef7e0; color: #b06000; }
+  .type-select { background: #e6f4ea; color: #137333; }
+  .type-upload { background: #f3e8fd; color: #6b1cb0; }
+  .type-multi  { background: #f0ebff; color: #5c2eb8; }
+  .type-number { background: #fff0e1; color: #b05c00; }
+  .type-date   { background: #e4f4fb; color: #006b9e; }
+  .type-confirm{ background: #fce8e6; color: #b31412; }
+  .type-toggle { background: #e8f5e9; color: #1b5e20; }
+
+  .opts-list { padding-left: 16px; margin: 0; }
+  .opts-list li { margin: 2px 0; }
+
+  .cond-tag { font-size: 11px; color: #b06000; background: #fef7e0; padding: 2px 6px; border-radius: 3px; display: inline-block; }
+  .cond-all { font-size: 11px; color: #5f6368; }
+
+  .diff-note { font-size: 11px; color: #d93025; margin-top: 3px; padding: 2px 6px; background: #fce8e6; border-radius: 3px; display: inline-block; }
+  .new-note  { font-size: 11px; color: #137333; margin-top: 3px; padding: 2px 6px; background: #e6f4ea; border-radius: 3px; display: inline-block; }
+
+  .note-box { padding: 10px 14px; background: #fff8e1; border-left: 3px solid #f9ab00; border-radius: 0 6px 6px 0; margin-bottom: 12px; font-size: 12px; color: #5f4b00; line-height: 1.7; }
+  .note-box.blue { background: #e8f0fe; border-left-color: #1a73e8; color: #1a1f6e; }
+  .note-box.red  { background: #fce8e6; border-left-color: #d93025; color: #7f1512; }
+
+  .sub-indent { padding-left: 20px; font-size: 12px; color: #5f6368; }
+
+  .badge-req { display:inline-block; font-size:11px; padding:1px 6px; background:#ea4335; color:#fff; border-radius:3px; }
+  .badge-opt { display:inline-block; font-size:11px; padding:1px 6px; background:#34a853; color:#fff; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>备案字段清单 <span class="version-badge">v2.0</span></h1>
+  <p>更新日期：2026-03-11 &nbsp;|&nbsp; 修正：安全信息结构（作业风险+施工工人双大类）/ 新增匹配保单Tab（小型工程必填，住宅装修/零星作业非必填）/ 补充工程规模条件字段（②交通工程道路长度、⑥非住宅装修用途转换单选+面积联动、⑧临时设施规划许可证件、住宅装修协议改必填）</p>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('xing',event)">小型工程备案</button>
+  <button class="tab-btn" onclick="switchTab('zhu',event)">住宅装修备案</button>
+  <button class="tab-btn" onclick="switchTab('ling',event)">零星作业备案</button>
+</div>
+
+
+<!-- ===================== 小型工程 ===================== -->
+<div id="tab-xing" class="tab-content active">
+  <div class="legend">
+    <span><span class="dot dot-required"></span>必填</span>
+    <span><span class="dot dot-optional"></span>选填</span>
+    <span><span class="dot dot-readonly"></span>只读（自动获取）</span>
+    <span><span class="dot dot-cond"></span>条件显示</span>
+  </div>
+
+  <!-- ===== 基础信息 ===== -->
+  <div class="section-title">基础信息 Tab — 项目信息</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>工程项目</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>工程名称，自由输入</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>2</td><td>工程规模</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">选择器（跳转页）</span></td>
+        <td><ul class="opts-list">
+          <li>①100万以下新建/改建/扩建房屋建筑（含附属设施）工程</li>
+          <li>②100万以下交通（含附属设施）工程</li>
+          <li>③100万以下新（改）建供水、排水项目及不纳入监管的河道、泵（闸）等维修类水务工程</li>
+          <li>④100万以下园林绿化工程</li>
+          <li>⑤100万以下既有建筑修缮工程</li>
+          <li>⑥100万以下且300㎡以下非住宅既有建筑装饰装修工程（商务楼宇简易装修放宽至500㎡以下）</li>
+          <li>⑦100万以下既有建筑加装电梯工程</li>
+          <li>⑧已批准基地范围内临时设施及有许可证的临时建设工程</li>
+          <li>⑨依法获批农民自建或翻建低层住宅</li>
+          <li>⑩农业基础性/生产性/附属性设施等建设工程</li>
+          <li>⑪农村地区基础设施/公共服务场所/绿化美化（小三园）/标识标牌等综合性建设工程</li>
+        </ul></td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>3</td><td>工程地址</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">地图选点</span></td><td>进入地图页：搜索 / 拖动红色标记 / 点击附近地址列表，确认后回填</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>4</td><td>街道社区</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">行政区域选择器（联动）</span></td><td>左选街道（夏阳/盈浦/香花桥/朱家角/练塘/金泽等）→ 右侧联动显示社区</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>5</td><td>所属物业</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-select">物业选择器</span></td><td>搜索匹配，显示：物业名称 + 统一信用代码</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>6</td><td>工程总额（万）</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>必须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+      <tr>
+        <td>7</td>
+        <td>建筑面积（m²）</td>
+        <td><span class="tag tag-required">必填</span></td>
+        <td><span class="type-tag type-number">数字输入</span></td>
+        <td>
+          必须 &gt; 0<br>
+          <span class="diff-note">规模⑥且选"涉及用途转换"=是 → 须 &lt; 300㎡</span><br>
+          <span class="diff-note">规模⑥且选"涉及用途转换"=否 → 须 &lt; 500㎡</span>
+        </td>
+        <td><span class="cond-tag">规模非②时显示</span></td>
+      </tr>
+      <tr>
+        <td>7a</td>
+        <td>道路/桥梁长度<span class="new-note">规模②专有</span></td>
+        <td><span class="tag tag-required">必填</span></td>
+        <td><span class="type-tag type-number">数字输入</span></td>
+        <td>单位：米；不限制最大值</td>
+        <td><span class="cond-tag">仅规模②（交通工程）</span></td>
+      </tr>
+      <tr>
+        <td>7b</td>
+        <td>涉及用途转换的商务楼宇简易装修工程<span class="new-note">规模⑥专有</span></td>
+        <td><span class="tag tag-required">必填</span></td>
+        <td><span class="type-tag type-select">单选</span></td>
+        <td>是 / 否；影响字段7建筑面积上限（是→&lt;300㎡；否→&lt;500㎡）</td>
+        <td><span class="cond-tag">仅规模⑥（非住宅装修）</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">基础信息 Tab — 建设单位信息</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>8</td><td>建设单位身份</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">单选</span></td><td>产权人 / 承租人</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>9</td><td>所有权证明或相关产权证明</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF；产权人/承租人均需上传</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>10</td><td>租赁合同</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-tag">仅"承租人"</span></td></tr>
+      <tr><td>11</td><td>授权委托书</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多图上传</span></td><td>支持多张图片上传</td><td><span class="cond-tag">仅"承租人"</span></td></tr>
+      <tr><td>12</td><td>建设单位身份类型</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">单选</span></td><td>单位 / 个人</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>13</td><td>建设单位营业执照</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-ocr">文件上传（OCR）</span></td><td>自动识别单位名称；JPG / PNG / PDF</td><td><span class="cond-tag">仅"单位"</span></td></tr>
+      <tr><td>14</td><td>建设单位名称</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-tag">仅"单位"</span></td></tr>
+      <tr><td>15</td><td>甲方负责人身份证</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+      <tr><td>16</td><td>甲方负责人姓名</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>—</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+      <tr><td>17</td><td>甲方负责人手机号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">手机号输入</span></td><td>11位数字</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">基础信息 Tab — 备案人员信息（只读）</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>18</td><td>姓名</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>从登录用户信息自动获取，不可修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>19</td><td>身份证号</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>脱敏显示，不可修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>20</td><td>备案人员手机号</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>脱敏显示，不可修改</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ===== 工程信息 ===== -->
+  <div class="section-title">工程信息 Tab — 施工方信息</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>21</td><td>施工负责人身份证</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-ocr">文件上传（OCR）</span></td><td>自动识别姓名和身份证号；JPG / PNG / PDF</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>22</td><td>姓名</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>23</td><td>身份证号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，18位</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>24</td><td>手机号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">手机号输入</span></td><td>11位数字</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>25</td><td>施工单位</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">选择器（可新增）</span></td><td>搜索匹配，显示：单位名称 + 统一信用代码 + 法定代表人；未找到可"新增施工单位"（见下表 N1-N13）</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>26</td><td>施工时间</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-date">日期范围选择</span></td><td>YYYY-MM-DD 至 YYYY-MM-DD；结束 &gt; 开始</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">工程信息 Tab — 新增施工单位（弹出表单）</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>N1</td><td>施工单位营业执照</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-ocr">文件上传（OCR）</span></td><td>自动识别单位名称、信用代码、法人</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N2</td><td>施工单位名称</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N3</td><td>统一信用代码</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N4</td><td>公司法人</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N5</td><td>资质证明（施工单位资质证明）</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N6</td><td>资质有效期</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-date">日期选择</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N7</td><td>安全生产许可证</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N8</td><td>法人身份证（正面）</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-ocr">文件上传（OCR）</span></td><td>自动识别姓名和身份证号</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N9</td><td>身份证背面</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N10</td><td>身份证姓名</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N11</td><td>身份证件号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，18位</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N12</td><td>法人手机号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">手机号输入</span></td><td>11位数字</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>N13</td><td>单位规模（人）</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">工程信息 Tab — 安全施工资料确认</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>27</td><td>安全风险告知书</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-confirm">确认阅读</span></td><td>点击查看详情 → 倒计时结束后可点击"已阅读"确认</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>28</td><td>安全生产承诺书</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-confirm">确认阅读并签字</span></td><td>点击查看详情 → 倒计时结束 → 进入手写签名页 → 签名确认后生成承诺书图片</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">工程信息 Tab — 相关文件上传</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>29</td><td>承发包合同</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>提示：请提交封面、工程地址、金额、签字盖章页</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>30</td><td>施工图纸及技术资料</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>31</td><td>相关项目批复/认定手续</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr>
+        <td>32</td>
+        <td>临时建设工程规划许可证件<span class="new-note">规模⑧专有</span></td>
+        <td><span class="tag tag-required">必填</span></td>
+        <td><span class="type-tag type-multi">多图上传</span></td>
+        <td>支持多张图片上传</td>
+        <td><span class="cond-tag">仅规模⑧（临时设施/临时建设工程）</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== 安全信息 ===== -->
+  <div class="section-title orange">安全信息 Tab — 大类一：涉及的作业风险（开关选择 + 各类型附加字段）</div>
+  <div class="note-box">页面标题区域显示"请选择施工时会涉及的作业风险"；每个风险类别为独立开关，默认关闭；开启后在该风险条目下方展开附加字段。</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">风险类别（开关）</th><th class="col-req">开关默认</th><th>开启后显示的附加字段（均必填）</th></tr></thead>
+    <tbody>
+      <tr><td>S1</td><td>用电作业</td><td>关</td><td>施工作业方案（必填，多文件上传）</td></tr>
+      <tr><td>S2</td><td>高空作业</td><td>关</td><td>施工作业方案（必填，多文件上传）</td></tr>
+      <tr><td>S3</td><td>动火作业</td><td>关</td><td>施工作业方案（必填，多文件上传）、涉及人员密集场所（必填，单选：<b>是 / 否</b>）</td></tr>
+      <tr><td>S4</td><td>有限空间作业</td><td>关</td><td>施工专项方案（必填，多文件上传）</td></tr>
+      <tr><td>S5</td><td>动土作业</td><td>关</td><td>开挖深度m（必填，数字输入）、涉路施工许可证（必填，文件上传）、地下管道交底记录（必填，文件上传）、安全保护协议（必填，文件上传）</td></tr>
+      <tr><td>S6</td><td>拆除作业</td><td>关</td><td>施工作业方案（必填，多文件上传）</td></tr>
+      <tr><td>S7</td><td>爆破作业</td><td>关</td><td>批准文件（必填，文件上传）、施工专项方案（必填，多文件上传）</td></tr>
+      <tr><td>S8</td><td>监控摄像头</td><td>关</td><td>现场安装照片（必填，文件上传），提示：请上传摄像头安装照片</td></tr>
+      <tr><td>S9</td><td>涉及排水改造</td><td>关</td><td>无附加字段，仅作标识</td></tr>
+      <tr><td>S10</td><td>夜间施工</td><td>关</td><td>无附加字段，仅作标识</td></tr>
+      <tr><td>S11</td><td>周末施工</td><td>关</td><td>无附加字段，仅作标识</td></tr>
+      <tr><td>S12</td><td>涉及落地式钢管脚手架</td><td>关</td><td>搭设高度是否大于24m（必填，单选：<b>是 / 否</b>）</td></tr>
+      <tr><td>S13</td><td>涉及起重吊装</td><td>关</td><td>施工专项方案（必填，多文件上传）</td></tr>
+      <tr><td>S14</td><td>涉及其他高风险工程</td><td>关</td><td>施工专项方案（必填，多文件上传）</td></tr>
+      <tr><td>S15</td><td>涉及装修后使用功能与原产权证不符</td><td>关</td><td>施工专项方案（必填，多文件上传）、设计单位审查意见（必填，文件上传）、设计单位资质（必填，文件上传）</td></tr>
+      <tr><td>S16</td><td>涉及消防设施变动</td><td>关</td><td>施工专项方案（必填，多文件上传）、设计单位审查意见（必填，文件上传）、设计单位资质（必填，文件上传）</td></tr>
+      <tr><td>S17</td><td>涉及房屋外立面改动</td><td>关</td><td>施工专项方案（必填，多文件上传）、设计单位审查意见（必填，文件上传）、设计单位资质（必填，文件上传）</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title orange">安全信息 Tab — 大类二：施工工人（全局，不区分风险类别）</div>
+  <div class="note-box">施工工人为全局管理，不再挂靠在具体风险类别下。页面底部独立展示"施工人员"区块，点击"+ 添加施工人员"进入选择页。</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称 / 功能</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>W0</td>
+        <td>施工人员列表<br><span class="sub-indent">+ 添加施工人员（按钮）</span></td>
+        <td><span class="tag tag-optional">选填</span></td>
+        <td><span class="type-tag">卡片列表</span></td>
+        <td>已添加的工人以卡片形式展示：姓名（脱敏）| 手机号（脱敏）；可删除</td>
+        <td><span class="cond-all">始终</span></td>
+      </tr>
+      <tr>
+        <td colspan="6" style="background:#f8f9fa; font-weight:600; font-size:12px; color:#5f6368; padding:8px 12px;">
+          ▶ 点击"+ 添加施工人员" → 进入"选择施工工人"页
+        </td>
+      </tr>
+      <tr><td>W1</td><td>搜索框</td><td>—</td><td><span class="type-tag">文本输入</span></td><td>搜索姓名或身份证号，从历史工人中筛选</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>W2</td><td>历史工人列表（多选）</td><td>—</td><td><span class="type-tag">复选框列表</span></td><td>卡片显示：姓名 | 手机号（脱敏）/ 身份证号（脱敏）；支持全选；右侧有"编辑"按钮</td><td><span class="cond-all">始终</span></td></tr>
+      <tr>
+        <td colspan="6" style="background:#f8f9fa; font-weight:600; font-size:12px; color:#5f6368; padding:8px 12px;">
+          ▶ 点击"新增工人" → 进入"新增施工工人"页
+        </td>
+      </tr>
+      <tr><td>W3</td><td>工人身份证</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-ocr">文件上传（OCR）</span></td><td>上传后自动识别姓名和身份证号</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>W4</td><td>身份证姓名</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>W5</td><td>身份证号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，18位</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>W6</td><td>手机号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">手机号输入</span></td><td>11位数字</td><td><span class="cond-all">始终</span></td></tr>
+      <tr>
+        <td colspan="6" style="background:#f0f4ff; font-weight:600; font-size:12px; color:#1a3a7a; padding:8px 12px;">
+          ▶ 工人工种（可添加多个工种卡片，第一个不可删除）
+        </td>
+      </tr>
+      <tr><td>W7</td><td>工人工种</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">选择器（弹窗单选）</span></td>
+        <td>
+          <ul class="opts-list">
+            <li>木工 / 架子工 / 钢筋工 / <b>电工★</b> / <b>电焊工★</b> / 抹灰工 / 油漆工</li>
+            <li>混凝土工 / 防水工 / 起重机驾驶员 / 挖掘机驾驶员 / 中小型建筑机器操作工</li>
+            <li><b>高空作业工★</b> / 其他</li>
+          </ul>
+          <span style="font-size:11px;color:#d93025;">★标注工种（电工/电焊工/高空作业工）特种作业证为必填；其余工种特种作业证为选填</span>
+        </td>
+        <td><span class="cond-all">每个工种卡片均有</span></td>
+      </tr>
+      <tr><td>W8</td><td>特种作业证</td><td><span class="tag tag-optional">选填（特种工种必填）</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>电工/电焊工/高空作业工时为必填；其余工种选填</td><td><span class="cond-all">每个工种卡片均有</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ===== 匹配保单 ===== -->
+  <div class="section-title purple">匹配保单 Tab <span class="badge-req" style="margin-left:6px;">小型工程必填</span></div>
+  <div class="note-box blue">小型工程保单为<b>必填</b>，必须完成保单信息填写才能提交备案申请。</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr>
+        <td colspan="6" style="background:#f3e8fd; font-weight:700; font-size:12px; color:#5c2eb8; padding:8px 12px;">
+          保单基础信息
+        </td>
+      </tr>
+      <tr><td>P1</td><td>保险公司名称</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">选择器</span></td><td>后台配置的保险公司列表</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P2</td><td>保单号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P3</td><td>险种名称</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">选择器</span></td><td>后台配置的险种列表</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P4</td><td>保费金额（元）</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>必须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P5</td><td>保险期限</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-date">日期范围选择</span></td><td>开始时间 至 结束时间；结束 &gt; 开始</td><td><span class="cond-all">始终</span></td></tr>
+      <tr>
+        <td colspan="6" style="background:#f3e8fd; font-weight:700; font-size:12px; color:#5c2eb8; padding:8px 12px;">
+          相关文件上传
+        </td>
+      </tr>
+      <tr><td>P6</td><td>保单原件</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>支持 JPG / PNG / PDF</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P7</td><td>提交支付凭证</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>支持 JPG / PNG / PDF</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ===================== 住宅装修 ===================== -->
+<div id="tab-zhu" class="tab-content">
+  <div class="note-box">与小型工程不同的字段已用 <span style="color:#d93025;font-weight:600;">★差异</span> 标注。工程信息Tab（施工方信息、安全施工资料）与小型工程完全一致，不重复列出。</div>
+  <div class="legend">
+    <span><span class="dot dot-required"></span>必填</span>
+    <span><span class="dot dot-optional"></span>选填</span>
+    <span><span class="dot dot-readonly"></span>只读</span>
+    <span><span class="dot dot-cond"></span>条件显示</span>
+  </div>
+
+  <div class="section-title">基础信息 Tab — 项目信息</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>工程项目</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>2</td><td>工程规模</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">选择器（跳转页）</span></td><td>① 住宅室内装饰装修工程（唯一选项）</td><td><span class="cond-all">始终</span></td></tr>
+      <tr>
+        <td>3a</td>
+        <td>工程地址<div class="diff-note">★差异：原"所属楼栋"改为地址选择</div></td>
+        <td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">地址选择器</span></td>
+        <td>选择小区/楼盘及楼栋</td><td><span class="cond-all">始终</span></td>
+      </tr>
+      <tr>
+        <td>3b</td>
+        <td>门牌号（室）<div class="diff-note">★差异：原"具体楼层房号"改为文本填写</div></td>
+        <td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td>
+        <td>填写室号，如"XX室"</td><td><span class="cond-all">始终</span></td>
+      </tr>
+      <tr><td>4</td><td>街道社区</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">行政区域选择器（联动）</span></td><td>左选街道 → 右侧联动显示社区</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>5</td><td>所属物业</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-select">物业选择器</span></td><td>搜索匹配</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>6</td><td>工程总额（万）<div class="diff-note">★差异：改为非必填</div></td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>选填，如填写须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>7</td><td>建筑面积（m²）<div class="diff-note">★差异：改为非必填</div></td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>选填，如填写须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">基础信息 Tab — 装修人信息（业主或经业主授权的使用人）<span class="diff-note" style="margin-left:8px;vertical-align:middle;">★差异：原"建设单位信息"</span></div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>8</td><td>装修人身份<div class="diff-note">★原"建设单位身份"</div></td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">单选</span></td><td>产权人 / 承租人</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>9</td><td>所有权证明或相关产权证明</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF；产权人/承租人均需</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>10</td><td>租赁合同</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-tag">仅"承租人"</span></td></tr>
+      <tr><td>11</td><td>授权委托书</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多图上传</span></td><td>支持多张图片</td><td><span class="cond-tag">仅"承租人"</span></td></tr>
+      <tr><td>12</td><td>装修人身份类型<div class="diff-note">★原"建设单位身份类型"；机构→单位</div></td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">单选</span></td><td>单位 / 个人</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>13</td><td>建设单位营业执照</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-ocr">文件上传（OCR）</span></td><td>自动识别单位名称</td><td><span class="cond-tag">仅"单位"</span></td></tr>
+      <tr><td>14</td><td>建设单位名称</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-tag">仅"单位"</span></td></tr>
+      <tr><td>15</td><td>业主身份证</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+      <tr><td>16</td><td>业主姓名</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>—</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+      <tr><td>17</td><td>业主手机号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">手机号输入</span></td><td>11位数字</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">基础信息 Tab — 备案人员信息（只读，与小型工程一致）</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>18</td><td>姓名</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>不可修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>19</td><td>身份证号</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>脱敏显示</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>20</td><td>备案人员手机号</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>脱敏显示</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">工程信息 Tab — 施工方信息（与小型工程完全一致，字段 21-26）</div>
+  <div class="section-title">工程信息 Tab — 新增施工单位（与小型工程完全一致，字段 N1-N13）</div>
+  <div class="section-title">工程信息 Tab — 安全施工资料确认（与小型工程一致，字段 27-28）</div>
+
+  <div class="section-title">工程信息 Tab — 相关文件上传</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>29</td><td>承发包合同</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>提示：请提交封面、工程地址、金额、签字盖章页</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>30</td><td>施工图纸及技术资料<div class="diff-note">★改为非必填</div></td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>31</td><td>相关项目批复/认定手续<div class="diff-note">★改为非必填</div></td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>32</td><td>装修装饰管理协议<div class="new-note">★住宅装修专有新增字段</div></td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-multi">多图上传</span></td><td>支持多张图片上传</td><td><span class="cond-all">住宅装修专有</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title orange">安全信息 Tab — 大类一：涉及的作业风险（与小型工程完全一致，S1-S17）</div>
+  <div class="section-title orange">安全信息 Tab — 大类二：施工工人（与小型工程完全一致，W0-W8）</div>
+
+  <div class="section-title purple">匹配保单 Tab <span class="badge-opt" style="margin-left:6px;">住宅装修非必填</span></div>
+  <div class="note-box red">住宅装修保单为<b>非必填</b>，可不填写保单信息直接提交备案申请。如选择填写，则以下字段均为必填。</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td colspan="6" style="background:#f3e8fd; font-weight:700; font-size:12px; color:#5c2eb8; padding:8px 12px;">保单基础信息（整体选填；如填写则以下字段均必填）</td></tr>
+      <tr><td>P1</td><td>保险公司名称</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-select">选择器</span></td><td>后台配置的保险公司列表</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P2</td><td>保单号</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag">文本输入</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P3</td><td>险种名称</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-select">选择器</span></td><td>后台配置的险种列表</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P4</td><td>保费金额（元）</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>如填写须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P5</td><td>保险期限</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-date">日期范围选择</span></td><td>开始时间 至 结束时间</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td colspan="6" style="background:#f3e8fd; font-weight:700; font-size:12px; color:#5c2eb8; padding:8px 12px;">相关文件上传</td></tr>
+      <tr><td>P6</td><td>保单原件</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P7</td><td>提交支付凭证</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ===================== 零星作业 ===================== -->
+<div id="tab-ling" class="tab-content">
+  <div class="note-box">与小型工程不同的字段已用 <span style="color:#d93025;font-weight:600;">★差异</span> 标注。工程信息Tab（施工方信息、安全施工资料）、安全信息Tab 与小型工程完全一致，不重复列出。</div>
+  <div class="legend">
+    <span><span class="dot dot-required"></span>必填</span>
+    <span><span class="dot dot-optional"></span>选填</span>
+    <span><span class="dot dot-readonly"></span>只读</span>
+    <span><span class="dot dot-cond"></span>条件显示</span>
+  </div>
+
+  <div class="section-title">基础信息 Tab — 项目信息</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>作业项目<div class="diff-note">★差异：原"工程项目"</div></td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>作业名称，自由输入</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>2</td><td>作业类别<div class="diff-note">★差异：原"工程规模"</div></td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">选择器（跳转页）</span></td>
+        <td><ul class="opts-list">
+          <li>①空调、太阳能、雨棚、防盗网、管道、工业环保设备等非主体配套设备设施的安装、维护、拆除</li>
+          <li>②建筑外墙清洗、修补、屋面检修等各类建筑外墙零星高处作业</li>
+          <li>③户外小型广告及门楣招牌的安装、维护、拆除</li>
+          <li>④新能源汽车、电动自行车充电设施的安装、维护、拆除</li>
+          <li>⑤临时搭建舞台、看台、展台、布景等搭设、拆除</li>
+          <li>⑥锅炉、压力容器（含气瓶）、压力管道、电梯、起重机械等特种设备的安装、改造、修理</li>
+          <li>⑦住宅区、公共场所绿化枝叶修剪</li>
+          <li>⑧道路绿化枝叶修剪</li>
+          <li>⑨供水、排水、通信、电力、燃气等管线设施维护、维修工程</li>
+          <li>⑩其他存在坍塌/物体打击/高处坠落/消防安全/机械伤害等风险的零星作业活动</li>
+        </ul></td><td><span class="cond-all">始终</span></td>
+      </tr>
+      <tr><td>3</td><td>作业地址<div class="diff-note">★差异：原"工程地址"</div></td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">地图选点</span></td><td>进入地图页：搜索 / 拖动标记 / 附近列表选择，确认后回填</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>4</td><td>街道社区</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">行政区域选择器（联动）</span></td><td>左选街道 → 右侧联动显示社区</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>5</td><td>所属物业</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-select">物业选择器</span></td><td>搜索匹配</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>6</td><td>工程总额（万）<div class="diff-note">★改为非必填</div></td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>选填，如填写须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>7</td><td>建筑面积（m²）<div class="diff-note">★改为非必填</div></td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>选填，如填写须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">基础信息 Tab — 作业单位信息<span class="diff-note" style="margin-left:8px;vertical-align:middle;">★差异：原"建设单位信息"</span></div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>8</td><td>作业单位身份<div class="diff-note">★原"建设单位身份"</div></td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">单选</span></td><td>产权人 / 承租人</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>9</td><td>所有权证明或相关产权证明</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF；产权人/承租人均需</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>10</td><td>租赁合同</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-tag">仅"承租人"</span></td></tr>
+      <tr><td>11</td><td>授权委托书</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多图上传</span></td><td>支持多张图片</td><td><span class="cond-tag">仅"承租人"</span></td></tr>
+      <tr><td>12</td><td>作业单位身份类型<div class="diff-note">★原"建设单位身份类型"；机构→单位</div></td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-select">单选</span></td><td>单位 / 个人</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>13</td><td>建设单位营业执照</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-ocr">文件上传（OCR）</span></td><td>自动识别单位名称</td><td><span class="cond-tag">仅"单位"</span></td></tr>
+      <tr><td>14</td><td>建设单位名称</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>OCR 自动填充，可手动修改</td><td><span class="cond-tag">仅"单位"</span></td></tr>
+      <tr><td>15</td><td>甲方负责人身份证</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+      <tr><td>16</td><td>甲方负责人姓名</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag">文本输入</span></td><td>—</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+      <tr><td>17</td><td>甲方负责人手机号</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-number">手机号输入</span></td><td>11位数字</td><td><span class="cond-all">单位/个人均显示</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">基础信息 Tab — 备案人员信息（只读，与小型工程一致）</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>18</td><td>姓名</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>不可修改</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>19</td><td>身份证号</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>脱敏显示</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>20</td><td>备案人员手机号</td><td><span class="tag tag-readonly">只读</span></td><td><span class="type-tag">自动获取</span></td><td>脱敏显示</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">工程信息 Tab — 施工方信息（与小型工程完全一致，字段 21-26）</div>
+  <div class="section-title">工程信息 Tab — 新增施工单位（与小型工程完全一致，字段 N1-N13）</div>
+  <div class="section-title">工程信息 Tab — 安全施工资料确认（与小型工程一致，字段 27-28）</div>
+
+  <div class="section-title">工程信息 Tab — 相关文件上传（与小型工程完全一致）</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td>29</td><td>承发包合同</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>提示：请提交封面、工程地址、金额、签字盖章页</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>30</td><td>施工图纸及技术资料</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>31</td><td>相关项目批复/认定手续</td><td><span class="tag tag-required">必填</span></td><td><span class="type-tag type-multi">多文件上传</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title orange">安全信息 Tab — 大类一：涉及的作业风险（与小型工程完全一致，S1-S17）</div>
+  <div class="section-title orange">安全信息 Tab — 大类二：施工工人（与小型工程完全一致，W0-W8）</div>
+
+  <div class="section-title purple">匹配保单 Tab <span class="badge-opt" style="margin-left:6px;">零星作业非必填</span></div>
+  <div class="note-box red">零星作业保单为<b>非必填</b>，可不填写保单信息直接提交备案申请。如选择填写，则以下字段均为必填。</div>
+  <table>
+    <thead><tr><th class="col-no">#</th><th class="col-name">字段名称</th><th class="col-req">必填/选填</th><th class="col-type">字段类型</th><th>选项内容 / 说明</th><th class="col-cond">显示条件</th></tr></thead>
+    <tbody>
+      <tr><td colspan="6" style="background:#f3e8fd; font-weight:700; font-size:12px; color:#5c2eb8; padding:8px 12px;">保单基础信息（整体选填；如填写则以下字段均必填）</td></tr>
+      <tr><td>P1</td><td>保险公司名称</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-select">选择器</span></td><td>后台配置的保险公司列表</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P2</td><td>保单号</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag">文本输入</span></td><td>—</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P3</td><td>险种名称</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-select">选择器</span></td><td>后台配置的险种列表</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P4</td><td>保费金额（元）</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-number">数字输入</span></td><td>如填写须 &gt; 0</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P5</td><td>保险期限</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-date">日期范围选择</span></td><td>开始时间 至 结束时间</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td colspan="6" style="background:#f3e8fd; font-weight:700; font-size:12px; color:#5c2eb8; padding:8px 12px;">相关文件上传</td></tr>
+      <tr><td>P6</td><td>保单原件</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-all">始终</span></td></tr>
+      <tr><td>P7</td><td>提交支付凭证</td><td><span class="tag tag-optional">选填</span></td><td><span class="type-tag type-upload">文件上传</span></td><td>JPG / PNG / PDF</td><td><span class="cond-all">始终</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+function switchTab(key, e) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + key).classList.add('active');
+  e.target.classList.add('active');
+}
+</script>
+</body>
+</html>

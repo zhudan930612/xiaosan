@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>施工端原型设计 - 青浦区小型工程监管平台</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #e8eaf0; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif; color: #333; }
+
+  .page-title { text-align: center; padding: 32px 20px 16px; font-size: 22px; font-weight: 700; color: #222; }
+  .page-subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 32px; }
+
+  .section-label { text-align: center; font-size: 11px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin: 32px 0 12px; }
+
+  /* Phone Container */
+  .phones-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; padding: 0 24px 40px; }
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .phone-label { font-size: 12px; color: #666; font-weight: 600; text-align: center; }
+  .phone-sub { font-size: 11px; color: #aaa; text-align: center; margin-top: -8px; }
+
+  .phone {
+    width: 320px;
+    background: #fff;
+    border-radius: 32px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+    border: 6px solid #1a1a1a;
+  }
+  .phone::before {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 26px;
+    background: #1a1a1a;
+    border-radius: 0 0 16px 16px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+  .phone-inner {
+    height: 620px;
+    overflow-y: auto;
+    padding-top: 30px;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none;
+  }
+  .phone-inner::-webkit-scrollbar { display: none; }
+
+  /* Status Bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 20px 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #333;
+    flex-shrink: 0;
+  }
+
+  /* Nav Header */
+  .nav-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px 10px;
+    background: #fff;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .nav-back { font-size: 20px; color: #333; width: 32px; cursor: pointer; }
+  .nav-title { flex: 1; text-align: center; font-size: 16px; font-weight: 700; color: #222; }
+  .nav-right { width: 32px; text-align: right; font-size: 13px; color: #52c41a; }
+
+  /* Tab Bar */
+  .tab-bar {
+    display: flex;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px 4px;
+    cursor: pointer;
+    gap: 3px;
+  }
+  .tab-icon { font-size: 20px; line-height: 1; }
+  .tab-text { font-size: 10px; color: #999; }
+  .tab-item.active .tab-text { color: #52c41a; }
+
+  /* Content Scroll Area */
+  .content { flex: 1; overflow-y: auto; background: #f5f7fa; }
+  .content::-webkit-scrollbar { display: none; }
+
+  /* =================== COMPONENTS =================== */
+
+  /* Hero Banner */
+  .hero-banner {
+    background: linear-gradient(135deg, #52c41a 0%, #3ba614 100%);
+    padding: 16px 16px 20px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .hero-greeting { font-size: 13px; opacity: 0.85; margin-bottom: 2px; }
+  .hero-name { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+  .hero-stats { display: flex; gap: 12px; }
+  .hero-stat {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    flex: 1;
+    text-align: center;
+  }
+  .hero-stat-num { font-size: 22px; font-weight: 700; line-height: 1; }
+  .hero-stat-label { font-size: 11px; opacity: 0.85; margin-top: 3px; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+  .badge-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+  .badge-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+  .badge-red { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffb4b4; }
+  .badge-gray { background: #f5f5f5; color: #999; border: 1px solid #e8e8e8; }
+  .badge-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+  .badge-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+
+  /* Card */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    margin: 0 12px 10px;
+    padding: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .card-title { font-size: 14px; font-weight: 700; color: #222; flex: 1; padding-right: 8px; line-height: 1.4; }
+  .card-body { display: flex; flex-direction: column; gap: 5px; }
+  .card-row { display: flex; align-items: center; gap: 6px; }
+  .card-label { font-size: 12px; color: #999; white-space: nowrap; }
+  .card-value { font-size: 12px; color: #555; flex: 1; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+  .card-time { font-size: 11px; color: #bbb; }
+  .card-arrow { font-size: 14px; color: #ccc; }
+
+  /* Card Tags Row */
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+
+  /* Alert Strip */
+  .alert-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    margin: 0 12px 10px;
+  }
+  .alert-red { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffb4b4; }
+  .alert-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+
+  /* Section Header */
+  .sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 8px;
+  }
+  .sec-title { font-size: 13px; font-weight: 700; color: #333; }
+  .sec-more { font-size: 12px; color: #52c41a; }
+
+  /* Tab Switcher */
+  .tab-switcher {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+  .tab-sw-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 12px;
+    color: #999;
+    position: relative;
+    cursor: pointer;
+  }
+  .tab-sw-item.active { color: #52c41a; font-weight: 700; }
+  .tab-sw-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 2px;
+    background: #52c41a;
+    border-radius: 1px;
+  }
+
+  /* Form */
+  .form-group { padding: 0 12px 10px; }
+  .form-item {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .form-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+  .form-label.required::before { content: '* '; color: #ff4d4f; }
+  .form-value { font-size: 14px; color: #333; }
+  .form-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: transparent;
+  }
+  .form-input::placeholder { color: #ccc; }
+  .form-hint { font-size: 11px; color: #aaa; margin-top: 4px; }
+  .form-divider { height: 1px; background: #f0f0f0; margin: 4px 0; }
+  .form-row { display: flex; align-items: center; justify-content: space-between; }
+  .form-placeholder { font-size: 14px; color: #ccc; }
+
+  /* Radio Group */
+  .radio-group { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .radio-item {
+    border: 1.5px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+  }
+  .radio-item.selected { border-color: #52c41a; color: #52c41a; background: #f6ffed; }
+
+  /* Toggle Row */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f8f8f8;
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label { font-size: 14px; color: #333; }
+  .toggle-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
+  .toggle-switch {
+    width: 38px;
+    height: 22px;
+    border-radius: 11px;
+    background: #e8e8e8;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .toggle-switch.on { background: #52c41a; }
+  .toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: left 0.2s;
+  }
+  .toggle-switch.on .toggle-knob { left: 18px; }
+
+  /* Photo Upload */
+  .photo-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+  .photo-thumb {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    background: #f5f7fa;
+    border: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #ccc;
+    overflow: hidden;
+  }
+  .photo-thumb.filled { background: #e6f7e6; color: #52c41a; font-size: 12px; text-align: center; border-color: #b7eb8f; }
+
+  /* Info Row */
+  .info-row {
+    display: flex;
+    padding: 9px 16px;
+    background: #fff;
+    border-bottom: 1px solid #f8f8f8;
+  }
+  .info-key { font-size: 13px; color: #999; width: 88px; flex-shrink: 0; }
+  .info-val { font-size: 13px; color: #333; flex: 1; }
+  .info-val.green { color: #52c41a; }
+  .info-val.orange { color: #fa8c16; }
+  .info-val.red { color: #ff4d4f; }
+  .info-val.blue { color: #1890ff; }
+
+  /* Bottom Button */
+  .bottom-btn-area {
+    padding: 10px 16px;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+  }
+  .btn-primary {
+    flex: 1;
+    background: #52c41a;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+  }
+  .btn-secondary {
+    flex: 1;
+    background: #fff;
+    color: #52c41a;
+    border: 2px solid #52c41a;
+    border-radius: 24px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+  }
+  .btn-gray {
+    flex: 1;
+    background: #f5f5f5;
+    color: #999;
+    border: none;
+    border-radius: 24px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .btn-red {
+    flex: 1;
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+  }
+  .btn-orange {
+    flex: 1;
+    background: #fff7e6;
+    color: #fa8c16;
+    border: 1.5px solid #ffd591;
+    border-radius: 24px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+  }
+  .btn-sm {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-sm-green { background: #52c41a; color: white; }
+  .btn-sm-outline { background: #fff; color: #52c41a; border: 1.5px solid #52c41a; }
+  .btn-sm-gray { background: #f5f5f5; color: #999; }
+
+  /* Notice */
+  .notice {
+    background: #fff7e6;
+    border: 1px solid #ffd591;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 0 12px 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .notice-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .notice-text { font-size: 12px; color: #7d4e00; line-height: 1.6; }
+
+  .notice-red {
+    background: #fff1f0;
+    border: 1px solid #ffb4b4;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 0 12px 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .notice-red .notice-text { color: #7d0000; }
+
+  /* Quick Actions */
+  .quick-actions {
+    display: flex;
+    padding: 14px 12px;
+    gap: 10px;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .quick-action {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .quick-action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .qa-green { background: #f6ffed; }
+  .qa-orange { background: #fff7e6; }
+  .qa-blue { background: #e6f7ff; }
+  .qa-red { background: #fff1f0; }
+  .quick-action-label { font-size: 11px; color: #555; text-align: center; }
+
+  /* Search Bar */
+  .search-bar {
+    padding: 10px 12px;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .search-input {
+    background: #f5f7fa;
+    border-radius: 20px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-input-text { font-size: 13px; color: #ccc; }
+
+  /* Divider */
+  .divider { height: 8px; background: #f5f7fa; flex-shrink: 0; }
+
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: #ccc;
+    gap: 10px;
+  }
+  .empty-icon { font-size: 40px; }
+  .empty-text { font-size: 13px; }
+
+  /* Steps */
+  .steps { padding: 12px 16px; }
+  .step-item { display: flex; gap: 12px; }
+  .step-left { display: flex; flex-direction: column; align-items: center; }
+  .step-dot { width: 16px; height: 16px; border-radius: 50%; background: #52c41a; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .step-dot.gray { background: #e8e8e8; }
+  .step-dot.blue { background: #1890ff; }
+  .step-dot-inner { width: 6px; height: 6px; border-radius: 50%; background: white; }
+  .step-line { width: 2px; flex: 1; background: #e8e8e8; margin: 3px 0; min-height: 24px; }
+  .step-line.green { background: #52c41a; }
+  .step-content { flex: 1; padding-bottom: 16px; }
+  .step-title { font-size: 13px; font-weight: 600; color: #333; line-height: 1; }
+  .step-time { font-size: 11px; color: #bbb; margin-top: 3px; }
+  .step-desc { font-size: 12px; color: #666; margin-top: 5px; line-height: 1.5; }
+
+  /* Violation section in rectification */
+  .vio-section {
+    background: #fff;
+    border-radius: 12px;
+    margin: 0 12px 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .vio-header {
+    background: #fff1f0;
+    padding: 10px 14px;
+    border-bottom: 1px solid #ffe0de;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .vio-title { font-size: 13px; font-weight: 700; color: #ff4d4f; flex: 1; line-height: 1.4; }
+  .vio-body { padding: 10px 14px; }
+  .vio-upload { padding: 10px 14px 12px; border-top: 1px solid #f0f0f0; }
+  .vio-upload-label { font-size: 12px; color: #666; font-weight: 600; margin-bottom: 6px; }
+
+  /* Complaint card */
+  .complaint-card {
+    background: #fff;
+    border-radius: 12px;
+    margin: 0 12px 10px;
+    padding: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .complaint-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+  .complaint-title { font-size: 14px; font-weight: 700; color: #222; flex: 1; padding-right: 8px; line-height: 1.4; }
+  .complaint-body { font-size: 12px; color: #666; line-height: 1.6; }
+  .complaint-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; }
+  .complaint-time { font-size: 11px; color: #bbb; }
+
+  /* Inspection record header (in rectification form) */
+  .insp-header {
+    background: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 0 12px 10px;
+  }
+  .insp-header-title { font-size: 12px; color: #52c41a; font-weight: 700; margin-bottom: 4px; }
+  .insp-header-info { font-size: 12px; color: #333; line-height: 1.6; }
+
+  /* Result screen */
+  .result-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 32px;
+  }
+  .result-icon.success { background: #f6ffed; border: 2px solid #b7eb8f; }
+  .result-icon.fail { background: #fff1f0; border: 2px solid #ffb4b4; }
+
+  /* Project stat summary (in rectification list) */
+  .proj-stats {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .proj-stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 6px;
+    background: #f5f7fa;
+  }
+  .proj-stat-num { font-size: 16px; font-weight: 700; line-height: 1; }
+  .proj-stat-label { font-size: 10px; color: #999; margin-top: 2px; }
+  .num-orange { color: #fa8c16; }
+  .num-red { color: #ff4d4f; }
+  .num-green { color: #52c41a; }
+
+  /* Filing status bar (within detail) */
+  .filing-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 10px 14px;
+    margin-bottom: 1px;
+  }
+
+  /* Textarea */
+  .textarea-field {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: #333;
+    background: transparent;
+    resize: none;
+    font-family: inherit;
+    line-height: 1.6;
+  }
+  .textarea-field::placeholder { color: #ccc; }
+
+  /* Select field simulation */
+  .select-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .select-arrow { font-size: 12px; color: #ccc; }
+
+  /* Urgency tags */
+  .tag-high { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffb4b4; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag-normal { background: #f5f5f5; color: #888; border: 1px solid #e8e8e8; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag-night { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag-weekend { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+  /* Section divider */
+  .sec-divider { height: 1px; background: #f0f0f0; margin: 0 14px; }
+</style>
+</head>
+<body>
+
+<div class="page-title">施工端原型设计</div>
+<div class="page-subtitle">青浦区小型工程监管平台 · 施工方视角 · 三大模块：工程备案 / 隐患整改 / 安全投诉</div>
+
+<!-- ======================== MODULE 1: 工程备案 ======================== -->
+<div class="section-label">MODULE 1 — 工程备案</div>
+<div class="phones-row">
+
+  <!-- P1: 工程备案首页 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P1 工程备案首页</div>
+    <div class="phone-sub">Tab 1 · 在建工程列表 + 备案状态</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+          <div class="hero-greeting">你好，王师傅 👋</div>
+          <div class="hero-name">上海精诚建筑工程有限公司</div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-num">4</div>
+              <div class="hero-stat-label">在建工程</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num" style="color:#ffe58f">2</div>
+              <div class="hero-stat-label">待整改</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">1</div>
+              <div class="hero-stat-label">审核中备案</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <div class="quick-action">
+            <div class="quick-action-icon qa-green">📝</div>
+            <div class="quick-action-label">新增备案</div>
+          </div>
+          <div class="quick-action">
+            <div class="quick-action-icon qa-orange">⚠️</div>
+            <div class="quick-action-label">整改跟踪</div>
+          </div>
+          <div class="quick-action">
+            <div class="quick-action-icon qa-blue">📢</div>
+            <div class="quick-action-label">安全投诉</div>
+          </div>
+          <div class="quick-action">
+            <div class="quick-action-icon qa-red">🔔</div>
+            <div class="quick-action-label">消息通知</div>
+          </div>
+        </div>
+
+        <!-- Alert Strip -->
+        <div class="alert-strip alert-red">
+          <span>⚠️</span>
+          <span>「青浦路改造工程」停工整改，整改期限还剩 1 天</span>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="tab-switcher">
+          <div class="tab-sw-item active">全部(4)</div>
+          <div class="tab-sw-item">审核中(1)</div>
+          <div class="tab-sw-item">施工中(3)</div>
+          <div class="tab-sw-item">已完工(0)</div>
+        </div>
+
+        <!-- Content: Project List -->
+        <div class="content" style="padding-top: 10px;">
+
+          <!-- Card 1: 停工整改 + 高风险 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">青浦路 XX 号道路改造工程</div>
+              <span class="badge badge-red">停工整改</span>
+            </div>
+            <div class="card-body">
+              <div class="card-row"><span class="card-label">📍</span><span class="card-value">青浦区青浦路 118 号</span></div>
+              <div class="card-row"><span class="card-label">📅</span><span class="card-value">2026-01-10 至 2026-04-30</span></div>
+              <div class="card-row"><span class="card-label">👀</span><span class="card-value" style="color:#999">夏阳街道 · 已巡查 6 次 · 距上次 3 天</span></div>
+              <div class="card-row"><span class="card-label">⚠️</span><span class="card-value" style="color:#ff4d4f">当前隐患 2 条</span></div>
+            </div>
+            <div class="card-tags">
+              <span class="tag-high">高风险</span>
+              <span class="tag-night">夜间施工</span>
+            </div>
+          </div>
+
+          <!-- Card 2: 现场整改 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">徐泾镇某住宅楼外墙修缮工程</div>
+              <span class="badge badge-orange">现场整改</span>
+            </div>
+            <div class="card-body">
+              <div class="card-row"><span class="card-label">📍</span><span class="card-value">徐泾镇嘉松中路 XX 号</span></div>
+              <div class="card-row"><span class="card-label">📅</span><span class="card-value">2026-02-01 至 2026-05-15</span></div>
+              <div class="card-row"><span class="card-label">👀</span><span class="card-value" style="color:#999">徐泾镇 · 已巡查 4 次 · 距上次 5 天</span></div>
+              <div class="card-row"><span class="card-label">🕐</span><span class="card-value" style="color:#fa8c16">整改期限：3月13日（剩2天）</span></div>
+            </div>
+            <div class="card-tags">
+              <span class="tag-normal">一般项目</span>
+              <span class="tag-weekend">周末施工</span>
+            </div>
+          </div>
+
+          <!-- Card 3: 正常施工 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">重固镇某厂房内部装修工程</div>
+              <span class="badge badge-green">正常施工</span>
+            </div>
+            <div class="card-body">
+              <div class="card-row"><span class="card-label">📍</span><span class="card-value">重固镇工业路 66 号</span></div>
+              <div class="card-row"><span class="card-label">📅</span><span class="card-value">2026-01-20 至 2026-06-30</span></div>
+              <div class="card-row"><span class="card-label">👀</span><span class="card-value" style="color:#999">重固镇 · 已巡查 3 次 · 距上次 8 天</span></div>
+            </div>
+            <div class="card-tags">
+              <span class="tag-high">高风险</span>
+            </div>
+          </div>
+
+          <!-- Card 4: 审核中 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">朱家角镇某民居改造项目</div>
+              <span class="badge badge-blue">备案审核中</span>
+            </div>
+            <div class="card-body">
+              <div class="card-row"><span class="card-label">📍</span><span class="card-value">朱家角镇新风路 XX 号</span></div>
+              <div class="card-row"><span class="card-label">📋</span><span class="card-value">零星作业</span></div>
+              <div class="card-row"><span class="card-label">⏰</span><span class="card-value" style="color:#1890ff">提交于 2026-03-10，等待审核</span></div>
+            </div>
+            <div class="card-tags">
+              <span class="tag-normal">一般项目</span>
+            </div>
+          </div>
+
+          <!-- FAB -->
+          <div style="text-align:center; padding: 10px 0 20px;">
+            <div style="display:inline-flex; align-items:center; gap:8px; background:#52c41a; color:white; border-radius:24px; padding:12px 28px; font-size:14px; font-weight:700; box-shadow:0 4px 12px rgba(82,196,26,0.4);">
+              ＋ 新增备案
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+          <div class="tab-item active">
+            <span class="tab-icon">📋</span>
+            <span class="tab-text" style="color:#52c41a">工程备案</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">🔧</span>
+            <span class="tab-text">隐患整改</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">📢</span>
+            <span class="tab-text">安全投诉</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P2: 工程详情 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P2 工程详情</div>
+    <div class="phone-sub">备案信息 + 巡查记录 + 整改情况</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">工程详情</div>
+          <div class="nav-right">备案回执</div>
+        </div>
+
+        <div class="content">
+          <!-- 工程标题区 -->
+          <div style="background:#fff; padding:14px 16px; margin-bottom:8px;">
+            <div style="font-size:15px; font-weight:700; color:#222; line-height:1.4; margin-bottom:8px;">青浦路 XX 号道路改造工程</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <span class="badge badge-red">停工整改</span>
+              <span class="tag-high">高风险</span>
+              <span class="tag-night">夜间施工</span>
+            </div>
+          </div>
+
+          <!-- 备案信息 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">备案信息</span></div>
+            <div class="info-row"><span class="info-key">工程地址</span><span class="info-val">青浦区青浦路 118 号</span></div>
+            <div class="info-row"><span class="info-key">工程类型</span><span class="info-val">小型工程</span></div>
+            <div class="info-row"><span class="info-key">计划工期</span><span class="info-val">2026-01-10 至 2026-04-30</span></div>
+            <div class="info-row"><span class="info-key">施工负责人</span><span class="info-val">王明 · 138xxxx5678</span></div>
+            <div class="info-row"><span class="info-key">备案机构</span><span class="info-val">夏阳街道建设管理科</span></div>
+            <div class="info-row"><span class="info-key">备案日期</span><span class="info-val">2026-01-05</span></div>
+            <div class="info-row"><span class="info-key">许可证号</span><span class="info-val">沪建 2026-QP-0088</span></div>
+          </div>
+
+          <!-- 巡查情况 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">安全巡查记录</span><span class="sec-more">共 6 次</span></div>
+            <!-- 巡查卡片（近3次） -->
+            <div style="padding:0 14px 10px; display:flex; flex-direction:column; gap:8px;">
+              <div style="background:#fff1f0; border-radius:8px; padding:9px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="font-size:12px; font-weight:700; color:#ff4d4f;">发现隐患 2 条 · 停工整改</div>
+                  <div style="font-size:11px; color:#bbb;">2026-03-10</div>
+                </div>
+                <div style="font-size:11px; color:#999; margin-top:3px;">巡查员：李红（夏阳街道）</div>
+              </div>
+              <div style="background:#f6ffed; border-radius:8px; padding:9px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="font-size:12px; font-weight:700; color:#52c41a;">未发现隐患 · 正常</div>
+                  <div style="font-size:11px; color:#bbb;">2026-02-28</div>
+                </div>
+                <div style="font-size:11px; color:#999; margin-top:3px;">巡查员：李红（夏阳街道）</div>
+              </div>
+              <div style="background:#f6ffed; border-radius:8px; padding:9px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="font-size:12px; font-weight:700; color:#52c41a;">未发现隐患 · 正常</div>
+                  <div style="font-size:11px; color:#bbb;">2026-02-15</div>
+                </div>
+                <div style="font-size:11px; color:#999; margin-top:3px;">巡查员：王刚（夏阳街道）</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 当前整改情况 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">当前整改情况</span></div>
+            <div style="padding: 0 14px 12px;">
+              <div style="background:#fff1f0; border-radius:8px; padding:10px 12px; margin-bottom:8px;">
+                <div style="font-size:13px; font-weight:700; color:#ff4d4f; margin-bottom:4px;">① 电工未持证上岗</div>
+                <div style="font-size:12px; color:#666;">状态：<span style="color:#fa8c16;">待提交整改</span> · 期限 2026-03-13</div>
+              </div>
+              <div style="background:#fff1f0; border-radius:8px; padding:10px 12px;">
+                <div style="font-size:13px; font-weight:700; color:#ff4d4f; margin-bottom:4px;">② 临边防护缺失</div>
+                <div style="font-size:12px; color:#666;">状态：<span style="color:#fa8c16;">待提交整改</span> · 期限 2026-03-13</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom: go to submit rectification -->
+        <div class="bottom-btn-area">
+          <div class="btn-primary">提交整改记录 →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P3: 新增备案表单 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P3 新增备案</div>
+    <div class="phone-sub">填写工程信息 · 提交备案申请</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">新增备案</div>
+          <div class="nav-right">草稿</div>
+        </div>
+
+        <div class="content">
+          <div class="notice">
+            <span class="notice-icon">ℹ️</span>
+            <span class="notice-text">开工前须完成备案。提交后由街道审核，审核通过后方可开始施工。</span>
+          </div>
+
+          <!-- 基本信息 -->
+          <div style="padding: 0 12px 0;">
+            <div class="sec-header" style="padding-left:0;"><span class="sec-title">基本信息</span></div>
+          </div>
+          <div class="form-group">
+            <div class="form-item">
+              <div class="form-label required">工程名称</div>
+              <input class="form-input" placeholder="请输入工程全称" />
+            </div>
+            <div class="form-item">
+              <div class="form-label required">工程地址</div>
+              <div class="form-row">
+                <input class="form-input" placeholder="选择或输入详细地址" style="flex:1" />
+                <span style="font-size:16px; color:#52c41a;">📍</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label required">工程类型</div>
+              <div class="radio-group">
+                <div class="radio-item selected">小型工程</div>
+                <div class="radio-item">住宅装修</div>
+                <div class="radio-item">零星作业</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 施工信息 -->
+          <div style="padding: 0 12px 0;">
+            <div class="sec-header" style="padding-left:0;"><span class="sec-title">施工信息</span></div>
+          </div>
+          <div class="form-group">
+            <div class="form-item">
+              <div class="form-label required">计划开工日期</div>
+              <div class="form-row">
+                <span class="form-placeholder">选择日期</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label required">计划竣工日期</div>
+              <div class="form-row">
+                <span class="form-placeholder">选择日期</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label required">施工负责人</div>
+              <input class="form-input" placeholder="姓名" />
+              <div class="form-divider"></div>
+              <input class="form-input" placeholder="联系电话" style="margin-top:6px;" />
+            </div>
+            <div class="form-item">
+              <div class="form-label">施工许可证号</div>
+              <input class="form-input" placeholder="如有，请填写（选填）" />
+            </div>
+          </div>
+
+          <!-- 特殊施工声明 -->
+          <div style="padding: 0 12px 0;">
+            <div class="sec-header" style="padding-left:0;"><span class="sec-title">特殊施工声明</span></div>
+          </div>
+          <div class="form-group">
+            <div class="form-item">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">夜间施工</div>
+                  <div class="toggle-sub">22:00—06:00 期间施工</div>
+                </div>
+                <div class="toggle-switch on"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">周末施工</div>
+                  <div class="toggle-sub">周六、周日施工</div>
+                </div>
+                <div class="toggle-switch"><div class="toggle-knob"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 附件上传 -->
+          <div style="padding: 0 12px 0;">
+            <div class="sec-header" style="padding-left:0;"><span class="sec-title">附件上传</span></div>
+          </div>
+          <div class="form-group">
+            <div class="form-item">
+              <div class="form-label">施工方案 / 许可证等材料</div>
+              <div class="photo-area" style="padding:0; margin-top:6px;">
+                <div class="photo-thumb filled">📄<br><span style="font-size:10px;">方案.pdf</span></div>
+                <div class="photo-thumb" style="font-size:16px;">＋</div>
+              </div>
+              <div class="form-hint">支持图片、PDF，单文件不超过 20MB</div>
+            </div>
+          </div>
+
+          <div style="height:20px;"></div>
+        </div>
+
+        <div class="bottom-btn-area">
+          <div class="btn-gray">存草稿</div>
+          <div class="btn-primary">提交备案</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P4: 备案驳回 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P4 备案驳回</div>
+    <div class="phone-sub">备案被驳回 · 查看原因 · 重新提交</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">备案详情</div>
+          <div class="nav-right"></div>
+        </div>
+
+        <div class="content">
+          <!-- 驳回提示 -->
+          <div style="text-align:center; padding:24px 20px 16px;">
+            <div class="result-icon fail">❌</div>
+            <div style="font-size:17px; font-weight:700; color:#222; margin-bottom:6px;">备案申请被驳回</div>
+            <div style="font-size:13px; color:#999;">请查看驳回原因并修改后重新提交</div>
+          </div>
+
+          <!-- 驳回原因 -->
+          <div class="notice-red">
+            <span class="notice-icon">⚠️</span>
+            <div class="notice-text">
+              <div style="font-weight:700; margin-bottom:4px;">驳回原因</div>
+              1. 施工方案文件缺失，请上传完整施工方案；<br>
+              2. 施工负责人联系电话格式有误，请核对后重填。
+            </div>
+          </div>
+
+          <!-- 审核信息 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="info-row"><span class="info-key">审核机构</span><span class="info-val">夏阳街道建设管理科</span></div>
+            <div class="info-row"><span class="info-key">审核人员</span><span class="info-val">赵主任</span></div>
+            <div class="info-row"><span class="info-key">驳回时间</span><span class="info-val">2026-03-11 14:30</span></div>
+          </div>
+
+          <!-- 原备案信息（可修改） -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">备案信息</span><span style="font-size:12px; color:#52c41a;">点击修改</span></div>
+            <div class="info-row">
+              <span class="info-key">工程名称</span>
+              <span class="info-val">朱家角镇某民居改造项目</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">工程类型</span>
+              <span class="info-val">零星作业</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">施工负责人</span>
+              <span class="info-val red">王明 · 138xxxx567（格式有误）</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">施工方案</span>
+              <span class="info-val red">未上传（需补充）</span>
+            </div>
+          </div>
+
+          <div style="height:20px;"></div>
+        </div>
+
+        <div class="bottom-btn-area">
+          <div class="btn-primary">修改并重新提交</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end phones-row -->
+
+
+<!-- ======================== MODULE 2: 隐患整改 ======================== -->
+<div class="section-label">MODULE 2 — 隐患整改</div>
+<div class="phones-row">
+
+  <!-- P5: 整改待办列表 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P5 整改待办列表</div>
+    <div class="phone-sub">Tab 2 · 按工程汇总待整改任务</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+        <!-- Header area (no nav, this is a tab page) -->
+        <div style="background: linear-gradient(135deg, #52c41a 0%, #3ba614 100%); padding: 14px 16px 16px; color:white; flex-shrink:0;">
+          <div style="font-size:16px; font-weight:700; margin-bottom:10px;">隐患整改</div>
+          <div style="display:flex; gap:10px;">
+            <div style="background:rgba(255,255,255,0.2); border-radius:8px; padding:8px 12px; flex:1; text-align:center;">
+              <div style="font-size:18px; font-weight:700; color:#ffe58f;">2</div>
+              <div style="font-size:11px; opacity:0.85;">待整改</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.2); border-radius:8px; padding:8px 12px; flex:1; text-align:center;">
+              <div style="font-size:18px; font-weight:700;">1</div>
+              <div style="font-size:11px; opacity:0.85;">审核中</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.2); border-radius:8px; padding:8px 12px; flex:1; text-align:center;">
+              <div style="font-size:18px; font-weight:700;">3</div>
+              <div style="font-size:11px; opacity:0.85;">已完成</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="tab-switcher">
+          <div class="tab-sw-item active">待整改(2)</div>
+          <div class="tab-sw-item">审核中(1)</div>
+          <div class="tab-sw-item">已驳回(1)</div>
+          <div class="tab-sw-item">已完成(3)</div>
+        </div>
+
+        <div class="content" style="padding-top:10px;">
+          <div class="alert-strip alert-red">
+            <span>⏰</span>
+            <span>有 1 条整改任务今日到期，请尽快提交</span>
+          </div>
+
+          <!-- Project card: 停工整改（逾期） -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">青浦路 XX 号道路改造工程</div>
+              <span class="badge badge-red">停工整改</span>
+            </div>
+            <div class="card-body">
+              <div class="card-row"><span class="card-label">📅</span><span class="card-value" style="color:#ff4d4f;">整改期限：2026-03-12（今日到期）</span></div>
+              <div class="card-row"><span class="card-label">📋</span><span class="card-value">巡查记录：2026-03-10 · 夏阳街道</span></div>
+            </div>
+            <!-- 违规汇总 -->
+            <div class="proj-stats">
+              <div class="proj-stat-item">
+                <div class="proj-stat-num num-red">2</div>
+                <div class="proj-stat-label">待整改</div>
+              </div>
+              <div class="proj-stat-item">
+                <div class="proj-stat-num" style="color:#999">0</div>
+                <div class="proj-stat-label">已完成</div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="card-time">距到期：今日</span>
+              <button class="btn-sm btn-sm-green">提交整改</button>
+            </div>
+          </div>
+
+          <!-- Project card: 现场整改（正常） -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">徐泾镇某住宅楼外墙修缮工程</div>
+              <span class="badge badge-orange">现场整改</span>
+            </div>
+            <div class="card-body">
+              <div class="card-row"><span class="card-label">📅</span><span class="card-value" style="color:#fa8c16;">整改期限：2026-03-13（剩1天）</span></div>
+              <div class="card-row"><span class="card-label">📋</span><span class="card-value">巡查记录：2026-03-09 · 徐泾镇</span></div>
+            </div>
+            <div class="proj-stats">
+              <div class="proj-stat-item">
+                <div class="proj-stat-num num-orange">1</div>
+                <div class="proj-stat-label">待整改</div>
+              </div>
+              <div class="proj-stat-item">
+                <div class="proj-stat-num" style="color:#999">0</div>
+                <div class="proj-stat-label">已完成</div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="card-time">距到期：1 天</span>
+              <button class="btn-sm btn-sm-green">提交整改</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+          <div class="tab-item">
+            <span class="tab-icon">📋</span>
+            <span class="tab-text">工程备案</span>
+          </div>
+          <div class="tab-item active">
+            <span class="tab-icon">🔧</span>
+            <span class="tab-text" style="color:#52c41a;">隐患整改</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">📢</span>
+            <span class="tab-text">安全投诉</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P6: 整改记录提交 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P6 提交整改记录</div>
+    <div class="phone-sub">针对本次巡查所有违规一次性提交</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">提交整改记录</div>
+          <div class="nav-right"></div>
+        </div>
+
+        <div class="content">
+          <!-- 巡查记录来源 -->
+          <div class="insp-header">
+            <div class="insp-header-title">📋 对应巡查记录</div>
+            <div class="insp-header-info">
+              青浦路 XX 号道路改造工程<br>
+              巡查日期：2026-03-10 · 巡查员：李红（夏阳街道）<br>
+              整改期限：<span style="color:#ff4d4f;">2026-03-12（今日到期）</span>
+            </div>
+          </div>
+
+          <div class="notice">
+            <span class="notice-icon">ℹ️</span>
+            <span class="notice-text">请针对以下 2 条违规分别填写整改材料，填写完毕后统一提交。审核员将对整条记录进行整体审核。</span>
+          </div>
+
+          <!-- 违规 1 -->
+          <div class="vio-section">
+            <div class="vio-header">
+              <div>
+                <div class="vio-title">① 电工未持证上岗</div>
+                <div style="display:flex; gap:5px; margin-top:4px;"><span class="badge badge-red">较大隐患</span><span class="badge badge-red">停工整改</span></div>
+              </div>
+            </div>
+            <div class="vio-body">
+              <div style="font-size:12px; color:#666; margin-bottom:5px; line-height:1.5;">整改要求：现场施工电工须持有效期内电工操作证方可上岗，请立即整改并提交证书照片。</div>
+              <div style="font-size:12px; color:#bbb;">巡查照片已记录，如需查看请展开</div>
+            </div>
+            <div class="vio-upload">
+              <div class="vio-upload-label">整改说明</div>
+              <div style="background:#f5f7fa; border-radius:8px; padding:9px 11px; margin-bottom:8px;">
+                <textarea class="textarea-field" rows="2" placeholder="请描述整改情况...">已安排持证电工张某（证书编号：XX）替换上岗。</textarea>
+              </div>
+              <div class="vio-upload-label">整改照片 <span style="font-weight:400; color:#aaa;">（最多9张）</span></div>
+              <div class="photo-area" style="padding:0; gap:6px;">
+                <div class="photo-thumb filled">✓<br><span style="font-size:10px;">整改图1</span></div>
+                <div class="photo-thumb filled">✓<br><span style="font-size:10px;">整改图2</span></div>
+                <div class="photo-thumb">＋</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 违规 2 -->
+          <div class="vio-section">
+            <div class="vio-header">
+              <div>
+                <div class="vio-title">② 临边防护缺失</div>
+                <div style="display:flex; gap:5px; margin-top:4px;"><span class="badge badge-orange">一般隐患</span><span class="badge badge-red">停工整改</span></div>
+              </div>
+            </div>
+            <div class="vio-body">
+              <div style="font-size:12px; color:#666; margin-bottom:5px; line-height:1.5;">整改要求：楼层临边须安装符合规范的防护栏杆，高度不低于 1.2m。</div>
+            </div>
+            <div class="vio-upload">
+              <div class="vio-upload-label">整改说明</div>
+              <div style="background:#f5f7fa; border-radius:8px; padding:9px 11px; margin-bottom:8px;">
+                <textarea class="textarea-field" rows="2" placeholder="请描述整改情况..."></textarea>
+              </div>
+              <div class="vio-upload-label">整改照片 <span style="font-weight:400; color:#aaa;">（最多9张）</span></div>
+              <div class="photo-area" style="padding:0; gap:6px;">
+                <div class="photo-thumb">＋</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:10px;"></div>
+        </div>
+
+        <div class="bottom-btn-area">
+          <div class="btn-gray">暂存</div>
+          <div class="btn-primary">提交整改记录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P7: 整改审核结果 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P7 整改审核结果</div>
+    <div class="phone-sub">两种状态：审核通过 / 被驳回</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">整改记录详情</div>
+          <div class="nav-right"></div>
+        </div>
+
+        <div class="content">
+          <!-- 驳回状态展示 -->
+          <div style="text-align:center; padding:24px 20px 16px;">
+            <div class="result-icon fail">❌</div>
+            <div style="font-size:17px; font-weight:700; color:#222; margin-bottom:6px;">整改记录被驳回</div>
+            <div style="font-size:13px; color:#999;">请查看驳回意见并重新提交整条整改记录</div>
+          </div>
+
+          <!-- 驳回意见 -->
+          <div class="notice-red">
+            <span class="notice-icon">⚠️</span>
+            <div class="notice-text">
+              <div style="font-weight:700; margin-bottom:4px;">驳回意见</div>
+              ① 电工整改照片模糊，无法辨认证书信息，请重新拍摄清晰照片；<br>
+              ② 临边防护照片缺失，请补充上传。
+            </div>
+          </div>
+
+          <!-- 审核信息 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="info-row"><span class="info-key">审核人员</span><span class="info-val">赵工（夏阳街道）</span></div>
+            <div class="info-row"><span class="info-key">驳回时间</span><span class="info-val">2026-03-11 16:45</span></div>
+            <div class="info-row"><span class="info-key">重新期限</span><span class="info-val red">请于 2026-03-13 前重新提交</span></div>
+          </div>
+
+          <!-- 原整改内容（只读回顾） -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">已提交的整改内容</span><span style="font-size:11px;color:#aaa;">仅供参考</span></div>
+            <div style="padding:0 14px 12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="background:#f5f7fa; border-radius:8px; padding:10px 12px;">
+                <div style="font-size:12px; font-weight:700; color:#333; margin-bottom:4px;">① 电工未持证上岗</div>
+                <div style="font-size:12px; color:#666;">说明：已安排持证电工替换上岗</div>
+                <div style="font-size:12px; color:#ff4d4f; margin-top:3px;">⚠ 照片模糊，需重拍</div>
+              </div>
+              <div style="background:#f5f7fa; border-radius:8px; padding:10px 12px;">
+                <div style="font-size:12px; font-weight:700; color:#333; margin-bottom:4px;">② 临边防护缺失</div>
+                <div style="font-size:12px; color:#666;">说明：已安装防护栏杆</div>
+                <div style="font-size:12px; color:#ff4d4f; margin-top:3px;">⚠ 照片缺失，需补充</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-btn-area">
+          <div class="btn-primary">重新提交整改记录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P7b: 整改审核通过（另一状态） -->
+  <div class="phone-wrap">
+    <div class="phone-label">P7b 整改通过</div>
+    <div class="phone-sub">审核通过 · 工程恢复施工</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">整改记录详情</div>
+          <div class="nav-right"></div>
+        </div>
+
+        <div class="content">
+          <!-- 通过状态 -->
+          <div style="text-align:center; padding:24px 20px 16px;">
+            <div class="result-icon success">✅</div>
+            <div style="font-size:17px; font-weight:700; color:#222; margin-bottom:6px;">整改审核通过</div>
+            <div style="font-size:13px; color:#999;">违规已整改完毕，工程恢复正常施工</div>
+          </div>
+
+          <!-- 审核信息 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="info-row"><span class="info-key">审核人员</span><span class="info-val">赵工（徐泾镇）</span></div>
+            <div class="info-row"><span class="info-key">通过时间</span><span class="info-val green">2026-03-11 10:20</span></div>
+            <div class="info-row"><span class="info-key">工程状态</span><span class="info-val green">恢复正常施工</span></div>
+          </div>
+
+          <!-- 整改记录 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">整改详情</span></div>
+            <div style="padding:0 14px 12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="background:#f6ffed; border-radius:8px; padding:10px 12px;">
+                <div style="font-size:12px; font-weight:700; color:#52c41a; margin-bottom:4px;">① 安全警示牌缺失 ✓</div>
+                <div style="font-size:12px; color:#666;">说明：已补设安全警示牌 3 块</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 整改时间线 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">整改进度</span></div>
+            <div class="steps">
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-dot"><div class="step-dot-inner"></div></div>
+                  <div class="step-line green"></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">发现隐患</div>
+                  <div class="step-time">2026-03-09 10:00 · 李红</div>
+                  <div class="step-desc">巡查发现安全警示牌缺失，限期整改</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-dot"><div class="step-dot-inner"></div></div>
+                  <div class="step-line green"></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">提交整改记录</div>
+                  <div class="step-time">2026-03-10 09:30 · 王师傅</div>
+                  <div class="step-desc">已补设警示牌，上传照片 2 张</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-dot"><div class="step-dot-inner"></div></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">审核通过</div>
+                  <div class="step-time">2026-03-11 10:20 · 赵工</div>
+                  <div class="step-desc">整改材料符合要求，整改完成</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end phones-row -->
+
+
+<!-- ======================== MODULE 3: 安全隐患投诉 ======================== -->
+<div class="section-label">MODULE 3 — 安全隐患投诉</div>
+<div class="phones-row">
+
+  <!-- P8: 投诉列表 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P8 投诉列表</div>
+    <div class="phone-sub">Tab 3 · 已提交的投诉记录</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+
+        <!-- Header area -->
+        <div style="background: linear-gradient(135deg, #fa8c16 0%, #d46b08 100%); padding: 14px 16px 16px; color:white; flex-shrink:0;">
+          <div style="font-size:16px; font-weight:700; margin-bottom:10px;">安全隐患投诉</div>
+          <div style="display:flex; gap:10px;">
+            <div style="background:rgba(255,255,255,0.2); border-radius:8px; padding:8px 12px; flex:1; text-align:center;">
+              <div style="font-size:18px; font-weight:700;">5</div>
+              <div style="font-size:11px; opacity:0.85;">累计投诉</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.2); border-radius:8px; padding:8px 12px; flex:1; text-align:center;">
+              <div style="font-size:18px; font-weight:700; color:#ffe58f;">2</div>
+              <div style="font-size:11px; opacity:0.85;">处理中</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.2); border-radius:8px; padding:8px 12px; flex:1; text-align:center;">
+              <div style="font-size:18px; font-weight:700;">3</div>
+              <div style="font-size:11px; opacity:0.85;">已处理</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="tab-switcher">
+          <div class="tab-sw-item active">全部(5)</div>
+          <div class="tab-sw-item">处理中(2)</div>
+          <div class="tab-sw-item">已处理(3)</div>
+        </div>
+
+        <div class="content" style="padding-top:10px;">
+
+          <!-- Complaint 1: 处理中 -->
+          <div class="complaint-card">
+            <div class="complaint-header">
+              <div class="complaint-title">施工现场扬尘严重，未采取降尘措施</div>
+              <span class="badge badge-orange">处理中</span>
+            </div>
+            <div class="complaint-body">
+              关联工程：青浦路 XX 号道路改造工程<br>
+              投诉类型：环境污染
+            </div>
+            <div class="complaint-footer">
+              <span class="complaint-time">2026-03-10 提交</span>
+              <span style="font-size:12px; color:#fa8c16;">等待处理 ›</span>
+            </div>
+          </div>
+
+          <!-- Complaint 2: 处理中 -->
+          <div class="complaint-card">
+            <div class="complaint-header">
+              <div class="complaint-title">深夜 23:00 仍在施工，噪音扰民</div>
+              <span class="badge badge-orange">处理中</span>
+            </div>
+            <div class="complaint-body">
+              关联工程：徐泾镇某住宅楼外墙修缮工程<br>
+              投诉类型：扰民
+            </div>
+            <div class="complaint-footer">
+              <span class="complaint-time">2026-03-09 提交</span>
+              <span style="font-size:12px; color:#fa8c16;">等待处理 ›</span>
+            </div>
+          </div>
+
+          <!-- Complaint 3: 已处理 -->
+          <div class="complaint-card">
+            <div class="complaint-header">
+              <div class="complaint-title">工地出入口无防护栏，行人存在安全隐患</div>
+              <span class="badge badge-green">已处理</span>
+            </div>
+            <div class="complaint-body">
+              关联工程：重固镇某厂房内部装修工程<br>
+              投诉类型：安全违规<br>
+              <span style="color:#52c41a; margin-top:3px; display:block;">处理结果：现场已整改，安装防护栏</span>
+            </div>
+            <div class="complaint-footer">
+              <span class="complaint-time">2026-02-28 提交</span>
+              <span style="font-size:12px; color:#52c41a;">查看详情 ›</span>
+            </div>
+          </div>
+
+          <!-- FAB -->
+          <div style="text-align:center; padding: 10px 0 20px;">
+            <div style="display:inline-flex; align-items:center; gap:8px; background:#fa8c16; color:white; border-radius:24px; padding:12px 28px; font-size:14px; font-weight:700; box-shadow:0 4px 12px rgba(250,140,22,0.4);">
+              ＋ 新增投诉
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+          <div class="tab-item">
+            <span class="tab-icon">📋</span>
+            <span class="tab-text">工程备案</span>
+          </div>
+          <div class="tab-item">
+            <span class="tab-icon">🔧</span>
+            <span class="tab-text">隐患整改</span>
+          </div>
+          <div class="tab-item active">
+            <span class="tab-icon">📢</span>
+            <span class="tab-text" style="color:#52c41a;">安全投诉</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P9: 新增投诉 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P9 新增投诉</div>
+    <div class="phone-sub">填写投诉信息 · 提交至主管部门</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">新增安全投诉</div>
+          <div class="nav-right"></div>
+        </div>
+
+        <div class="content">
+          <div class="notice">
+            <span class="notice-icon">📢</span>
+            <span class="notice-text">您的投诉将匿名提交至主管部门，我们会在 5 个工作日内处理并反馈结果。</span>
+          </div>
+
+          <div class="form-group">
+            <!-- 关联工程 -->
+            <div class="form-item">
+              <div class="form-label required">关联工程</div>
+              <div class="select-field">
+                <span style="font-size:14px; color:#333;">青浦路 XX 号道路改造工程</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+
+            <!-- 投诉对象 -->
+            <div class="form-item">
+              <div class="form-label required">投诉类型</div>
+              <div class="radio-group">
+                <div class="radio-item selected">安全违规</div>
+                <div class="radio-item">扰民噪音</div>
+                <div class="radio-item">环境污染</div>
+                <div class="radio-item">其他</div>
+              </div>
+            </div>
+
+            <!-- 投诉描述 -->
+            <div class="form-item">
+              <div class="form-label required">投诉描述</div>
+              <div style="background:#f5f7fa; border-radius:8px; padding:9px 11px; margin-top:4px;">
+                <textarea class="textarea-field" rows="4" placeholder="请详细描述您发现的安全隐患或违规行为，包括时间、地点、具体情况..."></textarea>
+              </div>
+              <div class="form-hint">最多 500 字</div>
+            </div>
+
+            <!-- 现场照片/视频 -->
+            <div class="form-item">
+              <div class="form-label">现场照片/视频</div>
+              <div class="form-hint" style="margin-bottom:8px;">上传现场照片或视频，有助于更快处理（选填）</div>
+              <div class="photo-area" style="padding:0;">
+                <div class="photo-thumb filled">📷<br><span style="font-size:10px;">现场图1</span></div>
+                <div class="photo-thumb">＋</div>
+              </div>
+            </div>
+
+            <!-- 发生时间 -->
+            <div class="form-item">
+              <div class="form-label">发生时间</div>
+              <div class="form-row">
+                <span style="font-size:14px; color:#333;">2026-03-12 23:00</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+
+            <!-- 联系方式（选填） -->
+            <div class="form-item">
+              <div class="form-label">联系方式（选填）</div>
+              <input class="form-input" placeholder="如需回访，请留下联系电话" />
+              <div class="form-hint">如不填写，投诉将匿名提交</div>
+            </div>
+          </div>
+
+          <div style="height:20px;"></div>
+        </div>
+
+        <div class="bottom-btn-area">
+          <div class="btn-primary">提交投诉</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P10: 投诉详情 -->
+  <div class="phone-wrap">
+    <div class="phone-label">P10 投诉详情</div>
+    <div class="phone-sub">查看投诉状态 + 处理进度</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+        <div class="nav-header">
+          <div class="nav-back">‹</div>
+          <div class="nav-title">投诉详情</div>
+          <div class="nav-right"></div>
+        </div>
+
+        <div class="content">
+          <!-- 投诉状态 -->
+          <div style="background:#fff; padding:14px 16px; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <div style="font-size:15px; font-weight:700; color:#222; flex:1; padding-right:8px; line-height:1.4;">工地出入口无防护栏，行人存在安全隐患</div>
+              <span class="badge badge-green">已处理</span>
+            </div>
+            <div style="font-size:12px; color:#999;">投诉编号：TZ2026031001 · 2026-02-28 提交</div>
+          </div>
+
+          <!-- 投诉信息 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="info-row"><span class="info-key">关联工程</span><span class="info-val">重固镇某厂房内部装修工程</span></div>
+            <div class="info-row"><span class="info-key">投诉类型</span><span class="info-val">安全违规</span></div>
+            <div class="info-row"><span class="info-key">发生时间</span><span class="info-val">2026-02-27 14:00</span></div>
+            <div class="info-row"><span class="info-key">投诉描述</span><span class="info-val">工地东侧出入口无防护栏，行人可直接进入施工区域，存在重大安全隐患。</span></div>
+          </div>
+
+          <!-- 处理结果 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">处理结果</span></div>
+            <div style="padding:0 14px 12px;">
+              <div style="background:#f6ffed; border-radius:8px; padding:10px 12px; margin-bottom:8px;">
+                <div style="font-size:12px; font-weight:700; color:#52c41a; margin-bottom:4px;">已整改完毕</div>
+                <div style="font-size:12px; color:#333; line-height:1.5;">已要求施工方在工地东侧出入口安装防护栏，并增设安全警示标志，现场已整改到位。</div>
+                <div style="font-size:11px; color:#aaa; margin-top:4px;">处理人：赵工（重固镇） · 2026-03-02</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 处理进度 -->
+          <div style="background:#fff; margin-bottom:8px;">
+            <div class="sec-header"><span class="sec-title">处理进度</span></div>
+            <div class="steps">
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-dot"><div class="step-dot-inner"></div></div>
+                  <div class="step-line green"></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">投诉提交</div>
+                  <div class="step-time">2026-02-28 09:15</div>
+                  <div class="step-desc">投诉已提交至重固镇建设管理科</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-dot"><div class="step-dot-inner"></div></div>
+                  <div class="step-line green"></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">受理中</div>
+                  <div class="step-time">2026-02-28 14:00</div>
+                  <div class="step-desc">赵工已接收投诉，安排现场核查</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-dot"><div class="step-dot-inner"></div></div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">处理完成</div>
+                  <div class="step-time">2026-03-02 16:30</div>
+                  <div class="step-desc">现场已整改，防护栏已安装到位</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end phones-row -->
+
+</body>
+</html>

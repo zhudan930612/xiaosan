@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>线上投保解决方案（3种方案对比）</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #2c3e50;
+      background: #f5f6fa;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 3px solid #27ae60;
+    }
+    h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin: 40px 0 16px;
+      padding: 10px 16px;
+      background: #eafaf1;
+      border-left: 4px solid #27ae60;
+      border-radius: 0 6px 6px 0;
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 28px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #dfe6e9;
+    }
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #34495e;
+      margin: 18px 0 8px;
+    }
+    p { margin: 10px 0; }
+    a { color: #27ae60; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    hr {
+      border: none;
+      border-top: 1px solid #dfe6e9;
+      margin: 28px 0;
+    }
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    th {
+      background: #2ecc71;
+      color: #fff;
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #ecf0f1;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #f9fffe; }
+    /* Highlight recommended column */
+    .table-compare th:nth-child(3),
+    .table-compare td:nth-child(3) {
+      background-color: #d5f5e3;
+    }
+    .table-compare th:nth-child(3) {
+      background-color: #27ae60;
+    }
+    /* Code blocks */
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 16px 0;
+      overflow-x: auto;
+      font-family: "Fira Code", "Cascadia Code", "Consolas", "Monaco", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    code {
+      background: #eafaf1;
+      color: #27ae60;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "Fira Code", "Consolas", monospace;
+      font-size: 13px;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+    /* Blockquote */
+    blockquote {
+      border-left: 4px solid #27ae60;
+      background: #eafaf1;
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 0 6px 6px 0;
+      color: #2d6a4f;
+    }
+    blockquote p { margin: 4px 0; }
+    /* Lists */
+    ul, ol {
+      padding-left: 24px;
+      margin: 10px 0;
+    }
+    li { margin: 5px 0; }
+    /* Doc meta */
+    .doc-meta {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    .doc-meta table { box-shadow: none; margin: 0; border-radius: 0; }
+    /* Recommend badge */
+    .badge-recommend {
+      display: inline-block;
+      background: #27ae60;
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    /* Scheme cards */
+    .scheme-card {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #dfe6e9;
+      padding: 20px 24px;
+      margin: 16px 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .scheme-card.recommended {
+      border-color: #27ae60;
+      border-width: 2px;
+    }
+    .scheme-label {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .label-a { background: #fef9c3; color: #a16207; }
+    .label-b { background: #dcfce7; color: #15803d; }
+    .label-c { background: #e0f2fe; color: #0369a1; }
+    .pro-con {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .pro, .con {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .pro { background: #f0fdf4; border-left: 3px solid #22c55e; }
+    .con { background: #fff7f7; border-left: 3px solid #f87171; }
+    .pro h4, .con h4 { margin: 0 0 6px; font-size: 13px; }
+    .pro li, .con li { margin: 3px 0; }
+    /* Steps */
+    .steps {
+      counter-reset: steps;
+      margin: 12px 0;
+    }
+    .step {
+      display: flex;
+      gap: 12px;
+      margin: 10px 0;
+      align-items: flex-start;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #27ae60;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Warning box */
+    .warn-box {
+      background: #fffbeb;
+      border: 1px solid #fbbf24;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      color: #92400e;
+      font-size: 14px;
+    }
+    strong { color: #1a1a2e; }
+    /* Footer */
+    .footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #dfe6e9;
+      color: #95a5a6;
+      font-size: 13px;
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 16px 12px 40px; }
+      h1 { font-size: 20px; }
+      table { font-size: 12px; }
+      .pro-con { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<h1>线上投保解决方案（3种方案对比）</h1>
+
+<blockquote>
+  <p>🤖 AI草稿，待人工确认</p>
+  <p>本文档对比3种线上投保技术方案，供与保险公司洽谈时选型决策。</p>
+</blockquote>
+
+<div class="doc-meta">
+<table>
+  <thead><tr><th>字段</th><th>内容</th></tr></thead>
+  <tbody>
+    <tr><td>规划池记录 ID</td><td>保单匹配-线上投保</td></tr>
+    <tr><td>产品规划摘要</td><td>保单匹配功能目前仅上线"上传保单"方式，线上投保（保险公司入驻平台）因合作未谈妥尚未开发</td></tr>
+    <tr><td>设计日期</td><td>2026-03-23</td></tr>
+    <tr><td>状态</td><td>🤖 AI草稿</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr>
+
+<h2>背景说明</h2>
+
+<h3>现状</h3>
+<ul>
+  <li>已上线：上传保单（线下投保）+ OCR识别</li>
+  <li>未上线：线上投保（保险公司入驻平台，用户直接选险购买）</li>
+</ul>
+
+<h3>需求</h3>
+<ul>
+  <li>保险公司入驻平台，用户可直接选择保险公司投保付款</li>
+  <li>投保流程：选保险公司 → 填写投保信息 → 支付 → 保单数据自动回传平台</li>
+  <li>保费计算：等待保险公司方案，<strong>大概率是动态报价</strong>（基于工程信息实时计算）</li>
+  <li>保单关联：<strong>同一工程仅关联1张有效保单</strong></li>
+</ul>
+
+<hr>
+
+<h2>3种技术方案对比</h2>
+
+<h3>总览表</h3>
+
+<div style="overflow-x:auto;">
+<table class="table-compare">
+  <thead>
+    <tr>
+      <th>对比维度</th>
+      <th>方案A：外链跳转</th>
+      <th>方案B：H5内嵌（推荐）</th>
+      <th>方案C：平台统一API</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>技术原理</strong></td><td>跳转到保险公司外部投保页面</td><td>平台内打开保险公司H5页</td><td>平台直接调用保险公司API完成报价、投保、出单</td></tr>
+    <tr><td><strong>平台开发量</strong></td><td>低</td><td>中</td><td>高</td></tr>
+    <tr><td><strong>预估周期</strong></td><td>1-2周</td><td>4-6周</td><td>2-3个月</td></tr>
+    <tr><td><strong>保险公司配合要求</strong></td><td>低，只需提供投保链接</td><td>中，需提供H5并对接JS Bridge/回调</td><td>高，需开放标准API并配合联调</td></tr>
+    <tr><td><strong>用户体验</strong></td><td>一般，跳出平台</td><td>较好，留在平台内</td><td>最佳，全程平台内完成</td></tr>
+    <tr><td><strong>保单回传能力</strong></td><td>弱，依赖Webhook或补录</td><td>强，可自动回传</td><td>强，可自动回传</td></tr>
+    <tr><td><strong>动态保费支持</strong></td><td>保险公司页面自行计算</td><td>H5页实时试算</td><td>平台直接调用报价API</td></tr>
+    <tr><td><strong>支付链路控制力</strong></td><td>低</td><td>中</td><td>高</td></tr>
+    <tr><td><strong>平台数据掌控度</strong></td><td>低</td><td>中</td><td>高</td></tr>
+    <tr><td><strong>异常单处理难度</strong></td><td>高</td><td>中</td><td>中</td></tr>
+    <tr><td><strong>后续扩展能力</strong></td><td>低</td><td>中高</td><td>高</td></tr>
+    <tr><td><strong>主要风险</strong></td><td>回跳丢失、状态不一致、转化率低</td><td>多家保司适配成本不一致</td><td>技术复杂、合规要求高、周期长</td></tr>
+    <tr><td><strong>适合阶段</strong></td><td>快速试点</td><td>首期正式上线</td><td>长期平台化建设</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>决策维度说明</h3>
+
+<p>在与保险公司确认方案前，建议优先围绕以下 5 个维度评估：</p>
+
+<table>
+  <thead><tr><th>维度</th><th>关注问题</th><th>对方案选择的影响</th></tr></thead>
+  <tbody>
+    <tr><td><strong>保险公司配合深度</strong></td><td>是否愿意提供H5或API？是否有成熟技术团队？</td><td>配合度低时更偏向方案A；配合度中等可落方案B；深度合作才适合方案C</td></tr>
+    <tr><td><strong>上线时效</strong></td><td>是否需要快速形成可演示、可试点能力？</td><td>时间越紧，越应优先考虑方案A或方案B</td></tr>
+    <tr><td><strong>用户体验要求</strong></td><td>是否希望投保全流程尽量不离开备案平台？</td><td>对体验要求越高，越倾向方案B/C</td></tr>
+    <tr><td><strong>平台运营诉求</strong></td><td>是否希望沉淀订单、支付、转化等经营数据？</td><td>对平台掌控要求越高，越倾向方案C</td></tr>
+    <tr><td><strong>长期战略定位</strong></td><td>线上投保是单点功能，还是未来要做保险能力平台？</td><td>只是先补齐流程可用方案B；要做能力中台则应规划方案C</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h3>方案A：外链跳转模式</h3>
+
+<div class="scheme-card">
+  <span class="scheme-label label-a">方案 A · 外链跳转</span>
+
+  <h4>流程</h4>
+  <pre>用户选择保险公司 → 点击"立即投保" → 跳转至保险公司外部投保页
+→ 用户在保险公司页面完成投保+支付 → 返回平台
+  ├─ 保险公司支持Webhook：自动推送保单数据到平台
+  └─ 保险公司不支持：用户手动确认或上传保单（降级）</pre>
+
+  <h4>平台需做</h4>
+  <ul>
+    <li>提供URL参数规范（传入工程信息）</li>
+    <li>可选：提供Webhook接收端点接收保单数据</li>
+  </ul>
+
+  <h4>保险公司需做</h4>
+  <ul>
+    <li>提供可访问的投保页面URL</li>
+    <li>可选：对接平台Webhook推送保单数据</li>
+  </ul>
+
+  <div class="pro-con">
+    <div class="pro">
+      <h4>✅ 优点</h4>
+      <ul>
+        <li>接入门槛最低，保险公司无需改造系统</li>
+        <li>平台开发量最小，1-2周可上线</li>
+      </ul>
+    </div>
+    <div class="con">
+      <h4>❌ 缺点</h4>
+      <ul>
+        <li>用户体验割裂（离开平台）</li>
+        <li>若无Webhook，保单数据需用户手动确认</li>
+        <li>无法实时同步保单状态</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>动态保费处理</h4>
+  <ul>
+    <li>保险公司页面自行计算保费，平台不参与</li>
+    <li>列表展示保险公司提供的"参考价"或"¥xx起"</li>
+  </ul>
+</div>
+
+<h3>方案B：H5内嵌页模式 <span class="badge-recommend">推荐</span></h3>
+
+<div class="scheme-card recommended">
+  <span class="scheme-label label-b">方案 B · H5内嵌（推荐）</span>
+
+  <h4>流程</h4>
+  <pre>用户选择保险公司 → 平台打开内嵌WebView加载保险公司H5页
+→ H5页携带工程信息，用户在内嵌页完成投保+支付
+→ 支付成功后，H5调用JS Bridge通知平台
+→ 保险公司服务端回调API推送保单数据
+→ 平台自动关联保单</pre>
+
+  <h4>平台需做</h4>
+  <ul>
+    <li>定义H5页面参数规范</li>
+    <li>定义JS Bridge通信协议</li>
+    <li>提供保单回调API</li>
+    <li>WebView容器开发</li>
+  </ul>
+
+  <h4>保险公司需做</h4>
+  <ul>
+    <li>提供适配移动端的H5投保页</li>
+    <li>接入平台JS Bridge协议（支付成功通知）</li>
+    <li>服务端对接保单回调API</li>
+  </ul>
+
+  <div class="pro-con">
+    <div class="pro">
+      <h4>✅ 优点</h4>
+      <ul>
+        <li>用户体验好，不离开平台</li>
+        <li>保单数据自动回传，闭环完整</li>
+        <li>支持动态保费（H5页实时试算）</li>
+        <li>开发成本适中</li>
+      </ul>
+    </div>
+    <div class="con">
+      <h4>❌ 缺点</h4>
+      <ul>
+        <li>需定义接口标准</li>
+        <li>各家保险公司需做适配开发</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>动态保费处理</h4>
+  <ul>
+    <li>H5页进入后，基于传入的工程信息实时试算保费</li>
+    <li>展示最终支付金额，用户确认后支付</li>
+  </ul>
+</div>
+
+<h3>方案C：平台统一投保API模式</h3>
+
+<div class="scheme-card">
+  <span class="scheme-label label-c">方案 C · 平台统一API</span>
+
+  <h4>流程</h4>
+  <pre>用户选择保险公司和险种 → 平台调用保险公司报价API获取保费
+→ 展示保费信息，用户确认 → 平台发起投保请求（调用承保API）
+→ 用户在平台内完成支付 → 保险公司出具保单，API返回保单信息
+→ 平台自动关联保单</pre>
+
+  <h4>平台需做</h4>
+  <ul>
+    <li>建设保险公司API网关（聚合不同保险公司的API差异）</li>
+    <li>统一支付收款能力（需支付资质）</li>
+    <li>完整的投保UI流程（选险、报价、支付）</li>
+  </ul>
+
+  <h4>保险公司需做</h4>
+  <ul>
+    <li>开放标准化API（报价、承保、查询）</li>
+    <li>满足金融监管合规要求（销售资质、系统接入合规）</li>
+  </ul>
+
+  <div class="pro-con">
+    <div class="pro">
+      <h4>✅ 优点</h4>
+      <ul>
+        <li>体验最佳，全程在平台内完成</li>
+        <li>数据完全受控</li>
+        <li>支持后续理赔服务延伸</li>
+      </ul>
+    </div>
+    <div class="con">
+      <h4>❌ 缺点</h4>
+      <ul>
+        <li>开发量最大</li>
+        <li>需要支付资质</li>
+        <li>保险公司API对接合规要求高</li>
+        <li>上线周期最长（2-3个月）</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>动态保费处理</h4>
+  <ul>
+    <li>平台实时调用保险公司报价API获取保费</li>
+    <li>支持多险种对比、价格锁定期等功能</li>
+  </ul>
+</div>
+
+<hr>
+
+<h2>关键问题说明</h2>
+
+<h3>1. 保费计算方式（动态报价）</h3>
+
+<p><strong>结论</strong>：首期按<strong>动态报价</strong>设计</p>
+
+<table>
+  <thead><tr><th>场景</th><th>处理方式</th></tr></thead>
+  <tbody>
+    <tr><td>保险公司列表页</td><td>展示"¥xx起"或"参考价"（不作为最终价）</td></tr>
+    <tr><td>投保确认页</td><td>基于工程信息（类型、地址、周期、规模）实时试算</td></tr>
+    <tr><td>不支持实时试算的保险公司</td><td>展示"价格待确认"，支付前提示"以实际报价为准"</td></tr>
+  </tbody>
+</table>
+
+<h3>2. 同一工程多保单问题</h3>
+
+<p><strong>结论</strong>：<strong>一期不支持</strong>，一个备案工程仅关联1张有效主保单</p>
+
+<table>
+  <thead><tr><th>场景</th><th>规则</th></tr></thead>
+  <tbody>
+    <tr><td>支付前切换保险公司</td><td>允许重新发起投保，以最后一次成功为准</td></tr>
+    <tr><td>已出单后更换保险公司</td><td>需先作废原保单，再重新投保</td></tr>
+    <tr><td>多险种需求</td><td>一期不支持主险+附加险模式，如需联合承保，后续扩展</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>推荐建议</h2>
+
+<table>
+  <thead><tr><th>场景</th><th>推荐方案</th></tr></thead>
+  <tbody>
+    <tr><td>快速上线、试探市场</td><td>方案A（外链跳转）</td></tr>
+    <tr><td><strong>首期正式接入（推荐）</strong></td><td><strong>方案B（H5内嵌）</strong></td></tr>
+    <tr><td>深度合作、战略级投入</td><td>方案C（平台统一API）</td></tr>
+  </tbody>
+</table>
+
+<h3>推荐意见</h3>
+
+<p><strong>当前推荐方案：方案B（H5内嵌）</strong></p>
+
+<p>推荐理由：</p>
+<ul>
+  <li>能满足"保险公司入驻平台、用户在平台内完成线上投保"的核心诉求</li>
+  <li>比方案A更完整地承接投保结果、保单回传和状态闭环</li>
+  <li>比方案C更现实，不要求首期就完成统一API和支付中台建设</li>
+  <li>适合当前"合作模式未完全确定、但要尽快推进线上投保"的阶段</li>
+</ul>
+
+<div class="warn-box">
+  <strong>不建议首期直接上方案C</strong>：当前赔付方式、报价规则、支付归属都还未完全确定。如果现在直接按方案C推进，容易因为保险公司接口和合规条件不成熟导致项目周期失控。方案C更适合作为二期升级目标，而不是首期落地方案。
+</div>
+
+<p><strong>方案A的定位</strong>：</p>
+<ul>
+  <li>可以作为保险公司技术配合不足时的兜底方案</li>
+  <li>适合先跑通商务合作和基础投保闭环</li>
+  <li>但不建议作为长期主方案</li>
+</ul>
+
+<h3>决策建议</h3>
+
+<p>建议按"两步走"推进：</p>
+
+<ol>
+  <li><strong>先决策首期上线方案</strong>
+    <ul>
+      <li>建议首期以方案B为目标方案</li>
+      <li>若某家保险公司短期无法提供H5，仅能提供投保链接，则允许该保司临时按方案A接入</li>
+    </ul>
+  </li>
+  <li><strong>再预留二期升级路径</strong>
+    <ul>
+      <li>首期先统一工程信息传参规范、保单回调规范、保单绑定规则</li>
+      <li>等保险公司合作模式、支付规则、报价规则稳定后，再评估是否升级到方案C</li>
+    </ul>
+  </li>
+</ol>
+
+<p>建议的实际落地路径：</p>
+
+<table>
+  <thead><tr><th>阶段</th><th>建议动作</th><th>目标</th></tr></thead>
+  <tbody>
+    <tr><td><strong>第一阶段</strong></td><td>输出统一接入标准（工程参数、回调字段、鉴权方式）</td><td>让不同保险公司至少能按A/B方案接入</td></tr>
+    <tr><td><strong>第二阶段</strong></td><td>首家保险公司按方案B接入上线</td><td>形成真实闭环样板</td></tr>
+    <tr><td><strong>第三阶段</strong></td><td>补充后台配置能力（辖区开关、是否强制、展示哪些保司）</td><td>支撑按街道/社区差异化投保</td></tr>
+    <tr><td><strong>第四阶段</strong></td><td>评估是否建设统一API中台</td><td>决定是否升级方案C</td></tr>
+  </tbody>
+</table>
+
+<h3>当前阶段是否需要原型</h3>
+
+<p>当前阶段<strong>不建议先画详细原型</strong>，原因是：</p>
+<ul>
+  <li>现在的核心问题是方案选型，不是页面交互细化</li>
+  <li>保险公司接入方式、支付链路、动态报价规则都还未最终确定</li>
+  <li>如果先画原型，后续方案变化时大概率需要整体重画</li>
+</ul>
+
+<p>当前阶段建议保留：</p>
+<ul>
+  <li>方案流程图</li>
+  <li>方案对比表</li>
+  <li>接口和回传规则说明</li>
+</ul>
+
+<p>待首期方案明确后，再补页面原型会更高效。</p>
+
+<hr>
+
+<h2>待与保险公司确认事项</h2>
+
+<table>
+  <thead><tr><th>序号</th><th>问题</th><th>影响</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>采用哪种技术方案？</td><td>开发工作量、上线时间</td></tr>
+    <tr><td>2</td><td>是否支持动态保费试算？</td><td>方案B/C的实现方式</td></tr>
+    <tr><td>3</td><td>支付收款方是谁？（平台 vs 保险公司）</td><td>财务流程、合规要求</td></tr>
+    <tr><td>4</td><td>保单数据回调的鉴权方式？</td><td>接口安全设计</td></tr>
+    <tr><td>5</td><td>投保失败/超时后的补偿机制？</td><td>用户体验</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>附录：技术对接规范（方案B）</h2>
+
+<h3>JS Bridge协议</h3>
+
+<pre><code>// H5调用：支付成功通知
+window.QingPuInsurance.onPaymentSuccess(policyNo)
+
+// H5调用：支付失败通知
+window.QingPuInsurance.onPaymentFail(errorCode, errorMsg)
+
+// H5调用：关闭页面
+window.QingPuInsurance.closePage()</code></pre>
+
+<h3>保单回调API</h3>
+
+<pre><code>POST /api/policy/callback
+
+{
+  "projectId": "工程ID",
+  "policyNo": "保单号",
+  "insuranceCompany": "保险公司名称",
+  "insuranceType": "险种名称",
+  "premium": 480.00,
+  "startDate": "2026-03-23",
+  "endDate": "2026-06-22",
+  "policyFileUrl": "保单文件URL"
+}</code></pre>
+
+<hr>
+
+<h2>设计依据</h2>
+
+<ol>
+  <li><strong>产品上下文</strong>（第124行）：除住宅室内装修和零星施工作业外，小型工程必须投保安责险</li>
+  <li><strong>产品规划</strong>（第72-76行）：保单匹配功能目前仅支持上传保单，线上投保待开发</li>
+</ol>
+
+<div class="footer">导出时间：2026-03-23 · 线上投保解决方案文档</div>
+
+</div>
+</body>
+</html>

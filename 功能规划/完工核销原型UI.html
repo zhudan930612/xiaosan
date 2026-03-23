@@ -1,0 +1,2632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>完工核销 - 高保真原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* 原型容器 */
+        .prototype-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            padding: 40px;
+            justify-content: center;
+        }
+
+        /* 手机框架 */
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 1000;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #f5f7fa;
+            padding-top: 44px;
+            padding-bottom: 34px;
+        }
+
+        .phone-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* 导航栏 */
+        .nav-bar {
+            position: fixed;
+            top: 44px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 375px;
+            height: 44px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .nav-back {
+            position: absolute;
+            left: 16px;
+            font-size: 20px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .nav-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .nav-action {
+            position: absolute;
+            right: 16px;
+            font-size: 14px;
+            color: #1890ff;
+        }
+
+        /* 内容区 */
+        .content {
+            padding: 16px;
+            padding-top: 60px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #1890ff;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+
+        /* 信息项 */
+        .info-item {
+            display: flex;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .info-label {
+            color: #999;
+            min-width: 80px;
+        }
+
+        .info-value {
+            color: #333;
+            flex: 1;
+        }
+
+        /* 表单样式 */
+        .form-item {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-label .required {
+            color: #ff4d4f;
+            margin-right: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 44px;
+            background: #f5f7fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .form-input::placeholder {
+            color: #bfbfbf;
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 100px;
+            background: #f5f7fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            color: #333;
+            resize: none;
+        }
+
+        /* 日期选择器 */
+        .date-picker {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f5f7fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 0 12px;
+            height: 44px;
+        }
+
+        .date-picker-text {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .date-picker-icon {
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* 图片上传 */
+        .photo-upload {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .photo-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-add {
+            width: 80px;
+            height: 80px;
+            border: 1px dashed #d9d9d9;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 12px;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        .photo-add-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .photo-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        /* 单选按钮组 */
+        .radio-group {
+            display: flex;
+            gap: 16px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .radio-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d9d9d9;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radio-item.active .radio-circle {
+            border-color: #1890ff;
+        }
+
+        .radio-item.active .radio-circle::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #1890ff;
+            border-radius: 50%;
+        }
+
+        .radio-text {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            width: 100%;
+            height: 44px;
+            border-radius: 22px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            color: #fff;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%);
+            color: #fff;
+        }
+
+        .btn-default {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-tag-normal {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .status-tag-repair {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .status-tag-stop {
+            background: #fff1f0;
+            color: #ff4d4f;
+            border: 1px solid #ffa39e;
+        }
+
+        .status-tag-verifying {
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+        }
+
+        .status-tag-completed {
+            background: #f5f5f5;
+            color: #999;
+            border: 1px solid #d9d9d9;
+        }
+
+        /* 列表样式 */
+        .list-item {
+            background: #fff;
+            padding: 16px;
+            margin-bottom: 1px;
+            cursor: pointer;
+        }
+
+        .list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .list-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .list-item-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .list-item-address {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .list-item-info {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* 首页特殊样式 */
+        .header-card {
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            border-radius: 16px;
+            padding: 20px 16px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 12px;
+        }
+
+        .user-detail {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .switch-role {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        /* 待巡查卡片 */
+        .alert-card {
+            background: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
+            border-radius: 12px;
+            padding: 16px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .alert-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .alert-desc {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .alert-arrow {
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
+        /* 快捷功能 */
+        .quick-actions {
+            display: flex;
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .quick-action-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            background: #f6ffed;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .quick-action-icon.blue {
+            background: #e6f7ff;
+        }
+
+        .quick-action-icon.orange {
+            background: #fff7e6;
+        }
+
+        .quick-action-icon.red {
+            background: #fff1f0;
+        }
+
+        .quick-action-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            background: #ff4d4f;
+            border-radius: 9px;
+            font-size: 11px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        .quick-action-label {
+            font-size: 13px;
+            color: #333;
+        }
+
+        /* 工程状态汇总 */
+        .status-summary {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .status-summary-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .status-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 auto 6px;
+        }
+
+        .status-dot.green {
+            background: #52c41a;
+        }
+
+        .status-dot.orange {
+            background: #fa8c16;
+        }
+
+        .status-dot.red {
+            background: #ff4d4f;
+        }
+
+        .status-count {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .status-name {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 375px;
+            height: 812px;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            width: 280px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-input {
+            width: 100%;
+            min-height: 80px;
+            background: #f5f7fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            resize: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            height: 40px;
+            border-radius: 20px;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .modal-btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .modal-btn-confirm {
+            background: #1890ff;
+            color: #fff;
+        }
+
+        /* 底部固定按钮 */
+        .fixed-bottom {
+            position: fixed;
+            bottom: 34px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 375px;
+            padding: 12px 16px;
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 12px;
+        }
+
+        .fixed-bottom .btn {
+            flex: 1;
+            margin: 0;
+        }
+
+        /* Tab标签 */
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky;
+            top: 88px;
+            z-index: 10;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: #1890ff;
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            background: #1890ff;
+            border-radius: 2px;
+        }
+
+        .tab-badge {
+            display: inline-block;
+            min-width: 18px;
+            height: 18px;
+            background: #ff4d4f;
+            color: #fff;
+            font-size: 11px;
+            border-radius: 9px;
+            padding: 0 5px;
+            margin-left: 4px;
+        }
+
+        /* 照片预览 */
+        .photo-preview {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .preview-item {
+            width: 70px;
+            height: 70px;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            width: 120px;
+            height: 120px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 删除按钮 */
+        .delete-btn {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            background: #ff4d4f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* 原型分组标题 */
+        .section-break {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0 8px;
+            flex-basis: 100%;
+        }
+
+        .section-break-line {
+            flex: 1;
+            height: 1px;
+            background: #d9d9d9;
+        }
+
+        .section-break-label {
+            font-size: 13px;
+            color: #8c8c8c;
+            background: #f5f7fa;
+            padding: 4px 12px;
+            border-radius: 12px;
+            border: 1px solid #d9d9d9;
+            white-space: nowrap;
+        }
+
+        /* 便签注释 */
+        .page-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .note-container {
+            width: 180px;
+            flex-shrink: 0;
+        }
+
+        .note {
+            background: #fffbe6;
+            border: 1px dashed #faad14;
+            border-radius: 4px;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #595959;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .note::before {
+            content: '📌 注';
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #d48806;
+            margin-bottom: 4px;
+        }
+
+        .note-line {
+            position: absolute;
+            top: 50%;
+            right: -16px;
+            width: 16px;
+            height: 1px;
+            border-top: 1px dashed #faad14;
+        }
+    </style>
+</head>
+<body>
+    <div class="prototype-container">
+
+        <!-- 页面1: 安全巡检首页 -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar" style="top: 0;">
+                    <div class="nav-title">安全巡检</div>
+                </div>
+                <div class="content" style="padding-top: 50px;">
+                    <!-- 用户信息卡片 -->
+                    <div class="header-card">
+                        <div class="user-info">
+                            <div class="user-avatar">张</div>
+                            <div class="user-detail">
+                                <div class="user-name">张三</div>
+                                <div class="user-role">夏阳街道 · 巡查员</div>
+                            </div>
+                            <div class="switch-role">切换身份 ▾</div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stat-item">
+                                <div class="stat-number">542</div>
+                                <div class="stat-label">在建工程</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">186</div>
+                                <div class="stat-label">小型工程</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">328</div>
+                                <div class="stat-label">住宅装修</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">28</div>
+                                <div class="stat-label">零星作业</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 待巡查提醒 -->
+                    <div class="alert-card">
+                        <div class="alert-icon">⚠</div>
+                        <div class="alert-content">
+                            <div class="alert-title">12个工程待巡查</div>
+                            <div class="alert-desc">超出频次要求，请尽快安排巡查</div>
+                        </div>
+                        <div class="alert-arrow">›</div>
+                    </div>
+
+                    <!-- 快捷功能区 -->
+                    <div class="quick-actions">
+                        <div class="quick-action-item">
+                            <div class="quick-action-icon blue">
+                                📋
+                            </div>
+                            <div class="quick-action-label">全部工程</div>
+                        </div>
+                        <div class="quick-action-item">
+                            <div class="quick-action-icon orange">
+                                🔧
+                                <span class="quick-action-badge">8</span>
+                            </div>
+                            <div class="quick-action-label">整改跟踪</div>
+                        </div>
+                        <div class="quick-action-item">
+                            <div class="quick-action-icon red">
+                                ✅
+                                <span class="quick-action-badge">3</span>
+                            </div>
+                            <div class="quick-action-label">完工核销</div>
+                        </div>
+                    </div>
+
+                    <!-- 工程状态汇总 -->
+                    <div class="status-summary">
+                        <div class="status-summary-title">工程状态汇总</div>
+                        <div class="status-row">
+                            <div class="status-item">
+                                <div class="status-dot green"></div>
+                                <div class="status-count">486</div>
+                                <div class="status-name">正常施工</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-dot orange"></div>
+                                <div class="status-count">38</div>
+                                <div class="status-name">现场整改</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-dot red"></div>
+                                <div class="status-count">18</div>
+                                <div class="status-name">停工整改</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面2: 完工核销申请页（施工方） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">完工核销申请</div>
+                </div>
+                <div class="content">
+                    <!-- 工程信息卡片 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程地址</span>
+                            <span class="info-value">青浦区夏阳街道XX路123号</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">备案编号</span>
+                            <span class="info-value">BA20260319001</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-normal">正常施工</span></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">施工时间</span>
+                            <span class="info-value">2026-01-15 ~ 2026-03-20</span>
+                        </div>
+                        <div style="margin-top: 12px; text-align: right;">
+                            <span style="font-size: 13px; color: #1890ff; cursor: pointer;">查看完整工程详情 ›</span>
+                        </div>
+                    </div>
+
+                    <!-- 完工信息填写 -->
+                    <div class="card">
+                        <div class="card-title">完工信息</div>
+
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>完工日期</label>
+                            <div class="date-picker">
+                                <span class="date-picker-text">2026-03-20</span>
+                                <span class="date-picker-icon">▼</span>
+                            </div>
+                        </div>
+
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>完工现场照片</label>
+                            <div class="photo-upload">
+                                <div class="photo-add">
+                                    <div class="photo-add-icon">+</div>
+                                    <div>添加</div>
+                                </div>
+                            </div>
+                            <div class="photo-hint">请至少上传1张完工现场照片，最多9张</div>
+                        </div>
+
+                        <div class="form-item">
+                            <label class="form-label">备注说明</label>
+                            <textarea class="form-textarea" placeholder="请输入备注说明（选填，最多200字）"></textarea>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary">提交申请</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面3: 完工核销申请页 - 已上传照片状态 -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">完工核销申请</div>
+                </div>
+                <div class="content">
+                    <!-- 工程信息卡片 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程地址</span>
+                            <span class="info-value">青浦区夏阳街道XX路123号</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">备案编号</span>
+                            <span class="info-value">BA20260319001</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-repair">现场整改</span>（所有状态均可申请核销）</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">施工时间</span>
+                            <span class="info-value">2026-01-15 ~ 2026-03-20</span>
+                        </div>
+                        <div style="margin-top: 12px; text-align: right;">
+                            <span style="font-size: 13px; color: #1890ff; cursor: pointer;">查看完整工程详情 ›</span>
+                        </div>
+                    </div>
+
+                    <!-- 完工信息填写 -->
+                    <div class="card">
+                        <div class="card-title">完工信息</div>
+
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>完工日期</label>
+                            <div class="date-picker">
+                                <span class="date-picker-text">2026-03-20</span>
+                                <span class="date-picker-icon">▼</span>
+                            </div>
+                        </div>
+
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>完工现场照片</label>
+                            <div class="photo-upload">
+                                <div class="photo-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23e6f7ff' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='12'%3E现场照片1%3C/text%3E%3C/svg%3E" alt="现场照片">
+                                    <div class="delete-btn">×</div>
+                                </div>
+                                <div class="photo-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23e6f7ff' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='12'%3E现场照片2%3C/text%3E%3C/svg%3E" alt="现场照片">
+                                    <div class="delete-btn">×</div>
+                                </div>
+                                <div class="photo-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23e6f7ff' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='12'%3E现场照片3%3C/text%3E%3C/svg%3E" alt="现场照片">
+                                    <div class="delete-btn">×</div>
+                                </div>
+                                <div class="photo-add">
+                                    <div class="photo-add-icon">+</div>
+                                    <div>添加</div>
+                                </div>
+                            </div>
+                            <div class="photo-hint">已上传3张，还可上传6张</div>
+                        </div>
+
+                        <div class="form-item">
+                            <label class="form-label">备注说明</label>
+                            <textarea class="form-textarea" placeholder="工程已按设计要求完成施工，申请核销。">工程已按设计要求完成施工，现场清理完毕，申请核销。</textarea>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary">提交申请</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面4: 核销待审核列表（监管人员） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">核销待审核</div>
+                    <div class="nav-action">筛选</div>
+                </div>
+                <div class="content">
+                    <!-- 搜索栏 -->
+                    <div style="background: #fff; padding: 12px 16px; border-radius: 12px; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 8px;">
+                            <select style="height: 36px; border: 1px solid #e8e8e8; border-radius: 18px; padding: 0 10px; font-size: 13px; background: #fff; color: #666;">
+                                <option>工程名称</option>
+                                <option>工程地址</option>
+                                <option>申请人</option>
+                            </select>
+                            <input type="text" placeholder="搜索工程名称 / 地址 / 申请人" style="flex: 1; height: 36px; border: 1px solid #e8e8e8; border-radius: 18px; padding: 0 12px; font-size: 13px;">
+                        </div>
+                    </div>
+
+                    <!-- 摘要统计 -->
+                    <div class="card" style="padding: 12px 0;">
+                        <div style="display: flex; justify-content: space-around; text-align: center;">
+                            <div>
+                                <div style="font-size: 20px; font-weight: 700; color: #1890ff;">12</div>
+                                <div style="font-size: 12px; color: #666;">待审核申请</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 20px; font-weight: 700; color: #fa8c16;">4</div>
+                                <div style="font-size: 12px; color: #666;">整改中工程</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 20px; font-weight: 700; color: #52c41a;">8</div>
+                                <div style="font-size: 12px; color: #666;">正常施工工程</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 状态Tab -->
+                    <div class="tabs" style="top: 44px; margin-bottom: 12px;">
+                        <div class="tab active">全部 <span class="tab-badge">12</span></div>
+                        <div class="tab">正常施工 <span class="tab-badge" style="background: #52c41a;">8</span></div>
+                        <div class="tab">现场整改 <span class="tab-badge" style="background: #fa8c16;">3</span></div>
+                        <div class="tab">停工整改 <span class="tab-badge">1</span></div>
+                    </div>
+
+                    <!-- 待审核工程卡片列表 -->
+                    <div class="card">
+                        <div class="list-item" style="margin: -16px -16px 0;">
+                            <div class="list-item-header">
+                                <div class="list-item-title">青浦区夏阳街道XX路住宅小区装修工程</div>
+                                <span class="status-tag status-tag-verifying">核销待审核</span>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: #fff7e6; color: #fa8c16; padding: 2px 6px; border-radius: 4px; font-size: 11px;">现场整改</span>
+                                <span style="background: #f6ffed; color: #52c41a; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 4px;">住宅装修</span>
+                            </div>
+                            <div class="list-item-address">📍 青浦区夏阳街道XX路123号</div>
+                            <div class="list-item-info">
+                                <span>申请时间：2026-03-20 14:30</span>
+                            </div>
+                            <div class="list-item-info" style="margin-top: 4px;">
+                                <span>申请人：张三（施工方）</span>
+                                <span>遗留整改：1条</span>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 13px; color: #1890ff; font-weight: 500;">
+                                查看工程与申请详情 ›
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="list-item" style="margin: -16px -16px 0;">
+                            <div class="list-item-header">
+                                <div class="list-item-title">XX商务楼宇装修工程</div>
+                                <span class="status-tag status-tag-verifying">核销待审核</span>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: #fff1f0; color: #ff4d4f; padding: 2px 6px; border-radius: 4px; font-size: 11px;">停工整改</span>
+                                <span style="background: #e6f7ff; color: #1890ff; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 4px;">小型工程</span>
+                            </div>
+                            <div class="list-item-address">📍 青浦区盈港路456号</div>
+                            <div class="list-item-info">
+                                <span>申请时间：2026-03-19 10:16</span>
+                            </div>
+                            <div class="list-item-info" style="margin-top: 4px;">
+                                <span>申请人：李四（业主）</span>
+                                <span>遗留整改：2条</span>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 13px; color: #1890ff; font-weight: 500;">
+                                查看工程与申请详情 ›
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="list-item" style="margin: -16px -16px 0;">
+                            <div class="list-item-header">
+                                <div class="list-item-title">XX小区加装电梯工程</div>
+                                <span class="status-tag status-tag-verifying">核销待审核</span>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: #f6ffed; color: #52c41a; padding: 2px 6px; border-radius: 4px; font-size: 11px;">正常施工</span>
+                                <span style="background: #fff7e6; color: #fa8c16; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 4px;">零星作业</span>
+                            </div>
+                            <div class="list-item-address">📍 青浦区公园路789号</div>
+                            <div class="list-item-info">
+                                <span>申请时间：2026-03-18 17:42</span>
+                            </div>
+                            <div class="list-item-info" style="margin-top: 4px;">
+                                <span>申请人：王五（施工方）</span>
+                                <span>遗留整改：0条</span>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 13px; color: #1890ff; font-weight: 500;">
+                                查看工程与申请详情 ›
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面4-2: 待审核工程展示页（按工程维度查看） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">待审核工程</div>
+                    <div class="nav-action">排序</div>
+                </div>
+                <div class="content">
+                    <!-- 搜索栏 -->
+                    <div style="background: #fff; padding: 12px 16px; border-radius: 12px; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" placeholder="搜索待审核工程" style="flex: 1; height: 36px; border: 1px solid #e8e8e8; border-radius: 18px; padding: 0 12px; font-size: 13px;">
+                            <button style="width: 60px; height: 36px; background: #1890ff; color: #fff; border: none; border-radius: 18px; font-size: 13px;">搜索</button>
+                        </div>
+                    </div>
+
+                    <!-- 工程展示列表 -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                            <div style="font-size: 16px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">青浦区夏阳街道XX路住宅小区装修工程</div>
+                            <span class="status-tag status-tag-verifying">待审核</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 6px;">📍 青浦区夏阳街道XX路123号</div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">📅 2026-01-15 ~ 2026-03-20</div>
+                        <div style="display: flex; gap: 12px; font-size: 12px; color: #666; margin-bottom: 10px;">
+                            <span>申请人：张三</span>
+                            <span>现场整改</span>
+                            <span>遗留整改1条</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #999; padding-top: 10px; border-top: 1px solid #f0f0f0;">
+                            <span>申请时间：2026-03-20 14:30</span>
+                            <span style="color: #1890ff; font-weight: 500;">进入审核 ›</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                            <div style="font-size: 16px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">XX商务楼宇装修工程</div>
+                            <span class="status-tag status-tag-verifying">待审核</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 6px;">📍 青浦区盈港路456号</div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">📅 2026-02-01 ~ 2026-03-19</div>
+                        <div style="display: flex; gap: 12px; font-size: 12px; color: #666; margin-bottom: 10px;">
+                            <span>申请人：李四</span>
+                            <span>停工整改</span>
+                            <span>遗留整改2条</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #999; padding-top: 10px; border-top: 1px solid #f0f0f0;">
+                            <span>申请时间：2026-03-19 10:16</span>
+                            <span style="color: #1890ff; font-weight: 500;">进入审核 ›</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面5: 核销审核详情（监管人员） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">核销审核详情</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程信息卡片 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程地址</span>
+                            <span class="info-value">青浦区夏阳街道XX路123号</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">备案编号</span>
+                            <span class="info-value">BA20260319001</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程类型</span>
+                            <span class="info-value">住宅装修</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">施工单位</span>
+                            <span class="info-value">XX装修公司</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">施工时间</span>
+                            <span class="info-value">2026-01-15 ~ 2026-03-20</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">负责人</span>
+                            <span class="info-value">王工 138****1234</span>
+                        </div>
+                        <div style="margin-top: 12px; text-align: right;">
+                            <span style="font-size: 13px; color: #1890ff; cursor: pointer;">查看完整工程详情 ›</span>
+                        </div>
+                    </div>
+
+                    <!-- 核销申请信息 -->
+                    <div class="card">
+                        <div class="card-title">核销申请信息</div>
+                        <div class="info-item">
+                            <span class="info-label">完工日期</span>
+                            <span class="info-value">2026-03-20</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请时间</span>
+                            <span class="info-value">2026-03-20 14:30</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请人</span>
+                            <span class="info-value">张三（施工方）</span>
+                        </div>
+
+                        <div style="margin-top: 12px;">
+                            <div class="info-label" style="margin-bottom: 8px;">完工现场照片</div>
+                            <div class="photo-preview">
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E照片1%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E照片2%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E照片3%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 12px;">
+                            <div class="info-label">备注说明</div>
+                            <div style="background: #f5f7fa; padding: 12px; border-radius: 8px; margin-top: 8px; font-size: 14px; color: #333; line-height: 1.6;">
+                                工程已按设计要求完成施工，现场清理完毕，申请核销。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="fixed-bottom">
+                    <button class="btn btn-default">驳回申请</button>
+                    <button class="btn btn-success">审核通过</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面6: 巡检端直接核销页（街道/社区） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">直接核销</div>
+                </div>
+                <div class="content">
+                    <!-- 工程信息卡片 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程地址</span>
+                            <span class="info-value">青浦区夏阳街道XX路123号</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">备案编号</span>
+                            <span class="info-value">BA20260319001</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-repair">现场整改</span>（所有状态均可直接核销）</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">施工时间</span>
+                            <span class="info-value">2026-01-15 ~ 2026-03-20</span>
+                        </div>
+                        <div style="margin-top: 12px; text-align: right;">
+                            <span style="font-size: 13px; color: #1890ff; cursor: pointer;">查看完整工程详情 ›</span>
+                        </div>
+                    </div>
+
+                    <!-- 核销资料填写 -->
+                    <div class="card">
+                        <div class="card-title">核销资料</div>
+
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>是否完工</label>
+                            <div class="radio-group">
+                                <div class="radio-item active">
+                                    <div class="radio-circle"></div>
+                                    <span class="radio-text">是</span>
+                                </div>
+                                <div class="radio-item">
+                                    <div class="radio-circle"></div>
+                                    <span class="radio-text">否</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>现场图片</label>
+                            <div class="photo-upload">
+                                <div class="photo-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23e6f7ff' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='12'%3E现场照片1%3C/text%3E%3C/svg%3E" alt="现场照片">
+                                    <div class="delete-btn">×</div>
+                                </div>
+                                <div class="photo-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23e6f7ff' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='12'%3E现场照片2%3C/text%3E%3C/svg%3E" alt="现场照片">
+                                    <div class="delete-btn">×</div>
+                                </div>
+                                <div class="photo-add">
+                                    <div class="photo-add-icon">+</div>
+                                    <div>添加</div>
+                                </div>
+                            </div>
+                            <div class="photo-hint">请至少上传1张现场照片，最多9张</div>
+                        </div>
+
+                        <div class="form-item">
+                            <label class="form-label">补充说明</label>
+                            <textarea class="form-textarea" placeholder="请输入补充说明（选填，最多200字）">经现场核查，该工程已完成全部施工内容，现场清理完毕，符合核销条件。</textarea>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary">提交核销</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面7: 工程详情页（含核销入口） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">工程详情</div>
+                    <div class="nav-action">···</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程状态卡片 -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="font-size: 18px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">青浦区夏阳街道XX路住宅小区装修工程</div>
+                            <span class="status-tag status-tag-normal">正常施工</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📍 青浦区夏阳街道XX路123号
+                        </div>
+                        <div style="font-size: 13px; color: #666;">
+                            📅 2026-01-15 ~ 2026-03-20
+                        </div>
+                    </div>
+
+                    <!-- 三方巡查统计 -->
+                    <div class="card">
+                        <div class="card-title">巡查统计</div>
+                        <div style="display: flex; justify-content: space-around; text-align: center;">
+                            <div>
+                                <div style="font-size: 14px; color: #666;">街道 3</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">5天未巡查</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 14px; color: #666;">社区 4</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">0天未巡查</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 14px; color: #666;">物业 8</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">2天未巡查</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab栏 -->
+                    <div class="tabs">
+                        <div class="tab active">街道巡查(3)</div>
+                        <div class="tab">社区巡查(4)</div>
+                        <div class="tab">物业巡查(8)</div>
+                        <div class="tab">整改记录(2)</div>
+                        <div class="tab">备案</div>
+                    </div>
+
+                    <!-- 巡查记录列表 -->
+                    <div style="margin-top: 12px;">
+                        <div class="list-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div>
+                                    <span style="background: #fff1f0; color: #ff4d4f; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px;">高处</span>
+                                    <span style="background: #fff7e6; color: #fa8c16; padding: 2px 6px; border-radius: 4px; font-size: 11px;">用电</span>
+                                </div>
+                                <span style="font-size: 12px; color: #999;">03-18 10:30</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666;">巡查人：张三 · 夏阳街道办</div>
+                            <div style="text-align: right; margin-top: 8px;">
+                                <span style="font-size: 13px; color: #52c41a;">已整改 ›</span>
+                            </div>
+                        </div>
+
+                        <div class="list-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div>
+                                    <span style="background: #f6ffed; color: #52c41a; padding: 2px 6px; border-radius: 4px; font-size: 11px;">无违规</span>
+                                </div>
+                                <span style="font-size: 12px; color: #999;">03-10 14:20</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666;">巡查人：张三 · 夏阳街道办</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="fixed-bottom">
+                    <button class="btn btn-primary">申请完工核销</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面7-2: 工程详情页（核销审核中状态） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">工程详情</div>
+                    <div class="nav-action">···</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程状态卡片 -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="font-size: 18px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">青浦区夏阳街道XX路住宅小区装修工程</div>
+                            <span class="status-tag status-tag-verifying">核销待审核</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📍 青浦区夏阳街道XX路123号
+                        </div>
+                        <div style="font-size: 13px; color: #666;">
+                            📅 2026-01-15 ~ 2026-03-20
+                        </div>
+                    </div>
+
+                    <!-- 核销审核提示 -->
+                    <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; color: #d48806; line-height: 1.6;">
+                            <span style="font-weight: 600;">提示：</span>该工程已提交完工核销申请，正在审核中。审核期间不可新增巡查记录，但可继续提交核销前遗留的整改记录。
+                        </div>
+                    </div>
+
+                    <!-- 三方巡查统计 -->
+                    <div class="card">
+                        <div class="card-title">巡查统计</div>
+                        <div style="display: flex; justify-content: space-around; text-align: center;">
+                            <div>
+                                <div style="font-size: 14px; color: #666;">街道 3</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">5天未巡查</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 14px; color: #666;">社区 4</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">0天未巡查</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 14px; color: #666;">物业 8</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">2天未巡查</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab栏 -->
+                    <div class="tabs">
+                        <div class="tab active">街道巡查(3)</div>
+                        <div class="tab">社区巡查(4)</div>
+                        <div class="tab">物业巡查(8)</div>
+                        <div class="tab">整改记录(2)</div>
+                        <div class="tab">备案</div>
+                    </div>
+
+                    <!-- 巡查记录列表 -->
+                    <div style="margin-top: 12px;">
+                        <div class="list-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div>
+                                    <span style="background: #fff1f0; color: #ff4d4f; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px;">高处</span>
+                                    <span style="background: #fff7e6; color: #fa8c16; padding: 2px 6px; border-radius: 4px; font-size: 11px;">用电</span>
+                                </div>
+                                <span style="font-size: 12px; color: #999;">03-18 10:30</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666;">巡查人：张三 · 夏阳街道办</div>
+                            <div style="text-align: right; margin-top: 8px;">
+                                <span style="font-size: 13px; color: #1890ff; font-weight: 500;">去审核 >></span>
+                            </div>
+                        </div>
+
+                        <div class="list-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div>
+                                    <span style="background: #f6ffed; color: #52c41a; padding: 2px 6px; border-radius: 4px; font-size: 11px;">无违规</span>
+                                </div>
+                                <span style="font-size: 12px; color: #999;">03-10 14:20</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666;">巡查人：张三 · 夏阳街道办</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 - 核销审核中状态 -->
+                <div class="fixed-bottom">
+                    <button class="btn btn-default" disabled style="background: #f5f5f5; color: #999;">核销审核中，不可新增巡查</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 补充场景：驳回 & 重新申请 ===== -->
+        <div class="section-break">
+            <div class="section-break-line"></div>
+            <div class="section-break-label">⬇ 新增场景：施工方申请被驳回 / 重新申请 / 多次驳回</div>
+            <div class="section-break-line"></div>
+        </div>
+
+        <!-- 页面7-3: 施工方工程详情（核销申请被驳回状态） -->
+        <div class="page-wrapper">
+        <div class="note-container" style="padding-top: 60px;">
+            <div class="note">
+                驳回后工程状态<strong>自动回退</strong>到申请前的状态（如正常施工），不是一个永久状态，施工方可继续正常巡查和整改。
+                <div class="note-line"></div>
+            </div>
+            <div class="note">
+                工程详情的 tab 新增<strong>「申请历史」</strong>入口，展示所有驳回记录，审查历史时不需要单独开一个列表页。
+                <div class="note-line"></div>
+            </div>
+        </div>
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">工程详情</div>
+                    <div class="nav-action">···</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程状态卡片 -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="font-size: 18px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">青浦区夏阳街道XX路住宅小区装修工程</div>
+                            <span class="status-tag" style="background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e;">核销已驳回</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📍 青浦区夏阳街道XX路123号
+                        </div>
+                        <div style="font-size: 13px; color: #666;">
+                            📅 2026-01-15 ~ 2026-03-20
+                        </div>
+                    </div>
+
+                    <!-- 驳回通知 -->
+                    <div style="background: #fff1f0; border: 1px solid #ffa39e; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 16px; margin-right: 6px;">❌</span>
+                            <span style="font-size: 14px; font-weight: 600; color: #cf1322;">核销申请已被驳回</span>
+                        </div>
+                        <div style="font-size: 13px; color: #595959; line-height: 1.6; margin-bottom: 6px;">
+                            <span style="color: #8c8c8c;">驳回时间：</span>2026-03-21 10:05
+                        </div>
+                        <div style="font-size: 13px; color: #595959; line-height: 1.6; margin-bottom: 6px;">
+                            <span style="color: #8c8c8c;">审核人：</span>李监管（夏阳街道）
+                        </div>
+                        <div style="font-size: 13px; color: #595959; line-height: 1.6;">
+                            <span style="color: #8c8c8c;">驳回原因：</span><span style="color: #cf1322;">现场垃圾未清理完毕，需完成清理后重新申请。</span>
+                        </div>
+                    </div>
+
+                    <!-- 驳回后状态说明 -->
+                    <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; color: #d48806; line-height: 1.6;">
+                            <span style="font-weight: 600;">提示：</span>驳回后工程状态已恢复为<strong>正常施工</strong>，可继续巡查和整改，处理完毕后可重新提交核销申请。
+                        </div>
+                    </div>
+
+                    <!-- 三方巡查统计 -->
+                    <div class="card">
+                        <div class="card-title">巡查统计</div>
+                        <div style="display: flex; justify-content: space-around; text-align: center;">
+                            <div>
+                                <div style="font-size: 14px; color: #666;">街道 3</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">5天未巡查</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 14px; color: #666;">社区 4</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">0天未巡查</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 14px; color: #666;">物业 8</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 2px;">2天未巡查</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab栏 -->
+                    <div class="tabs">
+                        <div class="tab active">街道巡查(3)</div>
+                        <div class="tab">社区巡查(4)</div>
+                        <div class="tab">物业巡查(8)</div>
+                        <div class="tab">整改记录(2)</div>
+                        <div class="tab">申请历史(1)</div>
+                    </div>
+
+                    <!-- 巡查记录列表 -->
+                    <div style="margin-top: 12px;">
+                        <div class="list-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div>
+                                    <span style="background: #f6ffed; color: #52c41a; padding: 2px 6px; border-radius: 4px; font-size: 11px;">无违规</span>
+                                </div>
+                                <span style="font-size: 12px; color: #999;">03-22 09:00</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666;">巡查人：张三 · 夏阳街道办</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="fixed-bottom">
+                    <button class="btn btn-primary">重新申请核销</button>
+                </div>
+            </div>
+        </div>
+        </div><!-- end page-wrapper 7-3 -->
+
+        <!-- 页面7-4: 施工方重新申请核销（含驳回历史提示） -->
+        <div class="page-wrapper">
+        <div class="note-container" style="padding-top: 60px;">
+            <div class="note">
+                申请表单顶部<strong>必须回显上次驳回原因</strong>，施工方必须看到被驳回的原因，以便针对性地补充材料。
+                <div class="note-line"></div>
+            </div>
+            <div class="note">
+                历史记录默认<strong>折叠</strong>，避免干扰主流程；用「展开」按钮让施工方自主查看。
+                <div class="note-line"></div>
+            </div>
+        </div>
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">完工核销申请</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+
+                    <!-- 上次驳回警示 -->
+                    <div style="background: #fff1f0; border: 1px solid #ffa39e; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; font-weight: 600; color: #cf1322; margin-bottom: 6px;">⚠️ 上次申请于 03-21 被驳回</div>
+                        <div style="font-size: 13px; color: #595959; line-height: 1.5;">驳回原因：现场垃圾未清理完毕，需完成清理后重新申请。</div>
+                        <div style="font-size: 12px; color: #8c8c8c; margin-top: 6px;">请确认已处理完驳回问题后再提交。</div>
+                    </div>
+
+                    <!-- 工程信息卡片 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">施工开始</span>
+                            <span class="info-value">2026-01-15</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">计划结束</span>
+                            <span class="info-value">2026-03-20</span>
+                        </div>
+                        <div class="info-item" style="margin-bottom: 0;">
+                            <span class="info-label">当前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-normal">正常施工</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 申请信息填写 -->
+                    <div class="card">
+                        <div class="card-title">申请信息</div>
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>实际完工日期</label>
+                            <div class="date-picker">
+                                <span class="date-picker-text">2026-03-22</span>
+                                <span class="date-picker-icon">▾</span>
+                            </div>
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label"><span class="required">*</span>完工现场照片（含清理完毕证明）</label>
+                            <div class="photo-upload">
+                                <div class="photo-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23e6f7ff' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='9'%3E现场清理照%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                                <div class="photo-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23e6f7ff' width='80' height='80'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E完工照2%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                                <div class="photo-add">
+                                    <div class="photo-add-icon">+</div>
+                                    <div>添加照片</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-item" style="margin-bottom: 0;">
+                            <label class="form-label">补充说明</label>
+                            <textarea class="form-textarea" placeholder="请说明已处理驳回问题的情况...">现场垃圾已全部清理完毕，照片为清理后现场，请重新审核。</textarea>
+                        </div>
+                    </div>
+
+                    <!-- 历史申请记录（折叠展示） -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="card-title" style="margin-bottom: 0;">历史申请记录</div>
+                            <span style="font-size: 13px; color: #1890ff;">展开 ▾</span>
+                        </div>
+                        <div style="margin-top: 12px; padding: 12px; background: #fafafa; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 13px; color: #333; font-weight: 500;">第1次申请</span>
+                                <span class="status-tag" style="background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e;">已驳回</span>
+                            </div>
+                            <div style="font-size: 12px; color: #8c8c8c; margin-bottom: 4px;">申请时间：2026-03-20 14:30</div>
+                            <div style="font-size: 12px; color: #cf1322;">驳回原因：现场垃圾未清理完毕</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-bottom">
+                    <button class="btn btn-default">取消</button>
+                    <button class="btn btn-primary">提交申请</button>
+                </div>
+            </div>
+        </div>
+        </div><!-- end page-wrapper 7-4 -->
+
+        <!-- 页面7-5: 多次驳回情形 - 施工方申请历史（第3次申请待审核，前2次均被驳回） -->
+        <div class="page-wrapper">
+        <div class="note-container" style="padding-top: 60px;">
+            <div class="note">
+                这是「申请历史」tab 点进来的独立页面，以<strong>时间线</strong>呈现所有申请，方便施工方和监管方追溯。
+                <div class="note-line"></div>
+            </div>
+            <div class="note">
+                系统<strong>不限制驳回次数</strong>，多次驳回后状态始终回退；时间线倒序（新申请在最上方）。
+                <div class="note-line"></div>
+            </div>
+            <div class="note">
+                巡检方在 8-2 页也能看到全部历史记录，保持两端视角一致。
+                <div class="note-line"></div>
+            </div>
+        </div>
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">核销申请历史</div>
+                </div>
+                <div class="content">
+                    <!-- 工程信息 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item" style="margin-bottom: 0;">
+                            <span class="info-label">当前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-verifying">核销待审核</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 多次驳回说明 -->
+                    <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; color: #d48806; line-height: 1.6;">
+                            <span style="font-weight: 600;">说明：</span>系统不限制申请次数。每次驳回后工程状态恢复为驳回前状态，施工方可在整改完毕后重新发起申请。
+                        </div>
+                    </div>
+
+                    <!-- 申请历史时间线 -->
+                    <div class="card">
+                        <div class="card-title">申请历史记录</div>
+
+                        <!-- 第3次：待审核 -->
+                        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                            <div style="display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0;">
+                                <div style="width: 12px; height: 12px; background: #1890ff; border-radius: 50%; margin-top: 3px;"></div>
+                                <div style="flex: 1; width: 2px; background: #d9d9d9; margin-top: 4px;"></div>
+                            </div>
+                            <div style="flex: 1; padding-bottom: 16px; border-bottom: 1px dashed #f0f0f0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 14px; font-weight: 600; color: #333;">第3次申请</span>
+                                    <span class="status-tag status-tag-verifying">待审核</span>
+                                </div>
+                                <div style="font-size: 12px; color: #8c8c8c; margin-bottom: 4px;">提交时间：2026-03-23 09:15</div>
+                                <div style="font-size: 13px; color: #666;">已提交现场清理完毕证明照片，等待审核中。</div>
+                            </div>
+                        </div>
+
+                        <!-- 第2次：已驳回 -->
+                        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                            <div style="display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0;">
+                                <div style="width: 12px; height: 12px; background: #ff4d4f; border-radius: 50%; margin-top: 3px;"></div>
+                                <div style="flex: 1; width: 2px; background: #d9d9d9; margin-top: 4px;"></div>
+                            </div>
+                            <div style="flex: 1; padding-bottom: 16px; border-bottom: 1px dashed #f0f0f0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 14px; font-weight: 600; color: #333;">第2次申请</span>
+                                    <span class="status-tag" style="background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e;">已驳回</span>
+                                </div>
+                                <div style="font-size: 12px; color: #8c8c8c; margin-bottom: 4px;">提交：2026-03-22 10:30 · 驳回：2026-03-22 14:20</div>
+                                <div style="font-size: 13px; color: #8c8c8c; margin-bottom: 2px;">审核人：李监管（夏阳街道）</div>
+                                <div style="font-size: 13px; color: #cf1322;">驳回原因：照片不清晰，无法确认清理情况，请重新拍摄。</div>
+                            </div>
+                        </div>
+
+                        <!-- 第1次：已驳回 -->
+                        <div style="display: flex; gap: 12px;">
+                            <div style="display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0;">
+                                <div style="width: 12px; height: 12px; background: #ff4d4f; border-radius: 50%; margin-top: 3px;"></div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 14px; font-weight: 600; color: #333;">第1次申请</span>
+                                    <span class="status-tag" style="background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e;">已驳回</span>
+                                </div>
+                                <div style="font-size: 12px; color: #8c8c8c; margin-bottom: 4px;">提交：2026-03-20 14:30 · 驳回：2026-03-21 10:05</div>
+                                <div style="font-size: 13px; color: #8c8c8c; margin-bottom: 2px;">审核人：李监管（夏阳街道）</div>
+                                <div style="font-size: 13px; color: #cf1322;">驳回原因：现场垃圾未清理完毕，需完成清理后重新申请。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div><!-- end page-wrapper 7-5 -->
+
+        <!-- 页面8: 巡检方工程详情页（存在待审核核销申请） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">工程详情</div>
+                    <div class="nav-action">···</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程状态卡片 -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="font-size: 18px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">青浦区夏阳街道XX路住宅小区装修工程</div>
+                            <span class="status-tag status-tag-verifying">核销待审核</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📍 青浦区夏阳街道XX路123号
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📅 2026-01-15 ~ 2026-03-20
+                        </div>
+                        <div style="font-size: 13px; color: #999;">
+                            当前已有施工方提交的完工核销申请，巡检方不可再次发起直接核销。
+                        </div>
+                    </div>
+
+                    <!-- 提示信息 -->
+                    <div style="background: #e6f7ff; border: 1px solid #91d5ff; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; color: #096dd9; line-height: 1.6;">
+                            <span style="font-weight: 600;">提示：</span>街道/社区巡检人员进入该工程时，若已存在待审核核销申请，应查看申请记录并进入审核流程处理，不再显示“直接核销”入口。
+                        </div>
+                    </div>
+
+                    <!-- 当前申请摘要 -->
+                    <div class="card">
+                        <div class="card-title">当前核销申请摘要</div>
+                        <div class="info-item">
+                            <span class="info-label">申请人</span>
+                            <span class="info-value">张三（施工方）</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请时间</span>
+                            <span class="info-value">2026-03-20 14:30</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-repair">现场整改</span></span>
+                        </div>
+                        <div class="info-item" style="margin-bottom: 0;">
+                            <span class="info-label">待处理动作</span>
+                            <span class="info-value" style="color: #1890ff; font-weight: 500;">查看申请记录并审核 ›</span>
+                        </div>
+                    </div>
+
+                    <!-- 巡查记录列表 -->
+                    <div class="card">
+                        <div class="card-title">巡查记录</div>
+                        <div class="list-item" style="margin: 0 -16px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <div>
+                                    <span style="background: #fff1f0; color: #ff4d4f; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px;">高处</span>
+                                    <span style="background: #fff7e6; color: #fa8c16; padding: 2px 6px; border-radius: 4px; font-size: 11px;">用电</span>
+                                </div>
+                                <span style="font-size: 12px; color: #999;">03-18 10:30</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666;">巡查人：张三 · 夏阳街道办</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="fixed-bottom">
+                    <button class="btn btn-default">更多操作</button>
+                    <button class="btn btn-primary">查看申请记录</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面8-2: 巡检方待审核申请记录列表 -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">核销申请记录</div>
+                    <div class="nav-action">筛选</div>
+                </div>
+                <div class="content">
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-verifying">核销待审核</span></span>
+                        </div>
+                    </div>
+
+                    <!-- 多次驳回提示 -->
+                    <div style="background: #fff7e6; border: 1px solid #ffd591; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #d46b08;">
+                        ⚠️ 该工程已有 <strong>2次历史驳回记录</strong>，本次为第3次申请。
+                    </div>
+
+                    <div style="background: #fff; border-radius: 12px; overflow: hidden;">
+                        <!-- 当前：待审核（第3次） -->
+                        <div class="list-item">
+                            <div class="list-item-header">
+                                <div class="list-item-title">第3次申请（当前）</div>
+                                <span class="status-tag status-tag-verifying">待审核</span>
+                            </div>
+                            <div class="list-item-address">申请人：张三（施工方）</div>
+                            <div class="list-item-info">
+                                <span>申请时间：2026-03-23 09:15</span>
+                            </div>
+                            <div class="list-item-info" style="margin-top: 4px;">
+                                <span>完工日期：2026-03-22</span>
+                                <span>申请前状态：正常施工</span>
+                            </div>
+                            <div style="margin-top: 4px; font-size: 12px; color: #666;">补充说明：现场垃圾已全部清理完毕，照片为清理后现场。</div>
+                            <div style="margin-top: 10px; font-size: 13px; color: #1890ff; font-weight: 500;">
+                                查看申请详情并审核 ›
+                            </div>
+                        </div>
+
+                        <!-- 历史：第2次已驳回 -->
+                        <div class="list-item" style="background: #fafafa;">
+                            <div class="list-item-header">
+                                <div class="list-item-title" style="color: #8c8c8c;">第2次申请</div>
+                                <span class="status-tag" style="background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e;">已驳回</span>
+                            </div>
+                            <div class="list-item-address" style="color: #8c8c8c;">申请人：张三（施工方）</div>
+                            <div class="list-item-info" style="color: #8c8c8c;">
+                                <span>申请时间：2026-03-22 10:30</span>
+                            </div>
+                            <div class="list-item-info" style="margin-top: 4px; color: #cf1322; font-size: 12px;">
+                                驳回原因：照片不清晰，无法确认清理情况，请重新拍摄。
+                            </div>
+                        </div>
+
+                        <!-- 历史：第1次已驳回 -->
+                        <div class="list-item" style="background: #fafafa;">
+                            <div class="list-item-header">
+                                <div class="list-item-title" style="color: #8c8c8c;">第1次申请</div>
+                                <span class="status-tag" style="background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e;">已驳回</span>
+                            </div>
+                            <div class="list-item-address" style="color: #8c8c8c;">申请人：张三（施工方）</div>
+                            <div class="list-item-info" style="color: #8c8c8c;">
+                                <span>申请时间：2026-03-20 14:30</span>
+                            </div>
+                            <div class="list-item-info" style="margin-top: 4px; color: #cf1322; font-size: 12px;">
+                                驳回原因：现场垃圾未清理完毕，需完成清理后重新申请。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面8-3: 巡检方申请记录详情页（点击申请记录进入） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">申请记录详情</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程地址</span>
+                            <span class="info-value">青浦区夏阳街道XX路123号</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请前状态</span>
+                            <span class="info-value"><span class="status-tag status-tag-repair">现场整改</span></span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">申请信息</div>
+                        <div class="info-item">
+                            <span class="info-label">申请人</span>
+                            <span class="info-value">张三（施工方）</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请时间</span>
+                            <span class="info-value">2026-03-20 14:30</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">完工日期</span>
+                            <span class="info-value">2026-03-20</span>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <div class="info-label" style="margin-bottom: 8px;">完工现场照片</div>
+                            <div class="photo-preview">
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E完工照1%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E完工照2%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <div class="info-label" style="margin-bottom: 6px;">备注说明</div>
+                            <div style="font-size: 14px; color: #666; line-height: 1.6;">工程已按设计要求完成施工，现场清理完毕，申请核销。</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; color: #d48806; line-height: 1.6;">
+                            <span style="font-weight: 600;">审核提示：</span>审核通过后工程状态变更为“已核销”，不可新增巡查记录；核销前遗留整改记录仍可继续提交和审核。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-bottom">
+                    <button class="btn btn-default">驳回申请</button>
+                    <button class="btn btn-success">审核通过</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面8-4: 巡检方审核通过后的工程详情页 -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">工程详情</div>
+                    <div class="nav-action">···</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程状态卡片 -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="font-size: 18px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">青浦区夏阳街道XX路住宅小区装修工程</div>
+                            <span class="status-tag status-tag-completed">已核销</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📍 青浦区夏阳街道XX路123号
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📅 2026-01-15 ~ 2026-03-20
+                        </div>
+                        <div style="font-size: 13px; color: #999;">
+                            核销时间：2026-03-21 09:30（巡检方审核通过）
+                        </div>
+                    </div>
+
+                    <!-- 核销结果提示 -->
+                    <div style="background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 13px; color: #389e0d; line-height: 1.6;">
+                            <span style="font-weight: 600;">核销成功：</span>该工程已完成完工核销，后续不可再新增巡查记录，但核销前遗留整改记录仍可继续提交和审核。
+                        </div>
+                    </div>
+
+                    <!-- 核销信息 -->
+                    <div class="card">
+                        <div class="card-title">核销信息</div>
+                        <div class="info-item">
+                            <span class="info-label">核销方式</span>
+                            <span class="info-value">施工方申请核销</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">审核人</span>
+                            <span class="info-value">张三（夏阳街道巡检方）</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">核销编号</span>
+                            <span class="info-value">HX20260321001</span>
+                        </div>
+                    </div>
+
+                    <!-- 遗留整改提示 -->
+                    <div class="card">
+                        <div class="card-title">遗留整改记录</div>
+                        <div class="info-item">
+                            <span class="info-label">当前情况</span>
+                            <span class="info-value">1条待审核整改记录，继续保留处理</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed-bottom">
+                    <button class="btn btn-default" disabled style="background: #f5f5f5; color: #999;">已核销，不可新增巡查</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面9: 审核通过确认弹窗 -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">核销审核详情</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程信息卡片 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程地址</span>
+                            <span class="info-value">青浦区夏阳街道XX路123号</span>
+                        </div>
+                    </div>
+
+                    <!-- 核销申请信息 -->
+                    <div class="card">
+                        <div class="card-title">核销申请信息</div>
+                        <div class="info-item">
+                            <span class="info-label">完工日期</span>
+                            <span class="info-value">2026-03-20</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请时间</span>
+                            <span class="info-value">2026-03-20 14:30</span>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <div class="info-label" style="margin-bottom: 8px;">完工现场照片</div>
+                            <div class="photo-preview">
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E照片1%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E照片2%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                                <div class="preview-item">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect fill='%23e6f7ff' width='70' height='70'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231890ff' font-size='10'%3E照片3%3C/text%3E%3C/svg%3E" alt="照片">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="fixed-bottom">
+                    <button class="btn btn-default">驳回申请</button>
+                    <button class="btn btn-success">审核通过</button>
+                </div>
+
+                <!-- 确认弹窗 -->
+                <div class="modal show">
+                    <div class="modal-content">
+                        <div class="modal-title">确认通过核销申请？</div>
+                        <div class="modal-text" style="text-align: left;">
+                            核销后工程将归档，<span style="color: #ff4d4f; font-weight: 500;">不可再新增巡查记录</span>，但核销前遗留的整改记录仍可继续提交和审核。
+                        </div>
+                        <div class="modal-buttons">
+                            <button class="modal-btn modal-btn-cancel">取消</button>
+                            <button class="modal-btn modal-btn-confirm">确认通过</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面10: 驳回申请弹窗 -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">核销审核详情</div>
+                </div>
+                <div class="content" style="padding-bottom: 80px;">
+                    <!-- 工程信息卡片 -->
+                    <div class="card">
+                        <div class="card-title">工程信息</div>
+                        <div class="info-item">
+                            <span class="info-label">工程名称</span>
+                            <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">工程地址</span>
+                            <span class="info-value">青浦区夏阳街道XX路123号</span>
+                        </div>
+                    </div>
+
+                    <!-- 核销申请信息 -->
+                    <div class="card">
+                        <div class="card-title">核销申请信息</div>
+                        <div class="info-item">
+                            <span class="info-label">完工日期</span>
+                            <span class="info-value">2026-03-20</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">申请时间</span>
+                            <span class="info-value">2026-03-20 14:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="fixed-bottom">
+                    <button class="btn btn-default">驳回申请</button>
+                    <button class="btn btn-success">审核通过</button>
+                </div>
+
+                <!-- 驳回弹窗 -->
+                <div class="modal show">
+                    <div class="modal-content" style="width: 300px;">
+                        <div class="modal-title">驳回核销申请</div>
+                        <textarea class="modal-input" placeholder="请输入驳回原因（必填）"></textarea>
+                        <div class="modal-buttons">
+                            <button class="modal-btn modal-btn-cancel">取消</button>
+                            <button class="modal-btn modal-btn-confirm" style="background: #ff4d4f;">确认驳回</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面11: 核销成功状态 -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">工程详情</div>
+                </div>
+                <div class="content">
+                    <!-- 工程状态卡片 -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="font-size: 18px; font-weight: 600; color: #333; flex: 1; margin-right: 8px;">青浦区夏阳街道XX路住宅小区装修工程</div>
+                            <span class="status-tag status-tag-completed">已核销</span>
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📍 青浦区夏阳街道XX路123号
+                        </div>
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                            📅 2026-01-15 ~ 2026-03-20
+                        </div>
+                        <div style="font-size: 13px; color: #999;">
+                            核销时间：2026-03-21 09:30
+                        </div>
+                    </div>
+
+                    <!-- 核销信息 -->
+                    <div class="card">
+                        <div class="card-title">核销信息</div>
+                        <div class="info-item">
+                            <span class="info-label">核销方式</span>
+                            <span class="info-value">施工方申请核销</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">完工日期</span>
+                            <span class="info-value">2026-03-20</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">审核人</span>
+                            <span class="info-value">李监管（夏阳街道）</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">核销编号</span>
+                            <span class="info-value">HX20260321001</span>
+                        </div>
+                    </div>
+
+                    <!-- 提示信息 -->
+                    <div style="background: #e6f7ff; border: 1px solid #91d5ff; border-radius: 8px; padding: 12px; margin-top: 16px;">
+                        <div style="font-size: 13px; color: #096dd9; line-height: 1.6;">
+                            <span style="font-weight: 600;">提示：</span>该工程已核销，不可新增巡查记录。如有核销前遗留的整改记录，仍可继续提交和审核。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面12: 工程列表（含状态筛选） -->
+        <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="nav-bar">
+                    <div class="nav-back">‹</div>
+                    <div class="nav-title">全部工程</div>
+                </div>
+                <div class="content" style="padding-top: 50px;">
+                    <!-- 搜索栏 -->
+                    <div style="background: #fff; padding: 12px 16px; margin-bottom: 1px;">
+                        <div style="display: flex; gap: 8px;">
+                            <select style="height: 36px; border: 1px solid #e8e8e8; border-radius: 18px; padding: 0 12px; font-size: 14px; background: #fff;">
+                                <option>工程名称</option>
+                                <option>工程地址</option>
+                            </select>
+                            <input type="text" placeholder="请输入关键词搜索" style="flex: 1; height: 36px; border: 1px solid #e8e8e8; border-radius: 18px; padding: 0 12px; font-size: 14px;">
+                            <button style="width: 60px; height: 36px; background: #1890ff; color: #fff; border: none; border-radius: 18px; font-size: 14px;">搜索</button>
+                        </div>
+                    </div>
+
+                    <!-- 工程类型Tab -->
+                    <div style="background: #fff; padding: 12px 16px; margin-bottom: 1px;">
+                        <div style="display: flex; gap: 8px;">
+                            <span style="background: #1890ff; color: #fff; padding: 6px 14px; border-radius: 16px; font-size: 13px;">全部(542)</span>
+                            <span style="background: #f5f5f5; color: #666; padding: 6px 14px; border-radius: 16px; font-size: 13px;">小型工程(186)</span>
+                            <span style="background: #f5f5f5; color: #666; padding: 6px 14px; border-radius: 16px; font-size: 13px;">住宅装修(328)</span>
+                        </div>
+                    </div>
+
+                    <!-- 状态Tab -->
+                    <div class="tabs" style="top: 44px;">
+                        <div class="tab active">正常施工 <span class="tab-badge" style="background: #52c41a;">486</span></div>
+                        <div class="tab">现场整改 <span class="tab-badge">38</span></div>
+                        <div class="tab">停工整改 <span class="tab-badge">18</span></div>
+                        <div class="tab">已核销 <span class="tab-badge" style="background: #999;">56</span></div>
+                    </div>
+
+                    <!-- 工程列表 -->
+                    <div style="margin-top: 12px;">
+                        <div class="list-item">
+                            <div class="list-item-header">
+                                <div class="list-item-title">青浦区夏阳街道XX路住宅小区装修工程</div>
+                                <span class="status-tag status-tag-normal">正常施工</span>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: #ff4d4f; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 11px;">高风险</span>
+                            </div>
+                            <div class="list-item-address">📍 青浦区夏阳街道XX路123号</div>
+                            <div class="list-item-info">
+                                <span>🏢 XX装修公司</span>
+                            </div>
+                            <div class="list-item-info" style="margin-top: 4px;">
+                                <span>📅 2026-01-15 ~ 2026-03-20</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-around; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #666;">
+                                <div>街道3/隐患0<br/><span style="color: #999;">5天未巡查</span></div>
+                                <div>社区4/隐患1<br/><span style="color: #ff4d4f;">0天未巡查</span></div>
+                                <div>物业8/隐患0<br/><span style="color: #999;">2天未巡查</span></div>
+                            </div>
+                        </div>
+
+                        <div class="list-item">
+                            <div class="list-item-header">
+                                <div class="list-item-title">XX商务楼宇装修工程</div>
+                                <span class="status-tag status-tag-repair">现场整改</span>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: #999; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 11px;">一般项目</span>
+                                <span style="background: #722ed1; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 11px; margin-left: 4px;">夜间施工</span>
+                            </div>
+                            <div class="list-item-address">📍 青浦区盈港路456号</div>
+                            <div class="list-item-info">
+                                <span>🏢 YY装饰工程公司</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

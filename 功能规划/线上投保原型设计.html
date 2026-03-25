@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>线上投保 - H5内嵌页模式原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #F5F5F5;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            height: 24px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        /* 导航栏 */
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .nav-back {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-title {
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-right {
+            width: 24px;
+        }
+
+        /* 页面容器 */
+        .page {
+            display: none;
+            min-height: calc(100vh - 68px);
+            padding-bottom: 80px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 流程状态卡片 */
+        .flow-card {
+            margin: 12px 16px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            position: relative;
+        }
+
+        .flow-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flow-step {
+            text-align: center;
+        }
+
+        .flow-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .flow-text {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .flow-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            opacity: 0.8;
+        }
+
+        .flow-tag {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            color: #00B578;
+            padding: 6px 12px;
+            border-radius: 12px 0 12px 0;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 分组标题 */
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin: 24px 16px 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #00B578;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        /* 卡片 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            margin: 0 16px 12px;
+            padding: 16px;
+        }
+
+        /* 工程信息 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* 保险公司列表 */
+        .company-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: #fff;
+            margin: 0 16px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .company-item:active {
+            background: #F5F5F5;
+        }
+
+        .company-item.selected {
+            border: 2px solid #00B578;
+        }
+
+        .company-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #E6F7F0 0%, #fff 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 12px;
+            border: 1px solid #E6F7F0;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .company-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .company-price {
+            text-align: right;
+        }
+
+        .price-tag {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .price-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FF4D4F;
+        }
+
+        .price-unit {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .select-icon {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #E5E5E5;
+            border-radius: 50%;
+            margin-left: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .company-item.selected .select-icon {
+            background: #00B578;
+            border-color: #00B578;
+        }
+
+        .select-icon::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .company-item.selected .select-icon::after {
+            display: block;
+        }
+
+        /* WebView容器 */
+        .webview-container {
+            position: fixed;
+            top: 68px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+        }
+
+        .webview-container.active {
+            display: flex;
+        }
+
+        .webview-header {
+            height: 44px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid #E5E5E5;
+        }
+
+        .webview-close {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #666;
+        }
+
+        .webview-title {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .webview-body {
+            flex: 1;
+            overflow-y: auto;
+            background: #F5F5F5;
+        }
+
+        /* 模拟保险公司H5页面 */
+        .insurer-page {
+            padding: 16px;
+        }
+
+        .insurer-header {
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .insurer-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .insurer-product {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* 保费计算区 */
+        .premium-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .premium-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .premium-value {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+        }
+
+        .premium-symbol {
+            font-size: 24px;
+            color: #FF4D4F;
+            font-weight: 600;
+        }
+
+        .premium-number {
+            font-size: 48px;
+            color: #FF4D4F;
+            font-weight: 700;
+            margin: 0 4px;
+        }
+
+        .premium-unit {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .premium-formula {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #E5E5E5;
+        }
+
+        /* 投保信息表单 */
+        .form-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .form-item {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-label.required::before {
+            content: '*';
+            color: #FF4D4F;
+            margin-right: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 44px;
+            background: #F5F5F5;
+            border: none;
+            border-radius: 8px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: #E6F7F0;
+        }
+
+        .form-input:disabled {
+            color: #999;
+        }
+
+        /* 保障内容 */
+        .coverage-list {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .coverage-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .coverage-item:last-child {
+            border-bottom: none;
+        }
+
+        .coverage-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .coverage-limit {
+            font-size: 14px;
+            color: #00B578;
+            font-weight: 500;
+        }
+
+        /* 底部操作区 */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 12px 16px 24px;
+            border-top: 1px solid #E5E5E5;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            height: 48px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #00B578;
+            border: 1px solid #00B578;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            color: #fff;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 提示信息 */
+        .tip-box {
+            background: #E6F7F0;
+            border: 1px solid #00B578;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px;
+            font-size: 13px;
+            color: #00A86B;
+            line-height: 1.6;
+        }
+
+        /* JS Bridge通信日志 */
+        .bridge-log {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            width: 280px;
+            max-height: 300px;
+            background: rgba(0,0,0,0.85);
+            border-radius: 8px;
+            padding: 12px;
+            color: #00FF00;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            z-index: 1000;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .bridge-log.active {
+            display: block;
+        }
+
+        .bridge-log-title {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #444;
+        }
+
+        .bridge-log-item {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .bridge-log-time {
+            color: #999;
+            font-size: 10px;
+        }
+
+        /* 加载状态 */
+        .loading-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1001;
+        }
+
+        .loading-mask.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #E5E5E5;
+            border-top-color: #00B578;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 结果页面 */
+        .result-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 48px 32px;
+            text-align: center;
+        }
+
+        .result-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 24px;
+        }
+
+        .result-icon.success {
+            background: #E6F7F0;
+        }
+
+        .result-icon.fail {
+            background: #FFF2F0;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .result-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .result-policy {
+            background: #F5F5F5;
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .result-policy-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .result-policy-label {
+            color: #666;
+        }
+
+        .result-policy-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .tag-green {
+            background: #E6F7F0;
+            color: #00B578;
+        }
+
+        .tag-orange {
+            background: #FFF7E6;
+            color: #FF9500;
+        }
+
+        /* 步骤条 */
+        .steps {
+            display: flex;
+            padding: 20px 16px;
+            background: #fff;
+            margin-bottom: 12px;
+        }
+
+        .step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #E5E5E5;
+        }
+
+        .step.active:not(:last-child)::after {
+            background: #00B578;
+        }
+
+        .step-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #E5E5E5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step.active .step-dot {
+            background: #00B578;
+            color: #fff;
+        }
+
+        .step-text {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .step.active .step-text {
+            color: #00B578;
+        }
+
+        /* 调试按钮 */
+        .debug-btn {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            width: 48px;
+            height: 48px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <span>9:41</span>
+        <span>信号 WiFi 电量</span>
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="nav-bar">
+        <div class="nav-back" onclick="goBack()">←</div>
+        <div class="nav-title" id="pageTitle">选择保险公司</div>
+        <div class="nav-right"></div>
+    </div>
+
+    <!-- 页面1: 选择保险公司 -->
+    <div class="page active" id="pageSelect">
+        <!-- 步骤条 -->
+        <div class="steps">
+            <div class="step active">
+                <div class="step-dot">1</div>
+                <div class="step-text">选择保司</div>
+            </div>
+            <div class="step">
+                <div class="step-dot">2</div>
+                <div class="step-text">填写信息</div>
+            </div>
+            <div class="step">
+                <div class="step-dot">3</div>
+                <div class="step-text">支付保费</div>
+            </div>
+            <div class="step">
+                <div class="step-dot">4</div>
+                <div class="step-text">完成投保</div>
+            </div>
+        </div>
+
+        <!-- 工程信息 -->
+        <div class="section-title">工程信息</div>
+        <div class="card">
+            <div class="info-row">
+                <span class="info-label">工程名称</span>
+                <span class="info-value">青浦区夏阳街道XX路住宅小区装修工程</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">工程地址</span>
+                <span class="info-value">青浦区夏阳街道XX路88号</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">工程类型</span>
+                <span class="info-value">住宅装修</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">施工周期</span>
+                <span class="info-value">2026-01-15 至 2026-03-20</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">建筑面积</span>
+                <span class="info-value">200m²</span>
+            </div>
+        </div>
+
+        <!-- 保险公司列表 -->
+        <div class="section-title">选择保险公司</div>
+
+        <div class="company-item" data-company="pingan" onclick="selectCompany(this)">
+            <div class="company-logo">🛡️</div>
+            <div class="company-info">
+                <div class="company-name">平安保险</div>
+                <div class="company-desc">安全生产责任险 · 极速出单</div>
+            </div>
+            <div class="company-price">
+                <div class="price-tag">参考价</div>
+                <div class="price-value">480<span class="price-unit">元起</span></div>
+            </div>
+            <div class="select-icon"></div>
+        </div>
+
+        <div class="company-item" data-company="taibao" onclick="selectCompany(this)">
+            <div class="company-logo">🛡️</div>
+            <div class="company-info">
+                <div class="company-name">太平洋保险</div>
+                <div class="company-desc">建筑工程安责险 · 全程线上</div>
+            </div>
+            <div class="company-price">
+                <div class="price-tag">参考价</div>
+                <div class="price-value">520<span class="price-unit">元起</span></div>
+            </div>
+            <div class="select-icon"></div>
+        </div>
+
+        <div class="company-item" data-company="renbao" onclick="selectCompany(this)">
+            <div class="company-logo">🛡️</div>
+            <div class="company-info">
+                <div class="company-name">中国人保</div>
+                <div class="company-desc">建筑施工安全责任险 · 即时生效</div>
+            </div>
+            <div class="company-price">
+                <div class="price-tag">参考价</div>
+                <div class="price-value">460<span class="price-unit">元起</span></div>
+            </div>
+            <div class="select-icon"></div>
+        </div>
+
+        <!-- 底部操作 -->
+        <div class="bottom-bar">
+            <button class="btn btn-secondary" onclick="goBack()">取消</button>
+            <button class="btn btn-primary" id="btnNext" onclick="openInsurerH5()" disabled>下一步</button>
+        </div>
+    </div>
+
+    <!-- 页面2: WebView内嵌保险公司H5 -->
+    <div class="webview-container" id="webviewContainer">
+        <div class="webview-header">
+            <div class="webview-close" onclick="closeWebview()">✕</div>
+            <div class="webview-title" id="webviewTitle">平安保险</div>
+            <div style="width:24px;"></div>
+        </div>
+        <div class="webview-body">
+            <!-- 模拟保险公司H5页面内容 -->
+            <div class="insurer-page">
+                <!-- 保司头部 -->
+                <div class="insurer-header">
+                    <div class="insurer-name">平安保险 · 建筑工程安责险</div>
+                    <div class="insurer-product">为施工安全保驾护航</div>
+                </div>
+
+                <!-- 实时保费计算 -->
+                <div class="premium-box">
+                    <div class="premium-label">基于工程信息实时计算的保费</div>
+                    <div class="premium-value">
+                        <span class="premium-symbol">¥</span>
+                        <span class="premium-number" id="premiumNumber">480</span>
+                        <span class="premium-unit">元</span>
+                    </div>
+                    <div class="premium-formula">
+                        工程类型：住宅装修 | 面积：200m² | 周期：65天
+                    </div>
+                </div>
+
+                <!-- 投保信息 -->
+                <div class="form-card">
+                    <div class="form-title">投保人信息（自动带入）</div>
+                    <div class="form-item">
+                        <div class="form-label required">企业名称</div>
+                        <input type="text" class="form-input" value="上海XX建筑装饰工程有限公司" disabled>
+                    </div>
+                    <div class="form-item">
+                        <div class="form-label required">统一社会信用代码</div>
+                        <input type="text" class="form-input" value="91310115XXXXXXXXXX" disabled>
+                    </div>
+                    <div class="form-item">
+                        <div class="form-label required">联系人</div>
+                        <input type="text" class="form-input" value="张三">
+                    </div>
+                    <div class="form-item">
+                        <div class="form-label required">联系电话</div>
+                        <input type="tel" class="form-input" value="138****8888">
+                    </div>
+                </div>
+
+                <!-- 保障内容 -->
+                <div class="coverage-list">
+                    <div class="form-title">保障内容</div>
+                    <div class="coverage-item">
+                        <span class="coverage-name">施工人员意外伤亡</span>
+                        <span class="coverage-limit">50万元/人</span>
+                    </div>
+                    <div class="coverage-item">
+                        <span class="coverage-name">第三者人身伤亡</span>
+                        <span class="coverage-limit">100万元</span>
+                    </div>
+                    <div class="coverage-item">
+                        <span class="coverage-name">第三者财产损失</span>
+                        <span class="coverage-limit">50万元</span>
+                    </div>
+                    <div class="coverage-item">
+                        <span class="coverage-name">医疗费用</span>
+                        <span class="coverage-limit">5万元/人</span>
+                    </div>
+                </div>
+
+                <!-- 保险期间 -->
+                <div class="form-card">
+                    <div class="form-title">保险期间</div>
+                    <div class="form-item">
+                        <div class="form-label">起保日期</div>
+                        <input type="text" class="form-input" value="2026-01-15" disabled>
+                    </div>
+                    <div class="form-item">
+                        <div class="form-label">终保日期</div>
+                        <input type="text" class="form-input" value="2026-03-20" disabled>
+                    </div>
+                </div>
+
+                <!-- 声明 -->
+                <div style="padding: 0 0 100px; font-size: 12px; color: #999; line-height: 1.6;">
+                    <label style="display: flex; align-items: flex-start; gap: 8px;">
+                        <input type="checkbox" checked style="margin-top: 2px;">
+                        <span>我已阅读并同意《保险条款》《投保须知》《免责说明》</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部支付 -->
+        <div class="bottom-bar" style="z-index: 101;">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; color: #999;">实付金额</div>
+                <div style="font-size: 20px; color: #FF4D4F; font-weight: 700;">¥<span id="payAmount">480</span></div>
+            </div>
+            <button class="btn btn-primary" style="flex: 1.5;" onclick="simulatePayment()">立即支付</button>
+        </div>
+    </div>
+
+    <!-- 页面3: 支付成功/失败结果 -->
+    <div class="page" id="pageResult">
+        <div class="result-page" id="resultSuccess" style="display: none;">
+            <div class="result-icon success">✓</div>
+            <div class="result-title">投保成功</div>
+            <div class="result-desc">
+                保单已成功生成并自动关联到您的工程<br>
+                您可以在"我的保单"中查看详情
+            </div>
+            <div class="result-policy">
+                <div class="result-policy-row">
+                    <span class="result-policy-label">保单号</span>
+                    <span class="result-policy-value" id="policyNo">PA20260323000001</span>
+                </div>
+                <div class="result-policy-row">
+                    <span class="result-policy-label">保险公司</span>
+                    <span class="result-policy-value">平安保险</span>
+                </div>
+                <div class="result-policy-row">
+                    <span class="result-policy-label">保费金额</span>
+                    <span class="result-policy-value">¥480.00</span>
+                </div>
+                <div class="result-policy-row">
+                    <span class="result-policy-label">保险期间</span>
+                    <span class="result-policy-value">2026-01-15 至 2026-03-20</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="finishFlow()" style="width: 100%;">完成</button>
+        </div>
+
+        <div class="result-page" id="resultFail" style="display: none;">
+            <div class="result-icon fail">✕</div>
+            <div class="result-title">投保失败</div>
+            <div class="result-desc">
+                支付过程中出现异常，请重试<br>
+                如问题持续存在，请联系客服
+            </div>
+            <div style="display: flex; gap: 12px; width: 100%;">
+                <button class="btn btn-secondary" onclick="retryPayment()" style="flex: 1;">重试</button>
+                <button class="btn btn-primary" onclick="cancelPayment()" style="flex: 1;">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Bridge通信日志 -->
+    <div class="debug-btn" onclick="toggleLog()">调试</div>
+    <div class="bridge-log" id="bridgeLog">
+        <div class="bridge-log-title">JS Bridge 通信日志</div>
+        <div id="logContent"></div>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div class="loading-mask" id="loadingMask">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">加载中...</div>
+    </div>
+
+    <script>
+        // 全局状态
+        let selectedCompany = null;
+        let paymentSuccess = true; // 模拟支付成功或失败
+
+        // 模拟JS Bridge对象
+        window.QingPuInsurance = {
+            // H5调用：支付成功通知
+            onPaymentSuccess: function(policyNo) {
+                addLog('H5 → 平台', 'onPaymentSuccess', { policyNo: policyNo });
+                showResult(true);
+            },
+            // H5调用：支付失败通知
+            onPaymentFail: function(errorCode, errorMsg) {
+                addLog('H5 → 平台', 'onPaymentFail', { errorCode, errorMsg });
+                showResult(false);
+            },
+            // H5调用：关闭页面
+            closePage: function() {
+                addLog('H5 → 平台', 'closePage', {});
+                closeWebview();
+            }
+        };
+
+        // 选择保险公司
+        function selectCompany(el) {
+            document.querySelectorAll('.company-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            el.classList.add('selected');
+            selectedCompany = el.dataset.company;
+            document.getElementById('btnNext').disabled = false;
+        }
+
+        // 打开保险公司H5页面
+        function openInsurerH5() {
+            if (!selectedCompany) return;
+
+            const companyNames = {
+                'pingan': '平安保险',
+                'taibao': '太平洋保险',
+                'renbao': '中国人保'
+            };
+
+            document.getElementById('webviewTitle').textContent = companyNames[selectedCompany];
+            document.getElementById('webviewContainer').classList.add('active');
+
+            // 记录进入H5页面的日志
+            addLog('平台 → H5', 'loadH5', {
+                company: selectedCompany,
+                projectId: 'PRJ202601150001',
+                projectInfo: {
+                    name: '青浦区夏阳街道XX路住宅小区装修工程',
+                    type: '住宅装修',
+                    area: 200,
+                    startDate: '2026-01-15',
+                    endDate: '2026-03-20'
+                }
+            });
+
+            // 模拟H5页面加载完成后调用
+            setTimeout(() => {
+                addLog('H5初始化', 'H5页面加载完成，工程参数已接收', {});
+            }, 500);
+        }
+
+        // 关闭WebView
+        function closeWebview() {
+            document.getElementById('webviewContainer').classList.remove('active');
+            addLog('平台', '关闭H5页面', {});
+        }
+
+        // 模拟支付流程
+        function simulatePayment() {
+            document.getElementById('loadingMask').classList.add('active');
+            document.getElementById('loadingText').textContent = '正在支付...';
+
+            setTimeout(() => {
+                document.getElementById('loadingMask').classList.remove('active');
+
+                // 模拟支付结果
+                if (paymentSuccess) {
+                    // 调用JS Bridge通知平台支付成功
+                    const policyNo = 'PA' + new Date().getFullYear() + String(Math.random()).slice(2, 12);
+                    window.QingPuInsurance.onPaymentSuccess(policyNo);
+
+                    // 模拟服务端回调
+                    simulateServerCallback(policyNo);
+                } else {
+                    window.QingPuInsurance.onPaymentFail('PAY_001', '支付超时');
+                }
+            }, 1500);
+        }
+
+        // 模拟服务端回调
+        function simulateServerCallback(policyNo) {
+            setTimeout(() => {
+                const callbackData = {
+                    projectId: 'PRJ202601150001',
+                    policyNo: policyNo,
+                    insuranceCompany: '平安保险',
+                    insuranceType: '建筑工程安全生产责任险',
+                    premium: 480.00,
+                    startDate: '2026-01-15',
+                    endDate: '2026-03-20',
+                    policyFileUrl: 'https://example.com/policy/' + policyNo + '.pdf'
+                };
+
+                addLog('保司服务端 → 平台', '保单回调API', callbackData);
+                addLog('平台', '保单自动关联成功', {
+                    message: '工程 PRJ202601150001 已关联保单 ' + policyNo
+                });
+            }, 2000);
+        }
+
+        // 显示结果页面
+        function showResult(success) {
+            closeWebview();
+            document.getElementById('pageSelect').classList.remove('active');
+            document.getElementById('pageResult').classList.add('active');
+            document.getElementById('pageTitle').textContent = success ? '投保成功' : '投保失败';
+
+            if (success) {
+                document.getElementById('resultSuccess').style.display = 'flex';
+                document.getElementById('resultFail').style.display = 'none';
+            } else {
+                document.getElementById('resultSuccess').style.display = 'none';
+                document.getElementById('resultFail').style.display = 'flex';
+            }
+        }
+
+        // 重试支付
+        function retryPayment() {
+            paymentSuccess = true;
+            document.getElementById('pageResult').classList.remove('active');
+            openInsurerH5();
+        }
+
+        // 取消支付
+        function cancelPayment() {
+            document.getElementById('pageResult').classList.remove('active');
+            document.getElementById('pageSelect').classList.add('active');
+            document.getElementById('pageTitle').textContent = '选择保险公司';
+        }
+
+        // 完成流程
+        function finishFlow() {
+            alert('流程结束，返回工程详情页');
+            // 实际项目中这里会返回工程详情页
+        }
+
+        // 返回上一页
+        function goBack() {
+            if (document.getElementById('webviewContainer').classList.contains('active')) {
+                closeWebview();
+            } else if (document.getElementById('pageResult').classList.contains('active')) {
+                document.getElementById('pageResult').classList.remove('active');
+                document.getElementById('pageSelect').classList.add('active');
+                document.getElementById('pageTitle').textContent = '选择保险公司';
+            } else {
+                alert('返回上一页');
+            }
+        }
+
+        // 切换日志显示
+        function toggleLog() {
+            document.getElementById('bridgeLog').classList.toggle('active');
+        }
+
+        // 添加日志
+        function addLog(direction, action, data) {
+            const logContent = document.getElementById('logContent');
+            const time = new Date().toLocaleTimeString();
+            const dataStr = JSON.stringify(data, null, 2);
+
+            const logItem = document.createElement('div');
+            logItem.className = 'bridge-log-item';
+            logItem.innerHTML = `
+                <div class="bridge-log-time">${time}</div>
+                <div><strong>${direction}</strong></div>
+                <div>动作: ${action}</div>
+                <div>数据: ${dataStr}</div>
+            `;
+
+            logContent.insertBefore(logItem, logContent.firstChild);
+        }
+
+        // 动态计算保费演示
+        function simulatePremiumCalculation() {
+            const basePremium = 480;
+            const fluctuation = Math.floor(Math.random() * 40) - 20;
+            const finalPremium = basePremium + fluctuation;
+
+            document.getElementById('premiumNumber').textContent = finalPremium;
+            document.getElementById('payAmount').textContent = finalPremium;
+
+            addLog('H5', '动态保费计算', {
+                basePremium,
+                fluctuation,
+                finalPremium,
+                formula: '基于工程类型、面积、周期实时计算'
+            });
+        }
+
+        // 页面加载完成后添加初始日志
+        window.onload = function() {
+            addLog('系统', '页面加载完成', {
+                mode: 'H5内嵌页模式（方案B）',
+                description: '平台打开内嵌WebView加载保险公司H5页'
+            });
+        };
+    </script>
+</body>
+</html>

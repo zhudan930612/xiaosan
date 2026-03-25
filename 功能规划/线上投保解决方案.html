@@ -178,6 +178,40 @@
     .label-a { background: #fef9c3; color: #a16207; }
     .label-b { background: #dcfce7; color: #15803d; }
     .label-c { background: #e0f2fe; color: #0369a1; }
+    /* Risk highlights */
+    .highlight-red { color: #dc2626; font-weight: 600; }
+    .highlight-orange { color: #ea580c; font-weight: 600; }
+    /* Risk box */
+    .risk-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 20px;
+    }
+    .risk-box h4 {
+      color: #dc2626;
+      margin-top: 0;
+      border-bottom: none;
+    }
+    .risk-box table {
+      margin: 12px 0;
+      font-size: 13px;
+    }
+    .risk-box td, .risk-box th {
+      padding: 8px 10px;
+    }
+    /* Warning box */
+    .warn-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    .warn-box strong {
+      color: #b45309;
+    }
     .pro-con {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -251,7 +285,6 @@
 <h1>线上投保解决方案（3种方案对比）</h1>
 
 <blockquote>
-  <p>🤖 AI草稿，待人工确认</p>
   <p>本文档对比3种线上投保技术方案，供与保险公司洽谈时选型决策。</p>
 </blockquote>
 
@@ -261,8 +294,7 @@
   <tbody>
     <tr><td>规划池记录 ID</td><td>保单匹配-线上投保</td></tr>
     <tr><td>产品规划摘要</td><td>保单匹配功能目前仅上线"上传保单"方式，线上投保（保险公司入驻平台）因合作未谈妥尚未开发</td></tr>
-    <tr><td>设计日期</td><td>2026-03-23</td></tr>
-    <tr><td>状态</td><td>🤖 AI草稿</td></tr>
+    <tr><td>设计日期</td><td>2026-03-24</td></tr>
   </tbody>
 </table>
 </div>
@@ -314,6 +346,7 @@
     <tr><td><strong>异常单处理难度</strong></td><td>高</td><td>中</td><td>中</td></tr>
     <tr><td><strong>后续扩展能力</strong></td><td>低</td><td>中高</td><td>高</td></tr>
     <tr><td><strong>主要风险</strong></td><td>回跳丢失、状态不一致、转化率低</td><td>多家保司适配成本不一致</td><td>技术复杂、合规要求高、周期长</td></tr>
+    <tr><td><strong>合规风险</strong></td><td>低</td><td>低</td><td class="highlight-red"><strong>高（触碰保费资金）</strong></td></tr>
     <tr><td><strong>适合阶段</strong></td><td>快速试点</td><td>首期正式上线</td><td>长期平台化建设</td></tr>
   </tbody>
 </table>
@@ -486,6 +519,71 @@
     <li>平台实时调用保险公司报价API获取保费</li>
     <li>支持多险种对比、价格锁定期等功能</li>
   </ul>
+
+  <div class="risk-box">
+    <h4>⚠️ 风险点分析</h4>
+    <table>
+      <thead><tr><th>风险类型</th><th>具体风险</th><th>风险等级</th><th>应对措施</th></tr></thead>
+      <tbody>
+        <tr><td><strong>合规风险</strong></td><td>平台代收保费构成"从事经营性活动"，违反政务应用管理办法</td><td class="highlight-red"><strong>极高</strong></td><td><strong>放弃平台收款，保费仍由保险公司直接收取</strong></td></tr>
+        <tr><td><strong>合规风险</strong></td><td>平台被认定为保险代理机构，需取得保险中介许可证</td><td class="highlight-red"><strong>极高</strong></td><td>明确平台仅提供技术服务，不参与保险销售环节</td></tr>
+        <tr><td><strong>合规风险</strong></td><td>需具备支付业务许可证才能开展资金代收业务</td><td class="highlight-red">高</td><td>如必须收款，需对接持牌支付机构，平台不触碰资金</td></tr>
+        <tr><td><strong>技术风险</strong></td><td>需对接多家保险公司的不同API标准，适配成本高</td><td>高</td><td>建设API网关层，统一接口协议，隔离保险公司差异</td></tr>
+        <tr><td><strong>技术风险</strong></td><td>报价API性能不稳定，影响用户体验</td><td>中</td><td>设计缓存机制和降级方案，超时后展示"价格待确认"</td></tr>
+        <tr><td><strong>商务风险</strong></td><td>保险公司开放API的意愿低，对接周期长</td><td>高</td><td>优先选择技术能力强、合作意愿高的保险公司试点</td></tr>
+        <tr><td><strong>安全风险</strong></td><td>平台集中处理敏感投保数据，数据安全责任重大</td><td>高</td><td>加强数据加密、访问控制、审计日志等安全措施</td></tr>
+        <tr><td><strong>财务风险</strong></td><td>如需平台先收款再结算，存在资金池合规风险</td><td class="highlight-red">极高</td><td>严格禁止资金池模式，保费流向改为：用户→保险公司→平台收IT服务费</td></tr>
+      </tbody>
+    </table>
+    <p><strong>重要提示</strong>：基于政务应用管理办法第五条规定，方案C的"平台统一收款"模式存在<strong>重大合规风险</strong>。如采用方案C，必须调整为：平台仅调用API完成报价和投保单生成，保费支付仍由用户直接在保险公司渠道完成。</p>
+  </div>
+</div>
+
+<hr>
+
+<h2>各方案风险点汇总</h2>
+
+<h3>方案A：外链跳转模式 - 风险点分析</h3>
+<table>
+  <thead><tr><th>风险类型</th><th>具体风险</th><th>风险等级</th><th>应对措施</th></tr></thead>
+  <tbody>
+    <tr><td><strong>技术风险</strong></td><td>外部页面加载失败或超时，用户无法完成投保</td><td>中</td><td>增加超时检测和友好提示，提供重新加载入口</td></tr>
+    <tr><td><strong>技术风险</strong></td><td>保险公司页面改版导致URL参数失效</td><td>中</td><td>建立保司页面监控机制，定期巡检链接可用性</td></tr>
+    <tr><td><strong>数据风险</strong></td><td>无Webhook时保单数据依赖用户手动回传，数据完整性无法保障</td><td class="highlight-orange">高</td><td>设计强制上传保单截图机制，作为核验依据</td></tr>
+    <tr><td><strong>体验风险</strong></td><td>用户跳转后流失，未完成投保也未返回平台</td><td class="highlight-orange">高</td><td>增加投保引导提示，设置合理的跳转提醒</td></tr>
+    <tr><td><strong>合规风险</strong></td><td>保险公司页面资质不合规（如未展示保险条款）</td><td>中</td><td>合作前审核保险公司投保页面的合规性</td></tr>
+    <tr><td><strong>商务风险</strong></td><td>保险公司不配合对接Webhook，数据无法自动同步</td><td>中</td><td>将Webhook对接纳入合作协议必备条款</td></tr>
+  </tbody>
+</table>
+
+<h3>方案B：H5内嵌页模式 - 风险点分析</h3>
+<table>
+  <thead><tr><th>风险类型</th><th>具体风险</th><th>风险等级</th><th>应对措施</th></tr></thead>
+  <tbody>
+    <tr><td><strong>技术风险</strong></td><td>各家保险公司H5页面样式、交互不统一，用户体验差异大</td><td>中</td><td>制定H5设计规范文档，要求保司按规范开发</td></tr>
+    <tr><td><strong>技术风险</strong></td><td>JS Bridge通信协议版本不一致，导致支付状态通知失败</td><td class="highlight-orange">高</td><td>协议设计向下兼容，增加重试和超时机制</td></tr>
+    <tr><td><strong>技术风险</strong></td><td>WebView容器兼容性问题（不同手机系统、版本）</td><td>中</td><td>建立主流机型测试清单，覆盖iOS/Android主流版本</td></tr>
+    <tr><td><strong>数据风险</strong></td><td>保单回调延迟或丢失，用户已完成支付但平台未收到数据</td><td class="highlight-orange">高</td><td>设计补偿查询机制，定时向保险公司轮询保单状态</td></tr>
+    <tr><td><strong>合规风险</strong></td><td>平台内嵌H5被认定为参与保险销售环节，需承担相应责任</td><td>中</td><td>明确免责声明，突出"保险服务由第三方提供"，平台仅提供技术入口</td></tr>
+    <tr><td><strong>商务风险</strong></td><td>保险公司技术能力参差不齐，H5开发进度不可控</td><td>中</td><td>提供H5开发SDK和示例代码，降低接入门槛</td></tr>
+    <tr><td><strong>安全风险</strong></td><td>H5页面被恶意篡改，钓鱼风险</td><td>中</td><td>要求保险公司使用HTTPS，对H5域名进行白名单校验</td></tr>
+  </tbody>
+</table>
+
+<h3>合规边界说明（重要）</h3>
+<div class="warn-box">
+  <p><strong>平台角色定位</strong>：技术服务提供方，非保险中介机构</p>
+  <p><strong>资金流转原则</strong>：</p>
+  <pre>用户保费 ──────→ 保险公司账户（平台不经手）
+     ↑
+     └── 平台提供技术对接服务 ←── 保险公司支付IT服务费</pre>
+  <p><strong>合规红线</strong>：</p>
+  <ul>
+    <li>平台不得代收保费或设立资金池</li>
+    <li>平台不得按保费比例收取佣金/返点</li>
+    <li>平台不承担保险理赔责任或担保</li>
+  </ul>
+  <p><strong>合同定性</strong>：《技术服务协议》而非《保险代理协议》</p>
 </div>
 
 <hr>
@@ -584,24 +682,6 @@
     <tr><td><strong>第四阶段</strong></td><td>评估是否建设统一API中台</td><td>决定是否升级方案C</td></tr>
   </tbody>
 </table>
-
-<h3>当前阶段是否需要原型</h3>
-
-<p>当前阶段<strong>不建议先画详细原型</strong>，原因是：</p>
-<ul>
-  <li>现在的核心问题是方案选型，不是页面交互细化</li>
-  <li>保险公司接入方式、支付链路、动态报价规则都还未最终确定</li>
-  <li>如果先画原型，后续方案变化时大概率需要整体重画</li>
-</ul>
-
-<p>当前阶段建议保留：</p>
-<ul>
-  <li>方案流程图</li>
-  <li>方案对比表</li>
-  <li>接口和回传规则说明</li>
-</ul>
-
-<p>待首期方案明确后，再补页面原型会更高效。</p>
 
 <hr>
 

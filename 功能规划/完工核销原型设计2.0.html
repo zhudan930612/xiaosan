@@ -1046,6 +1046,38 @@
         .annotation-body li {
             margin-bottom: 2px;
         }
+
+        /* 标注可编辑态 */
+        .annotation-body[contenteditable="true"] {
+            cursor: text;
+            outline: none;
+            min-height: 40px;
+        }
+
+        .annotation-body[contenteditable="true"]:hover {
+            background: rgba(255, 197, 61, 0.1);
+            border-radius: 2px;
+        }
+
+        .annotation-body[contenteditable="true"]:focus {
+            background: rgba(255, 197, 61, 0.15);
+            border-radius: 2px;
+            box-shadow: inset 0 0 0 1px #FFC53D;
+        }
+
+        /* 标注标题栏：右侧显示编辑提示 */
+        .annotation-box:hover .annotation-edit-hint {
+            opacity: 1;
+        }
+
+        .annotation-edit-hint {
+            float: right;
+            font-size: 11px;
+            color: #FFC53D;
+            font-weight: normal;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -1055,8 +1087,8 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（申请完工核销 按钮）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（申请完工核销 按钮）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>显示条件：</strong>
                         <ul>
                             <li>工程状态为「正常施工」时显示此按钮</li>
@@ -1067,8 +1099,8 @@
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（整改记录）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（整改记录）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         整改记录与核销入口同页展示，便于用户确认整改状态后再发起申请。<br><br>
                         「去整改 >」点击后跳转至对应整改提交页面。
                     </div>
@@ -1141,15 +1173,15 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（驳回原因回显区域）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（驳回原因回显区域）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>显示条件：</strong>仅当本次申请存在历史被驳回记录时显示，首次申请不显示此区域。<br><br>
                         <strong>交互规则：</strong>「我知道了」点击后收起卡片，仅本次页面访问有效，不影响下次进入时的展示。
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（实际完工日期）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（实际完工日期）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>日期范围限制：</strong>
                         <ul>
                             <li>最早可选：施工开始日期</li>
@@ -1159,8 +1191,8 @@
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（完工现场照片）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（完工现场照片）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>上传规则：</strong>
                         <ul>
                             <li>必填，至少3张，最多9张</li>
@@ -1254,8 +1286,8 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（提交申请 按钮校验）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（提交申请 按钮校验）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         点击「提交申请」时触发以下校验：
                         <ul>
                             <li>实际完工日期：必填</li>
@@ -1344,8 +1376,8 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（核销审核期间业务限制）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（核销审核期间业务限制）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         核销审核中期间，以下操作不可用：
                         <ul>
                             <li>不可新增巡查记录（巡查区域置灰并提示）</li>
@@ -1355,8 +1387,8 @@
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（撤销申请）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（撤销申请）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>可撤销条件：</strong>审核通过前均可撤销。<br><br>
                         <strong>撤销后效果：</strong>
                         <ul>
@@ -1460,16 +1492,16 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（列表权限与排序）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（列表权限与排序）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>权限范围：</strong>仅展示当前用户管辖范围内的待审核申请。<br><br>
                         <strong>排序规则：</strong>按申请时间倒序排列（最新在前）。<br><br>
                         点击卡片任意区域跳转至核销审核详情页（页面6）。
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（照片缩略图展示）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（照片缩略图展示）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         列表卡片中展示照片缩略图：
                         <ul>
                             <li>最多显示3张</li>
@@ -1549,16 +1581,16 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（审核操作逻辑）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（审核操作逻辑）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>「驳回申请」点击后：</strong>弹出驳回原因输入弹窗（见页面7），填写并确认后执行驳回。<br><br>
                         <strong>「审核通过」点击后：</strong>弹出二次确认弹窗，确认后工程状态变更为「已核销」，流程结束。<br><br>
                         <strong>权限限制：</strong>仅当前管辖范围内的监管人员可操作审核按钮。
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（完工照片查看）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（完工照片查看）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         点击照片缩略图可放大查看，支持左右滑动切换。<br><br>
                         审核人员应重点核查照片内容是否符合完工标准。
                     </div>
@@ -1669,8 +1701,8 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（驳回原因弹窗规则）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（驳回原因弹窗规则）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>字段规则：</strong>驳回原因为必填，最多200字。<br><br>
                         <strong>按钮状态：</strong>驳回原因未填写时，「确认驳回」按钮置灰不可点击。<br><br>
                         <strong>确认驳回后效果：</strong>
@@ -1761,8 +1793,8 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（「更多操作」菜单）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（「更多操作」菜单）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         点击「更多操作 ▼」展开操作菜单，包含：
                         <ul>
                             <li>直接核销</li>
@@ -1772,8 +1804,8 @@
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（两种核销路径对比）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（两种核销路径对比）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>施工方申请审核：</strong>施工方发起 → 监管审核 → 审核通过后生效<br><br>
                         <strong>监管端直接核销：</strong>监管人员现场操作 → 立即生效，无需审核流程<br><br>
                         两种方式最终效果相同，工程均归档为「已核销」状态。
@@ -1831,16 +1863,16 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（直接核销特殊规则）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（直接核销特殊规则）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>操作人：</strong>监管人员，核销立即生效，无需审核流程。<br><br>
                         <strong>现场图片：</strong>至少3张（必填），建议拍摄完工全貌、设备撤离情况。<br><br>
                         提交成功后工程直接变更为「已核销」状态并归档。
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（「是否已完工」选「否」时）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（「是否已完工」选「否」时）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <span class="annotation-warn">⚠️ 待确认：</span>选「否」时：
                         <ul>
                             <li>方案A：「确认核销」按钮置灰，不可提交</li>
@@ -1940,15 +1972,15 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（列表内容与排序）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（列表内容与排序）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>权限范围：</strong>仅展示当前用户管辖范围内的已核销工程。<br><br>
                         <strong>排序规则：</strong>按核销时间倒序排列。
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（核销方式字段）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（核销方式字段）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         核销方式取值说明：
                         <ul>
                             <li>「施工方申请」：施工方提交申请 → 监管审核通过</li>
@@ -2023,16 +2055,16 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（核销后整改记录处理）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（核销后整改记录处理）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         核销前遗留的「待整改」记录，核销后15天内仍可提交整改材料。<br><br>
                         超过15天未整改：系统自动标记为「逾期未整改」，并通知相关监管人员。<br><br>
                         整改记录补充完成后，档案自动更新，不影响核销状态。
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（档案查看权限）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（档案查看权限）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         <strong>可查看人员：</strong>施工方、业主、监管人员均可查看。<br><br>
                         <strong>编辑限制：</strong>档案内容不可编辑，仅供查阅和追溯。<br><br>
                         <span class="annotation-warn">⚠️ 待确认：</span>档案是否支持导出/下载PDF？
@@ -2173,8 +2205,8 @@
         <div class="page-unit">
             <div class="annotation-col">
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（已核销状态限制）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（已核销状态限制）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         工程核销后以下操作不可用：
                         <ul>
                             <li>不可新增巡查记录（无「新增巡查」入口）</li>
@@ -2184,8 +2216,8 @@
                     </div>
                 </div>
                 <div class="annotation-box">
-                    <div class="annotation-title">📌 注（遗留整改记录规则）</div>
-                    <div class="annotation-body">
+                    <div class="annotation-title">📌 注（遗留整改记录规则）<span class="annotation-edit-hint">✏️ 可编辑</span></div>
+                    <div class="annotation-body" contenteditable="true">
                         核销前遗留的「待整改」记录：
                         <ul>
                             <li>核销后15天内「去整改」按钮保持可用</li>

@@ -88,13 +88,17 @@
             display: none;
         }
 
-        /* 页面标题 */
+        /* 页面标题 - 位于手机框架外部 */
         .page-title {
-            font-size: 12px;
-            color: #999;
-            margin: 8px 0 10px;
+            font-size: 14px;
+            color: #333;
+            margin: 0 0 12px 0;
             text-align: center;
-            font-weight: 500;
+            font-weight: 600;
+            background: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         /* 导航栏 - 渐变绿色 */
@@ -1011,11 +1015,18 @@
 
         /* ===================== 标注样式 ===================== */
 
-        /* 页面单元：标注列 + 手机框架并排 */
+        /* 页面单元：标注列 + (标题+手机框架)并排 */
         .page-unit {
             display: flex;
             align-items: flex-start;
             gap: 16px;
+        }
+
+        /* 手机框架容器：包含标题和手机框架 */
+        .phone-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         /* 标注列容器 */
@@ -1126,7 +1137,9 @@
                     </div>
                 </div>
             </div>
-            <div class="phone-frame">
+            <div class="phone-container">
+                <div class="page-title">页面1：施工方工程详情（核销入口）</div>
+                <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
                     <span class="status-icons">📶 📡 🔋</span>
@@ -1137,7 +1150,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面1：施工方工程详情（核销入口）</div>
                     <div class="content">
                         <!-- 工程信息卡片 -->
                         <div class="card">
@@ -1226,6 +1238,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面2：完工核销申请页</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1237,7 +1250,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面2：完工核销申请页</div>
                     <div class="content">
                         <!-- 驳回原因回显 -->
                         <div class="reject-notice">
@@ -1324,6 +1336,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面3：完工核销申请页（填写完成）</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1335,7 +1348,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面3：完工核销申请页（填写完成）</div>
                     <div class="content">
                         <!-- 工程信息 -->
                         <div class="section-title">工程信息</div>
@@ -1428,6 +1440,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面4：工程详情（核销审核中）</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1439,7 +1452,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面4：工程详情（核销审核中）</div>
                     <div class="content">
                         <!-- 流程状态卡片 -->
                         <div class="flow-card">
@@ -1543,6 +1555,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面5：监管人员核销待审核列表</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1554,7 +1567,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面5：监管人员核销待审核列表</div>
                     <div class="content">
                         <!-- 筛选标签 -->
                         <div class="filter-tags">
@@ -1631,6 +1643,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面6：核销审核详情页</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1642,7 +1655,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面6：核销审核详情页</div>
                     <div class="content">
                         <!-- 工程标题 -->
                         <div class="card">
@@ -1752,6 +1764,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面7：驳回原因输入弹窗</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1763,7 +1776,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面7：驳回原因输入弹窗</div>
                     <div class="content">
                         <!-- 工程标题 -->
                         <div class="card">
@@ -1853,6 +1865,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面8：巡检端工程详情（直接核销）</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1864,7 +1877,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面8：巡检端工程详情（直接核销）</div>
                     <div class="content">
                         <!-- 工程信息卡片 -->
                         <div class="card">
@@ -1926,6 +1938,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面9：巡检端直接核销页面</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -1937,7 +1950,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面9：巡检端直接核销页面</div>
                     <div class="content">
                         <!-- 工程信息 -->
                         <div class="section-title">工程信息</div>
@@ -2037,6 +2049,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面10：已核销工程列表</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -2048,7 +2061,6 @@
                     <span class="nav-action">筛选</span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面10：已核销工程列表</div>
                     <div class="content">
                         <!-- 筛选标签 -->
                         <div class="filter-tags">
@@ -2121,6 +2133,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面11：核销档案详情页</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -2132,7 +2145,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面11：核销档案详情页</div>
                     <div class="content">
                         <!-- 工程标题 -->
                         <div class="card">
@@ -2280,6 +2292,7 @@
                     </div>
                 </div>
             </div>
+            <div class="page-title">页面12：工程详情（已核销）</div>
             <div class="phone-frame">
                 <div class="status-bar">
                     <span class="status-time">9:41</span>
@@ -2291,7 +2304,6 @@
                     <span class="nav-action"></span>
                 </div>
                 <div class="phone-screen">
-                    <div class="page-title">页面12：工程详情（已核销）</div>
                     <div class="content">
                         <!-- 工程信息卡片 -->
                         <div class="card">

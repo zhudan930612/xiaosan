@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭装修申报流程原型</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .prototype-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .prototype-subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .pages-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            padding: 6px 16px;
+            background: #E6F7F0;
+            border-radius: 16px;
+            color: #00B578;
+        }
+
+        /* ========== 手机框架 ========== */
+        .phone-frame {
+            width: 375px;
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .signal-icon, .wifi-icon, .battery-icon {
+            width: 18px;
+            height: 12px;
+        }
+
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: #fff;
+        }
+
+        .nav-back {
+            position: absolute;
+            left: 16px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .phone-screen {
+            background: #F5F5F5;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+        }
+
+        .content {
+            flex: 1;
+            min-height: 667px;
+            padding: 16px;
+        }
+
+        /* ========== PC后台框架 ========== */
+        .pc-frame {
+            width: 1200px;
+            background: #f0f2f5;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+        }
+
+        .pc-header {
+            height: 64px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            color: #fff;
+        }
+
+        .pc-logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .pc-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .pc-container {
+            display: flex;
+            min-height: 700px;
+        }
+
+        .pc-sidebar {
+            width: 200px;
+            background: #fff;
+            border-right: 1px solid #E5E5E5;
+            padding: 16px 0;
+        }
+
+        .pc-menu-item {
+            padding: 12px 24px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pc-menu-item:hover, .pc-menu-item.active {
+            background: #E6F7F0;
+            color: #00B578;
+            border-right: 3px solid #00B578;
+        }
+
+        .pc-main {
+            flex: 1;
+            padding: 24px;
+        }
+
+        /* ========== 高级编辑器样式 ========== */
+        /* 编辑工具栏 */
+        .editor-toolbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            gap: 12px;
+        }
+
+        .edit-toggle, .save-btn {
+            padding: 10px 20px;
+            border-radius: 24px;
+            border: none;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 181, 120, 0.3);
+            transition: all 0.3s;
+        }
+
+        .edit-toggle:hover, .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 181, 120, 0.4);
+        }
+
+        .edit-toggle.active {
+            background: #FF3B30;
+        }
+
+        .save-btn {
+            display: none;
+        }
+
+        /* 卡片编辑工具栏 */
+        .card-toolbar {
+            position: absolute;
+            top: -36px;
+            right: 0;
+            display: none;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #333;
+            border-radius: 8px;
+            z-index: 100;
+        }
+
+        .edit-mode .editable-card:hover .card-toolbar {
+            display: flex;
+        }
+
+        .card-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .card-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1);
+        }
+
+        .card-drag {
+            cursor: move;
+        }
+
+        /* 编辑模式下的卡片样式 */
+        .edit-mode .editable-card {
+            position: relative;
+            border: 2px dashed transparent;
+            transition: all 0.2s;
+        }
+
+        .edit-mode .editable-card:hover {
+            border-color: #00B578;
+            box-shadow: 0 4px 20px rgba(0, 181, 120, 0.15);
+        }
+
+        /* 添加卡片按钮 */
+        .add-card-btn {
+            width: 100%;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            background: transparent;
+            color: #999;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+            margin-top: 12px;
+        }
+
+        .edit-mode .add-card-btn {
+            display: block;
+        }
+
+        .add-card-btn:hover {
+            border-color: #00B578;
+            color: #00B578;
+            background: rgba(0, 181, 120, 0.05);
+        }
+
+        /* 可编辑文字 - 修改为非编辑模式默认可编辑 */
+        .editable-text {
+            transition: all 0.2s;
+        }
+
+        .editable-text:hover {
+            background: rgba(0, 181, 120, 0.08);
+        }
+
+        .editable-text:focus {
+            outline: none;
+            box-shadow: inset 0 0 0 1px #00B578;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        /* 拖拽时的样式 */
+        .editable-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+
+        .editable-card.drag-over {
+            border-top: 3px solid #00B578;
+        }
+
+        /* Toast 提示 */
+        .editor-toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            z-index: 10000;
+            animation: toastIn 0.3s ease;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 编辑模式禁用标注编辑 */
+        .edit-mode .annotation-box {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* ========== 标注样式 ========== */
+        .page-with-annotation {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .annotation-panel {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        .annotation-box {
+            background: #FFFBE6;
+            border: 1px dashed #FFC53D;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .annotation-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .annotation-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .annotation-content ul {
+            margin: 0;
+            padding-left: 16px;
+        }
+
+        .annotation-content li {
+            margin-bottom: 4px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 16px;
+            margin-top: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #00B578;
+            border-radius: 2px;
+        }
+
+        .form-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #E5E5E5;
+        }
+
+        .form-item:last-child {
+            border-bottom: none;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .form-label.required::before {
+            content: '*';
+            color: #FF4D4F;
+            margin-right: 4px;
+        }
+
+        .form-value {
+            font-size: 14px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-input {
+            border: none;
+            background: transparent;
+            text-align: right;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            width: 200px;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .input-placeholder {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            color: #fff;
+            border: none;
+            height: 48px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #00B578;
+            border: 1px solid #00B578;
+            height: 48px;
+            border-radius: 24px;
+            font-size: 16px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .bottom-action {
+            padding: 16px;
+            background: #fff;
+            display: flex;
+            gap: 12px;
+        }
+
+        .upload-box {
+            width: 80px;
+            height: 80px;
+            border: 1px dashed #00B578;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #00B578;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .upload-box .icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+        }
+
+        .tag-primary {
+            background: #00B578;
+            color: #fff;
+        }
+
+        .tag-default {
+            background: #F5F5F5;
+            color: #666;
+            border: 1px solid #E5E5E5;
+        }
+
+        .tag-success {
+            background: #E6F7F0;
+            color: #00B578;
+        }
+
+        .tag-warning {
+            background: #FFF7E6;
+            color: #FF9500;
+        }
+
+        .tag-danger {
+            background: #FFF2F0;
+            color: #FF4D4F;
+        }
+
+        /* ========== 可编辑样式 ========== */
+        .editable-text[contenteditable="true"] {
+            cursor: text;
+            transition: all 0.2s;
+        }
+
+        .editable-text[contenteditable="true"]:hover {
+            background: rgba(0, 181, 120, 0.08);
+        }
+
+        .editable-text[contenteditable="true"]:focus {
+            outline: none;
+            box-shadow: inset 0 0 0 1px #00B578;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        /* ========== 页面1: 登录 ========== */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 24px;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .login-input {
+            width: 100%;
+            height: 52px;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            padding: 0 16px;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+
+        .login-btn {
+            margin-top: 24px;
+        }
+
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .login-link {
+            color: #00B578;
+        }
+
+        /* ========== 页面2: 申报类型选择 ========== */
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 8px;
+        }
+
+        .type-item {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .type-item:hover, .type-item.active {
+            border-color: #00B578;
+            background: #E6F7F0;
+        }
+
+        .type-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 28px;
+            margin: 0 auto 12px;
+        }
+
+        .type-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .type-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* ========== 页面3: 装修申报表单 ========== */
+        .form-section {
+            margin-bottom: 16px;
+        }
+
+        .upload-list {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .uploaded-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: #F5F5F5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .uploaded-img .delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #FF4D4F;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            gap: 24px;
+        }
+
+        .radio-item, .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .radio-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radio-circle.checked {
+            border-color: #00B578;
+            background: #00B578;
+        }
+
+        .radio-circle.checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .checkbox-square {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox-square.checked {
+            border-color: #00B578;
+            background: #00B578;
+        }
+
+        .checkbox-square.checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 12px;
+        }
+
+        /* ========== 页面4: 提交成功 ========== */
+        .success-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 24px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: #E6F7F0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00B578;
+            font-size: 48px;
+            margin-bottom: 24px;
+        }
+
+        .success-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .success-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .success-info {
+            background: #F5F5F5;
+            border-radius: 8px;
+            padding: 16px;
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .success-info-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .success-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ========== PC后台样式 ========== */
+        .pc-login-box {
+            width: 400px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 40px;
+            margin: 100px auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .pc-login-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .pc-input {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            padding: 0 16px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .pc-btn {
+            width: 100%;
+            height: 44px;
+            background: #00B578;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .pc-filter-bar {
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .pc-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pc-filter-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .pc-filter-select {
+            padding: 6px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .pc-table {
+            width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .pc-table-header {
+            display: grid;
+            grid-template-columns: 80px 2fr 1fr 1fr 1fr 120px;
+            background: #F5F5F5;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .pc-table-row {
+            display: grid;
+            grid-template-columns: 80px 2fr 1fr 1fr 1fr 120px;
+            padding: 16px;
+            border-bottom: 1px solid #F0F0F0;
+            font-size: 14px;
+            color: #666;
+            align-items: center;
+        }
+
+        .pc-table-row:hover {
+            background: #F5F5F5;
+        }
+
+        .pc-status-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .pc-btn-small {
+            padding: 6px 16px;
+            border: 1px solid #00B578;
+            color: #00B578;
+            background: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .pc-detail-header {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .pc-detail-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .pc-detail-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .pc-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .pc-detail-label {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .pc-detail-value {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .pc-detail-section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .pc-detail-section.editable-card {
+            padding-top: 40px;
+        }
+
+        .pc-audit-action.editable-card {
+            position: relative;
+            padding-top: 40px;
+        }
+
+        .pc-audit-action .card-content-area {
+            padding: 16px 0;
+        }
+
+        .pc-detail-header.editable-card {
+            position: relative;
+            padding-top: 40px;
+        }
+
+        .pc-detail-header .card-content-area {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .pc-section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 16px;
+            padding-left: 12px;
+            border-left: 4px solid #00B578;
+        }
+
+        .pc-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .pc-info-item {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pc-info-label {
+            font-size: 14px;
+            color: #666;
+            min-width: 100px;
+        }
+
+        .pc-info-value {
+            font-size: 14px;
+            color: #333;
+            flex: 1;
+        }
+
+        .pc-image-list {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pc-image-item {
+            width: 120px;
+            height: 120px;
+            background: #F5F5F5;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .pc-audit-action {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .pc-textarea {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 16px;
+        }
+
+        .pc-btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .pc-btn-primary {
+            padding: 10px 24px;
+            background: #00B578;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .pc-btn-danger {
+            padding: 10px 24px;
+            background: #FF4D4F;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* 卡片大小调节 */
+        .editable-card.resizing {
+            user-select: none;
+        }
+
+        .editable-card.resizing .card-content-area {
+            pointer-events: none;
+        }
+
+        /* 添加内容菜单 */
+        .add-content-menu {
+            position: absolute;
+            top: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 8px;
+            display: none;
+            z-index: 1000;
+            min-width: 140px;
+        }
+
+        .add-content-menu.show {
+            display: block;
+        }
+
+        .add-content-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-content-item:hover {
+            background: #F5F5F5;
+        }
+
+        /* 调节大小时的手柄 */
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, transparent 50%, #00B578 50%);
+            border-radius: 0 0 8px 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .edit-mode .editable-card:hover .resize-handle {
+            opacity: 0.6;
+        }
+
+        .edit-mode .editable-card.resizing .resize-handle {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 编辑工具栏 -->
+    <div class="editor-toolbar">
+        <button id="editToggle" class="edit-toggle">
+            <span class="edit-icon">✏️</span>
+            <span class="edit-text">进入编辑</span>
+        </button>
+        <button id="saveBtn" class="save-btn">
+            <span>💾</span> 保存干净HTML
+        </button>
+    </div>
+
+    <div class="prototype-title editable-text" contenteditable="true">家庭装修申报流程原型</div>
+    <div class="prototype-subtitle editable-text" contenteditable="true">用户端小程序 + 管理后台 PC端</div>
+
+    <!-- 用户端页面 -->
+    <div style="margin-bottom: 40px;">
+        <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; padding: 8px 16px; background: #E6F7F0; border-radius: 8px; display: inline-block;">
+            一、用户端（小程序）
+        </div>
+
+        <div class="pages-container">
+            <!-- 页面1: 登录 -->
+            <div class="page-wrapper">
+                <div class="page-label editable-text" contenteditable="true">1. 用户登录</div>
+                <div class="page-with-annotation">
+                    <div class="annotation-panel">
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（页面说明）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                用户登录入口，支持手机号+密码登录。首次使用需先注册账号。
+                            </div>
+                        </div>
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（登录按钮）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>点击后校验手机号格式（11位数字）</li>
+                                    <li>密码不能为空</li>
+                                    <li>登录失败提示："手机号或密码错误"</li>
+                                    <li>登录成功跳转至首页</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（其他入口）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>注册账号：跳转注册页面</li>
+                                    <li>忘记密码：跳转密码重置流程</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phone-frame">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <div class="status-icons">
+                            <svg class="signal-icon" viewBox="0 0 18 12" fill="none"><rect x="12" y="2" width="2" height="8" rx="1" fill="white"/><rect x="8" y="4" width="2" height="6" rx="1" fill="white"/><rect x="4" y="6" width="2" height="4" rx="1" fill="white" fill-opacity="0.5"/><rect y="8" width="2" height="2" rx="1" fill="white" fill-opacity="0.3"/></svg>
+                            <svg class="wifi-icon" viewBox="0 0 18 12" fill="none"><path d="M9 0L0 8h18L9 0z" fill="white"/><path d="M9 5l-4 4h8l-4-4z" fill="white"/></svg>
+                            <svg class="battery-icon" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="23" height="11" rx="2" stroke="white"/><rect x="2" y="2" width="18" height="8" rx="1" fill="white"/><rect x="24" y="4" width="2" height="4" rx="1" fill="white"/></svg>
+                        </div>
+                    </div>
+                    <div class="phone-screen">
+                        <div class="content" style="min-height: 667px; display: flex; flex-direction: column;">
+                            <div class="login-container" style="flex: 1;">
+                                <div class="login-logo editable-text" contenteditable="true">装</div>
+                                <div class="login-title editable-text" contenteditable="true">装修申报系统</div>
+                                <div class="login-form">
+                                    <input type="text" class="login-input editable-text" placeholder="请输入手机号" contenteditable="true">
+                                    <input type="password" class="login-input" placeholder="请输入密码">
+                                    <button class="btn-primary login-btn editable-text" contenteditable="true">登录</button>
+                                    <div class="login-options">
+                                        <span class="login-link editable-text" contenteditable="true">注册账号</span>
+                                        <span class="login-link editable-text" contenteditable="true">忘记密码</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; padding: 24px; font-size: 12px; color: #999;">
+                                <span class="editable-text" contenteditable="true">登录即表示同意《用户协议》和《隐私政策》</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- 页面2: 申报类型选择 -->
+            <div class="page-wrapper">
+                <div class="page-label editable-text" contenteditable="true">2. 申报类型选择</div>
+                <div class="phone-frame">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <div class="status-icons">
+                            <svg class="signal-icon" viewBox="0 0 18 12" fill="none"><rect x="12" y="2" width="2" height="8" rx="1" fill="white"/><rect x="8" y="4" width="2" height="6" rx="1" fill="white"/><rect x="4" y="6" width="2" height="4" rx="1" fill="white" fill-opacity="0.5"/><rect y="8" width="2" height="2" rx="1" fill="white" fill-opacity="0.3"/></svg>
+                            <svg class="wifi-icon" viewBox="0 0 18 12" fill="none"><path d="M9 0L0 8h18L9 0z" fill="white"/><path d="M9 5l-4 4h8l-4-4z" fill="white"/></svg>
+                            <svg class="battery-icon" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="23" height="11" rx="2" stroke="white"/><rect x="2" y="2" width="18" height="8" rx="1" fill="white"/><rect x="24" y="4" width="2" height="4" rx="1" fill="white"/></svg>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <span class="nav-back">←</span>
+                        <span class="nav-title editable-text" contenteditable="true">选择申报类型</span>
+                    </div>
+                    <div class="phone-screen">
+                        <div class="content" style="min-height: 667px;">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 16px; padding: 0 8px;">
+                                <span class="editable-text" contenteditable="true">请选择您需要申报的工程类型</span>
+                            </div>
+                            <div class="type-grid">
+                                <div class="type-item active">
+                                    <div class="type-icon editable-text" contenteditable="true">家</div>
+                                    <div class="type-name editable-text" contenteditable="true">家庭装修</div>
+                                    <div class="type-desc editable-text" contenteditable="true">住宅室内装修</div>
+                                </div>
+                                <div class="type-item">
+                                    <div class="type-icon" style="background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);">商</div>
+                                    <div class="type-name editable-text" contenteditable="true">商铺装修</div>
+                                    <div class="type-desc editable-text" contenteditable="true">商业空间装修</div>
+                                </div>
+                                <div class="type-item">
+                                    <div class="type-icon" style="background: linear-gradient(135deg, #FAAD14 0%, #D48806 100%);">改</div>
+                                    <div class="type-name editable-text" contenteditable="true">改造改建</div>
+                                    <div class="type-desc editable-text" contenteditable="true">房屋结构改造</div>
+                                </div>
+                                <div class="type-item">
+                                    <div class="type-icon" style="background: linear-gradient(135deg, #722ED1 0%, #531DAB 100%);">外</div>
+                                    <div class="type-name editable-text" contenteditable="true">外立面改造</div>
+                                    <div class="type-desc editable-text" contenteditable="true">外墙及门面装修</div>
+                                </div>
+                            </div>
+                            <div class="card" style="margin-top: 24px;">
+                                <div style="font-size: 14px; color: #666; line-height: 1.6;">
+                                    <span class="editable-text" contenteditable="true">💡 提示：家庭装修申报适用于住宅室内装修工程，包括水电改造、墙面地面铺装等。</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-action">
+                            <button class="btn-primary editable-text" contenteditable="true">下一步，填写申报信息</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面3: 装修申报表单 -->
+            <div class="page-wrapper">
+                <div class="page-label editable-text" contenteditable="true">3. 家庭装修申报</div>
+                <div class="page-with-annotation">
+                    <div class="annotation-panel">
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（业主信息）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>业主姓名：必填，2-20个字符</li>
+                                    <li>身份证号：必填，18位身份证格式校验</li>
+                                    <li>联系电话：必填，11位手机号格式</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（装修内容）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>多选框形式，至少选一项</li>
+                                    <li>如选择"其他"，需填写补充说明</li>
+                                    <li>涉及拆改需额外上传结构安全证明</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（材料上传）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>带*为必填材料</li>
+                                    <li>支持jpg/png/pdf格式</li>
+                                    <li>单张不超过10MB</li>
+                                    <li>长按已上传图片可删除/预览</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（按钮说明）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>暂存：保存草稿，不提交审核</li>
+                                    <li>提交申报：校验所有必填项后提交</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phone-frame">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <div class="status-icons">
+                            <svg class="signal-icon" viewBox="0 0 18 12" fill="none"><rect x="12" y="2" width="2" height="8" rx="1" fill="white"/><rect x="8" y="4" width="2" height="6" rx="1" fill="white"/><rect x="4" y="6" width="2" height="4" rx="1" fill="white" fill-opacity="0.5"/><rect y="8" width="2" height="2" rx="1" fill="white" fill-opacity="0.3"/></svg>
+                            <svg class="wifi-icon" viewBox="0 0 18 12" fill="none"><path d="M9 0L0 8h18L9 0z" fill="white"/><path d="M9 5l-4 4h8l-4-4z" fill="white"/></svg>
+                            <svg class="battery-icon" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="23" height="11" rx="2" stroke="white"/><rect x="2" y="2" width="18" height="8" rx="1" fill="white"/><rect x="24" y="4" width="2" height="4" rx="1" fill="white"/></svg>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <span class="nav-back">←</span>
+                        <span class="nav-title editable-text" contenteditable="true">家庭装修申报</span>
+                    </div>
+                    <div class="phone-screen">
+                        <div class="content card-editor-container" style="min-height: 800px;">
+                            <!-- 业主信息 -->
+                            <div class="form-section editable-card" data-card-id="1" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="section-title editable-text" contenteditable="true">业主信息</div>
+                                <div class="card card-content-area">
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">业主姓名</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入业主姓名" contenteditable="true">
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">身份证号</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入身份证号" contenteditable="true">
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">联系电话</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入联系电话" contenteditable="true">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 房屋信息 -->
+                            <div class="form-section editable-card" data-card-id="2" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="section-title editable-text" contenteditable="true">房屋信息</div>
+                                <div class="card card-content-area">
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">房屋地址</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请选择省市区" contenteditable="true">
+                                            <span style="color: #999;">▼</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">详细地址</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入小区名称、楼栋、房号" contenteditable="true">
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">房屋性质</span>
+                                        <div class="form-value">
+                                            <div class="radio-group">
+                                                <div class="radio-item">
+                                                    <div class="radio-circle checked"></div>
+                                                    <span class="editable-text" contenteditable="true">自有</span>
+                                                </div>
+                                                <div class="radio-item">
+                                                    <div class="radio-circle"></div>
+                                                    <span class="editable-text" contenteditable="true">租赁</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">房屋面积</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入面积" contenteditable="true">
+                                            <span style="color: #666;">㎡</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 装修信息 -->
+                            <div class="form-section editable-card" data-card-id="3" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="section-title editable-text" contenteditable="true">装修信息</div>
+                                <div class="card card-content-area">
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">装修项目</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入装修项目名称" contenteditable="true">
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">计划开工日期</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请选择日期" contenteditable="true">
+                                            <span style="color: #999;">▼</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label required editable-text" contenteditable="true">计划完工日期</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请选择日期" contenteditable="true">
+                                            <span style="color: #999;">▼</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-item" style="align-items: flex-start; padding: 16px 0;">
+                                        <span class="form-label required editable-text" contenteditable="true">装修内容</span>
+                                        <div class="form-value" style="flex-direction: column; align-items: flex-end;">
+                                            <div class="checkbox-group" style="flex-direction: column; gap: 12px;">
+                                                <div class="checkbox-item">
+                                                    <div class="checkbox-square checked"></div>
+                                                    <span class="editable-text" contenteditable="true">水电改造</span>
+                                                </div>
+                                                <div class="checkbox-item">
+                                                    <div class="checkbox-square checked"></div>
+                                                    <span class="editable-text" contenteditable="true">墙面地面铺装</span>
+                                                </div>
+                                                <div class="checkbox-item">
+                                                    <div class="checkbox-square"></div>
+                                                    <span class="editable-text" contenteditable="true">吊顶安装</span>
+                                                </div>
+                                                <div class="checkbox-item">
+                                                    <div class="checkbox-square"></div>
+                                                    <span class="editable-text" contenteditable="true">门窗更换</span>
+                                                </div>
+                                                <div class="checkbox-item">
+                                                    <div class="checkbox-square"></div>
+                                                    <span class="editable-text" contenteditable="true">厨卫改造</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label editable-text" contenteditable="true">是否涉及拆改</span>
+                                        <div class="form-value">
+                                            <div class="radio-group">
+                                                <div class="radio-item">
+                                                    <div class="radio-circle"></div>
+                                                    <span class="editable-text" contenteditable="true">是</span>
+                                                </div>
+                                                <div class="radio-item">
+                                                    <div class="radio-circle checked"></div>
+                                                    <span class="editable-text" contenteditable="true">否</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 施工信息 -->
+                            <div class="form-section editable-card" data-card-id="4" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="section-title editable-text" contenteditable="true">施工单位信息</div>
+                                <div class="card card-content-area">
+                                    <div class="form-item">
+                                        <span class="form-label editable-text" contenteditable="true">施工单位名称</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入施工单位名称" contenteditable="true">
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label editable-text" contenteditable="true">负责人姓名</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入负责人姓名" contenteditable="true">
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label editable-text" contenteditable="true">负责人电话</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入负责人电话" contenteditable="true">
+                                        </div>
+                                    </div>
+                                    <div class="form-item">
+                                        <span class="form-label editable-text" contenteditable="true">施工人数</span>
+                                        <div class="form-value">
+                                            <input type="text" class="form-input editable-text" placeholder="请输入施工人数" contenteditable="true">
+                                            <span style="color: #666;">人</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 材料上传 -->
+                            <div class="form-section editable-card" data-card-id="5" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="section-title editable-text" contenteditable="true">材料上传</div>
+                                <div class="card card-content-area">
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 14px; color: #333; margin-bottom: 8px;">
+                                            <span class="editable-text" contenteditable="true">* 业主身份证复印件</span>
+                                        </div>
+                                        <div class="upload-list">
+                                            <div class="upload-box">
+                                                <div class="icon">+</div>
+                                                <span class="editable-text" contenteditable="true">点击上传</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 14px; color: #333; margin-bottom: 8px;">
+                                            <span class="editable-text" contenteditable="true">* 房产证或租赁合同</span>
+                                        </div>
+                                        <div class="upload-list">
+                                            <div class="upload-box">
+                                                <div class="icon">+</div>
+                                                <span class="editable-text" contenteditable="true">点击上传</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 14px; color: #333; margin-bottom: 8px;">
+                                            <span class="editable-text" contenteditable="true">* 装修设计方案</span>
+                                        </div>
+                                        <div class="upload-list">
+                                            <div class="upload-box">
+                                                <div class="icon">+</div>
+                                                <span class="editable-text" contenteditable="true">点击上传</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 14px; color: #333; margin-bottom: 8px;">
+                                            <span class="editable-text" contenteditable="true">施工图纸（如有）</span>
+                                        </div>
+                                        <div class="upload-list">
+                                            <div class="upload-box">
+                                                <div class="icon">+</div>
+                                                <span class="editable-text" contenteditable="true">点击上传</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 承诺书 -->
+                            <div class="editable-card" data-card-id="6" draggable="false" style="margin-bottom: 12px;">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="card card-content-area">
+                                    <div class="checkbox-item" style="padding: 8px 0;">
+                                        <div class="checkbox-square checked"></div>
+                                        <span style="font-size: 14px; color: #666; line-height: 1.5;">
+                                            <span class="editable-text" contenteditable="true">本人承诺所填写的信息真实有效，并遵守相关装修管理规定，如有违反愿意承担相应责任。</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="add-card-btn">
+                                <span>+</span> 添加卡片
+                            </button>
+                        </div>
+                        <div class="bottom-action">
+                            <button class="btn-secondary editable-text" contenteditable="true">暂存</button>
+                            <button class="btn-primary editable-text" contenteditable="true" style="flex: 1;">提交申报</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- 页面4: 提交成功 -->
+            <div class="page-wrapper">
+                <div class="page-label editable-text" contenteditable="true">4. 提交成功</div>
+                <div class="phone-frame">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <div class="status-icons">
+                            <svg class="signal-icon" viewBox="0 0 18 12" fill="none"><rect x="12" y="2" width="2" height="8" rx="1" fill="white"/><rect x="8" y="4" width="2" height="6" rx="1" fill="white"/><rect x="4" y="6" width="2" height="4" rx="1" fill="white" fill-opacity="0.5"/><rect y="8" width="2" height="2" rx="1" fill="white" fill-opacity="0.3"/></svg>
+                            <svg class="wifi-icon" viewBox="0 0 18 12" fill="none"><path d="M9 0L0 8h18L9 0z" fill="white"/><path d="M9 5l-4 4h8l-4-4z" fill="white"/></svg>
+                            <svg class="battery-icon" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="23" height="11" rx="2" stroke="white"/><rect x="2" y="2" width="18" height="8" rx="1" fill="white"/><rect x="24" y="4" width="2" height="4" rx="1" fill="white"/></svg>
+                        </div>
+                    </div>
+                    <div class="phone-screen">
+                        <div class="content" style="min-height: 667px;">
+                            <div class="success-container">
+                                <div class="success-icon">✓</div>
+                                <div class="success-title editable-text" contenteditable="true">申报提交成功</div>
+                                <div class="success-desc editable-text" contenteditable="true">
+                                    您的装修申报材料已提交成功，<br>工作人员将在3个工作日内完成审核，<br>请耐心等待。
+                                </div>
+                                <div class="success-info">
+                                    <div class="success-info-item">
+                                        <span style="color: #999;">申报编号</span>
+                                        <span style="color: #333; font-weight: 500;">ZX20260326001</span>
+                                    </div>
+                                    <div class="success-info-item">
+                                        <span style="color: #999;">申报时间</span>
+                                        <span style="color: #333;">2026-03-26 14:30</span>
+                                    </div>
+                                    <div class="success-info-item">
+                                        <span style="color: #999;">当前状态</span>
+                                        <span style="color: #1890FF;">待审核</span>
+                                    </div>
+                                </div>
+                                <button class="btn-primary editable-text" contenteditable="true" style="width: 200px;">查看申报进度</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理后台页面 -->
+    <div style="margin-top: 60px;">
+        <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; padding: 8px 16px; background: #E6F7F0; border-radius: 8px; display: inline-block;">
+            二、管理后台（PC端）
+        </div>
+
+        <div class="pages-container">
+            <!-- 页面5: 后台登录 -->
+            <div class="page-wrapper" style="width: 100%;">
+                <div class="page-label editable-text" contenteditable="true">5. 管理后台登录</div>
+                <div class="pc-frame" style="width: 800px;">
+                    <div style="background: linear-gradient(135deg, #00B578 0%, #00A86B 100%); height: 200px; display: flex; align-items: center; justify-content: center;">
+                        <div style="color: #fff; font-size: 28px; font-weight: bold;">装修申报管理系统</div>
+                    </div>
+                    <div class="pc-login-box">
+                        <div class="pc-login-title editable-text" contenteditable="true">管理员登录</div>
+                        <input type="text" class="pc-input editable-text" placeholder="请输入账号" contenteditable="true">
+                        <input type="password" class="pc-input" placeholder="请输入密码">
+                        <button class="pc-btn editable-text" contenteditable="true">登录</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面6: 申报列表 -->
+            <div class="page-wrapper" style="width: 100%;">
+                <div class="page-label editable-text" contenteditable="true">6. 申报管理列表</div>
+                <div class="pc-frame">
+                    <div class="pc-header">
+                        <div class="pc-logo editable-text" contenteditable="true">装修申报管理系统</div>
+                        <div class="pc-user">
+                            <span>👤</span>
+                            <span class="editable-text" contenteditable="true">管理员</span>
+                            <span>▼</span>
+                        </div>
+                    </div>
+                    <div class="pc-container">
+                        <div class="pc-sidebar">
+                            <div class="pc-menu-item editable-text" contenteditable="true">🏠 首页</div>
+                            <div class="pc-menu-item active editable-text" contenteditable="true">📋 申报管理</div>
+                            <div class="pc-menu-item editable-text" contenteditable="true">🏗️ 工程管理</div>
+                            <div class="pc-menu-item editable-text" contenteditable="true">📊 数据统计</div>
+                            <div class="pc-menu-item editable-text" contenteditable="true">⚙️ 系统设置</div>
+                        </div>
+                        <div class="pc-main">
+                            <div style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 16px;">
+                                <span class="editable-text" contenteditable="true">申报管理</span>
+                            </div>
+
+                            <div class="pc-filter-bar">
+                                <div class="pc-filter-item">
+                                    <span class="pc-filter-label editable-text" contenteditable="true">申报状态：</span>
+                                    <select class="pc-filter-select">
+                                        <option class="editable-text">全部</option>
+                                        <option class="editable-text">待审核</option>
+                                        <option class="editable-text">审核通过</option>
+                                        <option class="editable-text">审核驳回</option>
+                                    </select>
+                                </div>
+                                <div class="pc-filter-item">
+                                    <span class="pc-filter-label editable-text" contenteditable="true">申报类型：</span>
+                                    <select class="pc-filter-select">
+                                        <option class="editable-text">全部</option>
+                                        <option class="editable-text">家庭装修</option>
+                                        <option class="editable-text">商铺装修</option>
+                                    </select>
+                                </div>
+                                <div class="pc-filter-item">
+                                    <span class="pc-filter-label editable-text" contenteditable="true">申报时间：</span>
+                                    <input type="text" class="pc-filter-select editable-text" placeholder="开始日期" style="width: 120px;">
+                                    <span>~</span>
+                                    <input type="text" class="pc-filter-select editable-text" placeholder="结束日期" style="width: 120px;">
+                                </div>
+                                <div class="pc-filter-item" style="margin-left: auto;">
+                                    <input type="text" class="pc-filter-select editable-text" placeholder="搜索业主姓名/地址" style="width: 200px;">
+                                    <button class="pc-btn-small editable-text" contenteditable="true">搜索</button>
+                                </div>
+                            </div>
+
+                            <div class="pc-table">
+                                <div class="pc-table-header">
+                                    <span class="editable-text" contenteditable="true">申报编号</span>
+                                    <span class="editable-text" contenteditable="true">业主信息</span>
+                                    <span class="editable-text" contenteditable="true">申报类型</span>
+                                    <span class="editable-text" contenteditable="true">申报时间</span>
+                                    <span class="editable-text" contenteditable="true">状态</span>
+                                    <span class="editable-text" contenteditable="true">操作</span>
+                                </div>
+                                <div class="pc-table-row">
+                                    <span>ZX20260326001</span>
+                                    <div>
+                                        <div style="color: #333;">张三</div>
+                                        <div style="font-size: 12px; color: #999;">138****8888</div>
+                                    </div>
+                                    <span>家庭装修</span>
+                                    <span>2026-03-26</span>
+                                    <span class="pc-status-tag" style="background: #E6F4FF; color: #1890FF;">待审核</span>
+                                    <button class="pc-btn-small editable-text" contenteditable="true">审核</button>
+                                </div>
+                                <div class="pc-table-row">
+                                    <span>ZX20260325002</span>
+                                    <div>
+                                        <div style="color: #333;">李四</div>
+                                        <div style="font-size: 12px; color: #999;">139****9999</div>
+                                    </div>
+                                    <span>商铺装修</span>
+                                    <span>2026-03-25</span>
+                                    <span class="pc-status-tag" style="background: #E6F7F0; color: #00B578;">审核通过</span>
+                                    <button class="pc-btn-small editable-text" contenteditable="true">查看</button>
+                                </div>
+                                <div class="pc-table-row">
+                                    <span>ZX20260324003</span>
+                                    <div>
+                                        <div style="color: #333;">王五</div>
+                                        <div style="font-size: 12px; color: #999;">137****7777</div>
+                                    </div>
+                                    <span>家庭装修</span>
+                                    <span>2026-03-24</span>
+                                    <span class="pc-status-tag" style="background: #FFF2F0; color: #FF4D4F;">审核驳回</span>
+                                    <button class="pc-btn-small editable-text" contenteditable="true">查看</button>
+                                </div>
+                                <div class="pc-table-row">
+                                    <span>ZX20260323004</span>
+                                    <div>
+                                        <div style="color: #333;">赵六</div>
+                                        <div style="font-size: 12px; color: #999;">136****6666</div>
+                                    </div>
+                                    <span>改造改建</span>
+                                    <span>2026-03-23</span>
+                                    <span class="pc-status-tag" style="background: #E6F4FF; color: #1890FF;">待审核</span>
+                                    <button class="pc-btn-small editable-text" contenteditable="true">审核</button>
+                                </div>
+                                <div class="pc-table-row">
+                                    <span>ZX20260322005</span>
+                                    <div>
+                                        <div style="color: #333;">孙七</div>
+                                        <div style="font-size: 12px; color: #999;">135****5555</div>
+                                    </div>
+                                    <span>家庭装修</span>
+                                    <span>2026-03-22</span>
+                                    <span class="pc-status-tag" style="background: #E6F7F0; color: #00B578;">审核通过</span>
+                                    <button class="pc-btn-small editable-text" contenteditable="true">查看</button>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; margin-top: 16px; gap: 8px;">
+                                <button class="pc-btn-default" style="padding: 6px 12px;">上一页</button>
+                                <button class="pc-btn-primary" style="padding: 6px 12px;">1</button>
+                                <button class="pc-btn-default" style="padding: 6px 12px;">2</button>
+                                <button class="pc-btn-default" style="padding: 6px 12px;">3</button>
+                                <button class="pc-btn-default" style="padding: 6px 12px;">下一页</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面7: 申报详情审核 -->
+            <div class="page-wrapper" style="width: 100%;">
+                <div class="page-label editable-text" contenteditable="true">7. 申报详情审核</div>
+                <div class="page-with-annotation">
+                    <div class="annotation-panel">
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（审核状态）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>待审核：蓝色标签，可操作</li>
+                                    <li>审核通过：绿色标签，只读</li>
+                                    <li>审核驳回：红色标签，显示驳回原因</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（审核操作）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>审核意见：必填，最少10个字符</li>
+                                    <li>通过审核：状态变更为"审核通过"</li>
+                                    <li>驳回申请：状态变更为"审核驳回"，需填写驳回原因</li>
+                                    <li>暂存：保存审核意见，不提交</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="annotation-box">
+                            <div class="annotation-title editable-text" contenteditable="true">📌 注（材料查看）</div>
+                            <div class="annotation-content editable-text" contenteditable="true">
+                                <ul>
+                                    <li>点击图片可预览大图</li>
+                                    <li>支持下载附件到本地</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pc-frame">
+                    <div class="pc-header">
+                        <div class="pc-logo editable-text" contenteditable="true">装修申报管理系统</div>
+                        <div class="pc-user">
+                            <span>👤</span>
+                            <span class="editable-text" contenteditable="true">管理员</span>
+                            <span>▼</span>
+                        </div>
+                    </div>
+                    <div class="pc-container">
+                        <div class="pc-sidebar">
+                            <div class="pc-menu-item editable-text" contenteditable="true">🏠 首页</div>
+                            <div class="pc-menu-item active editable-text" contenteditable="true">📋 申报管理</div>
+                            <div class="pc-menu-item editable-text" contenteditable="true">🏗️ 工程管理</div>
+                            <div class="pc-menu-item editable-text" contenteditable="true">📊 数据统计</div>
+                            <div class="pc-menu-item editable-text" contenteditable="true">⚙️ 系统设置</div>
+                        </div>
+                        <div class="pc-main">
+                            <div style="margin-bottom: 16px;">
+                                <span style="color: #00B578; cursor: pointer;">← <span class="editable-text" contenteditable="true">返回列表</span></span>
+                            </div>
+
+                            <div class="pc-detail-header editable-card" data-card-id="pc-header" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="pc-detail-title editable-text" contenteditable="true">申报详情 - ZX20260326001</div>
+                                <div class="pc-detail-info card-content-area">
+                                    <div class="pc-detail-item">
+                                        <span class="pc-detail-label editable-text" contenteditable="true">申报状态</span>
+                                        <span class="pc-detail-value" style="color: #1890FF;">
+                                            <span class="pc-status-tag" style="background: #E6F4FF; color: #1890FF;">待审核</span>
+                                        </span>
+                                    </div>
+                                    <div class="pc-detail-item">
+                                        <span class="pc-detail-label editable-text" contenteditable="true">申报类型</span>
+                                        <span class="pc-detail-value editable-text" contenteditable="true">家庭装修</span>
+                                    </div>
+                                    <div class="pc-detail-item">
+                                        <span class="pc-detail-label editable-text" contenteditable="true">申报时间</span>
+                                        <span class="pc-detail-value">2026-03-26 14:30</span>
+                                    </div>
+                                    <div class="pc-detail-item">
+                                        <span class="pc-detail-label editable-text" contenteditable="true">申报人</span>
+                                        <span class="pc-detail-value editable-text" contenteditable="true">张三</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pc-detail-section editable-card" data-card-id="pc-section-1" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="pc-section-title editable-text" contenteditable="true">业主信息</div>
+                                <div class="pc-info-grid card-content-area">
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">业主姓名：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">张三</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">身份证号：</span>
+                                        <span class="pc-info-value">440***********1234</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">联系电话：</span>
+                                        <span class="pc-info-value">138****8888</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">房屋性质：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">自有</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pc-detail-section editable-card" data-card-id="pc-section-2" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="pc-section-title editable-text" contenteditable="true">房屋信息</div>
+                                <div class="pc-info-grid card-content-area">
+                                    <div class="pc-info-item" style="grid-column: span 2;">
+                                        <span class="pc-info-label editable-text" contenteditable="true">房屋地址：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">广东省深圳市南山区粤海街道科技园社区高新南一道001号高新公寓5栋1201室</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">房屋面积：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">120 ㎡</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">所在楼层：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">12层/共28层</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pc-detail-section editable-card" data-card-id="pc-section-3" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="pc-section-title editable-text" contenteditable="true">装修信息</div>
+                                <div class="pc-info-grid card-content-area">
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">装修项目：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">高新公寓室内装修</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">是否拆改：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">否</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">计划开工：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">2026-04-01</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">计划完工：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">2026-06-30</span>
+                                    </div>
+                                    <div class="pc-info-item" style="grid-column: span 2;">
+                                        <span class="pc-info-label editable-text" contenteditable="true">装修内容：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">水电改造、墙面地面铺装</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pc-detail-section editable-card" data-card-id="pc-section-4" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="pc-section-title editable-text" contenteditable="true">施工单位信息</div>
+                                <div class="pc-info-grid card-content-area">
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">单位名称：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">深圳市华美装修公司</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">负责人：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">王师傅</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">联系电话：</span>
+                                        <span class="pc-info-value">136****6666</span>
+                                    </div>
+                                    <div class="pc-info-item">
+                                        <span class="pc-info-label editable-text" contenteditable="true">施工人数：</span>
+                                        <span class="pc-info-value editable-text" contenteditable="true">5 人</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pc-detail-section editable-card" data-card-id="pc-section-5" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="pc-section-title editable-text" contenteditable="true">附件材料</div>
+                                <div class="card-content-area">
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                                            <span class="editable-text" contenteditable="true">业主身份证复印件</span>
+                                        </div>
+                                        <div class="pc-image-list">
+                                            <div class="pc-image-item editable-text" contenteditable="true">身份证正面</div>
+                                            <div class="pc-image-item editable-text" contenteditable="true">身份证反面</div>
+                                        </div>
+                                    </div>
+                                    <div style="margin-bottom: 16px;">
+                                        <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                                            <span class="editable-text" contenteditable="true">房产证</span>
+                                        </div>
+                                        <div class="pc-image-list">
+                                            <div class="pc-image-item editable-text" contenteditable="true">房产证扫描件</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                                            <span class="editable-text" contenteditable="true">装修设计方案</span>
+                                        </div>
+                                        <div class="pc-image-list">
+                                            <div class="pc-image-item editable-text" contenteditable="true">设计方案1</div>
+                                            <div class="pc-image-item editable-text" contenteditable="true">设计方案2</div>
+                                            <div class="pc-image-item editable-text" contenteditable="true">设计方案3</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pc-audit-action editable-card" data-card-id="pc-audit" draggable="false">
+                                <div class="card-toolbar">
+                                    <button class="card-btn card-drag" title="拖拽排序">⋮⋮</button>
+                                    <button class="card-btn card-add-content" title="添加内容">➕</button>
+                                    <button class="card-btn card-resize" title="调节大小">↔️</button>
+                                    <button class="card-btn card-copy" title="复制卡片">📋</button>
+                                    <button class="card-btn card-delete" title="删除卡片">🗑️</button>
+                                </div>
+                                <div class="pc-section-title editable-text" contenteditable="true">审核操作</div>
+                                <div class="card-content-area">
+                                    <textarea class="pc-textarea editable-text" placeholder="请输入审核意见（必填）" contenteditable="true"></textarea>
+                                    <div class="pc-btn-group">
+                                        <button class="pc-btn-default editable-text" contenteditable="true">暂存</button>
+                                        <button class="pc-btn-danger editable-text" contenteditable="true">驳回申请</button>
+                                        <button class="pc-btn-primary editable-text" contenteditable="true">通过审核</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 高级编辑器功能 ==========
+        let isEditMode = false;
+        const editToggle = document.getElementById('editToggle');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // 编辑模式切换
+        editToggle.addEventListener('click', () => {
+            isEditMode = !isEditMode;
+            document.body.classList.toggle('edit-mode', isEditMode);
+            editToggle.classList.toggle('active', isEditMode);
+            editToggle.querySelector('.edit-text').textContent = isEditMode ? '退出编辑' : '进入编辑';
+            saveBtn.style.display = isEditMode ? 'block' : 'none';
+
+            // 切换所有可编辑文本的状态
+            document.querySelectorAll('.editable-text').forEach(el => {
+                el.contentEditable = isEditMode;
+            });
+
+            // 切换卡片的拖拽状态
+            document.querySelectorAll('.editable-card').forEach(card => {
+                card.draggable = isEditMode;
+            });
+        });
+
+        // 快捷键 Ctrl+E
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                editToggle.click();
+            }
+        });
+
+        // Toast 提示
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'editor-toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        // ========== 卡片操作功能 ==========
+        class CardEditor {
+            constructor(container) {
+                this.container = container;
+                this.init();
+                this.initResize();
+                this.initAddContent();
+            }
+
+            init() {
+                // 复制卡片
+                this.container.addEventListener('click', (e) => {
+                    if (e.target.closest('.card-copy')) {
+                        const card = e.target.closest('.editable-card');
+                        this.copyCard(card);
+                    }
+                });
+
+                // 删除卡片
+                this.container.addEventListener('click', (e) => {
+                    if (e.target.closest('.card-delete')) {
+                        const card = e.target.closest('.editable-card');
+                        this.deleteCard(card);
+                    }
+                });
+
+                // 添加卡片
+                const addBtn = this.container.querySelector('.add-card-btn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => this.addCard());
+                }
+
+                // 初始化拖拽
+                this.initDragAndDrop();
+            }
+
+            copyCard(card) {
+                const clone = card.cloneNode(true);
+                clone.dataset.cardId = Date.now();
+                clone.style.width = '';
+                clone.style.height = '';
+                card.after(clone);
+                showToast('卡片已复制');
+            }
+
+            deleteCard(card) {
+                if (confirm('确定要删除这个卡片吗？')) {
+                    card.remove();
+                    showToast('卡片已删除');
+                }
+            }
+
+            addCard() {
+                const template = this.container.querySelector('.editable-card');
+                if (template) {
+                    const newCard = template.cloneNode(true);
+                    newCard.dataset.cardId = Date.now();
+                    newCard.style.width = '';
+                    newCard.style.height = '';
+                    const title = newCard.querySelector('.section-title');
+                    if (title) title.textContent = '新分组';
+                    const inputs = newCard.querySelectorAll('.form-input');
+                    inputs.forEach(input => input.value = '');
+                    this.container.insertBefore(newCard, this.container.querySelector('.add-card-btn'));
+                    showToast('新卡片已添加');
+                }
+            }
+
+            initDragAndDrop() {
+                let draggedCard = null;
+
+                this.container.addEventListener('dragstart', (e) => {
+                    if (e.target.classList.contains('editable-card')) {
+                        draggedCard = e.target;
+                        e.target.classList.add('dragging');
+                    }
+                });
+
+                this.container.addEventListener('dragend', (e) => {
+                    if (e.target.classList.contains('editable-card')) {
+                        e.target.classList.remove('dragging');
+                    }
+                });
+
+                this.container.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const afterCard = this.getDragAfterCard(this.container, e.clientY);
+                    if (afterCard) {
+                        this.container.insertBefore(draggedCard, afterCard);
+                    } else {
+                        const addBtn = this.container.querySelector('.add-card-btn');
+                        if (addBtn) {
+                            this.container.insertBefore(draggedCard, addBtn);
+                        } else {
+                            this.container.appendChild(draggedCard);
+                        }
+                    }
+                });
+            }
+
+            getDragAfterCard(container, y) {
+                const cards = [...container.querySelectorAll('.editable-card:not(.dragging)')];
+                return cards.reduce((closest, card) => {
+                    const box = card.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset, element: card };
+                    }
+                    return closest;
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            // 初始化大小调节功能
+            initResize() {
+                let isResizing = false;
+                let currentCard = null;
+                let startX, startY, startWidth, startHeight;
+
+                this.container.addEventListener('click', (e) => {
+                    if (e.target.closest('.card-resize')) {
+                        const card = e.target.closest('.editable-card');
+                        if (card.classList.contains('resizing')) {
+                            card.classList.remove('resizing');
+                            showToast('已退出调节模式');
+                        } else {
+                            // 移除其他卡片的调节模式
+                            this.container.querySelectorAll('.editable-card.resizing').forEach(c => c.classList.remove('resizing'));
+                            card.classList.add('resizing');
+                            showToast('调节模式：拖拽卡片右下角改变大小');
+                        }
+                    }
+                });
+
+                // 添加resize handle到所有卡片
+                this.container.querySelectorAll('.editable-card').forEach(card => {
+                    if (!card.querySelector('.resize-handle')) {
+                        const handle = document.createElement('div');
+                        handle.className = 'resize-handle';
+                        card.appendChild(handle);
+                    }
+                });
+
+                // 监听handle的拖拽
+                this.container.addEventListener('mousedown', (e) => {
+                    if (e.target.classList.contains('resize-handle')) {
+                        isResizing = true;
+                        currentCard = e.target.closest('.editable-card');
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        startWidth = currentCard.offsetWidth;
+                        startHeight = currentCard.offsetHeight;
+                        e.preventDefault();
+                    }
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isResizing || !currentCard) return;
+                    const newWidth = startWidth + (e.clientX - startX);
+                    const newHeight = startHeight + (e.clientY - startY);
+                    currentCard.style.width = Math.max(200, newWidth) + 'px';
+                    currentCard.style.height = Math.max(100, newHeight) + 'px';
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isResizing && currentCard) {
+                        currentCard.classList.remove('resizing');
+                    }
+                    isResizing = false;
+                    currentCard = null;
+                });
+            }
+
+            // 初始化添加内容功能
+            initAddContent() {
+                // 为每个卡片的添加内容按钮创建菜单
+                this.container.addEventListener('click', (e) => {
+                    const addBtn = e.target.closest('.card-add-content');
+                    if (addBtn) {
+                        const card = addBtn.closest('.editable-card');
+                        this.showAddContentMenu(addBtn, card);
+                    }
+                });
+
+                // 点击其他地方关闭菜单
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.add-content-menu') && !e.target.closest('.card-add-content')) {
+                        document.querySelectorAll('.add-content-menu').forEach(m => m.remove());
+                    }
+                });
+            }
+
+            showAddContentMenu(button, card) {
+                // 移除其他菜单
+                document.querySelectorAll('.add-content-menu').forEach(m => m.remove());
+
+                const menu = document.createElement('div');
+                menu.className = 'add-content-menu show';
+                menu.innerHTML = `
+                    <div class="add-content-item" data-type="input">
+                        <span>📝</span> 输入框
+                    </div>
+                    <div class="add-content-item" data-type="label">
+                        <span>🏷️</span> 标签文字
+                    </div>
+                    <div class="add-content-item" data-type="textarea">
+                        <span>📄</span> 文本区域
+                    </div>
+                    <div class="add-content-item" data-type="radio">
+                        <span>⭕</span> 单选框
+                    </div>
+                    <div class="add-content-item" data-type="checkbox">
+                        <span>☑️</span> 复选框
+                    </div>
+                    <div class="add-content-item" data-type="upload">
+                        <span>📎</span> 上传区域
+                    </div>
+                    <div class="add-content-item" data-type="divider">
+                        <span>➖</span> 分隔线
+                    </div>
+                `;
+
+                const toolbar = button.closest('.card-toolbar');
+                toolbar.style.position = 'relative';
+                toolbar.appendChild(menu);
+
+                // 处理菜单项点击
+                menu.querySelectorAll('.add-content-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.addContentToCard(card, item.dataset.type);
+                        menu.remove();
+                    });
+                });
+            }
+
+            addContentToCard(card, type) {
+                const contentArea = card.querySelector('.card') || card;
+                let newElement;
+
+                switch(type) {
+                    case 'input':
+                        newElement = document.createElement('div');
+                        newElement.className = 'form-item';
+                        newElement.innerHTML = `
+                            <span class="form-label editable-text" contenteditable="true">新字段</span>
+                            <div class="form-value">
+                                <input type="text" class="form-input editable-text" placeholder="请输入" contenteditable="true">
+                            </div>
+                        `;
+                        break;
+                    case 'label':
+                        newElement = document.createElement('div');
+                        newElement.style.cssText = 'padding: 12px 16px; font-size: 14px; color: #666;';
+                        newElement.innerHTML = '<span class="editable-text" contenteditable="true">标签文字</span>';
+                        break;
+                    case 'textarea':
+                        newElement = document.createElement('div');
+                        newElement.style.cssText = 'padding: 12px 16px;';
+                        newElement.innerHTML = '<textarea class="pc-textarea editable-text" placeholder="请输入文本" style="height: 80px;"></textarea>';
+                        break;
+                    case 'radio':
+                        newElement = document.createElement('div');
+                        newElement.className = 'form-item';
+                        newElement.innerHTML = `
+                            <span class="form-label editable-text" contenteditable="true">选项</span>
+                            <div class="form-value">
+                                <div class="radio-group">
+                                    <div class="radio-item">
+                                        <div class="radio-circle checked"></div>
+                                        <span class="editable-text" contenteditable="true">是</span>
+                                    </div>
+                                    <div class="radio-item">
+                                        <div class="radio-circle"></div>
+                                        <span class="editable-text" contenteditable="true">否</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'checkbox':
+                        newElement = document.createElement('div');
+                        newElement.className = 'checkbox-item';
+                        newElement.style.cssText = 'padding: 8px 0;';
+                        newElement.innerHTML = `
+                            <div class="checkbox-square"></div>
+                            <span class="editable-text" contenteditable="true">选项文字</span>
+                        `;
+                        break;
+                    case 'upload':
+                        newElement = document.createElement('div');
+                        newElement.style.cssText = 'margin-bottom: 16px;';
+                        newElement.innerHTML = `
+                            <div style="font-size: 14px; color: #333; margin-bottom: 8px;">
+                                <span class="editable-text" contenteditable="true">上传材料</span>
+                            </div>
+                            <div class="upload-list">
+                                <div class="upload-box">
+                                    <div class="icon">+</div>
+                                    <span class="editable-text" contenteditable="true">点击上传</span>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'divider':
+                        newElement = document.createElement('div');
+                        newElement.style.cssText = 'border-top: 1px solid #E5E5E5; margin: 16px 0;';
+                        break;
+                }
+
+                if (newElement) {
+                    // 在内容区域末尾添加（但在添加按钮之前）
+                    const addBtn = contentArea.querySelector('.add-card-btn');
+                    if (addBtn) {
+                        contentArea.insertBefore(newElement, addBtn);
+                    } else {
+                        contentArea.appendChild(newElement);
+                    }
+                    showToast('内容已添加');
+                }
+            }
+        }
+
+        // 初始化所有卡片编辑器
+        document.querySelectorAll('.card-editor-container').forEach(container => {
+            new CardEditor(container);
+        });
+
+        // ========== 保存干净HTML ==========
+        saveBtn.addEventListener('click', () => {
+            // 克隆当前文档
+            const clone = document.documentElement.cloneNode(true);
+
+            // 移除编辑相关元素
+            const elementsToRemove = [
+                '.editor-toolbar',
+                '.card-toolbar',
+                '.add-card-btn',
+                '.editor-toast'
+            ];
+
+            elementsToRemove.forEach(selector => {
+                clone.querySelectorAll(selector).forEach(el => el.remove());
+            });
+
+            // 移除编辑相关样式类
+            clone.querySelectorAll('.edit-mode').forEach(el => {
+                el.classList.remove('edit-mode');
+            });
+
+            // 移除可编辑属性
+            clone.querySelectorAll('[contenteditable]').forEach(el => {
+                el.removeAttribute('contenteditable');
+            });
+
+            // 移除拖拽属性
+            clone.querySelectorAll('[draggable]').forEach(el => {
+                el.removeAttribute('draggable');
+            });
+
+            // 移除 editable-card 类和相关属性
+            clone.querySelectorAll('.editable-card').forEach(el => {
+                el.classList.remove('editable-card');
+                el.removeAttribute('data-card-id');
+            });
+
+            // 生成干净的HTML
+            const cleanHTML = '<!DOCTYPE html>\n' + clone.outerHTML;
+
+            // 下载文件
+            const blob = new Blob([cleanHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '家庭装修申报流程原型_干净版.html';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('已保存干净HTML');
+        });
+    </script>
+</body>
+</html>

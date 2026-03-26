@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C端PM交流社区 - 完整版原型设计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .pages-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+        }
+
+        .page-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        /* 手机框架 */
+        .phone-frame {
+            width: 375px;
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            overflow: hidden;
+            height: auto;
+            position: relative;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* 导航栏 */
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .nav-back {
+            position: absolute;
+            left: 16px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .nav-right {
+            position: absolute;
+            right: 16px;
+            font-size: 14px;
+        }
+
+        /* 页面内容区 */
+        .content {
+            min-height: 667px;
+            background: #f5f5f5;
+            padding-bottom: 20px;
+        }
+
+        /* Tab栏 */
+        .tab-bar {
+            display: flex;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tab-item.active {
+            color: #1890FF;
+            font-weight: 600;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: #1890FF;
+            border-radius: 2px;
+        }
+
+        /* 卡片 */
+        .card {
+            background: #fff;
+            margin: 12px;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .avatar-small {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+
+        .card-meta {
+            flex: 1;
+        }
+
+        .card-author {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-info {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .card-tag {
+            padding: 4px 10px;
+            background: #E6F7FF;
+            color: #1890FF;
+            font-size: 12px;
+            border-radius: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .card-summary {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .card-actions {
+            display: flex;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            margin-right: 24px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .action-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            display: flex;
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            padding: 8px 0;
+            position: relative;
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            text-align: center;
+            color: #999;
+            font-size: 11px;
+        }
+
+        .bottom-nav-item.active {
+            color: #1890FF;
+        }
+
+        /* 发布按钮 */
+        .fab-button {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(24,144,255,0.4);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* 详情页样式 */
+        .detail-content {
+            padding: 16px;
+            background: #fff;
+        }
+
+        .detail-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            padding-left: 10px;
+            border-left: 3px solid #1890FF;
+        }
+
+        .detail-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .detail-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            margin: 12px 0;
+        }
+
+        /* 评论区域 */
+        .comment-section {
+            background: #fff;
+            margin-top: 12px;
+            padding: 16px;
+        }
+
+        .comment-header {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .comment-item {
+            display: flex;
+            margin-bottom: 16px;
+        }
+
+        .comment-content {
+            flex: 1;
+            margin-left: 12px;
+        }
+
+        .comment-author {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .comment-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 6px;
+        }
+
+        .comment-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* 发布页样式 */
+        .form-group {
+            background: #fff;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 48px;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 0 16px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #1890FF;
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 15px;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-textarea:focus {
+            border-color: #1890FF;
+        }
+
+        .image-upload {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .upload-item {
+            width: 80px;
+            height: 80px;
+            border: 2px dashed #d9d9d9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 24px;
+        }
+
+        .template-select {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+        }
+
+        .template-item {
+            padding: 12px 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .template-item.active {
+            background: #E6F7FF;
+            color: #1890FF;
+            border: 1px solid #1890FF;
+        }
+
+        /* 主按钮 */
+        .btn-primary {
+            margin: 24px 16px;
+            height: 48px;
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            border: none;
+            border-radius: 24px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: calc(100% - 32px);
+        }
+
+        /* 个人主页 */
+        .profile-header {
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            padding: 32px 16px 24px;
+            color: #fff;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1890FF;
+            font-size: 28px;
+            font-weight: 600;
+            margin-right: 16px;
+        }
+
+        .profile-text {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .profile-bio {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .profile-stats {
+            display: flex;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-outline {
+            flex: 1;
+            height: 36px;
+            background: transparent;
+            border: 1px solid #fff;
+            border-radius: 18px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-solid {
+            flex: 1;
+            height: 36px;
+            background: #fff;
+            border: none;
+            border-radius: 18px;
+            color: #1890FF;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 标注 */
+        .annotation-panel {
+            width: 200px;
+            background: #FFFBE6;
+            border: 1px dashed #FFC53D;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .annotation-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .annotation-item {
+            margin-bottom: 8px;
+            padding-left: 8px;
+            border-left: 2px solid #FFC53D;
+        }
+
+        /* 可编辑样式 */
+        [contenteditable="true"] {
+            cursor: text;
+        }
+
+        [contenteditable="true"]:hover {
+            background: rgba(24,144,255,0.08);
+            outline: 1px dashed #1890FF;
+        }
+
+        [contenteditable="true"]:focus {
+            background: rgba(24,144,255,0.12);
+            outline: 2px solid #1890FF;
+        }
+
+        .btn-primary[contenteditable="true"]:focus {
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%) !important;
+            box-shadow: inset 0 0 0 2px #fff, 0 0 0 3px #1890FF;
+            outline: none;
+        }
+
+        /* 搜索页样式 */
+        .search-header {
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            padding: 8px 16px 12px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .search-cancel {
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .search-history {
+            background: #fff;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .history-tag {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .hot-section {
+            background: #fff;
+            padding: 16px;
+        }
+
+        .hot-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .hot-rank {
+            width: 24px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #999;
+        }
+
+        .hot-rank.top {
+            color: #FF4D4F;
+        }
+
+        .hot-text {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .hot-tag {
+            padding: 2px 6px;
+            background: #FFF1F0;
+            color: #FF4D4F;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        /* 消息页样式 */
+        .message-tabs {
+            display: flex;
+            background: #fff;
+            padding: 0 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .message-tab {
+            padding: 12px 20px;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+
+        .message-tab.active {
+            color: #1890FF;
+            font-weight: 600;
+        }
+
+        .message-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: #1890FF;
+        }
+
+        .message-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #FF4D4F;
+            border-radius: 50%;
+        }
+
+        .message-list {
+            background: #fff;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .message-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        .message-icon.like {
+            background: #FFF1F0;
+        }
+
+        .message-icon.comment {
+            background: #E6F7FF;
+        }
+
+        .message-icon.follow {
+            background: #F6FFED;
+        }
+
+        .message-icon.system {
+            background: #FFFBE6;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .message-desc {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .message-count {
+            min-width: 20px;
+            height: 20px;
+            background: #FF4D4F;
+            color: #fff;
+            font-size: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+
+        /* 登录页样式 */
+        .login-container {
+            min-height: 667px;
+            background: #fff;
+            padding: 60px 24px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .login-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 40px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .login-form {
+            margin-bottom: 24px;
+        }
+
+        .login-input-group {
+            margin-bottom: 16px;
+        }
+
+        .login-input {
+            width: 100%;
+            height: 52px;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            padding: 0 16px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .login-input:focus {
+            border-color: #1890FF;
+        }
+
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .login-link {
+            font-size: 13px;
+            color: #1890FF;
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 32px 0;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #f0f0f0;
+        }
+
+        .login-divider span {
+            padding: 0 16px;
+        }
+
+        .social-login {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+        }
+
+        .social-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .login-agreement {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 32px;
+            line-height: 1.8;
+        }
+
+        .login-agreement a {
+            color: #1890FF;
+        }
+
+        /* 关注/粉丝列表 */
+        .user-list {
+            background: #fff;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1890FF 0%, #096DD9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .user-desc {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .follow-btn {
+            padding: 6px 16px;
+            border: 1px solid #1890FF;
+            border-radius: 16px;
+            color: #1890FF;
+            font-size: 13px;
+            background: #fff;
+        }
+
+        .follow-btn.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        /* 设置页样式 */
+        .settings-list {
+            background: #fff;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .settings-icon {
+            width: 24px;
+            font-size: 18px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        .settings-text {
+            flex: 1;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .settings-arrow {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .settings-value {
+            font-size: 14px;
+            color: #999;
+            margin-right: 8px;
+        }
+
+        .logout-btn {
+            margin: 24px 16px;
+            height: 48px;
+            background: #fff;
+            border: 1px solid #FF4D4F;
+            border-radius: 24px;
+            color: #FF4D4F;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: calc(100% - 32px);
+        }
+    </style>
+</head>
+<body>
+    <h1 class="page-title" contenteditable="true">C端PM交流社区 - 完整版原型设计</h1>
+
+    <div class="pages-container">
+        <!-- 1. 首页/发现页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="nav-bar">
+                    <span class="nav-back">🔍</span>
+                    <span contenteditable="true">发现</span>
+                    <span class="nav-right">⚙️</span>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active" contenteditable="true">推荐</div>
+                    <div class="tab-item" contenteditable="true">关注</div>
+                    <div class="tab-item" contenteditable="true">社交产品</div>
+                    <div class="tab-item" contenteditable="true">电商产品</div>
+                </div>
+                <div class="content">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="avatar">张</div>
+                            <div class="card-meta">
+                                <div class="card-author" contenteditable="true">张产品经理</div>
+                                <div class="card-info" contenteditable="true">2小时前 · 小红书</div>
+                            </div>
+                            <div class="card-tag" contenteditable="true">社交</div>
+                        </div>
+                        <div class="card-title" contenteditable="true">小红书「笔记详情页」交互拆解：如何提升用户停留时长</div>
+                        <div class="card-summary" contenteditable="true">从小红书最近的版本迭代中，我发现他们在详情页做了几个非常巧妙的设计改动...</div>
+                        <div class="card-image">案例配图</div>
+                        <div class="card-actions">
+                            <div class="action-item">
+                                <span class="action-icon">♥</span>
+                                <span contenteditable="true">128</span>
+                            </div>
+                            <div class="action-item">
+                                <span class="action-icon">💬</span>
+                                <span contenteditable="true">32</span>
+                            </div>
+                            <div class="action-item">
+                                <span class="action-icon">⭐</span>
+                                <span contenteditable="true">收藏</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="avatar">李</div>
+                            <div class="card-meta">
+                                <div class="card-author" contenteditable="true">李产品</div>
+                                <div class="card-info" contenteditable="true">5小时前 · 拼多多</div>
+                            </div>
+                            <div class="card-tag" contenteditable="true">电商</div>
+                        </div>
+                        <div class="card-title" contenteditable="true">拼多多「百亿补贴」页面的转化策略分析</div>
+                        <div class="card-summary" contenteditable="true">百亿补贴是拼多多最重要的流量入口之一，本文从信息架构、价格展示、信任背书三个维度分析其转化策略...</div>
+                        <div class="card-image">案例配图</div>
+                        <div class="card-actions">
+                            <div class="action-item">
+                                <span class="action-icon">♥</span>
+                                <span contenteditable="true">256</span>
+                            </div>
+                            <div class="action-item">
+                                <span class="action-icon">💬</span>
+                                <span contenteditable="true">48</span>
+                            </div>
+                            <div class="action-item">
+                                <span class="action-icon">⭐</span>
+                                <span contenteditable="true">收藏</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fab-button">+</div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="bottom-nav-item active">
+                        <div style="font-size: 20px;">🏠</div>
+                        <div>首页</div>
+                    </div>
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">🔍</div>
+                        <div>发现</div>
+                    </div>
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">💬</div>
+                        <div>消息</div>
+                    </div>
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">👤</div>
+                        <div>我的</div>
+                    </div>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">1. 首页/发现页</div>
+                <div class="annotation-item">顶部搜索入口</div>
+                <div class="annotation-item">Tab切换：推荐、关注、分类</div>
+                <div class="annotation-item">案例卡片流</div>
+                <div class="annotation-item">悬浮发布按钮</div>
+            </div>
+        </div>
+
+        <!-- 2. 搜索页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="search-header">
+                    <div class="search-box">
+                        <div class="search-input-wrapper">
+                            <span style="color: rgba(255,255,255,0.7); margin-right: 8px;">🔍</span>
+                            <input type="text" class="search-input" placeholder="搜索产品、案例或用户" value="">
+                        </div>
+                        <span class="search-cancel" contenteditable="true">取消</span>
+                    </div>
+                </div>
+                <div class="content" style="background: #f5f5f5;">
+                    <div class="search-history">
+                        <div class="section-title">
+                            <span contenteditable="true">搜索历史</span>
+                            <span style="color: #999; font-size: 13px;">清空</span>
+                        </div>
+                        <div class="history-tags">
+                            <span class="history-tag" contenteditable="true">小红书</span>
+                            <span class="history-tag" contenteditable="true">交互设计</span>
+                            <span class="history-tag" contenteditable="true">用户增长</span>
+                            <span class="history-tag" contenteditable="true">抖音</span>
+                        </div>
+                    </div>
+
+                    <div class="hot-section">
+                        <div class="section-title" contenteditable="true">热门搜索</div>
+                        <div class="hot-item">
+                            <span class="hot-rank top">1</span>
+                            <span class="hot-text" contenteditable="true">小红书双列流设计</span>
+                            <span class="hot-tag">热</span>
+                        </div>
+                        <div class="hot-item">
+                            <span class="hot-rank top">2</span>
+                            <span class="hot-text" contenteditable="true">拼多多百亿补贴</span>
+                        </div>
+                        <div class="hot-item">
+                            <span class="hot-rank top">3</span>
+                            <span class="hot-text" contenteditable="true">抖音推荐算法</span>
+                            <span class="hot-tag">新</span>
+                        </div>
+                        <div class="hot-item">
+                            <span class="hot-rank">4</span>
+                            <span class="hot-text" contenteditable="true">淘宝首页改版</span>
+                        </div>
+                        <div class="hot-item">
+                            <span class="hot-rank">5</span>
+                            <span class="hot-text" contenteditable="true">微信视频号</span>
+                        </div>
+                        <div class="hot-item">
+                            <span class="hot-rank">6</span>
+                            <span class="hot-text" contenteditable="true">美团会员体系</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">2. 搜索页</div>
+                <div class="annotation-item">搜索输入框</div>
+                <div class="annotation-item">搜索历史记录</div>
+                <div class="annotation-item">热门搜索榜单</div>
+                <div class="annotation-item">热/新标签</div>
+            </div>
+        </div>
+
+        <!-- 3. 案例详情页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="nav-bar">
+                    <span class="nav-back">←</span>
+                    <span contenteditable="true">案例详情</span>
+                    <span class="nav-right">⋮</span>
+                </div>
+                <div class="content">
+                    <div class="detail-content">
+                        <div class="card-header" style="padding: 0 0 16px 0;">
+                            <div class="avatar">张</div>
+                            <div class="card-meta">
+                                <div class="card-author" contenteditable="true">张产品经理</div>
+                                <div class="card-info" contenteditable="true">2小时前 · 小红书深度拆解</div>
+                            </div>
+                            <button style="padding: 6px 16px; background: #1890FF; color: #fff; border: none; border-radius: 16px; font-size: 13px;">关注</button>
+                        </div>
+
+                        <div class="detail-title" contenteditable="true">小红书「笔记详情页」交互拆解：如何提升用户停留时长</div>
+
+                        <div class="detail-section">
+                            <div class="detail-section-title" contenteditable="true">一、背景与目标</div>
+                            <div class="detail-text" contenteditable="true">
+                                小红书近期在笔记详情页进行了多轮A/B测试，核心目标是提升用户的平均停留时长和互动率。从数据表现来看，新版本的停留时长提升了23%，互动率提升了15%。
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-section-title" contenteditable="true">二、关键设计改动</div>
+                            <div class="detail-text" contenteditable="true">
+                                1. <b>评论前置</b>：将热门评论前置展示，降低用户查看评论的路径成本<br><br>
+                                2. <b>相关推荐优化</b>：从单纯的算法推荐改为「相似内容+同作者内容」双列展示<br><br>
+                                3. <b>互动引导</b>：在内容阅读到50%时，轻提示用户点赞或收藏
+                            </div>
+                        </div>
+
+                        <div class="detail-image">配图：交互流程图</div>
+
+                        <div class="detail-section">
+                            <div class="detail-section-title" contenteditable="true">三、可借鉴点</div>
+                            <div class="detail-text" contenteditable="true">
+                                • 评论前置策略适合内容型产品，能有效提升社区氛围<br>
+                                • 相关推荐的双列策略平衡了平台目标和创作者利益<br>
+                                • 非侵入式的互动引导比强制弹窗效果更好
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-section-title" contenteditable="true">四、待讨论</div>
+                            <div class="detail-text" contenteditable="true">
+                                大家觉得这种评论前置的方式是否会影响阅读体验？欢迎在评论区讨论。
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comment-section">
+                        <div class="comment-header" contenteditable="true">评论 (32)</div>
+                        <div class="comment-item">
+                            <div class="avatar avatar-small">刘</div>
+                            <div class="comment-content">
+                                <div class="comment-author" contenteditable="true">刘产品</div>
+                                <div class="comment-text" contenteditable="true">分析得很到位，评论前置确实能提升互动率，但需要考虑负面评论的影响</div>
+                                <div class="comment-time">1小时前</div>
+                            </div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="avatar avatar-small">陈</div>
+                            <div class="comment-content">
+                                <div class="comment-author" contenteditable="true">陈设计</div>
+                                <div class="comment-text" contenteditable="true">双列推荐的设计很有意思，学习到了！</div>
+                                <div class="comment-time">2小时前</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav" style="padding: 12px 16px; justify-content: space-between;">
+                    <div style="flex: 1; height: 40px; background: #f5f5f5; border-radius: 20px; display: flex; align-items: center; padding: 0 16px; color: #999; font-size: 14px;" contenteditable="true">写评论...</div>
+                    <div style="display: flex; margin-left: 16px; gap: 16px;">
+                        <span style="font-size: 20px;">♥ 128</span>
+                        <span style="font-size: 20px;">⭐</span>
+                        <span style="font-size: 20px;">↗</span>
+                    </div>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">3. 案例详情页</div>
+                <div class="annotation-item">作者信息+关注</div>
+                <div class="annotation-item">结构化内容展示</div>
+                <div class="annotation-item">评论区互动</div>
+                <div class="annotation-item">底部操作栏</div>
+            </div>
+        </div>
+
+        <!-- 4. 发布页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="nav-bar">
+                    <span class="nav-back">取消</span>
+                    <span contenteditable="true">发布案例</span>
+                    <span class="nav-right" style="color: #1890FF; font-weight: 600;">发布</span>
+                </div>
+                <div class="content">
+                    <div class="form-group">
+                        <label class="form-label" contenteditable="true">选择分析模板</label>
+                        <div class="template-select">
+                            <div class="template-item active" contenteditable="true">功能分析</div>
+                            <div class="template-item" contenteditable="true">交互分析</div>
+                            <div class="template-item" contenteditable="true">商业分析</div>
+                            <div class="template-item" contenteditable="true">数据复盘</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" contenteditable="true">案例标题</label>
+                        <input type="text" class="form-input" placeholder="请输入案例标题" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" contenteditable="true">产品名称</label>
+                        <input type="text" class="form-input" placeholder="如：小红书、抖音" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" contenteditable="true">案例分类</label>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <span style="padding: 8px 16px; background: #E6F7FF; color: #1890FF; border-radius: 16px; font-size: 14px;" contenteditable="true">社交产品</span>
+                            <span style="padding: 8px 16px; background: #f5f5f5; color: #666; border-radius: 16px; font-size: 14px;" contenteditable="true">电商产品</span>
+                            <span style="padding: 8px 16px; background: #f5f5f5; color: #666; border-radius: 16px; font-size: 14px;" contenteditable="true">内容社区</span>
+                            <span style="padding: 8px 16px; background: #f5f5f5; color: #666; border-radius: 16px; font-size: 14px;" contenteditable="true">工具产品</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" contenteditable="true">案例分析内容</label>
+                        <textarea class="form-textarea" placeholder="请详细描述你的案例分析...
+
+建议包含：
+1. 背景与目标
+2. 关键设计/功能点
+3. 可借鉴之处
+4. 待讨论问题"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" contenteditable="true">添加配图</label>
+                        <div class="image-upload">
+                            <div class="upload-item">+</div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" contenteditable="true">发布案例</button>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">4. 发布页</div>
+                <div class="annotation-item">模板选择</div>
+                <div class="annotation-item">结构化表单</div>
+                <div class="annotation-item">分类标签选择</div>
+                <div class="annotation-item">图片上传</div>
+            </div>
+        </div>
+
+        <!-- 5. 消息页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="nav-bar">消息</div>
+                <div class="message-tabs">
+                    <div class="message-tab active">
+                        全部
+                        <span class="message-badge"></span>
+                    </div>
+                    <div class="message-tab">评论</div>
+                    <div class="message-tab">赞和收藏</div>
+                    <div class="message-tab">关注</div>
+                </div>
+                <div class="content" style="background: #f5f5f5;">
+                    <div class="message-list">
+                        <div class="message-item">
+                            <div class="message-icon comment">💬</div>
+                            <div class="message-content">
+                                <div class="message-title" contenteditable="true">评论回复</div>
+                                <div class="message-desc" contenteditable="true">刘产品回复了你的案例：分析得很到位...</div>
+                            </div>
+                            <div class="message-time">10:23</div>
+                            <div class="message-count">2</div>
+                        </div>
+                        <div class="message-item">
+                            <div class="message-icon like">♥</div>
+                            <div class="message-content">
+                                <div class="message-title" contenteditable="true">赞和收藏</div>
+                                <div class="message-desc" contenteditable="true">陈设计等3人赞了你的案例</div>
+                            </div>
+                            <div class="message-time">昨天</div>
+                        </div>
+                        <div class="message-item">
+                            <div class="message-icon follow">+</div>
+                            <div class="message-content">
+                                <div class="message-title" contenteditable="true">新增关注</div>
+                                <div class="message-desc" contenteditable="true">王设计关注了你</div>
+                            </div>
+                            <div class="message-time">昨天</div>
+                            <div class="message-count">1</div>
+                        </div>
+                        <div class="message-item">
+                            <div class="message-icon system">📢</div>
+                            <div class="message-content">
+                                <div class="message-title" contenteditable="true">系统通知</div>
+                                <div class="message-desc" contenteditable="true">你的案例已通过审核，获得推荐位</div>
+                            </div>
+                            <div class="message-time">3天前</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">🏠</div>
+                        <div>首页</div>
+                    </div>
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">🔍</div>
+                        <div>发现</div>
+                    </div>
+                    <div class="bottom-nav-item active">
+                        <div style="font-size: 20px;">💬</div>
+                        <div>消息</div>
+                    </div>
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">👤</div>
+                        <div>我的</div>
+                    </div>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">5. 消息页</div>
+                <div class="annotation-item">消息分类Tab</div>
+                <div class="annotation-item">评论/赞/关注/系统通知</div>
+                <div class="annotation-item">未读消息数量</div>
+                <div class="annotation-item">消息列表</div>
+            </div>
+        </div>
+
+        <!-- 6. 个人主页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="nav-bar" style="background: transparent; color: #333;">
+                    <span class="nav-back">←</span>
+                    <span contenteditable="true">个人主页</span>
+                    <span class="nav-right">⋮</span>
+                </div>
+                <div class="content" style="background: #fff;">
+                    <div class="profile-header">
+                        <div class="profile-info">
+                            <div class="profile-avatar">张</div>
+                            <div class="profile-text">
+                                <div class="profile-name" contenteditable="true">张产品经理</div>
+                                <div class="profile-bio" contenteditable="true">专注C端产品5年 · 前字节 · 现创业公司</div>
+                            </div>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" contenteditable="true">128</div>
+                                <div class="stat-label">案例</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" contenteditable="true">2.5k</div>
+                                <div class="stat-label">获赞</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" contenteditable="true">892</div>
+                                <div class="stat-label">关注</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" contenteditable="true">1.2k</div>
+                                <div class="stat-label">粉丝</div>
+                            </div>
+                        </div>
+                        <div class="profile-actions">
+                            <button class="btn-outline" contenteditable="true">编辑资料</button>
+                            <button class="btn-solid" contenteditable="true">+ 关注</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-bar">
+                        <div class="tab-item active" contenteditable="true">案例 128</div>
+                        <div class="tab-item" contenteditable="true">收藏 56</div>
+                        <div class="tab-item" contenteditable="true">赞过 234</div>
+                    </div>
+
+                    <div class="card" style="margin: 12px; box-shadow: none; border: 1px solid #f0f0f0;">
+                        <div class="card-tag" style="margin-bottom: 8px; display: inline-block;" contenteditable="true">社交</div>
+                        <div class="card-title" style="font-size: 15px;" contenteditable="true">小红书「笔记详情页」交互拆解</div>
+                        <div class="card-summary" style="font-size: 13px; -webkit-line-clamp: 1;" contenteditable="true">从三个维度分析小红书最近的设计改动...</div>
+                        <div style="display: flex; align-items: center; margin-top: 12px; color: #999; font-size: 12px;">
+                            <span>♥ 128</span>
+                            <span style="margin-left: 16px;">💬 32</span>
+                            <span style="margin-left: 16px;">2小时前</span>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin: 12px; box-shadow: none; border: 1px solid #f0f0f0;">
+                        <div class="card-tag" style="margin-bottom: 8px; display: inline-block;" contenteditable="true">电商</div>
+                        <div class="card-title" style="font-size: 15px;" contenteditable="true">拼多多首页信息架构分析</div>
+                        <div class="card-summary" style="font-size: 13px; -webkit-line-clamp: 1;" contenteditable="true">如何通过信息架构设计提升转化...</div>
+                        <div style="display: flex; align-items: center; margin-top: 12px; color: #999; font-size: 12px;">
+                            <span>♥ 89</span>
+                            <span style="margin-left: 16px;">💬 15</span>
+                            <span style="margin-left: 16px;">昨天</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">🏠</div>
+                        <div>首页</div>
+                    </div>
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">🔍</div>
+                        <div>发现</div>
+                    </div>
+                    <div class="bottom-nav-item">
+                        <div style="font-size: 20px;">💬</div>
+                        <div>消息</div>
+                    </div>
+                    <div class="bottom-nav-item active">
+                        <div style="font-size: 20px;">👤</div>
+                        <div>我的</div>
+                    </div>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">6. 个人主页</div>
+                <div class="annotation-item">用户信息+简介</div>
+                <div class="annotation-item">数据统计</div>
+                <div class="annotation-item">编辑/关注按钮</div>
+                <div class="annotation-item">内容Tab切换</div>
+            </div>
+        </div>
+
+        <!-- 7. 关注/粉丝列表 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="nav-bar">
+                    <span class="nav-back">←</span>
+                    <span contenteditable="true">我的关注</span>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab-item active" contenteditable="true">关注 892</div>
+                    <div class="tab-item" contenteditable="true">粉丝 1.2k</div>
+                </div>
+                <div class="content" style="background: #fff;">
+                    <div class="user-list">
+                        <div class="user-item">
+                            <div class="user-avatar">李</div>
+                            <div class="user-info">
+                                <div class="user-name" contenteditable="true">李产品</div>
+                                <div class="user-desc" contenteditable="true">电商产品经理 · 发表128篇案例</div>
+                            </div>
+                            <button class="follow-btn active">已关注</button>
+                        </div>
+                        <div class="user-item">
+                            <div class="user-avatar">王</div>
+                            <div class="user-info">
+                                <div class="user-name" contenteditable="true">王设计</div>
+                                <div class="user-desc" contenteditable="true">UI/UX设计师 · 专注移动端</div>
+                            </div>
+                            <button class="follow-btn active">已关注</button>
+                        </div>
+                        <div class="user-item">
+                            <div class="user-avatar">陈</div>
+                            <div class="user-info">
+                                <div class="user-name" contenteditable="true">陈数据</div>
+                                <div class="user-desc" contenteditable="true">数据产品经理 · 擅长增长</div>
+                            </div>
+                            <button class="follow-btn active">已关注</button>
+                        </div>
+                        <div class="user-item">
+                            <div class="user-avatar">赵</div>
+                            <div class="user-info">
+                                <div class="user-name" contenteditable="true">赵策略</div>
+                                <div class="user-desc" contenteditable="true">策略产品 · 前阿里</div>
+                            </div>
+                            <button class="follow-btn active">已关注</button>
+                        </div>
+                        <div class="user-item">
+                            <div class="user-avatar">孙</div>
+                            <div class="user-info">
+                                <div class="user-name" contenteditable="true">孙用户</div>
+                                <div class="user-desc" contenteditable="true">用户研究专家</div>
+                            </div>
+                            <button class="follow-btn active">已关注</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">7. 关注/粉丝列表</div>
+                <div class="annotation-item">Tab切换关注/粉丝</div>
+                <div class="annotation-item">用户头像+信息</div>
+                <div class="annotation-item">关注状态按钮</div>
+            </div>
+        </div>
+
+        <!-- 8. 设置页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar">9:41</div>
+                <div class="nav-bar">
+                    <span class="nav-back">←</span>
+                    <span contenteditable="true">设置</span>
+                </div>
+                <div class="content" style="background: #f5f5f5;">
+                    <div class="settings-list" style="margin-bottom: 12px;">
+                        <div class="settings-item">
+                            <span class="settings-icon">👤</span>
+                            <span class="settings-text" contenteditable="true">账号与安全</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-icon">🔔</span>
+                            <span class="settings-text" contenteditable="true">消息通知</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-icon">🔒</span>
+                            <span class="settings-text" contenteditable="true">隐私设置</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-list" style="margin-bottom: 12px;">
+                        <div class="settings-item">
+                            <span class="settings-icon">🎨</span>
+                            <span class="settings-text" contenteditable="true">主题风格</span>
+                            <span class="settings-value" contenteditable="true">跟随系统</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-icon">🌐</span>
+                            <span class="settings-text" contenteditable="true">语言</span>
+                            <span class="settings-value" contenteditable="true">简体中文</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-icon">🗑️</span>
+                            <span class="settings-text" contenteditable="true">清理缓存</span>
+                            <span class="settings-value" contenteditable="true">12.5MB</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-list">
+                        <div class="settings-item">
+                            <span class="settings-icon">⭐</span>
+                            <span class="settings-text" contenteditable="true">给应用评分</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-icon">💬</span>
+                            <span class="settings-text" contenteditable="true">意见反馈</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-icon">📖</span>
+                            <span class="settings-text" contenteditable="true">关于我们</span>
+                            <span class="settings-value" contenteditable="true">v1.0.0</span>
+                            <span class="settings-arrow">›</span>
+                        </div>
+                    </div>
+
+                    <button class="logout-btn" contenteditable="true">退出登录</button>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">8. 设置页</div>
+                <div class="annotation-item">账号与安全</div>
+                <div class="annotation-item">通知与隐私</div>
+                <div class="annotation-item">通用设置</div>
+                <div class="annotation-item">退出登录</div>
+            </div>
+        </div>
+
+        <!-- 9. 登录页 -->
+        <div class="page-wrapper">
+            <div class="phone-frame">
+                <div class="status-bar" style="background: #fff; color: #333;">9:41</div>
+                <div class="login-container">
+                    <div class="login-logo">
+                        <div class="login-icon">📱</div>
+                        <div class="login-title" contenteditable="true">PM社区</div>
+                        <div class="login-subtitle" contenteditable="true">C端产品经理的交流社区</div>
+                    </div>
+
+                    <div class="login-form">
+                        <div class="login-input-group">
+                            <input type="text" class="login-input" placeholder="手机号/邮箱">
+                        </div>
+                        <div class="login-input-group">
+                            <input type="password" class="login-input" placeholder="密码">
+                        </div>
+                        <div class="login-options">
+                            <span class="login-link" contenteditable="true">忘记密码？</span>
+                            <span class="login-link" contenteditable="true">验证码登录</span>
+                        </div>
+                        <button class="btn-primary" style="margin: 24px 0; width: 100%;" contenteditable="true">登录</button>
+                    </div>
+
+                    <div class="login-divider">
+                        <span contenteditable="true">其他登录方式</span>
+                    </div>
+
+                    <div class="social-login">
+                        <div class="social-icon">💬</div>
+                        <div class="social-icon">🔵</div>
+                        <div class="social-icon">🍎</div>
+                    </div>
+
+                    <div class="login-agreement">
+                        登录即代表同意 <a href="#">用户协议</a> 和 <a href="#">隐私政策</a><br>
+                        还没有账号？<a href="#">立即注册</a>
+                    </div>
+                </div>
+            </div>
+            <div class="annotation-panel">
+                <div class="annotation-title">9. 登录页</div>
+                <div class="annotation-item">Logo+品牌展示</div>
+                <div class="annotation-item">账号密码登录</div>
+                <div class="annotation-item">第三方登录</div>
+                <div class="annotation-item">用户协议/注册入口</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

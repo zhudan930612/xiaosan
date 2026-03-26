@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<!-- saved from url=(0228)file:///E:/AI%E7%9F%A5%E8%AF%86%E5%BA%93/%E5%B0%8F%E5%9E%8B%E5%B7%A5%E7%A8%8B%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/%E5%8A%9F%E8%83%BD%E8%A7%84%E5%88%92/%E6%9B%B4%E5%A4%9A%E6%9C%8D%E5%8A%A1%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更多服务 - 个人中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #F5F5F5;
+            padding: 20px;
+        }
+
+        .page-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: auto;
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 16px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .phone-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #F5F5F5;
+        }
+
+        .content {
+            flex: 1;
+            min-height: 667px;
+            padding-bottom: 20px;
+        }
+
+        /* 用户头像区域 */
+        .user-header {
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            padding: 30px 20px 40px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #fff;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .user-phone {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .auth-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+        }
+
+        .auth-badge::before {
+            content: "✓";
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            color: #00B578;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 6px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* 功能菜单区域 */
+        .menu-section {
+            margin: 12px 16px;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #F0F0F0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:active {
+            background: #F5F5F5;
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .icon-green { background: #E6F7F0; }
+        .icon-blue { background: #E6F4FF; }
+        .icon-orange { background: #FFF7E6; }
+        .icon-purple { background: #F0E6FF; }
+        .icon-gray { background: #F5F5F5; }
+
+        .menu-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .menu-arrow {
+            font-size: 18px;
+            color: #999;
+        }
+
+        /* 底部操作区 */
+        .bottom-action {
+            padding: 20px 16px 30px;
+            background: #F5F5F5;
+        }
+
+        .logout-btn {
+            width: 100%;
+            height: 48px;
+            border: 1px solid #FF4D4F;
+            background: #fff;
+            color: #FF4D4F;
+            border-radius: 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:active {
+            background: #FFF2F0;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            width: 100%;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-cancel {
+            background: #F5F5F5;
+            color: #666;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            color: #fff;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 20px 16px 12px;
+        }
+
+        /* 子页面样式 */
+        .sub-page-content {
+            background: #F5F5F5;
+            min-height: 600px;
+        }
+
+        .info-card {
+            background: #fff;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-title::before {
+            content: "";
+            width: 4px;
+            height: 16px;
+            background: #00B578;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .phone-list {
+            list-style: none;
+        }
+
+        .phone-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .phone-item:last-child {
+            border-bottom: none;
+        }
+
+        .phone-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .phone-number {
+            font-size: 14px;
+            color: #00B578;
+            cursor: pointer;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            cursor: pointer;
+        }
+
+        .faq-text {
+            font-size: 14px;
+            color: #333;
+            flex: 1;
+        }
+
+        .faq-arrow {
+            color: #999;
+            transition: transform 0.3s;
+        }
+
+        .faq-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 0 16px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .faq-answer.open {
+            display: block;
+        }
+
+        .tab-nav {
+            display: flex;
+            background: #fff;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 14px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab-item.active {
+            color: #00B578;
+            font-weight: 600;
+        }
+
+        .tab-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #00B578;
+            border-radius: 2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .template-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .template-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #F5F5F5;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .template-icon {
+            width: 40px;
+            height: 40px;
+            background: #E6F7F0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .template-info {
+            flex: 1;
+        }
+
+        .template-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .template-size {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .download-btn {
+            padding: 6px 12px;
+            background: #00B578;
+            color: #fff;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .process-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 0;
+        }
+
+        .process-step {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .process-step::after {
+            content: "→";
+            margin-left: 8px;
+            color: #00B578;
+        }
+
+        .process-step:last-child::after {
+            content: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- 页面1: 更多服务首页 -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>信号 WiFi 电量</span>
+            </div>
+            <div class="nav-bar">
+                <span class="back-btn" onclick="goBack()">←</span>
+                <span>更多服务</span>
+            </div>
+            <div class="phone-screen">
+                <div class="content">
+                    <!-- 用户信息区 -->
+                    <div class="user-header">
+                        <div class="user-avatar">👤</div>
+                        <div class="user-name">张三</div>
+                        <div class="user-phone">138****8888</div>
+                        <div class="auth-badge">已认证 2 家企业</div>
+                    </div>
+
+                    <!-- 功能菜单 -->
+                    <div class="menu-section">
+                        <div class="menu-item" onclick="goToPage(&#39;guide&#39;)">
+                            <div class="menu-icon icon-green">📋</div>
+                            <div class="menu-text">备案指南</div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                        <div class="menu-item" onclick="goToPage(&#39;faq&#39;)">
+                            <div class="menu-icon icon-blue">❓</div>
+                            <div class="menu-text">常见问题</div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                        <div class="menu-item" onclick="goToPage(&#39;contact&#39;)">
+                            <div class="menu-icon icon-orange">📞</div>
+                            <div class="menu-text">联系客服</div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                        <div class="menu-item" onclick="goToPage(&#39;about&#39;)">
+                            <div class="menu-icon icon-purple">ℹ️</div>
+                            <div class="menu-text">关于我们</div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作 -->
+                <div class="bottom-action">
+                    <button class="logout-btn" onclick="showLogoutModal()">退出登录</button>
+                </div>
+
+                <!-- 退出登录弹窗 -->
+                <div class="modal-overlay" id="logoutModal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-title">确认退出</div>
+                        <div class="modal-text">确定要退出登录吗？</div>
+                        <div class="modal-actions">
+                            <button class="modal-btn btn-cancel" onclick="hideLogoutModal()">取消</button>
+                            <button class="modal-btn btn-confirm" onclick="confirmLogout()">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面2: 备案指南 -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>信号 WiFi 电量</span>
+            </div>
+            <div class="nav-bar">
+                <span class="back-btn" onclick="goBack()">←</span>
+                <span>备案指南</span>
+            </div>
+            <div class="phone-screen">
+                <div class="content">
+                    <div class="tab-nav">
+                        <div class="tab-item" onclick="switchTab(this, &#39;owner&#39;)">业主</div>
+                        <div class="tab-item" onclick="switchTab(this, &#39;contractor&#39;)">施工方</div>
+                    </div>
+
+                    <!-- 业主备案指南 -->
+                    <div class="tab-content" id="owner">
+                        <div class="info-card">
+                            <div class="info-title">备案流程</div>
+                            <div class="process-flow">
+                                <span class="process-step">注册登录</span>
+                                <span class="process-step">选择工程类型</span>
+                                <span class="process-step">填写基础信息</span>
+                                <span class="process-step">填写工程信息</span>
+                                <span class="process-step">填写安全信息</span>
+                                <span class="process-step">匹配保单</span>
+                                <span class="process-step">提交审核</span>
+                                <span class="process-step">获取回执</span>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-title">材料模板下载</div>
+                            <div class="template-list">
+                                <div class="template-item" onclick="downloadTemplate(&#39;contract&#39;)">
+                                    <div class="template-icon">📄</div>
+                                    <div class="template-info">
+                                        <div class="template-name">承发包合同模板.docx</div>
+                                        <div class="template-size">28KB</div>
+                                    </div>
+                                    <div class="download-btn">下载</div>
+                                </div>
+                                <div class="template-item" onclick="downloadTemplate(&#39;plan&#39;)">
+                                    <div class="template-icon">📄</div>
+                                    <div class="template-info">
+                                        <div class="template-name">施工方案模板.docx</div>
+                                        <div class="template-size">35KB</div>
+                                    </div>
+                                    <div class="download-btn">下载</div>
+                                </div>
+                                <div class="template-item" onclick="downloadTemplate(&#39;commitment&#39;)">
+                                    <div class="template-icon">📄</div>
+                                    <div class="template-info">
+                                        <div class="template-name">安全生产承诺书.pdf</div>
+                                        <div class="template-size">156KB</div>
+                                    </div>
+                                    <div class="download-btn">下载</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-title">注意事项</div>
+                            <div class="info-text">
+                                1. 材料必须清晰完整，支持JPG、PNG、PDF格式<br>
+                                2. 施工单位必须已认证（可在备案时新增施工单位）<br>
+                                3. 工程地址必须准确（小型工程和零星作业支持地图选点）<br>
+                                4. 工程总额和建筑面积必须真实，需符合工程规模要求<br>
+                                5. 特种作业证要求：电工、电焊工、高空作业工必须上传
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 施工方备案指南 -->
+                    <div class="tab-content active" id="contractor">
+                        <div class="info-card">
+                            <div class="info-title">备案流程</div>
+                            <div class="process-flow">
+                                <span class="process-step">企业认证</span>
+                                <span class="process-step">注册登录</span>
+                                <span class="process-step">选择工程类型</span>
+                                <span class="process-step">填写基础信息</span>
+                                <span class="process-step">填写工程信息</span>
+                                <span class="process-step">填写安全信息</span>
+                                <span class="process-step">匹配保单</span>
+                                <span class="process-step">提交审核</span>
+                                <span class="process-step">获取回执</span>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-title">企业认证材料</div>
+                            <div class="info-text">
+                                • 施工单位营业执照（必传，支持OCR识别）<br>
+                                • 资质证明（必传）<br>
+                                • 安全生产许可证（必传）<br>
+                                • 法人身份证（必传，正反面+手持身份证）
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-title">材料模板下载</div>
+                            <div class="template-list">
+                                <div class="template-item" onclick="downloadTemplate(&#39;contract&#39;)">
+                                    <div class="template-icon">📄</div>
+                                    <div class="template-info">
+                                        <div class="template-name">承发包合同模板.docx</div>
+                                        <div class="template-size">28KB</div>
+                                    </div>
+                                    <div class="download-btn">下载</div>
+                                </div>
+                                <div class="template-item" onclick="downloadTemplate(&#39;plan&#39;)">
+                                    <div class="template-icon">📄</div>
+                                    <div class="template-info">
+                                        <div class="template-name">施工方案模板.docx</div>
+                                        <div class="template-size">35KB</div>
+                                    </div>
+                                    <div class="download-btn">下载</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面3: 常见问题 -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>信号 WiFi 电量</span>
+            </div>
+            <div class="nav-bar">
+                <span class="back-btn" onclick="goBack()">←</span>
+                <span>常见问题</span>
+            </div>
+            <div class="phone-screen">
+                <div class="content">
+                    <div class="tab-nav">
+                        <div class="tab-item" onclick="switchFaqTab(this, &#39;all&#39;)">全部</div>
+                        <div class="tab-item" onclick="switchFaqTab(this, &#39;account&#39;)">账号登录</div>
+                        <div class="tab-item active" onclick="switchFaqTab(this, &#39;record&#39;)">备案申报</div>
+                    </div>
+
+                    <div class="menu-section">
+                        <div class="faq-item">
+                            <div class="faq-question" onclick="toggleFaq(this)">
+                                <div class="faq-text">Q: 如何注册账号？</div>
+                                <div class="faq-arrow">▼</div>
+                            </div>
+                            <div class="faq-answer">
+                                A: 本系统对接青浦区统一认证系统，使用手机号验证码登录即可，无需单独注册。
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" onclick="toggleFaq(this)">
+                                <div class="faq-text">Q: 忘记密码怎么办？</div>
+                                <div class="faq-arrow">▼</div>
+                            </div>
+                            <div class="faq-answer">
+                                A: 本系统使用手机号验证码登录，无需密码。如手机号无法使用，请联系客服。
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" onclick="toggleFaq(this)">
+                                <div class="faq-text">Q: 什么工程需要备案？</div>
+                                <div class="faq-arrow">▼</div>
+                            </div>
+                            <div class="faq-answer">
+                                A: 青浦区范围内的小型工程、住宅装修、零星作业都需要备案。具体标准请查看备案指南。
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" onclick="toggleFaq(this)">
+                                <div class="faq-text">Q: 备案需要多长时间？</div>
+                                <div class="faq-arrow">▼</div>
+                            </div>
+                            <div class="faq-answer">
+                                A: 提交备案后，街镇审核人员会在1-3个工作日内完成审核。
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" onclick="toggleFaq(this)">
+                                <div class="faq-text">Q: 备案被驳回怎么办？</div>
+                                <div class="faq-arrow">▼</div>
+                            </div>
+                            <div class="faq-answer">
+                                A: 查看驳回原因，修改相关信息后重新提交即可。
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question" onclick="toggleFaq(this)">
+                                <div class="faq-text">Q: 支持哪些文件格式？</div>
+                                <div class="faq-arrow">▼</div>
+                            </div>
+                            <div class="faq-answer">
+                                A: 支持图片格式（JPG、PNG）和PDF格式。单个文件不超过10MB。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面4: 联系客服 -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>信号 WiFi 电量</span>
+            </div>
+            <div class="nav-bar">
+                <span class="back-btn" onclick="goBack()">←</span>
+                <span>联系客服</span>
+            </div>
+            <div class="phone-screen">
+                <div class="content">
+                    <div class="page-title">监管部门咨询电话</div>
+                    <div class="menu-section">
+                        <ul class="phone-list">
+                            <li class="phone-item">
+                                <span class="phone-name">赵巷镇</span>
+                                <span class="phone-number" onclick="callPhone(&#39;59753828&#39;)">59753828</span>
+                            </li>
+                            <li class="phone-item">
+                                <span class="phone-name">徐泾镇</span>
+                                <span class="phone-number" onclick="callPhone(&#39;59760729&#39;)">59760729</span>
+                            </li>
+                            <li class="phone-item">
+                                <span class="phone-name">华新镇</span>
+                                <span class="phone-number" onclick="callPhone(&#39;59791767&#39;)">59791767</span>
+                            </li>
+                            <li class="phone-item">
+                                <span class="phone-name">重固镇</span>
+                                <span class="phone-number" onclick="callPhone(&#39;59780225&#39;)">59780225</span>
+                            </li>
+                            <li class="phone-item">
+                                <span class="phone-name">白鹤镇</span>
+                                <span class="phone-number" onclick="callPhone(&#39;39290815&#39;)">39290815</span>
+                            </li>
+                            <li class="phone-item">
+                                <span class="phone-name">朱家角镇</span>
+                                <span class="phone-number" onclick="callPhone(&#39;59240622&#39;)">59240622</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="page-title">平台客服</div>
+                    <div class="menu-section">
+                        <div class="phone-item" style="padding: 16px;">
+                            <span class="phone-name">客服电话</span>
+                            <span class="phone-number" onclick="callPhone(&#39;400-XXX-XXXX&#39;)">400-XXX-XXXX</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-text">
+                            工作时间：工作日 9:00-18:00<br>
+                            如遇忙线，请稍后重试或联系属地监管部门
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面5: 关于我们 -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>信号 WiFi 电量</span>
+            </div>
+            <div class="nav-bar">
+                <span class="back-btn" onclick="goBack()">←</span>
+                <span>关于我们</span>
+            </div>
+            <div class="phone-screen">
+                <div class="content">
+                    <div class="info-card" style="text-align: center; padding: 40px 20px;">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #00B578 0%, #00A86B 100%); border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">🏗️</div>
+                        <div style="font-size: 20px; font-weight: 600; color: #333; margin-bottom: 8px;">青浦区小型工程监管平台</div>
+                        <div style="font-size: 14px; color: #999;">版本 v1.0.0</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-title">平台简介</div>
+                        <div class="info-text">
+                            青浦区小型工程监管平台是青浦区建设和管理委员会主导建设的工程安全监管信息化平台，旨在实现小型工程从备案到完工的全流程数字化管理，提升工程安全监管效能。
+                        </div>
+                    </div>
+
+                    <div class="menu-section" style="margin-top: 20px;">
+                        <div class="menu-item" onclick="goToAgreement()">
+                            <div class="menu-icon icon-green">📋</div>
+                            <div class="menu-text">服务协议</div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                        <div class="menu-item" onclick="goToPrivacy()">
+                            <div class="menu-icon icon-blue">🔒</div>
+                            <div class="menu-text">隐私政策</div>
+                            <div class="menu-arrow">›</div>
+                        </div>
+                    </div>
+
+                    <div class="info-card" style="text-align: center;">
+                        <div class="info-text" style="font-size: 12px; color: #999;">
+                            © 2026 华浙智擎 版权所有<br>
+                            技术支持：400-XXX-XXXX
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 显示退出登录弹窗
+        function showLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        // 隐藏退出登录弹窗
+        function hideLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        // 确认退出登录
+        function confirmLogout() {
+            alert('已退出登录，跳转至登录页');
+            hideLogoutModal();
+        }
+
+        // 返回上一页
+        function goBack() {
+            alert('返回上一页');
+        }
+
+        // 页面跳转
+        function goToPage(page) {
+            console.log('跳转到页面:', page);
+        }
+
+        // Tab切换
+        function switchTab(element, tabId) {
+            document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // FAQ Tab切换
+        function switchFaqTab(element, tabId) {
+            document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // FAQ展开/收起
+        function toggleFaq(element) {
+            const answer = element.nextElementSibling;
+            const arrow = element.querySelector('.faq-arrow');
+            answer.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        // 拨打电话
+        function callPhone(phone) {
+            alert('拨打电话: ' + phone);
+        }
+
+        // 下载模板
+        function downloadTemplate(type) {
+            alert('开始下载模板: ' + type);
+        }
+
+        // 查看服务协议
+        function goToAgreement() {
+            alert('查看服务协议');
+        }
+
+        // 查看隐私政策
+        function goToPrivacy() {
+            alert('查看隐私政策');
+        }
+    </script>
+
+
+</body></html>

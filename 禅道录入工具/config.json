@@ -1,0 +1,10 @@
+﻿{
+  "baseUrl": "http://120.46.219.85:8004/zentao",
+  "account": "zhulin",
+  "password": "zzl+20138",
+  "workloadWorkbookPath": "./工作量.xlsx",
+  "memberWorkbookPath": "./人员映射.xlsx",
+  "outputDir": "./output",
+  "productId": null,
+  "autoCreateExecution": true
+}

@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大屏巡查数据模块原型 - 完整交互系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a1628;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 可编辑元素样式 */
+        [contenteditable="true"] {
+            outline: none;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        [contenteditable="true"]:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        [contenteditable="true"]:focus {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.5);
+        }
+
+        /* 页面容器 */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: linear-gradient(90deg, rgba(0,212,255,0.1), transparent, rgba(0,212,255,0.1));
+            border-bottom: 1px solid rgba(0,212,255,0.3);
+            margin: -20px -20px 20px -20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: rgba(0,212,255,0.2);
+            border: 1px solid rgba(0,212,255,0.5);
+            color: #00d4ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(0,212,255,0.3);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #00b578);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #8899aa;
+            font-size: 14px;
+        }
+
+        /* 首页样式 */
+        .home-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(90deg, rgba(0,212,255,0.1), transparent, rgba(0,212,255,0.1));
+            border-bottom: 1px solid rgba(0,212,255,0.3);
+            margin: -20px -20px 20px -20px;
+        }
+
+        .home-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #00b578);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .home-subtitle {
+            font-size: 14px;
+            color: #8899aa;
+            margin-top: 8px;
+        }
+
+        /* 面板卡片 */
+        .panel {
+            background: rgba(16, 30, 55, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 16px;
+            right: 16px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #00d4ff;
+            border-radius: 2px;
+        }
+
+        /* 首页布局 */
+        .home-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+
+        .home-left, .home-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .home-center {
+            position: relative;
+        }
+
+        /* 统计卡片 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(16, 30, 55, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-name {
+            font-size: 14px;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: #8899aa;
+            margin-top: 4px;
+        }
+
+        .stat-status {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(0, 181, 120, 0.2);
+            color: #00b578;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .stat-status.pending {
+            background: rgba(255, 149, 0, 0.2);
+            color: #ff9500;
+        }
+
+        /* 地图区域 */
+        .map-container {
+            height: 500px;
+            background: linear-gradient(135deg, rgba(0,50,80,0.3), rgba(0,30,50,0.5));
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 30% 40%, rgba(0,212,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(0,181,120,0.1) 0%, transparent 50%);
+        }
+
+        .map-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .map-title {
+            font-size: 20px;
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        /* 镇级区域标记 */
+        .town-markers {
+            position: absolute;
+            inset: 0;
+        }
+
+        .town-marker {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .town-marker:hover {
+            transform: scale(1.1);
+        }
+
+        .marker-pin {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff9500, #ffbb33);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(255, 149, 0, 0.5);
+        }
+
+        .marker-pin::after {
+            content: attr(data-rank);
+            transform: rotate(45deg);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .marker-label {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            white-space: nowrap;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        /* 镇级位置 */
+        .town-zhujiajiao { top: 60%; left: 35%; }
+        .town-xujing { top: 35%; left: 65%; }
+        .town-huaxin { top: 25%; left: 55%; }
+        .town-zhaoxiang { top: 40%; left: 45%; }
+        .town-chonggu { top: 30%; left: 40%; }
+        .town-yingpu { top: 45%; left: 30%; }
+        .town-xiayang { top: 55%; left: 42%; }
+        .town-baihe { top: 20%; left: 45%; }
+        .town-jinze { top: 50%; left: 25%; }
+
+        /* 图表占位 */
+        .chart-box {
+            height: 180px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #556677;
+        }
+
+        /* 列表样式 */
+        .data-list {
+            list-style: none;
+        }
+
+        .data-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .data-list-item:hover {
+            background: rgba(0, 212, 255, 0.05);
+            margin: 0 -12px;
+            padding-left: 12px;
+            padding-right: 12px;
+            border-radius: 6px;
+        }
+
+        .data-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rank-badge {
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #00d4ff;
+        }
+
+        .rank-badge.top {
+            background: linear-gradient(135deg, #ff9500, #ffbb33);
+            color: #fff;
+        }
+
+        .item-name {
+            font-size: 14px;
+            color: #ccddee;
+        }
+
+        .item-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00b578, #00d4ff);
+            border-radius: 3px;
+        }
+
+        /* 表格 */
+        .data-table {
+            width: 100%;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 8px;
+            color: #8899aa;
+            font-weight: 400;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        /* 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .tag-green {
+            background: rgba(0, 181, 120, 0.2);
+            color: #00b578;
+        }
+
+        .tag-orange {
+            background: rgba(255, 149, 0, 0.2);
+            color: #ff9500;
+        }
+
+        .tag-red {
+            background: rgba(255, 77, 79, 0.2);
+            color: #ff4d4f;
+        }
+
+        .tag-blue {
+            background: rgba(24, 144, 255, 0.2);
+            color: #1890ff;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: #8899aa;
+        }
+
+        .filter-select {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .filter-input {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00b578, #00d4ff);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 181, 120, 0.4);
+        }
+
+        .btn-default {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+        }
+
+        .btn-default:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            color: #8899aa;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border-color: #00d4ff;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #0f1f3a, #1a2d4d);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 77, 79, 0.2);
+            border: 1px solid rgba(255, 77, 79, 0.5);
+            border-radius: 6px;
+            color: #ff4d4f;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(80vh - 70px);
+        }
+
+        /* 详情信息网格 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #8899aa;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* 两列布局 */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 时间线 */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            background: #00b578;
+            border-radius: 50%;
+            border: 2px solid #0a1628;
+        }
+
+        .timeline-item.warning::before {
+            background: #ff9500;
+        }
+
+        .timeline-item.danger::before {
+            background: #ff4d4f;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: #8899aa;
+            margin-bottom: 4px;
+        }
+
+        .timeline-content {
+            font-size: 14px;
+            color: #ccddee;
+        }
+
+        /* 页面内容区 */
+        .page-content {
+            background: rgba(16, 30, 55, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        /* 标注抽屉 */
+        .annotation-drawer {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        .annotation-toggle {
+            width: 32px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff9500, #ffbb33);
+            border: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: #fff;
+            font-size: 12px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .annotation-toggle:hover {
+            width: 36px;
+        }
+
+        .annotation-toggle span {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            letter-spacing: 2px;
+        }
+
+        .annotation-panel {
+            width: 0;
+            height: 80vh;
+            background: #FFFBE6;
+            border-left: 1px dashed #FFC53D;
+            overflow: hidden;
+            transition: width 0.3s ease;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .annotation-panel.open {
+            width: 300px;
+        }
+
+        .annotation-content-wrapper {
+            padding: 16px;
+            min-width: 300px;
+        }
+
+        .annotation-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #d48806;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .annotation-close {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 77, 79, 0.2);
+            border: none;
+            border-radius: 4px;
+            color: #ff4d4f;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .annotation-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .annotation-content strong {
+            color: #333;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1400px) {
+            .home-grid {
+                grid-template-columns: 1fr;
+            }
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+            .stats-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 900px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== 页面1: 首页 ==================== -->
+<div class="page active" id="page-home">
+    <div class="home-header">
+        <h1 class="home-title" contenteditable="true">青浦区小型工程和零星作业智慧监管平台</h1>
+        <p class="home-subtitle" contenteditable="true">数据更新时间：2026-03-30 14:30:00</p>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card" onclick="showPage('page-realtime')">
+            <div class="stat-icon">📊</div>
+            <div class="stat-name" contenteditable="true">实时统揽</div>
+            <div class="stat-value" contenteditable="true">366</div>
+            <div class="stat-sub" contenteditable="true">总备案数量</div>
+            <div class="stat-sub" contenteditable="true">总巡查次数：1,258</div>
+        </div>
+        <div class="stat-card" onclick="showPage('page-record')">
+            <div class="stat-icon">📝</div>
+            <div class="stat-name" contenteditable="true">备案统揽</div>
+            <div class="stat-value" contenteditable="true">95</div>
+            <div class="stat-sub" contenteditable="true">本周新增备案</div>
+            <span class="stat-status pending" contenteditable="true">待审核：104项</span>
+        </div>
+        <div class="stat-card" onclick="showPage('page-patrol')">
+            <div class="stat-icon">🔍</div>
+            <div class="stat-name" contenteditable="true">巡查统揽</div>
+            <div class="stat-value" contenteditable="true">86.5%</div>
+            <div class="stat-sub" contenteditable="true">本周巡查覆盖率</div>
+            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 4px;">
+                <span class="stat-status pending" contenteditable="true">整改率：72.3%</span>
+            </div>
+        </div>
+
+        <!-- 新增：巡查补充指标卡片 -->
+        <div class="stat-card" onclick="showPage('page-patrol')">
+            <div class="stat-icon" style="background: rgba(0, 181, 120, 0.1); color: #00b578;">📋</div>
+            <div class="stat-name" contenteditable="true">本月巡查</div>
+            <div class="stat-value" contenteditable="true" style="color: #00b578;">1,258</div>
+            <div class="stat-sub" contenteditable="true">本月累计巡查次数</div>
+            <span class="stat-status pending" contenteditable="true">待整改隐患：43个</span>
+        </div>
+
+        <!-- 组织统揽卡片 -->
+        <div class="stat-card" onclick="showPage('page-org')">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-name" contenteditable="true">组织统揽</div>
+            <div class="stat-value" contenteditable="true">85</div>
+            <div class="stat-sub" contenteditable="true">施工单位</div>
+            <div class="stat-sub" contenteditable="true">施工人数：234人</div>
+        </div>
+    </div>
+
+    <div class="home-grid">
+        <!-- 左侧 -->
+        <div class="home-left">
+            <div class="panel">
+                <div class="panel-title" contenteditable="true">工程数量统计</div>
+                <div class="filter-bar" style="margin-bottom: 12px;">
+                    <button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">全部</button>
+                    <button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">盈浦街道</button>
+                    <button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">夏阳街道</button>
+                    <button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">更多</button>
+                </div>
+                <div class="chart-box" style="height: 220px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
+                        <div>各街道工程数量柱状图</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title" contenteditable="true">动态风险量化分布</div>
+                <div class="two-col">
+                    <div class="chart-box" style="height: 150px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 36px;">🥧</div>
+                            <div style="font-size: 12px;">风险环形图</div>
+                        </div>
+                    </div>
+                    <div>
+                        <ul class="data-list">
+                            <li class="data-list-item">
+                                <span class="item-name">高空作业</span>
+                                <span class="item-value">58个</span>
+                            </li>
+                            <li class="data-list-item">
+                                <span class="item-name">用电作业</span>
+                                <span class="item-value">37个</span>
+                            </li>
+                            <li class="data-list-item">
+                                <span class="item-name">动火作业</span>
+                                <span class="item-value">31个</span>
+                            </li>
+                            <li class="data-list-item">
+                                <span class="item-name">脚手架</span>
+                                <span class="item-value">89个</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间 -->
+        <div class="home-center">
+            <div class="panel" style="height: 100%;">
+                <div class="panel-title" contenteditable="true">工程分布地图</div>
+                <div class="map-container" style="height: calc(100% - 40px);">
+                    <div class="map-bg"></div>
+                    <div class="map-content">
+                        <div class="map-title">青浦区工程点位分布</div>
+                        <p style="color: #667788; font-size: 14px;">点击镇级标记查看详情</p>
+                    </div>
+                    <!-- 镇级标记 -->
+                    <div class="town-markers">
+                        <div class="town-marker town-zhujiajiao" onclick="showPage('page-town')">
+                            <div class="marker-pin" data-rank="1"></div>
+                            <div class="marker-label">朱家角镇 NO.1</div>
+                        </div>
+                        <div class="town-marker town-xujing" onclick="showPage('page-town')">
+                            <div class="marker-pin" data-rank="2"></div>
+                            <div class="marker-label">徐泾镇 NO.2</div>
+                        </div>
+                        <div class="town-marker town-huaxin" onclick="showPage('page-town')">
+                            <div class="marker-pin" data-rank="3"></div>
+                            <div class="marker-label">华新镇 NO.3</div>
+                        </div>
+                        <div class="town-marker town-zhaoxiang" onclick="showPage('page-town')">
+                            <div class="marker-pin" data-rank="4" style="background: linear-gradient(135deg, #8899aa, #aabbcc);"></div>
+                            <div class="marker-label">赵巷镇 NO.4</div>
+                        </div>
+                        <div class="town-marker town-chonggu" onclick="showPage('page-town')">
+                            <div class="marker-pin" data-rank="4" style="background: linear-gradient(135deg, #8899aa, #aabbcc);"></div>
+                            <div class="marker-label">重固镇 NO.4</div>
+                        </div>
+                        <div class="town-marker town-yingpu" onclick="showPage('page-town')">
+                            <div class="marker-pin" data-rank="2" style="background: linear-gradient(135deg, #8899aa, #aabbcc);"></div>
+                            <div class="marker-label">盈浦街道 NO.2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧 -->
+        <div class="home-right">
+            <div class="panel">
+                <div class="panel-title" contenteditable="true">备案状态分布</div>
+                <div class="chart-box" style="height: 150px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 36px;">🍩</div>
+                        <div style="font-size: 12px;">备案状态环形图</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: #8899aa;">待填报</span>
+                        <span style="font-size: 13px; color: #ff9500;">5699 20%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: #8899aa;">待审核</span>
+                        <span style="font-size: 13px; color: #1890ff;">337 20%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: #8899aa;">已驳回</span>
+                        <span style="font-size: 13px; color: #ff4d4f;">65 20%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="font-size: 13px; color: #8899aa;">已通过</span>
+                        <span style="font-size: 13px; color: #00b578;">65 20%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title" contenteditable="true">近24小时新增备案</div>
+                <ul class="data-list">
+                    <li class="data-list-item" onclick="openModal('project-modal')">
+                        <div>
+                            <div style="font-size: 12px; color: #ff9500; margin-bottom: 4px;">高空 | 用电 | 动火</div>
+                            <div class="item-name" style="font-size: 13px;">XX小区外墙维修工程</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; color: #8899aa;">2026-03-30</div>
+                            <div style="font-size: 12px; color: #00d4ff;">15:32</div>
+                        </div>
+                    </li>
+                    <li class="data-list-item" onclick="openModal('project-modal')">
+                        <div>
+                            <div style="font-size: 12px; color: #ff9500; margin-bottom: 4px;">高空 | 用电</div>
+                            <div class="item-name" style="font-size: 13px;">XX商场装修工程</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; color: #8899aa;">2026-03-30</div>
+                            <div style="font-size: 12px; color: #00d4ff;">14:15</div>
+                        </div>
+                    </li>
+                    <li class="data-list-item" onclick="openModal('project-modal')">
+                        <div>
+                            <div style="font-size: 12px; color: #ff9500; margin-bottom: 4px;">动火 | 用电</div>
+                            <div class="item-name" style="font-size: 13px;">XX厂房改造工程</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; color: #8899aa;">2026-03-30</div>
+                            <div style="font-size: 12px; color: #00d4ff;">12:08</div>
+                        </div>
+                    </li>
+                    <li class="data-list-item" onclick="openModal('project-modal')">
+                        <div>
+                            <div style="font-size: 12px; color: #ff9500; margin-bottom: 4px;">高空</div>
+                            <div class="item-name" style="font-size: 13px;">XX大厦外墙清洗</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; color: #8899aa;">2026-03-30</div>
+                            <div style="font-size: 12px; color: #00d4ff;">10:45</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面2: 镇级详情页 ==================== -->
+<div class="page" id="page-town">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title" contenteditable="true">朱家角镇 - 详情</h2>
+        </div>
+        <div class="header-right">
+            <span>数据更新时间：2026-03-30 14:30:00</span>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">工程总数</div>
+            <div class="info-value" contenteditable="true">156</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">高风险工程</div>
+            <div class="info-value" contenteditable="true" style="color: #ff4d4f;">47</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">隐患数量</div>
+            <div class="info-value" contenteditable="true" style="color: #ff9500;">47</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">整改率</div>
+            <div class="info-value" contenteditable="true" style="color: #00b578;">68.3%</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">停工项目</div>
+            <div class="info-value" contenteditable="true">8</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">本月巡查次数</div>
+            <div class="info-value" contenteditable="true">128</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="panel">
+            <div class="panel-title" contenteditable="true">工程状态分布</div>
+            <div class="chart-box" style="height: 200px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
+                    <div>工程状态堆叠图</div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-title" contenteditable="true">隐患类型分布</div>
+            <div class="chart-box" style="height: 200px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">🥧</div>
+                    <div>隐患类型饼图</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top: 20px;">
+        <div class="panel-title" contenteditable="true">该街道工程列表</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>工程名称</th>
+                    <th>工程地址</th>
+                    <th>状态</th>
+                    <th>风险等级</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XX小区外墙维修工程</td>
+                    <td contenteditable="true">朱家角镇XX路XX号</td>
+                    <td><span class="tag tag-green">正常施工</span></td>
+                    <td><span class="tag tag-orange">一般风险</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XX商场装修工程</td>
+                    <td contenteditable="true">朱家角镇XX街XX号</td>
+                    <td><span class="tag tag-orange">现场整改</span></td>
+                    <td><span class="tag tag-red">高风险</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XX厂房改造工程</td>
+                    <td contenteditable="true">朱家角镇XX工业区</td>
+                    <td><span class="tag tag-red">停工整改</span></td>
+                    <td><span class="tag tag-red">高风险</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面3: 巡查记录列表页 ==================== -->
+<div class="page" id="page-patrol">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title" contenteditable="true">巡查记录</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary">导出数据</button>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-item">
+            <span class="filter-label">巡查日期：</span>
+            <input type="text" class="filter-input" value="2026-03-01 至 2026-03-30" style="width: 200px;">
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">所属街道：</span>
+            <select class="filter-select">
+                <option>全部街道</option>
+                <option>朱家角镇</option>
+                <option>徐泾镇</option>
+                <option>华新镇</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">巡查类型：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>街道巡查</option>
+                <option>社区巡查</option>
+                <option>物业巡查</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">是否发现隐患：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>有隐患</option>
+                <option>无隐患</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <input type="text" class="filter-input" placeholder="搜索工程名称/巡查人员" style="width: 200px;">
+            <button class="btn btn-primary">查询</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>巡查编号</th>
+                    <th>工程名称</th>
+                    <th>工程地址</th>
+                    <th>巡查时间</th>
+                    <th>巡查人员</th>
+                    <th>巡查类型</th>
+                    <th>隐患数量</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XC20260330001</td>
+                    <td contenteditable="true">XX小区外墙维修工程</td>
+                    <td contenteditable="true">朱家角镇XX路XX号</td>
+                    <td>2026-03-30 14:30</td>
+                    <td contenteditable="true">张三</td>
+                    <td><span class="tag tag-blue">街道巡查</span></td>
+                    <td style="color: #ff4d4f; font-weight: 600;">2</td>
+                    <td><span class="tag tag-orange">待整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XC20260330002</td>
+                    <td contenteditable="true">XX商场装修工程</td>
+                    <td contenteditable="true">徐泾镇XX街XX号</td>
+                    <td>2026-03-30 11:20</td>
+                    <td contenteditable="true">李四</td>
+                    <td><span class="tag tag-green">社区巡查</span></td>
+                    <td>0</td>
+                    <td><span class="tag tag-green">正常</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XC20260330003</td>
+                    <td contenteditable="true">XX厂房改造工程</td>
+                    <td contenteditable="true">华新镇XX工业区</td>
+                    <td>2026-03-30 09:15</td>
+                    <td contenteditable="true">王五</td>
+                    <td><span class="tag tag-orange">物业巡查</span></td>
+                    <td style="color: #ff4d4f; font-weight: 600;">5</td>
+                    <td><span class="tag tag-red">停工整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XC20260329001</td>
+                    <td contenteditable="true">XX大厦外墙清洗</td>
+                    <td contenteditable="true">赵巷镇XX路XX号</td>
+                    <td>2026-03-29 16:45</td>
+                    <td contenteditable="true">赵六</td>
+                    <td><span class="tag tag-blue">街道巡查</span></td>
+                    <td>0</td>
+                    <td><span class="tag tag-green">正常</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">XC20260329002</td>
+                    <td contenteditable="true">XX学校改造工程</td>
+                    <td contenteditable="true">重固镇XX路XX号</td>
+                    <td>2026-03-29 14:30</td>
+                    <td contenteditable="true">钱七</td>
+                    <td><span class="tag tag-green">社区巡查</span></td>
+                    <td style="color: #ff9500; font-weight: 600;">1</td>
+                    <td><span class="tag tag-orange">现场整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">4</button>
+            <button class="page-btn">5</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面4: 隐患详情页 ==================== -->
+<div class="page" id="page-danger">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title" contenteditable="true">隐患管理</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary">导出隐患清单</button>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">隐患总数</div>
+            <div class="info-value" contenteditable="true">227</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">待整改</div>
+            <div class="info-value" contenteditable="true" style="color: #ff9500;">43</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">整改中</div>
+            <div class="info-value" contenteditable="true" style="color: #1890ff;">28</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">已整改</div>
+            <div class="info-value" contenteditable="true" style="color: #00b578;">156</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">较大隐患</div>
+            <div class="info-value" contenteditable="true" style="color: #ff4d4f;">35</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">整改率</div>
+            <div class="info-value" contenteditable="true" style="color: #00b578;">72.3%</div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-item">
+            <span class="filter-label">隐患等级：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>较大隐患</option>
+                <option>一般隐患</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">整改状态：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>待整改</option>
+                <option>整改中</option>
+                <option>已整改</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">隐患类型：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>高处作业</option>
+                <option>动火作业</option>
+                <option>用电作业</option>
+                <option>有限空间</option>
+                <option>脚手架</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <input type="text" class="filter-input" placeholder="搜索工程名称" style="width: 200px;">
+            <button class="btn btn-primary">查询</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>隐患编号</th>
+                    <th>所属工程</th>
+                    <th>隐患类型</th>
+                    <th>隐患等级</th>
+                    <th>发现时间</th>
+                    <th>整改期限</th>
+                    <th>整改状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">YH20260330001</td>
+                    <td contenteditable="true">XX小区外墙维修工程</td>
+                    <td>高处作业</td>
+                    <td><span class="tag tag-red">较大隐患</span></td>
+                    <td>2026-03-30</td>
+                    <td style="color: #ff4d4f;">2026-04-02</td>
+                    <td><span class="tag tag-red">待整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">YH20260330002</td>
+                    <td contenteditable="true">XX商场装修工程</td>
+                    <td>动火作业</td>
+                    <td><span class="tag tag-orange">一般隐患</span></td>
+                    <td>2026-03-30</td>
+                    <td style="color: #ff9500;">2026-04-05</td>
+                    <td><span class="tag tag-orange">整改中</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">YH20260329001</td>
+                    <td contenteditable="true">XX厂房改造工程</td>
+                    <td>用电作业</td>
+                    <td><span class="tag tag-orange">一般隐患</span></td>
+                    <td>2026-03-29</td>
+                    <td>2026-04-01</td>
+                    <td><span class="tag tag-green">已整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">YH20260329002</td>
+                    <td contenteditable="true">XX大厦外墙清洗</td>
+                    <td>脚手架</td>
+                    <td><span class="tag tag-red">较大隐患</span></td>
+                    <td>2026-03-29</td>
+                    <td style="color: #ff4d4f;">2026-04-01</td>
+                    <td><span class="tag tag-red">待整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">YH20260328001</td>
+                    <td contenteditable="true">XX学校改造工程</td>
+                    <td>有限空间</td>
+                    <td><span class="tag tag-red">较大隐患</span></td>
+                    <td>2026-03-28</td>
+                    <td>2026-03-31</td>
+                    <td><span class="tag tag-green">已整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面5: 工程列表页 ==================== -->
+<div class="page" id="page-project">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title" contenteditable="true">工程管理</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary">新增备案</button>
+            <button class="btn btn-default" style="margin-left: 8px;">导出数据</button>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-item">
+            <span class="filter-label">工程状态：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>正常施工</option>
+                <option>现场整改</option>
+                <option>停工整改</option>
+                <option>已核销</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">风险等级：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>高风险</option>
+                <option>一般风险</option>
+                <option>低风险</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">所属街道：</span>
+            <select class="filter-select">
+                <option>全部街道</option>
+                <option>朱家角镇</option>
+                <option>徐泾镇</option>
+                <option>华新镇</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">作业类型：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>高处作业</option>
+                <option>动火作业</option>
+                <option>用电作业</option>
+                <option>有限空间</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <input type="text" class="filter-input" placeholder="搜索工程名称/备案号" style="width: 200px;">
+            <button class="btn btn-primary">查询</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>备案号</th>
+                    <th>工程名称</th>
+                    <th>工程地址</th>
+                    <th>施工单位</th>
+                    <th>作业类型</th>
+                    <th>风险等级</th>
+                    <th>工程状态</th>
+                    <th>备案时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">BA20260330001</td>
+                    <td contenteditable="true">XX小区外墙维修工程</td>
+                    <td contenteditable="true">朱家角镇XX路XX号</td>
+                    <td contenteditable="true">XX建筑装饰公司</td>
+                    <td>高空 | 用电 | 动火</td>
+                    <td><span class="tag tag-orange">一般风险</span></td>
+                    <td><span class="tag tag-green">正常施工</span></td>
+                    <td>2026-03-30</td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">BA20260330002</td>
+                    <td contenteditable="true">XX商场装修工程</td>
+                    <td contenteditable="true">徐泾镇XX街XX号</td>
+                    <td contenteditable="true">XX装修工程公司</td>
+                    <td>高空 | 用电</td>
+                    <td><span class="tag tag-red">高风险</span></td>
+                    <td><span class="tag tag-orange">现场整改</span></td>
+                    <td>2026-03-30</td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">BA20260330003</td>
+                    <td contenteditable="true">XX厂房改造工程</td>
+                    <td contenteditable="true">华新镇XX工业区</td>
+                    <td contenteditable="true">XX建设工程公司</td>
+                    <td>动火 | 用电</td>
+                    <td><span class="tag tag-red">高风险</span></td>
+                    <td><span class="tag tag-red">停工整改</span></td>
+                    <td>2026-03-30</td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">BA20260329001</td>
+                    <td contenteditable="true">XX大厦外墙清洗</td>
+                    <td contenteditable="true">赵巷镇XX路XX号</td>
+                    <td contenteditable="true">XX清洁服务公司</td>
+                    <td>高空</td>
+                    <td><span class="tag tag-orange">一般风险</span></td>
+                    <td><span class="tag tag-green">正常施工</span></td>
+                    <td>2026-03-29</td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td contenteditable="true">BA20260329002</td>
+                    <td contenteditable="true">XX学校改造工程</td>
+                    <td contenteditable="true">重固镇XX路XX号</td>
+                    <td contenteditable="true">XX教育建设公司</td>
+                    <td>动火 | 用电</td>
+                    <td><span class="tag tag-orange">一般风险</span></td>
+                    <td><span class="tag tag-green">正常施工</span></td>
+                    <td>2026-03-29</td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">4</button>
+            <button class="page-btn">5</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面6: 备案统揽页 ==================== -->
+<div class="page" id="page-record">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title" contenteditable="true">备案管理</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary">新增备案</button>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">总备案数</div>
+            <div class="info-value" contenteditable="true">366</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">本周新增</div>
+            <div class="info-value" contenteditable="true" style="color: #00b578;">95</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">待审核</div>
+            <div class="info-value" contenteditable="true" style="color: #ff9500;">104</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">已驳回</div>
+            <div class="info-value" contenteditable="true" style="color: #ff4d4f;">12</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">已通过</div>
+            <div class="info-value" contenteditable="true" style="color: #00b578;">250</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">待填报</div>
+            <div class="info-value" contenteditable="true">5699</div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-item">
+            <span class="filter-label">备案状态：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>待填报</option>
+                <option>待审核</option>
+                <option>已驳回</option>
+                <option>已通过</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">提交时间：</span>
+            <input type="text" class="filter-input" value="2026-03-01 至 2026-03-30" style="width: 200px;">
+        </div>
+        <div class="filter-item">
+            <input type="text" class="filter-input" placeholder="搜索工程名称/备案号" style="width: 200px;">
+            <button class="btn btn-primary">查询</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>备案号</th>
+                    <th>工程名称</th>
+                    <th>申报单位</th>
+                    <th>联系人</th>
+                    <th>联系电话</th>
+                    <th>提交时间</th>
+                    <th>备案状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td contenteditable="true">BA20260330001</td>
+                    <td contenteditable="true">XX小区外墙维修工程</td>
+                    <td contenteditable="true">XX物业公司</td>
+                    <td contenteditable="true">张三</td>
+                    <td contenteditable="true">138****8888</td>
+                    <td>2026-03-30 14:30</td>
+                    <td><span class="tag tag-orange">待审核</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">审核</button></td>
+                </tr>
+                <tr>
+                    <td contenteditable="true">BA20260330002</td>
+                    <td contenteditable="true">XX商场装修工程</td>
+                    <td contenteditable="true">XX商场管理部</td>
+                    <td contenteditable="true">李四</td>
+                    <td contenteditable="true">139****9999</td>
+                    <td>2026-03-30 11:20</td>
+                    <td><span class="tag tag-orange">待审核</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">审核</button></td>
+                </tr>
+                <tr>
+                    <td contenteditable="true">BA20260330003</td>
+                    <td contenteditable="true">XX厂房改造工程</td>
+                    <td contenteditable="true">XX工厂</td>
+                    <td contenteditable="true">王五</td>
+                    <td contenteditable="true">137****7777</td>
+                    <td>2026-03-30 09:15</td>
+                    <td><span class="tag tag-red">已驳回</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr>
+                    <td contenteditable="true">BA20260329001</td>
+                    <td contenteditable="true">XX大厦外墙清洗</td>
+                    <td contenteditable="true">XX清洁公司</td>
+                    <td contenteditable="true">赵六</td>
+                    <td contenteditable="true">136****6666</td>
+                    <td>2026-03-29 16:45</td>
+                    <td><span class="tag tag-green">已通过</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr>
+                    <td contenteditable="true">BA20260329002</td>
+                    <td contenteditable="true">XX学校改造工程</td>
+                    <td contenteditable="true">XX学校</td>
+                    <td contenteditable="true">钱七</td>
+                    <td contenteditable="true">135****5555</td>
+                    <td>2026-03-29 14:30</td>
+                    <td><span class="tag tag-green">已通过</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">4</button>
+            <button class="page-btn">5</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面7: 组织统揽页 ==================== -->
+<div class="page" id="page-org">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title" contenteditable="true">组织管理</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary">新增单位</button>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">施工单位总数</div>
+            <div class="info-value" contenteditable="true">85</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">施工人数</div>
+            <div class="info-value" contenteditable="true">234</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">街道巡查员</div>
+            <div class="info-value" contenteditable="true">56</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">社区巡查员</div>
+            <div class="info-value" contenteditable="true">78</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">物业巡查员</div>
+            <div class="info-value" contenteditable="true">42</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">三方巡查总数</div>
+            <div class="info-value" contenteditable="true">176</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="panel">
+            <div class="panel-title" contenteditable="true">施工单位排行</div>
+            <ul class="data-list">
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge top">1</span>
+                        <span class="item-name" contenteditable="true">XX建筑装饰公司</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">12个工程</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge top">2</span>
+                        <span class="item-name" contenteditable="true">XX装修工程公司</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">10个工程</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge top">3</span>
+                        <span class="item-name" contenteditable="true">XX建设工程公司</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">8个工程</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge">4</span>
+                        <span class="item-name" contenteditable="true">XX清洁服务公司</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">6个工程</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge">5</span>
+                        <span class="item-name" contenteditable="true">XX教育建设公司</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">5个工程</span>
+                </li>
+            </ul>
+        </div>
+        <div class="panel">
+            <div class="panel-title" contenteditable="true">巡查人员排行</div>
+            <ul class="data-list">
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge top">1</span>
+                        <span class="item-name" contenteditable="true">张三（街道）</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">128次巡查</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge top">2</span>
+                        <span class="item-name" contenteditable="true">李四（社区）</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">105次巡查</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge top">3</span>
+                        <span class="item-name" contenteditable="true">王五（街道）</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">98次巡查</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge">4</span>
+                        <span class="item-name" contenteditable="true">赵六（物业）</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">87次巡查</span>
+                </li>
+                <li class="data-list-item">
+                    <div class="item-left">
+                        <span class="rank-badge">5</span>
+                        <span class="item-name" contenteditable="true">钱七（社区）</span>
+                    </div>
+                    <span class="item-value" contenteditable="true">76次巡查</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面8: 实时统揽页 ==================== -->
+<div class="page" id="page-realtime">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title" contenteditable="true">实时统揽</h2>
+        </div>
+        <div class="header-right">
+            <span>实时数据刷新中...</span>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">当前在线工程</div>
+            <div class="info-value" contenteditable="true">156</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">今日新增备案</div>
+            <div class="info-value" contenteditable="true" style="color: #00b578;">23</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">今日巡查次数</div>
+            <div class="info-value" contenteditable="true" style="color: #00d4ff;">68</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">今日发现隐患</div>
+            <div class="info-value" contenteditable="true" style="color: #ff9500;">12</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">今日整改完成</div>
+            <div class="info-value" contenteditable="true" style="color: #00b578;">8</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">在线巡查员</div>
+            <div class="info-value" contenteditable="true">42</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="panel">
+            <div class="panel-title" contenteditable="true">近24小时备案趋势</div>
+            <div class="chart-box" style="height: 250px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">📈</div>
+                    <div>备案数量趋势图</div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-title" contenteditable="true">近24小时巡查趋势</div>
+            <div class="chart-box" style="height: 250px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
+                    <div>巡查次数趋势图</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top: 20px;">
+        <div class="panel-title" contenteditable="true">实时动态</div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-time">14:30:25</div>
+                <div class="timeline-content" contenteditable="true">XX小区外墙维修工程 新增备案</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">14:28:16</div>
+                <div class="timeline-content" contenteditable="true">张三 完成 XX商场装修工程 巡查，发现2处隐患</div>
+            </div>
+            <div class="timeline-item warning">
+                <div class="timeline-time">14:25:08</div>
+                <div class="timeline-content" contenteditable="true">XX厂房改造工程 隐患整改申请待审核</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">14:20:33</div>
+                <div class="timeline-content" contenteditable="true">李四 开始 XX大厦外墙清洗 巡查</div>
+            </div>
+            <div class="timeline-item danger">
+                <div class="timeline-time">14:15:47</div>
+                <div class="timeline-content" contenteditable="true">XX学校改造工程 发现高风险隐患，已要求停工整改</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗1: 工程详情 ==================== -->
+<div class="modal-overlay" id="project-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" contenteditable="true">工程详情</h3>
+            <button class="modal-close" onclick="closeModal('project-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">备案号</div>
+                    <div class="info-value" contenteditable="true">BA20260330001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">工程状态</div>
+                    <div class="info-value"><span class="tag tag-green">正常施工</span></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">风险等级</div>
+                    <div class="info-value"><span class="tag tag-orange">一般风险</span></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">基本信息</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+                    <div><span style="color: #8899aa;">工程名称：</span><span contenteditable="true">XX小区外墙维修工程</span></div>
+                    <div><span style="color: #8899aa;">工程地址：</span><span contenteditable="true">朱家角镇XX路XX号</span></div>
+                    <div><span style="color: #8899aa;">施工单位：</span><span contenteditable="true">XX建筑装饰公司</span></div>
+                    <div><span style="color: #8899aa;">负责人：</span><span contenteditable="true">张三 138****8888</span></div>
+                    <div><span style="color: #8899aa;">施工时间：</span><span contenteditable="true">2026-03-30 至 2026-04-30</span></div>
+                    <div><span style="color: #8899aa;">作业类型：</span><span contenteditable="true">高空 | 用电 | 动火</span></div>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="panel">
+                    <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">巡查记录（12次）</div>
+                    <ul class="data-list" style="font-size: 12px;">
+                        <li class="data-list-item">
+                            <span>2026-03-30</span>
+                            <span style="color: #ff4d4f;">发现2处隐患</span>
+                        </li>
+                        <li class="data-list-item">
+                            <span>2026-03-28</span>
+                            <span style="color: #00b578;">正常</span>
+                        </li>
+                        <li class="data-list-item">
+                            <span>2026-03-25</span>
+                            <span style="color: #00b578;">正常</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">隐患记录（2个）</div>
+                    <ul class="data-list" style="font-size: 12px;">
+                        <li class="data-list-item">
+                            <span>高处作业未系安全带</span>
+                            <span class="tag tag-red">待整改</span>
+                        </li>
+                        <li class="data-list-item">
+                            <span>用电设备未接地</span>
+                            <span class="tag tag-red">待整改</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button class="btn btn-primary" style="flex: 1;">查看巡查记录</button>
+                <button class="btn btn-default" style="flex: 1;">查看隐患详情</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗2: 巡查详情 ==================== -->
+<div class="modal-overlay" id="patrol-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" contenteditable="true">巡查详情</h3>
+            <button class="modal-close" onclick="closeModal('patrol-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">巡查编号</div>
+                    <div class="info-value" contenteditable="true">XC20260330001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">巡查时间</div>
+                    <div class="info-value" contenteditable="true">2026-03-30 14:30</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">巡查人员</div>
+                    <div class="info-value" contenteditable="true">张三（街道）</div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">工程信息</div>
+                <div style="font-size: 13px; line-height: 1.8;">
+                    <div><span style="color: #8899aa;">工程名称：</span>XX小区外墙维修工程</div>
+                    <div><span style="color: #8899aa;">工程地址：</span>朱家角镇XX路XX号</div>
+                    <div><span style="color: #8899aa;">施工单位：</span>XX建筑装饰公司</div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">巡查情况</div>
+                <div style="font-size: 13px; color: #ff4d4f; margin-bottom: 8px;">发现2处隐患：</div>
+                <ul style="font-size: 13px; color: #ccddee; padding-left: 20px; line-height: 1.8;">
+                    <li contenteditable="true">1. 高处作业人员未正确佩戴安全带，存在安全隐患</li>
+                    <li contenteditable="true">2. 临时用电设备未做接地保护，存在触电风险</li>
+                </ul>
+                <div style="margin-top: 12px; font-size: 13px;">
+                    <span style="color: #8899aa;">现场照片：</span>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <div style="width: 80px; height: 80px; background: rgba(0,0,0,0.3); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #556677;">📷</div>
+                        <div style="width: 80px; height: 80px; background: rgba(0,0,0,0.3); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #556677;">📷</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" style="flex: 1;">查看工程详情</button>
+                <button class="btn btn-default" style="flex: 1;">查看整改记录</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗3: 隐患详情 ==================== -->
+<div class="modal-overlay" id="danger-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" contenteditable="true">隐患详情</h3>
+            <button class="modal-close" onclick="closeModal('danger-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">隐患编号</div>
+                    <div class="info-value" contenteditable="true">YH20260330001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">隐患等级</div>
+                    <div class="info-value"><span class="tag tag-red">较大隐患</span></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">整改状态</div>
+                    <div class="info-value"><span class="tag tag-red">待整改</span></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">隐患信息</div>
+                <div style="font-size: 13px; line-height: 1.8;">
+                    <div><span style="color: #8899aa;">所属工程：</span><span contenteditable="true">XX小区外墙维修工程</span></div>
+                    <div><span style="color: #8899aa;">隐患类型：</span><span contenteditable="true">高处作业</span></div>
+                    <div><span style="color: #8899aa;">发现时间：</span>2026-03-30</div>
+                    <div><span style="color: #8899aa;">整改期限：</span><span style="color: #ff4d4f;">2026-04-02</span></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">隐患描述</div>
+                <div style="font-size: 13px; color: #ccddee; line-height: 1.6;" contenteditable="true">
+                    巡查发现，该工程高处作业人员在进行外墙维修作业时，未正确佩戴安全带，安全绳也未固定在可靠锚点上，存在高处坠落的安全隐患。
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">整改要求</div>
+                <div style="font-size: 13px; color: #ccddee; line-height: 1.6;" contenteditable="true">
+                    1. 立即停止高处作业，进行安全教育培训<br>
+                    2. 为作业人员配备符合标准的安全带和安全绳<br>
+                    3. 设置可靠的安全锚点，确保安全防护到位<br>
+                    4. 整改完成后拍照上传，申请复查
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" style="flex: 1;">查看工程详情</button>
+                <button class="btn btn-default" style="flex: 1;">查看巡查记录</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 标注抽屉 ==================== -->
+<div class="annotation-drawer">
+    <button class="annotation-toggle" onclick="toggleAnnotation()">
+        <span>标注</span>
+    </button>
+    <div class="annotation-panel" id="annotation-panel">
+        <div class="annotation-content-wrapper">
+            <div class="annotation-title">
+                <span>📌 需求说明</span>
+                <button class="annotation-close" onclick="toggleAnnotation()">×</button>
+            </div>
+            <div class="annotation-content" contenteditable="true">
+                <strong>📊 巡查覆盖率计算规则</strong><br>
+                • 分子：本周有巡查记录的在建工程数<br>
+                • 分母：当前在建工程总数（状态=正常施工|现场整改|停工整改）<br>
+                • 计算公式：分子 / 分母 × 100%<br>
+                • 更新频率：每日凌晨 2:00 自动更新<br>
+                • 口径说明：暂按"有巡查即覆盖"，后续按频次要求<br><br>
+
+                <strong>🔍 隐患等级判定规则</strong><br>
+                • 较大隐患：需停工整改的隐患（如高处坠落风险）<br>
+                • 一般隐患：现场整改或不限时整改的隐患<br>
+                • 判定依据：标准化隐患清单 V2.0<br><br>
+
+                <strong>📝 整改状态流转规则</strong><br>
+                • 待整改 → 整改中（提交整改记录）<br>
+                • 整改中 → 已整改（审核通过）<br>
+                • 整改中 → 待整改（审核不通过，退回）<br><br>
+
+                <strong>📅 时间口径定义</strong><br>
+                • "本周"：自然周（周一至周日）<br>
+                • "本月"：自然月（1日至月末）<br>
+                • "近24小时"：当前时间往前推24小时<br><br>
+
+                <strong>⚠️ 待确认事项</strong><br>
+                • 巡查频次配置功能是否影响覆盖率计算<br>
+                • 数据更新频率要求（实时/小时/日）<br>
+                • 历史数据处理方式（是否从上线日起统计）
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== JavaScript ==================== -->
+<script>
+    // 页面切换
+    function showPage(pageId) {
+        // 隐藏所有页面
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        // 显示目标页面
+        document.getElementById(pageId).classList.add('active');
+        // 滚动到顶部
+        window.scrollTo(0, 0);
+    }
+
+    // 标注抽屉展开/收起
+    function toggleAnnotation() {
+        const panel = document.getElementById('annotation-panel');
+        panel.classList.toggle('open');
+    }
+
+    // 打开弹窗
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    // 关闭弹窗
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 点击弹窗遮罩关闭
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    // ESC键关闭弹窗和标注
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+            document.getElementById('annotation-panel').classList.remove('open');
+        }
+    });
+</script>
+
+</body>
+</html>

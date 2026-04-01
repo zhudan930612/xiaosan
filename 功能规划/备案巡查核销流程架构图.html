@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备案巡查核销流程架构图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #fafafa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        h1 { text-align: center; color: #1a1a1a; margin-bottom: 8px; font-size: 24px; font-weight: 600; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 48px; font-size: 14px; }
+        .section {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .section-header {
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 16px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+        .section-content { padding: 24px; }
+        .mermaid { display: flex; justify-content: center; }
+        .note {
+            background: #f6f6f6;
+            border-left: 3px solid #999;
+            padding: 12px 16px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+        .doc-info {
+            border-top: 1px solid #e8e8e8;
+            padding: 20px 24px;
+            font-size: 12px;
+            color: #999;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 13px;
+        }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e8e8e8; }
+        th { background: #fafafa; font-weight: 500; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>小型工程管理系统</h1>
+        <p class="subtitle">备案巡查核销流程架构图</p>
+
+        <div class="section">
+            <div class="section-header">系统框架图 2.0（简化版）</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart TB
+    START([开始]) --> 备案
+
+    subgraph 备案["备案管理模块"]
+        申报[业主/施工方申报] --> 审核[AI+人工审核]
+        审核 -->|驳回| 申报
+        审核 -->|通过| 纳入[生成回执<br/>纳入监管]
+    end
+
+    备案 --> 巡查
+
+    subgraph 巡查["巡查监管模块"]
+        定期巡查[定期巡查] --> 结果{巡查结果}
+        结果 -->|无违规| 正常[正常施工]
+        结果 -->|发现违规| 登记[违规登记]
+        登记 --> 分级{隐患分级}
+        分级 -->|较大隐患| 停工[停工整改]
+        分级 -->|一般隐患| 现场[现场整改]
+        停工 --> 整改[提交整改]
+        现场 --> 整改
+        整改 --> 审核整改[同组织审核]
+        审核整改 -->|驳回| 整改
+        审核整改 -->|通过| 正常
+    end
+
+    正常 --> 核销
+    巡查 -.-> 核销
+
+    subgraph 核销["完工核销模块"]
+        申请[申请/直接核销] --> 核销审核{核销审核}
+        核销审核 -->|驳回| 申请
+        核销审核 -->|通过| 已核销[已核销]
+        已核销 --> 归档[工程归档]
+    end
+
+    归档 --> END([结束])
+
+    style 备案 fill:#e8f4fd,stroke:#1890ff
+    style 巡查 fill:#e6f7e6,stroke:#52c41a
+    style 核销 fill:#fff4e6,stroke:#fa8c16
+    style 停工 fill:#ffcccc,stroke:#ff4d4f
+    style 现场 fill:#fff0b3,stroke:#faad14
+    style 已核销 fill:#e6f7e6,stroke:#52c41a
+                </div>
+                <div class="note">
+                    简化版系统框架：三大核心模块，备案→巡查→核销形成完整闭环。发现违规必整改，整改闭环后恢复正常施工状态，最终完成核销归档。
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">一、系统整体流程架构图（详细版）</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart TB
+    START([开始]) --> A
+
+    subgraph 备案阶段["备案管理阶段"]
+        A[业主/施工方在线申报] --> B[AI审核]
+        B --> C[人工审核]
+        C -->|通过| D[生成备案回执<br/>工程纳入监管]
+        C -->|驳回| A
+    end
+
+    subgraph 施工监管阶段["施工监管阶段"]
+        D --> E[工程状态: 正常施工]
+        E --> F{巡查人员定期巡查}
+
+        subgraph 巡查流程["巡查流程"]
+            F -->|未发现违规| G[记录巡查结果<br/>保持正常施工]
+            F -->|发现违规| H[违规登记]
+            H --> I{隐患等级判断}
+            I -->|较大隐患| J[停工整改]
+            I -->|一般隐患| K[现场整改]
+        end
+
+        subgraph 整改流程["整改流程"]
+            J --> M[施工方提交整改记录]
+            K --> M
+            M --> N[同组织审核员审核整改]
+            N -->|通过| O[工程恢复正常施工]
+            N -->|驳回| M
+        end
+    end
+
+    subgraph 完工核销阶段["完工销项阶段"]
+        O --> P{完工核销}
+        E --> P
+        G --> P
+
+        subgraph 核销路径["核销路径"]
+            P -->|路径1| Q[施工方申请核销]
+            P -->|路径2| R[巡查员直接核销]
+            Q --> S[巡查员审核]
+            S -->|通过| T[工程状态: 已核销]
+            S -->|驳回| Q
+            R --> T
+        end
+    end
+
+    subgraph 档案归档["工程归档"]
+        T --> U[工程档案归档]
+        U --> V[备案信息]
+        U --> W[巡查记录]
+        U --> X[整改记录]
+        U --> Y[核销记录]
+    end
+
+    Y --> END([结束])
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">二、备案流程详细图</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart LR
+    A[开始] --> B[选择备案类型]
+    B --> C[小型工程/住宅装修/零星作业]
+    C --> D[填写基础信息]
+    D --> E[填写工程信息]
+    E --> F[填写安全信息]
+    F --> G[上传保单]
+    G --> H[施工单位管理]
+    H --> I[施工工人管理]
+    I --> J[提交备案申请]
+    J --> K{AI审核}
+    K -->|通过| L[人工审核]
+    K -->|驳回| M[显示驳回原因]
+    L -->|通过| N[生成备案回执]
+    L -->|驳回| M
+    M --> O[修改后重新提交]
+    O --> J
+    N --> P[工程纳入监管<br/>状态: 正常施工]
+    P --> Q[结束]
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">三、巡查与整改闭环流程图</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart TB
+    subgraph 巡查发起["1. 巡查发起"]
+        A[工程详情页] --> B[点击发起巡查]
+        B --> C[填写巡查信息]
+        C --> D{巡查结果}
+        D -->|未发现违规| E[提交巡查记录<br/>流程结束]
+        D -->|发现违规| F[进入违规登记]
+    end
+
+    subgraph 违规登记["2. 违规登记"]
+        F --> G[选择隐患类型]
+        G --> H[上传现场照片]
+        H --> I[填写违规描述]
+        I --> J[设置整改要求]
+        J --> K{隐患等级}
+        K -->|较大隐患| L[停工整改]
+        K -->|一般隐患| M[现场整改]
+        L --> N[设置整改期限]
+        M --> N
+        N --> P[提交违规登记]
+    end
+
+    subgraph 工程状态变更["3. 工程状态变更"]
+        P --> Q{同次巡查多条违规}
+        Q -->|含停工整改| R[工程状态: 停工整改]
+        Q -->|仅现场整改| S[工程状态: 现场整改]
+    end
+
+    subgraph 整改流程["4. 整改流程"]
+        R --> U[通知施工方提交整改记录]
+        S --> U
+        U --> V[施工方上传整改照片+说明]
+        V --> W[提交整改记录<br/>状态: 待审核]
+        W --> X[同组织审核员审核整改]
+        X -->|整体通过| Y[上传验收照片<br/>工程恢复正常施工]
+        X -->|整体驳回| Z[填写驳回原因<br/>返回待整改]
+        Z --> V
+    end
+                </div>
+                <div class="note">
+                    关键规则：发现违规必整改。同次巡查登记多条违规时，按最高等级确定工程状态（停工整改 > 现场整改）。
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">四、工程状态流转图</div>
+            <div class="section-content">
+                <div class="mermaid">
+stateDiagram-v2
+    [*] --> 正常施工: 备案审核通过
+
+    正常施工 --> 正常施工: 巡查无违规<br/>整改审核通过
+    正常施工 --> 现场整改: 巡查发现一般隐患
+    正常施工 --> 停工整改: 巡查发现较大隐患
+    正常施工 --> 核销待审核: 发起核销申请
+    正常施工 --> 已核销: 巡查员直接核销
+
+    现场整改 --> 正常施工: 整改审核通过
+    现场整改 --> 停工整改: 发现更严重违规<br/>升级为停工整改
+    现场整改 --> 核销待审核: 发起核销申请
+    现场整改 --> 已核销: 巡查员直接核销
+
+    停工整改 --> 正常施工: 整改审核通过
+    停工整改 --> 核销待审核: 发起核销申请
+    停工整改 --> 已核销: 巡查员直接核销
+
+    核销待审核 --> 已核销: 审核通过
+    核销待审核 --> 正常施工: 审核驳回
+    核销待审核 --> 现场整改: 审核驳回
+    核销待审核 --> 停工整改: 审核驳回
+
+    已核销 --> [*]: 工程归档
+
+    note right of 正常施工
+        可发起巡查
+        可申请/直接核销
+    end note
+
+    note right of 现场整改
+        可继续巡查
+        需提交整改记录
+    end note
+
+    note right of 停工整改
+        强制停工
+        整改完成前不可复工
+    end note
+
+    note right of 已核销
+        终态，不可撤销
+        15天内可继续完成遗留整改
+    end note
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">五、完工核销流程图</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart TB
+    subgraph 触发条件["触发条件判断"]
+        A[工程状态] --> B{是否已核销?}
+        B -->|是| C[显示已核销标签<br/>流程结束]
+        B -->|否| D{是否存在待审核核销申请?}
+        D -->|是| E[显示审核中状态<br/>等待审核]
+        D -->|否| F[显示核销入口]
+    end
+
+    subgraph 路径一["路径一: 施工方申请核销"]
+        F --> G[施工方填写完工日期/现场照片/备注]
+        G --> H[提交核销申请]
+        H --> I[记录申请前工程状态]
+        I --> J[工程状态: 核销待审核]
+        J --> K[锁定新增巡查入口]
+        K --> L[巡查员审核]
+        L -->|通过| M[工程状态: 已核销]
+        L -->|驳回| N[恢复申请前状态]
+        N --> G
+    end
+
+    subgraph 路径二["路径二: 巡检端直接核销"]
+        F --> O[巡查员确认是否完工]
+        O -->|是| P[上传现场图片]
+        P --> Q[工程状态: 已核销]
+        O -->|否| R[提示: 未完工不可核销]
+    end
+
+    subgraph 核销后处理["核销后处理"]
+        M --> S[生成核销记录]
+        Q --> S
+        S --> T[15天内允许继续提交遗留整改]
+        T --> U[工程归档<br/>查询历史记录]
+    end
+                </div>
+                <div class="note">
+                    双路径核销：路径一适用于施工方主动申请，需巡查员审核；路径二适用于巡查员现场直接确认完工并核销。
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">六、三方巡查协同流程图（时序图）</div>
+            <div class="section-content">
+                <div class="mermaid">
+sequenceDiagram
+    participant 街道 as 街道巡查员
+    participant 社区 as 社区巡查员
+    participant 物业 as 物业巡查员
+    participant 施工方 as 施工方
+    participant 系统 as 系统
+
+    rect rgb(245, 245, 245)
+        Note over 街道,系统: 备案审核通过后工程纳入监管
+        系统->>街道: 分配工程至各组织
+        系统->>社区: 分配工程至各组织
+        系统->>物业: 分配工程至各组织
+    end
+
+    rect rgb(245, 245, 245)
+        Note over 街道,系统: 各方独立开展巡查
+        par 街道巡查
+            街道->>系统: 发起巡查
+            系统-->>街道: 记录巡查结果
+        and 社区巡查
+            社区->>系统: 发起巡查
+            系统-->>社区: 记录巡查结果
+        and 物业巡查
+            物业->>系统: 发起巡查
+            系统-->>物业: 记录巡查结果
+        end
+    end
+
+    rect rgb(245, 245, 245)
+        Note over 街道,系统: 发现违规 → 独立整改流程
+        街道->>系统: 登记违规(较大隐患)
+        系统->>施工方: 通知停工整改
+        施工方->>系统: 提交整改记录
+        系统->>街道: 街道审核员审核
+        街道-->>系统: 审核通过
+        系统->>施工方: 通知整改通过
+    end
+
+    rect rgb(245, 245, 245)
+        Note over 街道,系统: 跨组织可见整改状态
+        社区->>系统: 查看工程详情
+        系统-->>社区: 显示街道巡查记录<br/>显示整改状态
+        物业->>系统: 查看工程详情
+        系统-->>物业: 显示各方巡查统计<br/>不显示整改操作入口
+    end
+
+    rect rgb(245, 245, 245)
+        Note over 街道,系统: 完工核销
+        alt 施工方申请核销
+            施工方->>系统: 提交核销申请
+            系统->>街道: 通知审核
+            街道->>系统: 审核通过
+        else 巡查员直接核销
+            街道->>系统: 直接核销
+        end
+        系统-->>系统: 工程状态: 已核销
+        系统->>施工方: 通知核销完成
+        系统->>社区: 同步核销状态
+        系统->>物业: 同步核销状态
+    end
+                </div>
+                <div class="note">
+                    协同规则：各方巡查记录互相可见，但整改审核仅限同组织人员进行，确保责任清晰。
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">七、隐患分级处置流程图</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart TB
+    A[巡查发现违规] --> B{隐患等级判断}
+
+    B -->|较大隐患| C[停工整改]
+    B -->|一般隐患| F[现场整改]
+
+    C --> G[工程状态: 停工整改]
+    F --> H[工程状态: 现场整改]
+
+    G --> J[整改期限到期前提交整改记录]
+    H --> J
+    J --> K[同组织审核员审核]
+
+    K -->|整体通过| L[上传验收照片]
+    L --> M[工程恢复正常施工]
+
+    K -->|整体驳回| N[填写驳回原因]
+    N --> O[退回施工方重新提交整改]
+    O --> J
+
+    subgraph 隐患分级标准["隐患分级标准"]
+        P[较大隐患] --> Q[重大安全风险<br/>需立即停工]
+        R[一般隐患] --> S[一般安全问题<br/>现场整改]
+    end
+
+    style C fill:#ff4d4f,stroke:#a8071a,color:#fff
+    style F fill:#faad14,stroke:#d48806,color:#fff
+    style G fill:#ffccc7,stroke:#ff4d4f
+    style H fill:#ffe58f,stroke:#faad14
+    style 隐患分级标准 fill:#f5f5f5,stroke:#999
+                </div>
+                <div class="note">
+                    隐患分级说明：隐患分为两级，较大隐患必须停工整改，一般隐患现场整改。发现违规必整改，不存在仅记录不整改的情况。
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">八、巡查频次与待巡查提醒流程</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart LR
+    subgraph 频次配置["巡查频次配置"]
+        A[高风险工程] --> B[街道: 每10天至少1次]
+        A --> C[社区: 每14天至少1次]
+        A --> D[物业: 每2天至少1次]
+
+        E[非高风险-家装] --> F[街道: 每30天至少1次]
+        E --> G[社区: 每21天至少1次]
+        E --> H[物业: 每7天至少1次]
+
+        I[非高风险-其他] --> J[街道: 每21天至少1次]
+        I --> K[社区: 每14天至少1次]
+        I --> L[物业: 每3天至少1次]
+    end
+
+    subgraph 待巡查计算["待巡查计算逻辑"]
+        M[系统每日计算] --> N{今天 - 上次巡查日期 > 频次阈值?}
+        N -->|是| O[计入待巡查列表]
+        N -->|否| P[正常状态]
+        Q[从未巡查] --> O
+    end
+
+    subgraph 待巡查展示["待巡查展示"]
+        O --> R[首页待巡查提醒]
+        O --> S[工程列表标注超期天数]
+        O --> T[待巡查工程列表]
+    end
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">九、角色权限与操作矩阵</div>
+            <div class="section-content">
+                <div class="mermaid">
+flowchart TB
+    subgraph 角色定义["角色定义"]
+        A[巡查人员] --> A1[街道/社区/物业巡查工作人员]
+        B[审核员] --> B1[与巡查人员同组织<br/>负责审核整改]
+        C[施工方] --> C1[施工单位负责人<br/>提交整改/申请核销]
+    end
+
+    subgraph 操作权限["各角色操作权限"]
+        D[发起巡查] --> D1[巡查人员]
+        E[登记违规] --> E1[巡查人员]
+        F[提交整改记录] --> F1[施工方]
+        G[审核整改] --> G1[同组织审核员]
+        H[申请核销] --> H1[施工方]
+        I[审核/直接核销] --> I1[巡查人员]
+    end
+
+    style 角色定义 fill:#f5f5f5,stroke:#999
+    style 操作权限 fill:#f5f5f5,stroke:#999
+                </div>
+                <table>
+                    <tr>
+                        <th>操作</th>
+                        <th>巡查人员</th>
+                        <th>审核员</th>
+                        <th>施工方</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td>发起巡查</td>
+                        <td>可</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>各方巡查员独立发起</td>
+                    </tr>
+                    <tr>
+                        <td>登记违规</td>
+                        <td>可</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>按隐患分级标准登记</td>
+                    </tr>
+                    <tr>
+                        <td>提交整改记录</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>可</td>
+                        <td>上传照片+整改说明</td>
+                    </tr>
+                    <tr>
+                        <td>审核整改</td>
+                        <td>-</td>
+                        <td>可</td>
+                        <td>-</td>
+                        <td>仅同组织人员可审核</td>
+                    </tr>
+                    <tr>
+                        <td>申请/审核/直接核销</td>
+                        <td>可</td>
+                        <td>-</td>
+                        <td>可</td>
+                        <td>双路径核销机制</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">流程图对应功能模块</div>
+            <div class="section-content">
+                <table>
+                    <tr>
+                        <th>流程图</th>
+                        <th>对应功能模块</th>
+                        <th>文档来源</th>
+                    </tr>
+                    <tr><td>系统整体流程架构图</td><td>全系统</td><td>产品规划汇总</td></tr>
+                    <tr><td>备案流程详细图</td><td>备案管理模块</td><td>备案管理功能设计</td></tr>
+                    <tr><td>巡查与整改闭环流程图</td><td>日常巡查模块</td><td>安全巡检功能设计</td></tr>
+                    <tr><td>工程状态流转图</td><td>工程管理</td><td>安全巡检功能设计</td></tr>
+                    <tr><td>完工核销流程图</td><td>完工销项模块</td><td>完工核销功能设计</td></tr>
+                    <tr><td>三方巡查协同流程图</td><td>日常巡查模块</td><td>安全巡检功能设计</td></tr>
+                    <tr><td>隐患分级处置流程图</td><td>日常巡查模块</td><td>安全巡检功能设计</td></tr>
+                    <tr><td>巡查频次与待巡查提醒流程</td><td>日常巡查模块</td><td>安全巡检功能设计</td></tr>
+                    <tr><td>角色权限与操作矩阵</td><td>权限管理</td><td>产品规划汇总</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="doc-info">
+            文档生成时间：2026-04-01 | 基于功能设计文档：安全巡检功能设计.md、完工核销功能设计.md
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+            sequence: { useMaxWidth: true, diagramMarginX: 50, diagramMarginY: 10 },
+            stateDiagram: { useMaxWidth: true }
+        });
+    </script>
+</body>
+</html>

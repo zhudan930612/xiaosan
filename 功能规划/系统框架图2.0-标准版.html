@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统框架图 2.0 - 标准泳道图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .header {
+            background: #1890ff;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .mermaid {
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">小型工程管理系统业务流程图</div>
+        <div class="mermaid">
+flowchart LR
+    subgraph 备案阶段["备案阶段"]
+        direction TB
+        subgraph 施工方备案["施工方"]
+            A1([开始]) --> A2[新增备案]
+            A2 --> A3[填写/修改资料]
+            A3 --> A4{资料是否完整}
+            A4 -->|否| A3
+            A4 -->|是| A5[提交申请]
+        end
+
+        subgraph 物业社区备案["物业/社区"]
+            B1[ ]
+        end
+
+        subgraph 街道备案["街道"]
+            C1[审核备案信息]
+            C2{资料是否审核通过}
+            C3[生成备案回执]
+        end
+
+        subgraph 区住建备案["区住建"]
+            D1[ ]
+        end
+
+        A5 --> C1
+        C1 --> C2
+        C2 -->|否| A3
+        C2 -->|是| C3
+    end
+
+    subgraph 施工阶段["施工阶段"]
+        direction TB
+        subgraph 施工方施工["施工方"]
+            E1([获准开工])
+            E2[正常施工]
+            E3[提交整改]
+        end
+
+        subgraph 物业社区施工["物业/社区"]
+            F1[定期巡查]
+        end
+
+        subgraph 街道施工["街道"]
+            G1[现场检查]
+            G2{巡查结果}
+            G3{隐患分级}
+            G4[停工整改]
+            G5[现场整改]
+            G6[审核整改]
+        end
+
+        subgraph 区住建施工["区住建"]
+            H1[ ]
+        end
+
+        C3 -.-> E1
+        E1 --> E2
+        E2 --> F1
+        F1 --> G1
+        G1 --> G2
+        G2 -->|无违规| E2
+        G2 -->|发现违规| G3
+        G3 -->|较大隐患| G4
+        G3 -->|一般隐患| G5
+        G4 --> E3
+        G5 --> E3
+        E3 --> G6
+        G6 -->|驳回| E3
+        G6 -->|通过| E2
+    end
+
+    subgraph 核销阶段["核销阶段"]
+        direction TB
+        subgraph 施工方核销["施工方"]
+            I1[申请核销]
+        end
+
+        subgraph 物业社区核销["物业/社区"]
+            J1[ ]
+        end
+
+        subgraph 街道核销["街道"]
+            K1{核销审核}
+            K2[已核销]
+        end
+
+        subgraph 区住建核销["区住建"]
+            L1[工程归档]
+            L2([结束])
+        end
+
+        E2 --> I1
+        I1 --> K1
+        K1 -->|驳回| I1
+        K1 -->|通过| K2
+        K2 --> L1
+        L1 --> L2
+    end
+
+    style A1 fill:#f0f0f0,stroke:#666
+    style E1 fill:#f0f0f0,stroke:#666
+    style L2 fill:#f0f0f0,stroke:#666
+    style A4 fill:#fff0b3,stroke:#d9a900
+    style C2 fill:#fff0b3,stroke:#d9a900
+    style G2 fill:#fff0b3,stroke:#d9a900
+    style G3 fill:#fff0b3,stroke:#d9a900
+    style K1 fill:#fff0b3,stroke:#d9a900
+    style 备案阶段 fill:#e6f7ff,stroke:#1890ff,stroke-width:2px
+    style 施工阶段 fill:#f6ffed,stroke:#52c41a,stroke-width:2px
+    style 核销阶段 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px
+    style G4 fill:#ffcccc,stroke:#ff4d4f
+    style G5 fill:#ffe58f,stroke:#faad14
+    style K2 fill:#d9f7be,stroke:#52c41a
+    style C3 fill:#bae7ff,stroke:#1890ff
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

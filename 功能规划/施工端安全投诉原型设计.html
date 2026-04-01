@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>施工端安全投诉功能原型</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #E5E5E5;
+            padding: 20px;
+        }
+
+        .prototype-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .prototype-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .prototype-wrapper {
+            display: flex;
+            gap: 32px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .page-group {
+            display: flex;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .phone-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: auto;
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phone-screen {
+            height: auto;
+            min-height: 667px;
+            background: #F5F5F5;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(180deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .status-time {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* 导航栏 */
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(180deg, #00B578 0%, #00A86B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: #fff;
+        }
+
+        .nav-back {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .nav-action {
+            position: absolute;
+            right: 16px;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        /* 内容区域 */
+        .page-content {
+            padding: 16px;
+            min-height: 579px;
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            background: #fff;
+            border-radius: 10px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            color: #999;
+            margin-right: 8px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            font-size: 15px;
+            background: transparent;
+            color: #333;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        /* 筛选标签 */
+        .filter-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            background: #fff;
+            border-radius: 16px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .filter-tab.active {
+            background: #00B578;
+            color: #fff;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .status-tag {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+
+        .status-pending {
+            background: #E6F4FF;
+            color: #1890FF;
+        }
+
+        .status-processing {
+            background: #FFF7E6;
+            color: #FF9500;
+        }
+
+        .status-completed {
+            background: #E6F7F0;
+            color: #00B578;
+        }
+
+        .status-rejected {
+            background: #FFF2F0;
+            color: #FF4D4F;
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+            color: #999;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .card-time {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            height: 36px;
+            padding: 0 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #00B578;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #00B578;
+            border: 1px solid #00B578;
+        }
+
+        .btn-text {
+            background: transparent;
+            color: #00B578;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: #F0F0F0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .empty-icon svg {
+            width: 40px;
+            height: 40px;
+            color: #ccc;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .empty-desc {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 详情页样式 */
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #00B578;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+
+        .info-list {
+            background: #fff;
+            border-radius: 12px;
+            padding: 0 16px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .info-value {
+            font-size: 15px;
+            color: #333;
+            text-align: right;
+            flex: 1;
+            margin-left: 16px;
+        }
+
+        /* 时间线 */
+        .timeline {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .timeline-item {
+            display: flex;
+            position: relative;
+            padding-bottom: 24px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 20px;
+            width: 2px;
+            height: calc(100% - 4px);
+            background: #E5E5E5;
+        }
+
+        .timeline-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-dot.completed {
+            background: #00B578;
+        }
+
+        .timeline-dot.current {
+            background: #fff;
+            border: 2px solid #00B578;
+        }
+
+        .timeline-dot.pending {
+            background: #fff;
+            border: 2px solid #E5E5E5;
+        }
+
+        .timeline-dot.completed svg {
+            width: 10px;
+            height: 10px;
+            color: #fff;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .timeline-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .timeline-time {
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* 表单样式 */
+        .form-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .form-item {
+            margin-bottom: 16px;
+        }
+
+        .form-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-label .required {
+            color: #FF4D4F;
+            margin-left: 2px;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            border: 1px solid #E5E5E5;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 15px;
+            color: #333;
+            background: #FAFAFA;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #00B578;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-select {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #FAFAFA;
+            border: 1px solid #E5E5E5;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .form-select .placeholder {
+            color: #999;
+        }
+
+        /* 图片上传 */
+        .upload-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .upload-box {
+            width: 100px;
+            height: 100px;
+            border: 1px dashed #00B578;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: #F5F5F5;
+        }
+
+        .upload-box svg {
+            width: 32px;
+            height: 32px;
+            color: #00B578;
+            margin-bottom: 4px;
+        }
+
+        .upload-text {
+            font-size: 12px;
+            color: #00B578;
+        }
+
+        .uploaded-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            background: #F0F0F0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .uploaded-image .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .uploaded-image .delete-btn svg {
+            width: 12px;
+            height: 12px;
+            color: #fff;
+        }
+
+        /* 底部按钮 */
+        .bottom-actions {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: #fff;
+            border-top: 1px solid #E5E5E5;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-block {
+            flex: 1;
+            height: 50px;
+            border-radius: 10px;
+        }
+
+        /* 成功页 */
+        .success-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #E6F7F0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            color: #00B578;
+        }
+
+        .success-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .success-desc {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 40px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 280px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .modal-btn-cancel {
+            background: #F5F5F5;
+            color: #333;
+        }
+
+        .modal-btn-confirm {
+            background: #00B578;
+            color: #fff;
+        }
+
+        /* 可编辑样式 */
+        [contenteditable="true"] {
+            cursor: text;
+        }
+
+        [contenteditable="true"]:hover {
+            outline: 1px dashed #00B578;
+            outline-offset: 2px;
+        }
+
+        [contenteditable="true"]:focus {
+            outline: 2px solid #00B578;
+            outline-offset: 2px;
+        }
+
+        /* 标注面板 */
+        .annotation-panel {
+            width: 280px;
+            background: #FFFBE6;
+            border: 1px dashed #FFC53D;
+            border-radius: 4px;
+            padding: 16px;
+            margin-top: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .annotation-title {
+            font-weight: 600;
+            color: #FF9500;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .annotation-section {
+            margin-bottom: 16px;
+        }
+
+        .annotation-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .annotation-section-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .annotation-content {
+            color: #666;
+            white-space: pre-wrap;
+        }
+
+        .annotation-content ul {
+            margin-left: 16px;
+            margin-top: 4px;
+        }
+
+        .annotation-content li {
+            margin-bottom: 4px;
+        }
+
+        .annotation-content code {
+            background: #FFF2DB;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #FF9500;
+        }
+
+        /* 页面标题 */
+        .page-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        /* 标签页切换 */
+        .tab-bar {
+            display: flex;
+            background: #fff;
+            border-bottom: 1px solid #F0F0F0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tab-item {
+            flex: 1;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            color: #666;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tab-item.active {
+            color: #00B578;
+            font-weight: 500;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #00B578;
+            border-radius: 2px;
+        }
+
+        /* 底部悬浮按钮 */
+        .fab {
+            position: absolute;
+            right: 20px;
+            bottom: 100px;
+            width: 56px;
+            height: 56px;
+            background: #00B578;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 181, 120, 0.4);
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .fab svg {
+            width: 24px;
+            height: 24px;
+            color: #fff;
+        }
+
+        /* 处理结果卡片 */
+        .result-card {
+            background: #E6F7F0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .result-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #00B578;
+            margin-bottom: 8px;
+        }
+
+        .result-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 驳回原因 */
+        .reject-card {
+            background: #FFF2F0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .reject-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #FF4D4F;
+            margin-bottom: 8px;
+        }
+
+        .reject-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="prototype-title">施工端安全投诉功能原型</div>
+    <div class="prototype-subtitle">文案可编辑模式 | 点击文字即可修改</div>
+
+    <div class="prototype-wrapper">
+        <!-- 第一组：列表页（有数据 + 空状态） -->
+        <div class="page-group">
+            <!-- 投诉列表页 - 有数据 -->
+            <div class="phone-wrapper">
+                <div class="page-label">投诉列表页（有数据）</div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time" contenteditable="true">9:41</span>
+                            <span contenteditable="true">安全投诉</span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="nav-title" contenteditable="true">我的投诉</div>
+                        </div>
+
+                        <div class="tab-bar">
+                            <div class="tab-item active" contenteditable="true">全部</div>
+                            <div class="tab-item" contenteditable="true">处理中</div>
+                            <div class="tab-item" contenteditable="true">已完成</div>
+                        </div>
+
+                        <div class="page-content">
+                            <div class="search-bar">
+                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                                <input type="text" class="search-input" placeholder="搜索工程名称" contenteditable="true">
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" contenteditable="true">金湾区金海岸大道改造工程项目</div>
+                                    <span class="status-tag status-pending" contenteditable="true">待受理</span>
+                                </div>
+                                <div class="card-info">
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span contenteditable="true">投诉类型：安全隐患</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span contenteditable="true">提交时间：2026-03-28 14:30</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" contenteditable="true">高新区创新科技园一期项目</div>
+                                    <span class="status-tag status-processing" contenteditable="true">处理中</span>
+                                </div>
+                                <div class="card-info">
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span contenteditable="true">投诉类型：违规施工</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span contenteditable="true">提交时间：2026-03-25 09:15</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" contenteditable="true">横琴新区金融中心大厦项目</div>
+                                    <span class="status-tag status-completed" contenteditable="true">已处理</span>
+                                </div>
+                                <div class="card-info">
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span contenteditable="true">投诉类型：环境污染</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span contenteditable="true">提交时间：2026-03-20 16:45</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" contenteditable="true">香洲区市政道路维护工程</div>
+                                    <span class="status-tag status-rejected" contenteditable="true">已驳回</span>
+                                </div>
+                                <div class="card-info">
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span contenteditable="true">投诉类型：其他问题</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span contenteditable="true">提交时间：2026-03-15 11:20</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="fab">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotation-panel" contenteditable="true">
+                    <div class="annotation-title">📌 需求说明</div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">投诉状态流转规则</div>
+                        <div class="annotation-content">
+• 待受理：投诉提交后初始状态
+• 处理中：管理员受理后开始处理
+• 已处理：处理完成并反馈结果
+• 已驳回：投诉不符合受理条件
+
+状态变更触发条件：
+- 待受理→处理中：管理员点击"受理"
+- 处理中→已处理：管理员提交处理结果
+- 待受理→已驳回：管理员点击"驳回"并填写原因                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">列表排序规则</div>
+                        <div class="annotation-content">
+• 默认按提交时间倒序（最新在前）
+• 支持按状态筛选（全部/处理中/已完成）
+• 支持按工程名称关键字搜索
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">数据权限规则</div>
+                        <div class="annotation-content">
+• 只显示当前用户提交的投诉
+• 最多显示最近50条记录
+• 下拉加载更多（分页大小20）
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 投诉列表页 - 空状态 -->
+            <div class="phone-wrapper">
+                <div class="page-label">投诉列表页（空状态）</div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time" contenteditable="true">9:41</span>
+                            <span contenteditable="true">安全投诉</span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="nav-title" contenteditable="true">我的投诉</div>
+                        </div>
+
+                        <div class="tab-bar">
+                            <div class="tab-item active" contenteditable="true">全部</div>
+                            <div class="tab-item" contenteditable="true">处理中</div>
+                            <div class="tab-item" contenteditable="true">已完成</div>
+                        </div>
+
+                        <div class="page-content">
+                            <div class="search-bar">
+                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                                <input type="text" class="search-input" placeholder="搜索工程名称" contenteditable="true">
+                            </div>
+
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="empty-title" contenteditable="true">暂无投诉记录</div>
+                                <div class="empty-desc" contenteditable="true">您还没有提交过任何投诉，点击下方按钮发起投诉</div>
+                            </div>
+                        </div>
+
+                        <div class="fab">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotation-panel" contenteditable="true">
+                    <div class="annotation-title">📌 需求说明</div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">空状态触发条件</div>
+                        <div class="annotation-content">
+• 用户首次使用，无投诉记录
+• 筛选条件下无匹配数据
+• 所有投诉记录被删除
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">空状态交互规则</div>
+                        <div class="annotation-content">
+• 点击悬浮按钮进入投诉页
+• 保留搜索和筛选功能
+• 搜索无结果时显示"未找到相关投诉"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二组：投诉详情页（多种状态） -->
+        <div class="page-group">
+            <!-- 投诉详情页 - 待受理 -->
+            <div class="phone-wrapper">
+                <div class="page-label">投诉详情（待受理）</div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time" contenteditable="true">9:41</span>
+                            <span contenteditable="true">投诉详情</span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="nav-title" contenteditable="true">投诉详情</div>
+                        </div>
+
+                        <div class="page-content">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" contenteditable="true">金湾区金海岸大道改造工程项目</div>
+                                    <span class="status-tag status-pending" contenteditable="true">待受理</span>
+                                </div>
+                                <div class="card-info">
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span contenteditable="true">投诉编号：TS202603280001</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span contenteditable="true">提交时间：2026-03-28 14:30:25</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">投诉信息</div>
+                            <div class="info-list">
+                                <div class="info-item">
+                                    <span class="info-label" contenteditable="true">投诉类型</span>
+                                    <span class="info-value" contenteditable="true">安全隐患</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label" contenteditable="true">投诉对象</span>
+                                    <span class="info-value" contenteditable="true">金海岸大道改造工程项目</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label" contenteditable="true">投诉人</span>
+                                    <span class="info-value" contenteditable="true">张三（138****8888）</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label" contenteditable="true">联系电话</span>
+                                    <span class="info-value" contenteditable="true">13800138888</span>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">问题描述</div>
+                            <div class="card">
+                                <p style="font-size: 15px; color: #333; line-height: 1.6;" contenteditable="true">
+                                    施工现场安全防护措施不到位，高空作业人员未佩戴安全带，存在严重安全隐患。多次提醒仍未整改，请相关部门介入处理。
+                                </p>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">现场照片</div>
+                            <div class="upload-area">
+                                <div class="uploaded-image">
+                                    <svg width="100%" height="100%" viewBox="0 0 100 100">
+                                        <rect fill="#F0F0F0" width="100" height="100"/>
+                                        <text x="50" y="55" text-anchor="middle" fill="#999" font-size="12">照片1</text>
+                                    </svg>
+                                </div>
+                                <div class="uploaded-image">
+                                    <svg width="100%" height="100%" viewBox="0 0 100 100">
+                                        <rect fill="#F0F0F0" width="100" height="100"/>
+                                        <text x="50" y="55" text-anchor="middle" fill="#999" font-size="12">照片2</text>
+                                    </svg>
+                                </div>
+                                <div class="uploaded-image">
+                                    <svg width="100%" height="100%" viewBox="0 0 100 100">
+                                        <rect fill="#F0F0F0" width="100" height="100"/>
+                                        <text x="50" y="55" text-anchor="middle" fill="#999" font-size="12">照片3</text>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">处理进度</div>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-dot current"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title" contenteditable="true">投诉提交</div>
+                                        <div class="timeline-desc" contenteditable="true">等待管理员受理</div>
+                                        <div class="timeline-time" contenteditable="true">2026-03-28 14:30:25</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot pending"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title" contenteditable="true">投诉受理</div>
+                                        <div class="timeline-desc" contenteditable="true">管理员审核并指派处理人员</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot pending"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title" contenteditable="true">处理反馈</div>
+                                        <div class="timeline-desc" contenteditable="true">处理完成后反馈结果</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bottom-actions">
+                            <button class="btn btn-secondary btn-block" contenteditable="true">撤销投诉</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotation-panel" contenteditable="true">
+                    <div class="annotation-title">📌 需求说明</div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">待受理状态规则</div>
+                        <div class="annotation-content">
+• 显示"撤销投诉"按钮
+• 允许修改投诉内容（编辑后重新提交）
+• 24小时内未受理自动发送催办通知
+• 72小时内未受理可拨打投诉热线
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">时间线展示规则</div>
+                        <div class="annotation-content">
+• 当前节点：绿色空心圆
+• 已完成节点：绿色实心圆+对勾
+• 待处理节点：灰色空心圆
+• 时间节点显示精确到秒
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">撤销投诉规则</div>
+                        <div class="annotation-content">
+• 仅待受理状态可撤销
+• 撤销后记录保留但标记为"已撤销"
+• 撤销原因选填（最大200字）
+• 撤销后24小时内不可对同一工程再次投诉
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 投诉详情页 - 已处理 -->
+            <div class="phone-wrapper">
+                <div class="page-label">投诉详情（已处理）</div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time" contenteditable="true">9:41</span>
+                            <span contenteditable="true">投诉详情</span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="nav-title" contenteditable="true">投诉详情</div>
+                        </div>
+
+                        <div class="page-content">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" contenteditable="true">横琴新区金融中心大厦项目</div>
+                                    <span class="status-tag status-completed" contenteditable="true">已处理</span>
+                                </div>
+                                <div class="card-info">
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span contenteditable="true">投诉编号：TS202603200003</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span contenteditable="true">提交时间：2026-03-20 16:45:10</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">投诉信息</div>
+                            <div class="info-list">
+                                <div class="info-item">
+                                    <span class="info-label" contenteditable="true">投诉类型</span>
+                                    <span class="info-value" contenteditable="true">环境污染</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label" contenteditable="true">投诉对象</span>
+                                    <span class="info-value" contenteditable="true">横琴新区金融中心大厦项目</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label" contenteditable="true">投诉人</span>
+                                    <span class="info-value" contenteditable="true">张三（138****8888）</span>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">问题描述</div>
+                            <div class="card">
+                                <p style="font-size: 15px; color: #333; line-height: 1.6;" contenteditable="true">
+                                    施工现场噪音过大，且粉尘污染严重，影响周边居民正常生活。请督促施工单位采取降噪降尘措施。
+                                </p>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">处理进度</div>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-dot completed">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <path d="M5 12l5 5L20 7"/>
+                                        </svg>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title" contenteditable="true">投诉提交</div>
+                                        <div class="timeline-time" contenteditable="true">2026-03-20 16:45:10</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot completed">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <path d="M5 12l5 5L20 7"/>
+                                        </svg>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title" contenteditable="true">投诉受理</div>
+                                        <div class="timeline-desc" contenteditable="true">已指派张工处理</div>
+                                        <div class="timeline-time" contenteditable="true">2026-03-20 17:02:35</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot completed">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <path d="M5 12l5 5L20 7"/>
+                                        </svg>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title" contenteditable="true">处理反馈</div>
+                                        <div class="timeline-desc" contenteditable="true">问题已处理完成</div>
+                                        <div class="timeline-time" contenteditable="true">2026-03-22 09:30:15</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="result-card">
+                                <div class="result-title" contenteditable="true">处理结果</div>
+                                <div class="result-content" contenteditable="true">
+                                    经现场核实，投诉情况属实。已要求施工单位：1.调整施工时间，避免夜间施工；2.加装隔音围挡；3.增加洒水降尘频次。目前整改措施已落实，感谢您的监督。
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">处理照片</div>
+                            <div class="upload-area">
+                                <div class="uploaded-image">
+                                    <svg width="100%" height="100%" viewBox="0 0 100 100">
+                                        <rect fill="#F0F0F0" width="100" height="100"/>
+                                        <text x="50" y="55" text-anchor="middle" fill="#999" font-size="12">整改后照片</text>
+                                    </svg>
+                                </div>
+                                <div class="uploaded-image">
+                                    <svg width="100%" height="100%" viewBox="0 0 100 100">
+                                        <rect fill="#F0F0F0" width="100" height="100"/>
+                                        <text x="50" y="55" text-anchor="middle" fill="#999" font-size="12">整改后照片</text>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotation-panel" contenteditable="true">
+                    <div class="annotation-title">📌 需求说明</div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">处理结果展示规则</div>
+                        <div class="annotation-content">
+• 已处理状态显示绿色结果卡片
+• 包含处理措施说明
+• 显示处理人员上传的整改照片
+• 处理结果字数限制500字以内
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">满意度评价（预留）</div>
+                        <div class="annotation-content">
+• V2.0版本增加满意度评价功能
+• 评价维度：处理速度、处理结果、服务态度
+• 评价后不可修改
+• 评价数据计入处理人员考核
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">已处理状态权限</div>
+                        <div class="annotation-content">
+• 不可撤销投诉
+• 不可修改投诉内容
+• 可查看完整处理流程
+• 可再次投诉（同一问题二次投诉需间隔7天）
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三组：发起投诉页 -->
+        <div class="page-group">
+            <!-- 发起投诉页 -->
+            <div class="phone-wrapper">
+                <div class="page-label">发起投诉页</div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time" contenteditable="true">9:41</span>
+                            <span contenteditable="true">发起投诉</span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="nav-title" contenteditable="true">发起投诉</div>
+                            <div class="nav-action" contenteditable="true">取消</div>
+                        </div>
+
+                        <div class="page-content">
+                            <div class="section-title" contenteditable="true">选择工程</div>
+                            <div class="form-card">
+                                <div class="form-item">
+                                    <label class="form-label" contenteditable="true">所属工程<span class="required">*</span></label>
+                                    <div class="form-select">
+                                        <span class="placeholder" contenteditable="true">请选择投诉的工程</span>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M9 18l6-6-6-6"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">投诉信息</div>
+                            <div class="form-card">
+                                <div class="form-item">
+                                    <label class="form-label" contenteditable="true">投诉类型<span class="required">*</span></label>
+                                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                        <span class="filter-tab active" contenteditable="true">安全隐患</span>
+                                        <span class="filter-tab" contenteditable="true">违规施工</span>
+                                        <span class="filter-tab" contenteditable="true">环境污染</span>
+                                        <span class="filter-tab" contenteditable="true">其他问题</span>
+                                    </div>
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label" contenteditable="true">问题描述<span class="required">*</span></label>
+                                    <textarea class="form-textarea" placeholder="请详细描述您发现的问题，包括问题发生的时间、地点、具体情况等" contenteditable="true"></textarea>
+                                    <div style="text-align: right; font-size: 12px; color: #999; margin-top: 4px;" contenteditable="true">0/500</div>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">现场照片</div>
+                            <div class="form-card">
+                                <div class="form-item">
+                                    <label class="form-label" contenteditable="true">上传照片（选填）</label>
+                                    <div class="upload-area">
+                                        <div class="upload-box">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                                <path d="M21 15l-5-5L5 21"/>
+                                            </svg>
+                                            <span class="upload-text" contenteditable="true">添加照片</span>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 8px;" contenteditable="true">最多上传9张照片，单张不超过10MB</div>
+                                </div>
+                            </div>
+
+                            <div class="section-title" contenteditable="true">联系方式</div>
+                            <div class="form-card">
+                                <div class="form-item">
+                                    <label class="form-label" contenteditable="true">投诉人姓名<span class="required">*</span></label>
+                                    <input type="text" class="form-input" placeholder="请输入您的姓名" value="张三" contenteditable="true">
+                                </div>
+                                <div class="form-item">
+                                    <label class="form-label" contenteditable="true">联系电话<span class="required">*</span></label>
+                                    <input type="text" class="form-input" placeholder="请输入您的手机号" value="13800138888" contenteditable="true">
+                                </div>
+                                <div style="font-size: 13px; color: #999; line-height: 1.5;" contenteditable="true">
+                                    您的个人信息仅用于投诉处理过程中与您联系，我们会严格保密。
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bottom-actions">
+                            <button class="btn btn-primary btn-block" contenteditable="true">提交投诉</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotation-panel" contenteditable="true">
+                    <div class="annotation-title">📌 需求说明</div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">工程选择规则</div>
+                        <div class="annotation-content">
+• 只显示当前用户关联的在建工程
+• 下拉选择或跳转选择页
+• 已完工工程不可投诉
+• 同一工程7天内不可重复投诉同类型问题
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">投诉类型枚举值</div>
+                        <div class="annotation-content">
+• <code>SAFETY</code> 安全隐患：安全防护缺失、违规操作等
+• <code>VIOLATION</code> 违规施工：无证施工、超范围施工等
+• <code>POLLUTION</code> 环境污染：噪音、粉尘、污水等
+• <code>OTHER</code> 其他问题：不属于以上类别的问题
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">字段校验规则</div>
+                        <div class="annotation-content">
+• 工程：必填，必须是用户关联工程
+• 投诉类型：必填，单选
+• 问题描述：必填，10-500字
+• 现场照片：选填，最多9张，支持jpg/png
+• 姓名：必填，2-20字符
+• 手机号：必填，11位手机号格式
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">提交按钮规则</div>
+                        <div class="annotation-content">
+• 必填项未填写时禁用提交
+• 点击提交后显示确认弹窗
+• 提交中显示loading状态，防重复提交
+• 提交成功后跳转成功页
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提交成功页 -->
+            <div class="phone-wrapper">
+                <div class="page-label">提交成功页</div>
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time" contenteditable="true">9:41</span>
+                            <span contenteditable="true">提交成功</span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                            </div>
+                            <div class="nav-title" contenteditable="true">提交成功</div>
+                        </div>
+
+                        <div class="page-content">
+                            <div class="success-page">
+                                <div class="success-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                        <polyline points="22 4 12 14.01 9 11.01"/>
+                                    </svg>
+                                </div>
+                                <div class="success-title" contenteditable="true">投诉提交成功</div>
+                                <div class="success-desc" contenteditable="true">
+                                    您的投诉已提交成功，我们将尽快处理并在3个工作日内反馈处理结果。投诉编号：TS202604010001
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                                    <button class="btn btn-primary btn-block" contenteditable="true">查看投诉详情</button>
+                                    <button class="btn btn-secondary btn-block" contenteditable="true">返回首页</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotation-panel" contenteditable="true">
+                    <div class="annotation-title">📌 需求说明</div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">成功页展示规则</div>
+                        <div class="annotation-content">
+• 显示成功图标和提示文案
+• 展示投诉编号（系统生成）
+• 告知预计处理时效（3个工作日）
+• 提供"查看详情"和"返回首页"两个入口
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">投诉编号生成规则</div>
+                        <div class="annotation-content">
+• 格式：TS + 年月日 + 4位序号
+• 示例：TS202604010001
+• 序号每日从0001开始递增
+• 全局唯一，不可重复
+                        </div>
+                    </div>
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">跳转规则</div>
+                        <div class="annotation-content">
+• 查看详情：跳转投诉详情页
+• 返回首页：返回系统首页
+• 物理返回键：同"返回首页"
+• 3秒后自动跳转投诉详情页（可选配置）
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单的交互演示
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

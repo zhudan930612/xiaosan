@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>巡查频次配置 - 小型工程全域全量安全监管平台</title>
+    <title>巡查频次配置 - 小型工程安全监管平台</title>
     <style>
         * {
             margin: 0;
@@ -34,7 +34,7 @@
             padding: 0 24px;
         }
 
-        .edit-toggle, .save-btn, .resize-toggle {
+        .edit-toggle, .save-btn {
             padding: 8px 16px;
             border-radius: 6px;
             border: 1px solid #d9d9d9;
@@ -47,7 +47,7 @@
             transition: all 0.2s;
         }
 
-        .edit-toggle:hover, .save-btn:hover, .resize-toggle:hover {
+        .edit-toggle:hover, .save-btn:hover {
             border-color: #1890ff;
             color: #1890ff;
         }
@@ -56,12 +56,6 @@
             background: #1890ff;
             color: #fff;
             border-color: #1890ff;
-        }
-
-        .resize-toggle.active {
-            background: #52c41a;
-            color: #fff;
-            border-color: #52c41a;
         }
 
         .save-btn {
@@ -189,6 +183,7 @@
             padding: 24px;
             flex: 1;
             min-height: calc(100vh - 112px);
+            padding-bottom: 100px;
         }
 
         /* 面包屑 */
@@ -201,7 +196,6 @@
         .breadcrumb a {
             color: #666;
             text-decoration: none;
-            cursor: pointer;
         }
 
         .breadcrumb a:hover {
@@ -241,40 +235,101 @@
             margin-bottom: 24px;
         }
 
-        /* 配置卡片 */
-        .config-section {
-            margin-bottom: 32px;
+        /* 风险等级选择 */
+        .risk-selector {
+            margin-bottom: 24px;
         }
 
-        .config-section:last-child {
-            margin-bottom: 0;
+        .section-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .risk-options {
+            display: flex;
+            gap: 16px;
+        }
+
+        .risk-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 2px solid #d9d9d9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .risk-option:hover {
+            border-color: #1890ff;
+        }
+
+        .risk-option.active {
+            border-color: #1890ff;
+            background: #e6f7ff;
+        }
+
+        .risk-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #1890ff;
+        }
+
+        .risk-icon {
+            font-size: 16px;
+        }
+
+        /* 工程类型Tab */
+        .type-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 2px;
+        }
+
+        .type-tab {
+            padding: 12px 24px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .type-tab:hover {
+            color: #1890ff;
+        }
+
+        .type-tab.active {
+            color: #1890ff;
+            border-bottom-color: #1890ff;
+            font-weight: 500;
+        }
+
+        /* 配置区域 */
+        .config-area {
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
 
         .config-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .risk-badge {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .risk-badge.high {
-            background: #ff4d4f;
-        }
-
-        .risk-badge.medium {
-            background: #faad14;
-        }
-
-        .risk-badge.low {
-            background: #52c41a;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e8e8e8;
         }
 
         .config-title {
@@ -283,37 +338,58 @@
             color: #333;
         }
 
-        .config-desc {
-            font-size: 13px;
-            color: #999;
-            margin-left: auto;
-        }
-
-        /* 频次配置表格 */
-        .freq-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .freq-table th,
-        .freq-table td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .freq-table th {
-            background: #fafafa;
+        .config-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: 500;
-            color: #666;
-            font-size: 14px;
         }
 
-        .freq-table td {
-            font-size: 14px;
+        .config-badge.high {
+            background: #fff1f0;
+            color: #cf1322;
+            border: 1px solid #ffa39e;
         }
 
-        .org-cell {
+        .config-badge.normal {
+            background: #f6ffed;
+            color: #389e0d;
+            border: 1px solid #b7eb8f;
+        }
+
+        /* 组织配置卡片 */
+        .org-configs {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .org-card {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .org-card:hover {
+            border-color: #d9d9d9;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .org-card.disabled {
+            background: #f5f5f5;
+            opacity: 0.7;
+        }
+
+        .org-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .org-info {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -326,7 +402,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .org-icon.street {
@@ -341,26 +417,72 @@
             background: #fff7e6;
         }
 
-        .org-info {
-            display: flex;
-            flex-direction: column;
-        }
-
         .org-name {
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
             color: #333;
         }
 
-        .org-code {
+        .org-desc {
             font-size: 12px;
             color: #999;
+            margin-top: 2px;
         }
 
-        /* 频次输入 */
-        .freq-input-group {
+        /* 开关 */
+        .switch-wrapper {
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .switch-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .switch {
+            width: 44px;
+            height: 22px;
+            background: #bfbfbf;
+            border-radius: 11px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .switch.active {
+            background: #1890ff;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .switch.active::after {
+            transform: translateX(22px);
+        }
+
+        /* 频次配置 */
+        .freq-config {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .freq-text {
+            font-size: 14px;
+            color: #666;
         }
 
         .freq-input {
@@ -379,81 +501,53 @@
             box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
         }
 
+        .freq-input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
         .freq-unit {
-            color: #666;
             font-size: 14px;
+            color: #333;
+            font-weight: 500;
         }
 
-        .freq-desc {
-            color: #1890ff;
-            font-size: 13px;
-            margin-top: 4px;
-        }
-
-        /* 开关 */
-        .switch {
-            width: 44px;
-            height: 22px;
-            background: #bfbfbf;
-            border-radius: 11px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .switch.active {
-            background: #1890ff;
-        }
-
-        .switch::before {
-            content: '关';
-            position: absolute;
-            right: 4px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 10px;
-            color: #fff;
-            transition: opacity 0.2s;
-        }
-
-        .switch.active::before {
-            content: '开';
-            left: 4px;
-            right: auto;
-        }
-
-        .switch.active::after {
-            transform: translateX(22px);
-        }
-
-        /* Toast通知 */
-        .toast {
-            position: fixed;
-            top: 64px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 12px 24px;
+        /* 提示信息 */
+        .info-alert {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
             border-radius: 8px;
-            font-size: 14px;
-            z-index: 10000;
-            opacity: 0;
-            transition: all 0.3s ease;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 13px;
+            color: #096dd9;
+            line-height: 1.6;
         }
 
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
+        .info-alert-icon {
+            font-size: 16px;
+            flex-shrink: 0;
         }
 
-        .toast.success {
-            background: #52c41a;
+        /* 底部操作栏 */
+        .bottom-actions {
+            position: fixed;
+            bottom: 0;
+            left: 208px;
+            right: 0;
+            background: #fff;
+            border-top: 1px solid #e8e8e8;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            z-index: 100;
         }
 
-        /* 按钮 */
         .btn {
-            padding: 8px 16px;
+            padding: 10px 24px;
             border-radius: 4px;
             font-size: 14px;
             cursor: pointer;
@@ -481,41 +575,11 @@
             color: #1890ff;
         }
 
-        /* 提示信息 */
-        .info-alert {
-            background: #e6f7ff;
-            border: 1px solid #91d5ff;
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #096dd9;
-        }
-
-        /* 底部操作栏 */
-        .bottom-actions {
-            position: fixed;
-            bottom: 0;
-            left: 208px;
-            right: 0;
-            background: #fff;
-            border-top: 1px solid #e8e8e8;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            z-index: 100;
-        }
-
         /* 标注区域 */
         .annotation-section {
             margin-top: 32px;
             padding-top: 24px;
             border-top: 2px solid #e8e8e8;
-            margin-bottom: 80px;
         }
 
         .annotation-title-main {
@@ -557,18 +621,74 @@
             line-height: 1.6;
         }
 
-        .annotation-content[contenteditable="true"]:hover {
-            background: rgba(255, 197, 61, 0.15);
-            padding: 4px;
-            border-radius: 4px;
+        /* Toast通知 */
+        .toast {
+            position: fixed;
+            top: 64px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
         }
 
-        .annotation-content[contenteditable="true"]:focus {
-            outline: none;
-            background: #fff;
-            padding: 4px;
-            border-radius: 4px;
-            box-shadow: inset 0 0 0 2px #ffc53d;
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: #52c41a;
+        }
+
+        .toast.error {
+            background: #ff4d4f;
+        }
+
+        /* 默认值预览表格 */
+        .default-table-wrapper {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px dashed #d9d9d9;
+        }
+
+        .default-table-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .default-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .default-table th,
+        .default-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border: 1px solid #e8e8e8;
+        }
+
+        .default-table th {
+            background: #fafafa;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .default-table td {
+            color: #333;
+        }
+
+        .default-table tr:hover td {
+            background: #f5f5f5;
         }
 
         /* 编辑模式样式 */
@@ -582,153 +702,14 @@
         .edit-mode .editable-text:hover {
             background: rgba(24, 144, 255, 0.05);
         }
-
-        .edit-mode .editable-text[contenteditable="true"]:focus {
-            outline: 2px solid #1890ff;
-            background: #fff;
-        }
-
-        /* 可编辑卡片 */
-        .editable-card {
-            position: relative;
-        }
-
-        .edit-mode .editable-card {
-            outline: 1px dashed #52c41a;
-        }
-
-        .edit-mode .editable-card:hover {
-            outline: 2px solid #52c41a;
-        }
-
-        .card-actions {
-            position: absolute;
-            top: -12px;
-            right: -12px;
-            display: none;
-            gap: 4px;
-            z-index: 10;
-        }
-
-        .edit-mode .editable-card:hover .card-actions {
-            display: flex;
-        }
-
-        .card-action-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .card-action-btn.copy {
-            background: #1890ff;
-            color: #fff;
-        }
-
-        .card-action-btn.delete {
-            background: #ff4d4f;
-            color: #fff;
-        }
-
-        .card-action-btn.drag {
-            background: #52c41a;
-            color: #fff;
-            cursor: grab;
-        }
-
-        .card-action-btn.add-content {
-            background: #fa8c16;
-            color: #fff;
-        }
-
-        /* 调节手柄 */
-        .resize-handle {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            width: 20px;
-            height: 20px;
-            background: #52c41a;
-            cursor: nwse-resize;
-            border-radius: 8px 0 8px 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 12px;
-        }
-
-        .resize-handle::before {
-            content: '↔';
-        }
-
-        .resizable .resize-handle {
-            display: flex;
-        }
-
-        .resizing {
-            outline: 2px solid #52c41a !important;
-            user-select: none;
-        }
-
-        /* 添加内容菜单 */
-        .add-content-menu {
-            position: absolute;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-            padding: 8px 0;
-            min-width: 160px;
-            z-index: 1000;
-            display: none;
-        }
-
-        .add-content-menu.show {
-            display: block;
-        }
-
-        .menu-item-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-size: 14px;
-        }
-
-        .menu-item-option:hover {
-            background: #f5f5f5;
-        }
     </style>
 </head>
 <body>
-    <!-- 添加内容菜单 -->
-    <div id="addContentMenu" class="add-content-menu">
-        <div class="menu-item-option" data-type="input"><span>📝</span><span>输入框</span></div>
-        <div class="menu-item-option" data-type="label"><span>🏷️</span><span>标签文字</span></div>
-        <div class="menu-item-option" data-type="textarea"><span>📄</span><span>文本区域</span></div>
-        <div class="menu-item-option" data-type="radio"><span>⭕</span><span>单选框</span></div>
-        <div class="menu-item-option" data-type="checkbox"><span>☑️</span><span>复选框</span></div>
-        <div class="menu-item-option" data-type="divider"><span>➖</span><span>分隔线</span></div>
-    </div>
-
     <!-- 编辑工具栏 -->
     <div class="editor-toolbar">
         <button id="editToggle" class="edit-toggle" title="快捷键: Ctrl+E">
             <span>✏️</span>
             <span class="edit-text">进入编辑</span>
-        </button>
-        <button id="resizeToggle" class="resize-toggle" style="display: none;" title="调节模式">
-            <span>↔️</span>
-            <span>调节模式</span>
         </button>
         <button id="saveBtn" class="save-btn" style="display: none;" title="保存当前原型">
             <span>💾</span>
@@ -743,13 +724,13 @@
     <div class="main-wrapper">
         <!-- 顶部导航 -->
         <div class="top-header">
-            <div class="logo editable-text">小型工程全域全量安全监管平台</div>
+            <div class="logo">小型工程全域全量安全监管平台</div>
             <div class="top-nav">
-                <div class="top-nav-item editable-text">企业中心</div>
-                <div class="top-nav-item active editable-text">运营管理</div>
-                <div class="top-nav-item editable-text">系统管理</div>
+                <div class="top-nav-item">企业中心</div>
+                <div class="top-nav-item active">运营管理</div>
+                <div class="top-nav-item">系统管理</div>
             </div>
-            <div class="user-info editable-text">
+            <div class="user-info">
                 <div class="user-avatar">👤</div>
                 <span>超级管理员</span>
                 <span>▼</span>
@@ -759,373 +740,236 @@
         <!-- 左侧菜单 -->
         <div class="sidebar">
             <div class="menu-section">
-                <div class="menu-item editable-text">楼栋管理</div>
-                <div class="menu-item editable-text">用户管理</div>
-                <div class="menu-item editable-text">小程序配置</div>
-                <div class="menu-item editable-text">AI审核流程配置</div>
-                <div class="menu-item active editable-text">安全知识答题</div>
-                <div class="menu-item editable-text" style="padding-left: 40px; color: #1890ff;">巡查频次配置</div>
+                <div class="menu-item">楼栋管理</div>
+                <div class="menu-item">用户管理</div>
+                <div class="menu-item">小程序配置</div>
+                <div class="menu-item">AI审核流程配置</div>
+                <div class="menu-item">安全知识答题</div>
+                <div class="menu-item active">巡查频次配置</div>
             </div>
         </div>
 
         <!-- 主内容区 -->
         <div class="main-content">
             <!-- 面包屑 -->
-            <div class="breadcrumb editable-text">
+            <div class="breadcrumb">
                 <a>运营管理</a>
                 <span class="separator">&gt;</span>
                 <span class="current">巡查频次配置</span>
             </div>
 
             <!-- 页面标题 -->
-            <div class="page-header editable-card">
+            <div class="page-header">
                 <div>
-                    <div class="page-title editable-text">巡查频次配置</div>
-                    <div class="page-subtitle editable-text">配置各组织对不同风险类型工程的巡查周期要求</div>
+                    <div class="page-title">巡查频次配置</div>
+                    <div class="page-subtitle">配置各组织对不同风险类型工程的巡查周期要求</div>
                 </div>
-                <button class="btn btn-primary">
-                    <span>💾</span>
-                    <span class="editable-text">保存配置</span>
-                </button>
-                <div class="card-actions">
-                    <button class="card-action-btn add-content" title="添加内容">➕</button>
-                    <button class="card-action-btn copy" title="复制">📋</button>
-                    <button class="card-action-btn drag" title="拖拽" draggable="true">✥</button>
-                    <button class="card-action-btn delete" title="删除">🗑</button>
-                </div>
-                <div class="resize-handle"></div>
             </div>
 
-            <!-- 提示信息 -->
-            <div class="info-alert editable-card">
-                <span>ℹ️</span>
-                <span class="editable-text">配置保存后将立即生效，系统将根据配置自动计算各工程的逾期状态</span>
-                <div class="card-actions">
-                    <button class="card-action-btn add-content" title="添加内容">➕</button>
-                    <button class="card-action-btn copy" title="复制">📋</button>
-                    <button class="card-action-btn delete" title="删除">🗑</button>
-                </div>
-                <div class="resize-handle"></div>
-            </div>
-
-            <!-- 配置内容 -->
-            <div class="page-container editable-card">
-                <!-- 高风险工程 -->
-                <div class="config-section">
-                    <div class="config-header">
-                        <div class="risk-badge high"></div>
-                        <div class="config-title editable-text">🔴 高风险工程</div>
-                        <div class="config-desc editable-text">适用于高风险等级的施工工程</div>
+            <!-- 配置主区域 -->
+            <div class="page-container">
+                <!-- 风险等级选择 -->
+                <div class="risk-selector">
+                    <div class="section-label">工程风险等级</div>
+                    <div class="risk-options">
+                        <label class="risk-option" data-risk="high">
+                            <input type="radio" name="riskLevel" value="high">
+                            <span class="risk-icon">🔴</span>
+                            <span>高风险</span>
+                        </label>
+                        <label class="risk-option active" data-risk="normal">
+                            <input type="radio" name="riskLevel" value="normal" checked>
+                            <span class="risk-icon">🟢</span>
+                            <span>非高风险</span>
+                        </label>
                     </div>
-                    <table class="freq-table">
+                </div>
+
+                <!-- 工程类型Tab -->
+                <div class="type-tabs">
+                    <div class="type-tab active" data-type="small">
+                        <span>🏗️</span>
+                        <span>小型工程</span>
+                    </div>
+                    <div class="type-tab" data-type="decoration">
+                        <span>🏠</span>
+                        <span>住宅装修</span>
+                    </div>
+                    <div class="type-tab" data-type="spot">
+                        <span>🔧</span>
+                        <span>零星作业</span>
+                    </div>
+                </div>
+
+                <!-- 配置区域 -->
+                <div class="config-area">
+                    <div class="config-header">
+                        <span class="config-title">当前配置组合</span>
+                        <span class="config-badge normal" id="configBadge">非高风险 · 小型工程</span>
+                    </div>
+
+                    <div class="org-configs">
+                        <!-- 街道配置 -->
+                        <div class="org-card" data-org="street">
+                            <div class="org-header">
+                                <div class="org-info">
+                                    <div class="org-icon street">🏢</div>
+                                    <div>
+                                        <div class="org-name">街道</div>
+                                        <div class="org-desc">街道办事处/乡镇政府</div>
+                                    </div>
+                                </div>
+                                <div class="switch-wrapper">
+                                    <span class="switch-label">启用巡查要求</span>
+                                    <div class="switch active" data-switch="street"></div>
+                                </div>
+                            </div>
+                            <div class="freq-config">
+                                <span class="freq-text">每</span>
+                                <input type="number" class="freq-input" value="21" min="1" max="365" data-org="street">
+                                <span class="freq-unit">天至少巡查 1 次</span>
+                            </div>
+                        </div>
+
+                        <!-- 社区配置 -->
+                        <div class="org-card" data-org="community">
+                            <div class="org-header">
+                                <div class="org-info">
+                                    <div class="org-icon community">🏘️</div>
+                                    <div>
+                                        <div class="org-name">社区</div>
+                                        <div class="org-desc">居委会/村委会</div>
+                                    </div>
+                                </div>
+                                <div class="switch-wrapper">
+                                    <span class="switch-label">启用巡查要求</span>
+                                    <div class="switch active" data-switch="community"></div>
+                                </div>
+                            </div>
+                            <div class="freq-config">
+                                <span class="freq-text">每</span>
+                                <input type="number" class="freq-input" value="14" min="1" max="365" data-org="community">
+                                <span class="freq-unit">天至少巡查 1 次</span>
+                            </div>
+                        </div>
+
+                        <!-- 物业配置 -->
+                        <div class="org-card" data-org="property">
+                            <div class="org-header">
+                                <div class="org-info">
+                                    <div class="org-icon property">🏠</div>
+                                    <div>
+                                        <div class="org-name">物业</div>
+                                        <div class="org-desc">物业服务企业</div>
+                                    </div>
+                                </div>
+                                <div class="switch-wrapper">
+                                    <span class="switch-label">启用巡查要求</span>
+                                    <div class="switch active" data-switch="property"></div>
+                                </div>
+                            </div>
+                            <div class="freq-config">
+                                <span class="freq-text">每</span>
+                                <input type="number" class="freq-input" value="3" min="1" max="365" data-org="property">
+                                <span class="freq-unit">天至少巡查 1 次</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 提示信息 -->
+                <div class="info-alert">
+                    <span class="info-alert-icon">💡</span>
+                    <div>
+                        <div><strong>配置说明</strong></div>
+                        <div>1. 配置保存后立即生效，系统将根据配置自动计算各工程的逾期状态</div>
+                        <div>2. 每个组织的巡查要求可独立启用/禁用，禁用时该组织不产生巡查频次要求</div>
+                        <div>3. 工程类型判定依据备案信息，高风险判定依据系统风险评估结果</div>
+                    </div>
+                </div>
+
+                <!-- 默认配置预览 -->
+                <div class="default-table-wrapper">
+                    <div class="default-table-title">📋 默认配置参考表</div>
+                    <table class="default-table">
                         <thead>
                             <tr>
-                                <th scope="col" width="200">组织</th>
-                                <th scope="col" width="200">巡查周期</th>
-                                <th scope="col">说明</th>
-                                <th scope="col" width="100">启用</th>
+                                <th>风险等级</th>
+                                <th>工程类型</th>
+                                <th>街道</th>
+                                <th>社区</th>
+                                <th>物业</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon street">🏢</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">街道</div>
-                                            <div class="org-code editable-text">Street Office</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="10">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">对辖区内高风险工程进行定期巡查</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
+                                <td rowspan="3">🔴 高风险</td>
+                                <td>小型工程</td>
+                                <td>每10天1次</td>
+                                <td>每14天1次</td>
+                                <td>每2天1次</td>
                             </tr>
                             <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon community">🏘️</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">社区</div>
-                                            <div class="org-code editable-text">Community</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="14">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">配合街道开展辖区巡查工作</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
+                                <td>住宅装修</td>
+                                <td>每10天1次</td>
+                                <td>每14天1次</td>
+                                <td>每2天1次</td>
                             </tr>
                             <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon property">🏠</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">物业</div>
-                                            <div class="org-code editable-text">Property</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="2">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">最贴近现场的日常安全管理</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
+                                <td>零星作业</td>
+                                <td>每7天1次</td>
+                                <td>每10天1次</td>
+                                <td>每1天1次</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="3">🟢 非高风险</td>
+                                <td>小型工程</td>
+                                <td>每21天1次</td>
+                                <td>每14天1次</td>
+                                <td>每3天1次</td>
+                            </tr>
+                            <tr>
+                                <td>住宅装修</td>
+                                <td>每30天1次</td>
+                                <td>每21天1次</td>
+                                <td>每7天1次</td>
+                            </tr>
+                            <tr>
+                                <td>零星作业</td>
+                                <td>每14天1次</td>
+                                <td>每10天1次</td>
+                                <td>每2天1次</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <!-- 非高风险·住宅装修工程 -->
-                <div class="config-section">
-                    <div class="config-header">
-                        <div class="risk-badge medium"></div>
-                        <div class="config-title editable-text">🟡 非高风险 · 住宅装修工程</div>
-                        <div class="config-desc editable-text">适用于住宅装修类工程</div>
-                    </div>
-                    <table class="freq-table">
-                        <thead>
-                            <tr>
-                                <th scope="col" width="200">组织</th>
-                                <th scope="col" width="200">巡查周期</th>
-                                <th scope="col">说明</th>
-                                <th scope="col" width="100">启用</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon street">🏢</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">街道</div>
-                                            <div class="org-code editable-text">Street Office</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="30">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">定期抽查住宅装修工程</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon community">🏘️</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">社区</div>
-                                            <div class="org-code editable-text">Community</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="21">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">关注辖区内装修动态</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon property">🏠</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">物业</div>
-                                            <div class="org-code editable-text">Property</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="7">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">小区内装修日常巡查</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- 非高风险·其他工程 -->
-                <div class="config-section">
-                    <div class="config-header">
-                        <div class="risk-badge low"></div>
-                        <div class="config-title editable-text">🟢 非高风险 · 其他工程</div>
-                        <div class="config-desc editable-text">适用于非住宅类一般工程</div>
-                    </div>
-                    <table class="freq-table">
-                        <thead>
-                            <tr>
-                                <th scope="col" width="200">组织</th>
-                                <th scope="col" width="200">巡查周期</th>
-                                <th scope="col">说明</th>
-                                <th scope="col" width="100">启用</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon street">🏢</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">街道</div>
-                                            <div class="org-code editable-text">Street Office</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="21">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">一般工程的常规巡查</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon community">🏘️</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">社区</div>
-                                            <div class="org-code editable-text">Community</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="14">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">协助街道开展巡查</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="org-cell">
-                                        <div class="org-icon property">🏠</div>
-                                        <div class="org-info">
-                                            <div class="org-name editable-text">物业</div>
-                                            <div class="org-code editable-text">Property</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="freq-input-group">
-                                        <span class="editable-text">每</span>
-                                        <input type="number" class="freq-input" value="3">
-                                        <span class="freq-unit editable-text">天至少巡查 1 次</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="editable-text">物业管理范围内的日常检查</div>
-                                </td>
-                                <td><div class="switch active"></div></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="card-actions">
-                    <button class="card-action-btn add-content" title="添加内容">➕</button>
-                    <button class="card-action-btn copy" title="复制">📋</button>
-                    <button class="card-action-btn drag" title="拖拽" draggable="true">✥</button>
-                    <button class="card-action-btn delete" title="删除">🗑</button>
-                </div>
-                <div class="resize-handle"></div>
             </div>
 
             <!-- 标注区域 -->
             <div class="annotation-section">
                 <div class="annotation-title-main">📌 设计标注说明</div>
                 <div class="annotation-grid">
-                    <div class="annotation-card editable-card">
-                        <div class="annotation-title">📌 页面功能</div>
-                        <div class="annotation-content" contenteditable="true">
-                            配置各组织（街道、社区、物业）对不同风险类型工程的巡查频次要求。支持按工程类型分组设置，可单独启用/禁用某组织的巡查要求。
+                    <div class="annotation-card">
+                        <div class="annotation-title">📌 配置维度</div>
+                        <div class="annotation-content">
+                            三维矩阵配置：风险等级（2种）× 工程类型（3种）× 巡查组织（3种）= 18种独立配置组合。每种组合可单独设置巡查周期和启用状态。
                         </div>
-                        <div class="card-actions">
-                            <button class="card-action-btn add-content" title="添加内容">➕</button>
-                            <button class="card-action-btn copy" title="复制">📋</button>
-                            <button class="card-action-btn drag" title="拖拽" draggable="true">✥</button>
-                            <button class="card-action-btn delete" title="删除">🗑</button>
-                        </div>
-                        <div class="resize-handle"></div>
                     </div>
 
-                    <div class="annotation-card editable-card">
-                        <div class="annotation-title">📌 配置规则</div>
-                        <div class="annotation-content" contenteditable="true">
+                    <div class="annotation-card">
+                        <div class="annotation-title">📌 默认配置</div>
+                        <div class="annotation-content">
                             高风险工程：物业每2天、社区每14天、街道每10天<br>
                             住宅装修：物业每7天、社区每21天、街道每30天<br>
-                            其他工程：物业每3天、社区每14天、街道每21天
+                            零星作业：物业更频繁（高风险每天1次）
                         </div>
-                        <div class="card-actions">
-                            <button class="card-action-btn add-content" title="添加内容">➕</button>
-                            <button class="card-action-btn copy" title="复制">📋</button>
-                            <button class="card-action-btn drag" title="拖拽" draggable="true">✥</button>
-                            <button class="card-action-btn delete" title="删除">🗑</button>
-                        </div>
-                        <div class="resize-handle"></div>
                     </div>
 
-                    <div class="annotation-card editable-card">
-                        <div class="annotation-title">📌 交互说明</div>
-                        <div class="annotation-content" contenteditable="true">
-                            点击数值可直接编辑巡查周期天数；开关控制该组织的巡查要求是否生效；保存后配置立即生效，系统据此计算工程逾期状态。
+                    <div class="annotation-card">
+                        <div class="annotation-title">📌 生效规则</div>
+                        <div class="annotation-content">
+                            配置保存后立即生效，系统重新计算所有工程的逾期状态。每个组织的巡查要求可独立启用/禁用，禁用时该组织对该类型工程不产生巡查频次要求。
                         </div>
-                        <div class="card-actions">
-                            <button class="card-action-btn add-content" title="添加内容">➕</button>
-                            <button class="card-action-btn copy" title="复制">📋</button>
-                            <button class="card-action-btn drag" title="拖拽" draggable="true">✥</button>
-                            <button class="card-action-btn delete" title="删除">🗑</button>
-                        </div>
-                        <div class="resize-handle"></div>
                     </div>
                 </div>
             </div>
@@ -1134,236 +978,159 @@
 
     <!-- 底部操作栏 -->
     <div class="bottom-actions">
-        <button class="btn btn-default editable-text">重置为默认</button>
-        <button class="btn btn-primary editable-text">保存配置</button>
+        <button class="btn btn-default" id="resetBtn">重置为默认</button>
+        <button class="btn btn-primary" id="saveConfigBtn">保存配置</button>
     </div>
 
     <script>
+        // 默认配置数据
+        const defaultConfig = {
+            high: {
+                small: { street: { enabled: true, days: 10 }, community: { enabled: true, days: 14 }, property: { enabled: true, days: 2 } },
+                decoration: { street: { enabled: true, days: 10 }, community: { enabled: true, days: 14 }, property: { enabled: true, days: 2 } },
+                spot: { street: { enabled: true, days: 7 }, community: { enabled: true, days: 10 }, property: { enabled: true, days: 1 } }
+            },
+            normal: {
+                small: { street: { enabled: true, days: 21 }, community: { enabled: true, days: 14 }, property: { enabled: true, days: 3 } },
+                decoration: { street: { enabled: true, days: 30 }, community: { enabled: true, days: 21 }, property: { enabled: true, days: 7 } },
+                spot: { street: { enabled: true, days: 14 }, community: { enabled: true, days: 10 }, property: { enabled: true, days: 2 } }
+            }
+        };
+
+        // 当前配置状态
+        let currentConfig = JSON.parse(JSON.stringify(defaultConfig));
+        let currentRisk = 'normal';
+        let currentType = 'small';
+
+        // 配置显示名称
+        const configNames = {
+            high: '🔴 高风险',
+            normal: '🟢 非高风险',
+            small: '小型工程',
+            decoration: '住宅装修',
+            spot: '零星作业'
+        };
+
         // 编辑模式切换
         let isEditMode = false;
-        let isResizeMode = false;
         const editToggle = document.getElementById('editToggle');
-        const resizeToggle = document.getElementById('resizeToggle');
         const saveBtn = document.getElementById('saveBtn');
         const body = document.body;
-        const addContentMenu = document.getElementById('addContentMenu');
 
         editToggle.addEventListener('click', () => {
             isEditMode = !isEditMode;
             body.classList.toggle('edit-mode', isEditMode);
             editToggle.classList.toggle('active', isEditMode);
             editToggle.querySelector('.edit-text').textContent = isEditMode ? '退出编辑' : '进入编辑';
-
-            document.querySelectorAll('.editable-text').forEach(el => {
-                el.contentEditable = isEditMode;
-            });
-
-            resizeToggle.style.display = isEditMode ? 'inline-flex' : 'none';
             saveBtn.style.display = isEditMode ? 'inline-flex' : 'none';
         });
 
-        resizeToggle.addEventListener('click', () => {
-            isResizeMode = !isResizeMode;
-            resizeToggle.classList.toggle('active', isResizeMode);
-            document.querySelectorAll('.editable-card').forEach(card => {
-                card.classList.toggle('resizable', isResizeMode);
+        // 风险等级切换
+        document.querySelectorAll('.risk-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.risk-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                option.querySelector('input').checked = true;
+                currentRisk = option.dataset.risk;
+                updateUI();
             });
         });
 
-        // 卡片大小调节
-        let resizingCard = null;
-        let startX, startY, startWidth, startHeight;
-
-        document.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('resize-handle')) {
-                resizingCard = e.target.closest('.editable-card');
-                startX = e.clientX;
-                startY = e.clientY;
-                startWidth = resizingCard.offsetWidth;
-                startHeight = resizingCard.offsetHeight;
-                resizingCard.classList.add('resizing');
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (resizingCard) {
-                const width = startWidth + (e.clientX - startX);
-                const height = startHeight + (e.clientY - startY);
-                resizingCard.style.width = Math.max(200, width) + 'px';
-                resizingCard.style.height = Math.max(100, height) + 'px';
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (resizingCard) {
-                resizingCard.classList.remove('resizing');
-                resizingCard = null;
-            }
-        });
-
-        // 卡片操作
-        let currentCard = null;
-
-        document.addEventListener('click', (e) => {
-            const card = e.target.closest('.editable-card');
-            if (!card) return;
-
-            if (e.target.classList.contains('add-content') || e.target.closest('.add-content')) {
-                currentCard = card;
-                const rect = e.target.getBoundingClientRect();
-                addContentMenu.style.left = (rect.left + window.scrollX) + 'px';
-                addContentMenu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-                addContentMenu.classList.add('show');
-                return;
-            }
-
-            if (e.target.classList.contains('copy')) {
-                const clone = card.cloneNode(true);
-                clone.style.position = 'relative';
-                clone.style.top = 'auto';
-                clone.style.left = 'auto';
-                clone.style.width = card.style.width || 'auto';
-                card.parentNode.insertBefore(clone, card.nextSibling);
-            } else if (e.target.classList.contains('delete')) {
-                if (confirm('确定删除此卡片？')) {
-                    card.remove();
-                }
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.add-content') && !addContentMenu.contains(e.target)) {
-                addContentMenu.classList.remove('show');
-            }
-        });
-
-        // 拖拽排序
-        let draggedCard = null;
-        document.addEventListener('dragstart', (e) => {
-            if (e.target.classList.contains('drag')) {
-                draggedCard = e.target.closest('.editable-card');
-                e.dataTransfer.effectAllowed = 'move';
-            }
-        });
-
-        document.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
-        document.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const targetCard = e.target.closest('.editable-card');
-            if (draggedCard && targetCard && draggedCard !== targetCard) {
-                const parent = targetCard.parentNode;
-                const draggedNext = draggedCard.nextSibling;
-                const targetNext = targetCard.nextSibling;
-                parent.insertBefore(draggedCard, targetNext);
-                parent.insertBefore(targetCard, draggedNext);
-            }
-            draggedCard = null;
-        });
-
-        // 添加内容
-        document.querySelectorAll('.menu-item-option').forEach(item => {
-            item.addEventListener('click', () => {
-                if (!currentCard) return;
-                const type = item.dataset.type;
-                let element;
-
-                switch(type) {
-                    case 'input':
-                        element = document.createElement('input');
-                        element.type = 'text';
-                        element.className = 'freq-input editable-text';
-                        element.placeholder = '请输入';
-                        break;
-                    case 'label':
-                        element = document.createElement('div');
-                        element.className = 'config-title editable-text';
-                        element.textContent = '标签文字';
-                        break;
-                    case 'textarea':
-                        element = document.createElement('textarea');
-                        element.className = 'freq-input editable-text';
-                        element.style.width = '100%';
-                        element.style.height = '80px';
-                        element.placeholder = '请输入内容';
-                        break;
-                    case 'radio':
-                        element = document.createElement('div');
-                        element.innerHTML = '<label style="display:flex;align-items:center;gap:8px;"><input type="radio" name="radio"><span class="editable-text" contenteditable="true">选项</span></label>';
-                        break;
-                    case 'checkbox':
-                        element = document.createElement('div');
-                        element.innerHTML = '<label style="display:flex;align-items:center;gap:8px;"><input type="checkbox"><span class="editable-text" contenteditable="true">选项</span></label>';
-                        break;
-                    case 'divider':
-                        element = document.createElement('hr');
-                        element.style = 'border: none; border-top: 1px solid #f0f0f0; margin: 16px 0;';
-                        break;
-                }
-
-                if (element) {
-                    const actions = currentCard.querySelector('.card-actions');
-                    if (actions) {
-                        currentCard.insertBefore(element, actions);
-                    } else {
-                        currentCard.appendChild(element);
-                    }
-                    if (isEditMode) element.contentEditable = true;
-                }
-                addContentMenu.classList.remove('show');
+        // 工程类型切换
+        document.querySelectorAll('.type-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentType = tab.dataset.type;
+                updateUI();
             });
-        });
-
-        // 保存
-        saveBtn.addEventListener('click', () => {
-            const clone = document.documentElement.cloneNode(true);
-            const toolbar = clone.querySelector('.editor-toolbar');
-            if (toolbar) toolbar.remove();
-
-            clone.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('edit-mode'));
-            clone.querySelectorAll('.editable-text').forEach(el => {
-                el.removeAttribute('contenteditable');
-                el.classList.remove('editable-text');
-            });
-            clone.querySelectorAll('.editable-card').forEach(el => {
-                el.classList.remove('editable-card', 'resizable');
-                const actions = el.querySelector('.card-actions');
-                if (actions) actions.remove();
-                const handle = el.querySelector('.resize-handle');
-                if (handle) handle.remove();
-            });
-
-            const menu = clone.querySelector('.add-content-menu');
-            if (menu) menu.remove();
-
-            const mainWrapper = clone.querySelector('.main-wrapper');
-            if (mainWrapper) mainWrapper.style.marginTop = '0';
-            const topHeader = clone.querySelector('.top-header');
-            if (topHeader) topHeader.style.top = '0';
-            const sidebar = clone.querySelector('.sidebar');
-            if (sidebar) sidebar.style.top = '64px';
-
-            const html = '<!DOCTYPE html>\n' + clone.outerHTML;
-            const blob = new Blob([html], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = '巡查频次配置原型.html';
-            a.click();
-            URL.revokeObjectURL(url);
-
-            showToast('已保存为HTML文件！');
         });
 
         // 开关切换
         document.querySelectorAll('.switch').forEach(sw => {
-            sw.addEventListener('click', (e) => {
-                e.stopPropagation();
+            sw.addEventListener('click', () => {
+                const org = sw.dataset.switch;
                 sw.classList.toggle('active');
+                const enabled = sw.classList.contains('active');
+                currentConfig[currentRisk][currentType][org].enabled = enabled;
+
+                // 更新卡片和输入框状态
+                const card = document.querySelector(`.org-card[data-org="${org}"]`);
+                const input = document.querySelector(`.freq-input[data-org="${org}"]`);
+                if (enabled) {
+                    card.classList.remove('disabled');
+                    input.disabled = false;
+                } else {
+                    card.classList.add('disabled');
+                    input.disabled = true;
+                }
             });
+        });
+
+        // 输入框变更
+        document.querySelectorAll('.freq-input').forEach(input => {
+            input.addEventListener('change', () => {
+                const org = input.dataset.org;
+                let days = parseInt(input.value);
+                if (days < 1) days = 1;
+                if (days > 365) days = 365;
+                input.value = days;
+                currentConfig[currentRisk][currentType][org].days = days;
+            });
+        });
+
+        // 更新UI
+        function updateUI() {
+            // 更新配置标签
+            const badge = document.getElementById('configBadge');
+            badge.textContent = `${configNames[currentRisk]} · ${configNames[currentType]}`;
+            badge.className = `config-badge ${currentRisk === 'high' ? 'high' : 'normal'}`;
+
+            // 更新各组织的配置
+            const config = currentConfig[currentRisk][currentType];
+            ['street', 'community', 'property'].forEach(org => {
+                const orgConfig = config[org];
+                const card = document.querySelector(`.org-card[data-org="${org}"]`);
+                const switchEl = document.querySelector(`.switch[data-switch="${org}"]`);
+                const input = document.querySelector(`.freq-input[data-org="${org}"]`);
+
+                // 更新开关
+                if (orgConfig.enabled) {
+                    switchEl.classList.add('active');
+                    card.classList.remove('disabled');
+                    input.disabled = false;
+                } else {
+                    switchEl.classList.remove('active');
+                    card.classList.add('disabled');
+                    input.disabled = true;
+                }
+
+                // 更新天数
+                input.value = orgConfig.days;
+            });
+        }
+
+        // 重置默认
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm(`确定要将"${configNames[currentRisk]} · ${configNames[currentType]}"的配置重置为默认值吗？`)) {
+                currentConfig[currentRisk][currentType] = JSON.parse(JSON.stringify(defaultConfig[currentRisk][currentType]));
+                updateUI();
+                showToast('已重置为默认配置');
+            }
+        });
+
+        // 保存配置
+        document.getElementById('saveConfigBtn').addEventListener('click', () => {
+            // 校验至少启用一个组织
+            const config = currentConfig[currentRisk][currentType];
+            const hasEnabled = Object.values(config).some(org => org.enabled);
+            if (!hasEnabled) {
+                showToast('至少需要启用一个巡查组织', 'error');
+                return;
+            }
+
+            showToast('配置保存成功！');
+            console.log('保存的配置：', currentConfig);
         });
 
         // Toast通知
@@ -1383,10 +1150,10 @@
                 e.preventDefault();
                 editToggle.click();
             }
-            if (e.key === 'Escape') {
-                addContentMenu.classList.remove('show');
-            }
         });
+
+        // 初始化
+        updateUI();
     </script>
 </body>
 </html>

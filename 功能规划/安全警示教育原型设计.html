@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安全警示教育原型设计</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #E5E5E5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    .page-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+      width: 100%;
+    }
+    .phone-frame {
+      width: 375px;
+      height: auto;
+      background: #F5F5F5;
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      flex-shrink: 0;
+    }
+    .phone-screen {
+      height: auto;
+      min-height: 667px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-bar {
+      height: 88px;
+      background: linear-gradient(180deg, #00B578 0%, #00A86B 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 10px;
+      position: relative;
+    }
+    .status-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .nav-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      height: 44px;
+      padding: 0 20px;
+    }
+    .nav-back {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .nav-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .video-section {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .video-placeholder {
+      width: 100%;
+      flex: 1;
+      background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .play-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      cursor: pointer;
+      position: absolute;
+    }
+    .video-controls {
+      height: 44px;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 10px;
+    }
+    .ctrl-btn {
+      width: 24px;
+      height: 24px;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+    .progress-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 35%;
+      background: #00B578;
+      border-radius: 2px;
+    }
+    .time-text {
+      font-size: 11px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .speed-btn {
+      font-size: 11px;
+      color: #fff;
+      padding: 2px 6px;
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 16px 20px 20px;
+    }
+    .page-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .summary-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+    }
+    .summary-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .summary-item {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.55;
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 14px;
+    }
+    .summary-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 6px;
+      height: 6px;
+      background: #00B578;
+      border-radius: 50%;
+    }
+    .summary-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-card {
+      background: #fff;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      cursor: pointer;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+    .section-arrow {
+      width: 20px;
+      height: 20px;
+      color: #999;
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .section-arrow.expanded {
+      transform: rotate(180deg);
+    }
+    .section-body {
+      padding: 0 18px 14px;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.65;
+      display: none;
+    }
+    .section-body.expanded {
+      display: block;
+    }
+    .section-body b {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .bottom-action {
+      background: #fff;
+      padding: 14px 20px 20px;
+      border-top: 1px solid #eee;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+    }
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .checkbox.checked {
+      background: #00B578;
+      border-color: #00B578;
+    }
+    .btn-primary {
+      width: 100%;
+      height: 48px;
+      background: #00B578;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    [contenteditable="true"]:hover {
+      outline: 1px dashed #00B578;
+      border-radius: 4px;
+    }
+    [contenteditable="true"]:focus {
+      outline: 2px solid #00B578;
+      border-radius: 4px;
+      background: rgba(0, 181, 120, 0.05);
+    }
+
+    .page-label {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin-top: 12px;
+      margin-bottom: 8px;
+    }
+
+    .entry-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .entry-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .entry-card.active {
+      border: 2px solid #00B578;
+    }
+    .entry-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    .entry-card-desc {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .error-placeholder {
+      width: 100%;
+      flex: 1;
+      background: #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      gap: 10px;
+    }
+    .retry-btn {
+      margin-top: 8px;
+      padding: 6px 16px;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <!-- 页面A: 安全警示教育页面(正常) -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="nav-bar">
+            <div class="status-bar">
+              <span>9:41</span>
+            </div>
+            <div class="nav-content">
+              <svg class="nav-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+              <div class="nav-title" contenteditable="true">安全警示教育</div>
+            </div>
+          </div>
+
+          <div class="video-section">
+            <div class="video-placeholder">
+              <div class="play-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="video-controls">
+              <div class="ctrl-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <div class="time-text">01:38 / 04:40</div>
+              <div class="speed-btn">1.0x</div>
+              <div class="ctrl-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+              </div>
+              <div class="ctrl-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-area">
+            <div class="page-title" contenteditable="true">小型工程安全警示要点</div>
+
+            <div class="summary-card">
+              <div class="summary-title" contenteditable="true">核心提示</div>
+              <div class="summary-item" contenteditable="true">小型工程虽规模不大，但安全风险不容忽视</div>
+              <div class="summary-item" contenteditable="true">业主、建设单位和施工单位均需落实安全责任</div>
+              <div class="summary-item" contenteditable="true">开工前必须完成安全生产责任保险投保</div>
+              <div class="summary-item" contenteditable="true">高处坠落、临时用电、人工拆除、动火作业为四类高风险场景</div>
+              <div class="summary-item" contenteditable="true">施工现场须配备消防设施，严禁违规动火</div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title" contenteditable="true">一、为什么要看这段安全教育</div>
+                <svg class="section-arrow" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="section-body" contenteditable="true">
+                小型工程是指投资额较小、施工周期较短的工程项目。虽然体量不大，但施工过程中涉及高处作业、临时用电、动火作业等多种危险作业环节，一旦发生事故，后果同样严重。本视频旨在帮助施工人员建立安全意识，掌握基本防范措施。
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title" contenteditable="true">二、相关责任主体要求</div>
+                <svg class="section-arrow" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="section-body" contenteditable="true">
+                <b>业主责任：</b>依法发包给具备资质的施工单位，提供真实准确的工程资料，协调现场施工条件，不得强令冒险作业。<br><br>
+                <b>建设单位责任：</b>建立健全安全生产管理制度，配备专职安全管理人员，组织实施安全教育培训，定期开展隐患排查治理。<br><br>
+                <b>施工单位责任：</b>编制并落实安全施工方案，为作业人员配备劳动防护用品，特种作业人员必须持证上岗，严格执行安全技术操作规程。
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title" contenteditable="true">三、保险投保提醒</div>
+                <svg class="section-arrow" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="section-body" contenteditable="true">
+                根据《安全生产责任保险实施办法》，小型工程施工单位应在开工前投保安全生产责任保险（安责险），确保保单覆盖完整施工周期。安责险不仅提供事故赔偿保障，还包含安全培训、风险评估等增值服务。
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title" contenteditable="true">四、四类高风险作业场景</div>
+                <svg class="section-arrow" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="section-body" contenteditable="true">
+                <b>高处作业：</b>作业人员必须佩戴安全带，脚手架搭设应符合规范，临边洞口须设置防护栏杆。<br><br>
+                <b>临时用电：</b>配电箱应有防雨措施，用电设备须做到"一机一闸一漏一箱"，严禁私拉乱接电线。<br><br>
+                <b>人工拆除：</b>拆除作业应自上而下进行，设置警戒区域，及时清运建筑垃圾，严禁立体交叉作业。<br><br>
+                <b>动火作业：</b>动火前须办理动火审批手续，配备灭火器材，清理周围可燃物，设专人监护。
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-title" contenteditable="true">五、结语与安全倡议</div>
+                <svg class="section-arrow" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <div class="section-body" contenteditable="true">
+                小工程，大责任。安全生产没有旁观者，人人都是第一责任人。让我们时刻绷紧安全这根弦，将安全责任落实到每一个环节、每一个岗位，共同筑牢小型工程施工安全防线。
+              </div>
+            </div>
+
+            <div class="bottom-action">
+              <div class="checkbox-row" onclick="toggleCheckbox(this)">
+                <div class="checkbox" id="checkbox1">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                </div>
+                <span contenteditable="true">近30天内不再显示此页面</span>
+              </div>
+              <button class="btn-primary" contenteditable="true">我已知晓</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="page-label">安全警示教育页面（正常）</div>
+    </div>
+
+    <!-- 页面B: 视频加载失败 -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="nav-bar">
+            <div class="status-bar">
+              <span>9:41</span>
+            </div>
+            <div class="nav-content">
+              <svg class="nav-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+              <div class="nav-title" contenteditable="true">安全警示教育</div>
+            </div>
+          </div>
+
+          <div class="video-section">
+            <div class="error-placeholder">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                <line x1="7" y1="2" x2="7" y2="22"></line>
+                <line x1="17" y1="2" x2="17" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="2" y1="7" x2="7" y2="7"></line>
+                <line x1="2" y1="17" x2="7" y2="17"></line>
+                <line x1="17" y1="17" x2="22" y2="17"></line>
+                <line x1="17" y1="7" x2="22" y2="7"></line>
+              </svg>
+              <div style="font-size: 14px; color: #ccc;">视频加载失败</div>
+              <div style="font-size: 12px; color: #888;">请检查网络后重试</div>
+              <div class="retry-btn">重新加载</div>
+            </div>
+          </div>
+
+          <div class="content-area">
+            <div class="page-title" contenteditable="true">小型工程安全警示要点</div>
+
+            <div class="summary-card">
+              <div class="summary-title" contenteditable="true">核心提示</div>
+              <div class="summary-item" contenteditable="true">小型工程虽规模不大，但安全风险不容忽视</div>
+              <div class="summary-item" contenteditable="true">业主、建设单位和施工单位均需落实安全责任</div>
+              <div class="summary-item" contenteditable="true">开工前必须完成安全生产责任保险投保</div>
+              <div class="summary-item" contenteditable="true">高处坠落、临时用电、人工拆除、动火作业为四类高风险场景</div>
+              <div class="summary-item" contenteditable="true">施工现场须配备消防设施，严禁违规动火</div>
+            </div>
+
+            <div class="bottom-action">
+              <div class="checkbox-row" onclick="toggleCheckbox(this)">
+                <div class="checkbox" id="checkbox2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                </div>
+                <span contenteditable="true">近30天内不再显示此页面</span>
+              </div>
+              <button class="btn-primary" contenteditable="true">我已知晓</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="page-label">安全警示教育页面（视频加载失败）</div>
+    </div>
+
+    <!-- 页面C: 选择工程类型页面(入口) -->
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen" style="padding: 20px;">
+          <div style="font-size: 17px; font-weight: 600; color: #333; margin-bottom: 24px; margin-top: 60px; text-align: center;" contenteditable="true">选择工程类型</div>
+
+          <div class="entry-card active">
+            <div class="entry-card-title" contenteditable="true">小型工程备案</div>
+            <div class="entry-card-desc" contenteditable="true">投资额较小的房屋建筑及市政工程</div>
+          </div>
+
+          <div class="entry-card">
+            <div class="entry-card-title" contenteditable="true">住宅装修备案</div>
+            <div class="entry-card-desc" contenteditable="true">住宅室内装饰装修工程</div>
+          </div>
+
+          <div class="entry-card">
+            <div class="entry-card-title" contenteditable="true">零星作业备案</div>
+            <div class="entry-card-desc" contenteditable="true">小规模的维修、改造等作业项目</div>
+          </div>
+
+          <div style="text-align: center; margin-top: 40px; font-size: 13px; color: #999;">
+            ← 点击卡片后进入安全警示教育页面
+          </div>
+        </div>
+      </div>
+      <div class="page-label">选择工程类型页面（入口）</div>
+    </div>
+  </div>
+
+  <script>
+    function toggleSection(header) {
+      const body = header.nextElementSibling;
+      const arrow = header.querySelector('.section-arrow');
+      body.classList.toggle('expanded');
+      arrow.classList.toggle('expanded');
+    }
+
+    function toggleCheckbox(row) {
+      const checkbox = row.querySelector('.checkbox');
+      checkbox.classList.toggle('checked');
+    }
+  </script>
+</body>
+</html>

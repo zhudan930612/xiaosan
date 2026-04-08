@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大屏巡查数据模块原型 - 不可编辑可交互</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a1628;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 页面容器 */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: linear-gradient(90deg, rgba(0,212,255,0.1), transparent, rgba(0,212,255,0.1));
+            border-bottom: 1px solid rgba(0,212,255,0.3);
+            margin: -20px -20px 20px -20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: rgba(0,212,255,0.2);
+            border: 1px solid rgba(0,212,255,0.5);
+            color: #00d4ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(0,212,255,0.3);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #00b578);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #8899aa;
+            font-size: 14px;
+        }
+
+        /* 首页样式 */
+        .home-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(90deg, rgba(0,212,255,0.1), transparent, rgba(0,212,255,0.1));
+            border-bottom: 1px solid rgba(0,212,255,0.3);
+            margin: -20px -20px 20px -20px;
+        }
+
+        .home-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #00b578);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .home-subtitle {
+            font-size: 14px;
+            color: #8899aa;
+            margin-top: 8px;
+        }
+
+        /* 面板卡片 */
+        .panel {
+            background: rgba(16, 30, 55, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 16px;
+            right: 16px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #00d4ff;
+            border-radius: 2px;
+        }
+
+        /* 首页布局 */
+        .home-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+
+        .home-left, .home-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .home-center {
+            position: relative;
+        }
+
+        /* 统计卡片 - 巡查统揽4张 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(16, 30, 55, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+        }
+
+        .stat-card.danger::before {
+            background: linear-gradient(90deg, transparent, #ff4d4f, transparent);
+        }
+
+        .stat-card.danger {
+            border-color: rgba(255, 77, 79, 0.2);
+        }
+
+        .stat-card.danger:hover {
+            border-color: rgba(255, 77, 79, 0.6);
+            box-shadow: 0 4px 20px rgba(255, 77, 79, 0.2);
+        }
+
+        .stat-card.warning::before {
+            background: linear-gradient(90deg, transparent, #ff9500, transparent);
+        }
+
+        .stat-card.warning {
+            border-color: rgba(255, 149, 0, 0.2);
+        }
+
+        .stat-card.warning:hover {
+            border-color: rgba(255, 149, 0, 0.6);
+            box-shadow: 0 4px 20px rgba(255, 149, 0, 0.2);
+        }
+
+        .stat-card.success::before {
+            background: linear-gradient(90deg, transparent, #00b578, transparent);
+        }
+
+        .stat-card.success {
+            border-color: rgba(0, 181, 120, 0.2);
+        }
+
+        .stat-card.success:hover {
+            border-color: rgba(0, 181, 120, 0.6);
+            box-shadow: 0 4px 20px rgba(0, 181, 120, 0.2);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-card.danger .stat-icon {
+            background: rgba(255, 77, 79, 0.1);
+        }
+
+        .stat-card.warning .stat-icon {
+            background: rgba(255, 149, 0, 0.1);
+        }
+
+        .stat-card.success .stat-icon {
+            background: rgba(0, 181, 120, 0.1);
+        }
+
+        .stat-name {
+            font-size: 14px;
+            color: #8899aa;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+
+        .stat-card.danger .stat-value {
+            color: #ff4d4f;
+        }
+
+        .stat-card.warning .stat-value {
+            color: #ff9500;
+        }
+
+        .stat-card.success .stat-value {
+            color: #00b578;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: #556677;
+            margin-top: 4px;
+        }
+
+        .stat-tooltip {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #00d4ff;
+            cursor: help;
+        }
+
+        /* 地图区域 */
+        .map-container {
+            height: 500px;
+            background: linear-gradient(135deg, rgba(0,50,80,0.3), rgba(0,30,50,0.5));
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 30% 40%, rgba(0,212,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(0,181,120,0.1) 0%, transparent 50%);
+        }
+
+        .map-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .map-title {
+            font-size: 20px;
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        /* 镇级区域标记 */
+        .town-markers {
+            position: absolute;
+            inset: 0;
+        }
+
+        .town-marker {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .town-marker:hover {
+            transform: scale(1.1);
+        }
+
+        .marker-pin {
+            width: 40px;
+            height: 40px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .marker-pin.red {
+            background: linear-gradient(135deg, #ff4d4f, #ff7875);
+            box-shadow: 0 0 20px rgba(255, 77, 79, 0.6);
+            animation: pulse-red 2s infinite;
+        }
+
+        .marker-pin.yellow {
+            background: linear-gradient(135deg, #ff9500, #ffbb33);
+            box-shadow: 0 0 20px rgba(255, 149, 0, 0.5);
+        }
+
+        .marker-pin.green {
+            background: linear-gradient(135deg, #00b578, #00d4ff);
+            box-shadow: 0 0 20px rgba(0, 181, 120, 0.4);
+        }
+
+        .marker-pin.gray {
+            background: linear-gradient(135deg, #8899aa, #aabbcc);
+            box-shadow: 0 0 10px rgba(136, 153, 170, 0.3);
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; transform: rotate(-45deg) scale(1); }
+            50% { opacity: 0.8; transform: rotate(-45deg) scale(1.1); }
+        }
+
+        .marker-pin::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            transform: rotate(45deg);
+        }
+
+        .marker-label {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            white-space: nowrap;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        /* 镇级位置 */
+        .town-zhujiajiao { top: 60%; left: 35%; }
+        .town-xujing { top: 35%; left: 65%; }
+        .town-huaxin { top: 25%; left: 55%; }
+        .town-zhaoxiang { top: 40%; left: 45%; }
+        .town-chonggu { top: 30%; left: 40%; }
+        .town-yingpu { top: 45%; left: 30%; }
+        .town-xiayang { top: 55%; left: 42%; }
+        .town-baihe { top: 20%; left: 45%; }
+        .town-jinze { top: 50%; left: 25%; }
+
+        /* 图例 */
+        .map-legend {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .legend-title {
+            font-size: 12px;
+            color: #8899aa;
+            margin-bottom: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #ccddee;
+            margin-bottom: 6px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.red {
+            background: #ff4d4f;
+            box-shadow: 0 0 8px #ff4d4f;
+        }
+
+        .legend-dot.yellow {
+            background: #ff9500;
+        }
+
+        .legend-dot.green {
+            background: #00b578;
+        }
+
+        .legend-dot.gray {
+            background: #8899aa;
+        }
+
+        /* 图表容器 */
+        .chart-box {
+            height: 180px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #556677;
+        }
+
+        /* 列表样式 */
+        .data-list {
+            list-style: none;
+        }
+
+        .data-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .data-list-item:hover {
+            background: rgba(0, 212, 255, 0.05);
+            margin: 0 -12px;
+            padding-left: 12px;
+            padding-right: 12px;
+            border-radius: 6px;
+        }
+
+        .data-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rank-badge {
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #00d4ff;
+        }
+
+        .rank-badge.top {
+            background: linear-gradient(135deg, #ff9500, #ffbb33);
+            color: #fff;
+        }
+
+        .item-name {
+            font-size: 14px;
+            color: #ccddee;
+        }
+
+        .item-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00b578, #00d4ff);
+            border-radius: 3px;
+        }
+
+        /* 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .tag-green {
+            background: rgba(0, 181, 120, 0.2);
+            color: #00b578;
+        }
+
+        .tag-orange {
+            background: rgba(255, 149, 0, 0.2);
+            color: #ff9500;
+        }
+
+        .tag-red {
+            background: rgba(255, 77, 79, 0.2);
+            color: #ff4d4f;
+        }
+
+        .tag-blue {
+            background: rgba(24, 144, 255, 0.2);
+            color: #1890ff;
+        }
+
+        .tag-gray {
+            background: rgba(136, 153, 170, 0.2);
+            color: #8899aa;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: #8899aa;
+        }
+
+        .filter-select {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .filter-input {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00b578, #00d4ff);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 181, 120, 0.4);
+        }
+
+        .btn-default {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+        }
+
+        .btn-default:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .btn.active {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+        }
+
+        /* 表格 */
+        .data-table {
+            width: 100%;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 8px;
+            color: #8899aa;
+            font-weight: 400;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            color: #8899aa;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border-color: #00d4ff;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #0f1f3a, #1a2d4d);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 77, 79, 0.2);
+            border: 1px solid rgba(255, 77, 79, 0.5);
+            border-radius: 6px;
+            color: #ff4d4f;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(80vh - 70px);
+        }
+
+        /* 详情信息网格 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #8899aa;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* 两列布局 */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 图表切换 */
+        .chart-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .chart-tab {
+            padding: 4px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            color: #8899aa;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chart-tab:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+        }
+
+        .chart-tab.active {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        /* 饼图/环形图占位 */
+        .pie-chart-box {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff4d4f 0deg 72deg,
+                #ff9500 72deg 144deg,
+                #00b578 144deg 252deg,
+                #1890ff 252deg 324deg,
+                #8899aa 324deg 360deg
+            );
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .pie-chart-box::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: rgba(16, 30, 55, 0.9);
+            border-radius: 50%;
+        }
+
+        /* 柱状图占位 */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 100%;
+            padding: 20px 10px;
+            gap: 8px;
+        }
+
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .bar-stack {
+            width: 100%;
+            display: flex;
+            flex-direction: column-reverse;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-segment {
+            width: 100%;
+            min-height: 8px;
+        }
+
+        .bar-segment.green { background: #00b578; }
+        .bar-segment.yellow { background: #ff9500; }
+        .bar-segment.red { background: #ff4d4f; }
+        .bar-segment.gray { background: #8899aa; }
+
+        .bar-label {
+            font-size: 11px;
+            color: #8899aa;
+        }
+
+        /* 分组柱状图 */
+        .grouped-bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 100%;
+            padding: 20px 10px;
+            gap: 16px;
+        }
+
+        .grouped-bar-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .grouped-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 120px;
+        }
+
+        .grouped-bar {
+            width: 16px;
+            border-radius: 2px;
+            transition: all 0.2s;
+        }
+
+        .grouped-bar:hover {
+            opacity: 0.8;
+        }
+
+        .grouped-bar.blue { background: #1890ff; }
+        .grouped-bar.green { background: #00b578; }
+        .grouped-bar.orange { background: #ff9500; }
+        .grouped-bar.gray {
+            background: #8899aa;
+            opacity: 0.5;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1400px) {
+            .home-grid {
+                grid-template-columns: 1fr;
+            }
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 900px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== 页面1: 首页（巡查数据模块） ==================== -->
+<div class="page active" id="page-home">
+    <div class="home-header">
+        <h1 class="home-title">青浦区小型工程和零星作业智慧监管平台</h1>
+        <p class="home-subtitle">数据更新时间：2026-04-08 14:30:00</p>
+    </div>
+
+    <!-- 巡查统揽 - 4张指标卡 -->
+    <div class="stats-row">
+        <div class="stat-card success" onclick="showPage('page-patrol')">
+            <div class="stat-tooltip" title="本周有巡查记录的在建工程数 / 在建工程总数">?</div>
+            <div class="stat-icon">📊</div>
+            <div class="stat-name">本周巡查覆盖率</div>
+            <div class="stat-value">86.5%</div>
+            <div class="stat-sub">分子：156 / 分母：180</div>
+        </div>
+        <div class="stat-card warning" onclick="showPage('page-danger')">
+            <div class="stat-tooltip" title="本周整改审核通过数 / 本周新发现隐患数">?</div>
+            <div class="stat-icon">🔧</div>
+            <div class="stat-name">本周隐患整改率</div>
+            <div class="stat-value">72.3%</div>
+            <div class="stat-sub">已整改：26 / 新增：36</div>
+        </div>
+        <div class="stat-card" onclick="showPage('page-patrol')">
+            <div class="stat-icon">📝</div>
+            <div class="stat-name">本月巡查次数</div>
+            <div class="stat-value">1,258</div>
+            <div class="stat-sub">较上月 +15.2%</div>
+        </div>
+        <div class="stat-card danger" onclick="showPage('page-danger')">
+            <div class="stat-tooltip" title="含待整改、整改中两种未闭环状态">?</div>
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-name">待整改隐患</div>
+            <div class="stat-value">43</div>
+            <div class="stat-sub">待整改：18 / 整改中：25</div>
+        </div>
+    </div>
+
+    <div class="home-grid">
+        <!-- 左侧 -->
+        <div class="home-left">
+            <!-- 巡查趋势图 -->
+            <div class="panel">
+                <div class="panel-title">巡查趋势图</div>
+                <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="switchTab(this, 'patrol-7d')">近7天</button>
+                    <button class="chart-tab" onclick="switchTab(this, 'patrol-30d')">近30天</button>
+                    <button class="chart-tab" onclick="switchTab(this, 'patrol-year')">本年度</button>
+                </div>
+                <div class="chart-box" style="height: 220px;">
+                    <div class="grouped-bar-chart">
+                        <div class="grouped-bar-item">
+                            <div class="grouped-bars">
+                                <div class="grouped-bar blue" style="height: 60px;"></div>
+                                <div class="grouped-bar green" style="height: 40px;"></div>
+                                <div class="grouped-bar orange" style="height: 20px;"></div>
+                            </div>
+                            <span class="bar-label">04/02</span>
+                        </div>
+                        <div class="grouped-bar-item">
+                            <div class="grouped-bars">
+                                <div class="grouped-bar blue" style="height: 80px;"></div>
+                                <div class="grouped-bar green" style="height: 50px;"></div>
+                                <div class="grouped-bar orange" style="height: 30px;"></div>
+                            </div>
+                            <span class="bar-label">04/03</span>
+                        </div>
+                        <div class="grouped-bar-item">
+                            <div class="grouped-bars">
+                                <div class="grouped-bar blue" style="height: 45px;"></div>
+                                <div class="grouped-bar green" style="height: 35px;"></div>
+                                <div class="grouped-bar orange" style="height: 15px;"></div>
+                            </div>
+                            <span class="bar-label">04/04</span>
+                        </div>
+                        <div class="grouped-bar-item">
+                            <div class="grouped-bars">
+                                <div class="grouped-bar blue" style="height: 70px;"></div>
+                                <div class="grouped-bar green" style="height: 45px;"></div>
+                                <div class="grouped-bar orange" style="height: 25px;"></div>
+                            </div>
+                            <span class="bar-label">04/05</span>
+                        </div>
+                        <div class="grouped-bar-item">
+                            <div class="grouped-bars">
+                                <div class="grouped-bar blue" style="height: 90px;"></div>
+                                <div class="grouped-bar green" style="height: 55px;"></div>
+                                <div class="grouped-bar orange" style="height: 35px;"></div>
+                            </div>
+                            <span class="bar-label">04/06</span>
+                        </div>
+                        <div class="grouped-bar-item">
+                            <div class="grouped-bars">
+                                <div class="grouped-bar blue" style="height: 55px;"></div>
+                                <div class="grouped-bar green" style="height: 30px;"></div>
+                                <div class="grouped-bar orange" style="height: 20px;"></div>
+                            </div>
+                            <span class="bar-label">04/07</span>
+                        </div>
+                        <div class="grouped-bar-item">
+                            <div class="grouped-bars">
+                                <div class="grouped-bar blue" style="height: 75px;"></div>
+                                <div class="grouped-bar green" style="height: 48px;"></div>
+                                <div class="grouped-bar gray" style="height: 0px;"></div>
+                            </div>
+                            <span class="bar-label">04/08</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 16px; margin-top: 8px;">
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8899aa;">
+                        <div style="width: 12px; height: 12px; background: #1890ff; border-radius: 2px;"></div>
+                        <span>街道巡查</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8899aa;">
+                        <div style="width: 12px; height: 12px; background: #00b578; border-radius: 2px;"></div>
+                        <span>社区巡查</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8899aa;">
+                        <div style="width: 12px; height: 12px; background: #ff9500; border-radius: 2px;"></div>
+                        <span>物业巡查（待接入）</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 工程状态分布图 -->
+            <div class="panel">
+                <div class="panel-title">工程状态分布</div>
+                <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="switchTab(this, 'status-7d')">近7天</button>
+                    <button class="chart-tab" onclick="switchTab(this, 'status-30d')">近30天</button>
+                    <button class="chart-tab" onclick="switchTab(this, 'status-year')">本年度</button>
+                </div>
+                <div class="chart-box" style="height: 180px;">
+                    <div class="bar-chart">
+                        <div class="bar-group">
+                            <div class="bar-stack" style="height: 120px;">
+                                <div class="bar-segment green" style="height: 40%;"></div>
+                                <div class="bar-segment yellow" style="height: 25%;"></div>
+                                <div class="bar-segment red" style="height: 15%;"></div>
+                                <div class="bar-segment gray" style="height: 20%;"></div>
+                            </div>
+                            <span class="bar-label">04/02</span>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar-stack" style="height: 100px;">
+                                <div class="bar-segment green" style="height: 45%;"></div>
+                                <div class="bar-segment yellow" style="height: 20%;"></div>
+                                <div class="bar-segment red" style="height: 10%;"></div>
+                                <div class="bar-segment gray" style="height: 25%;"></div>
+                            </div>
+                            <span class="bar-label">04/03</span>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar-stack" style="height: 110px;">
+                                <div class="bar-segment green" style="height: 35%;"></div>
+                                <div class="bar-segment yellow" style="height: 30%;"></div>
+                                <div class="bar-segment red" style="height: 20%;"></div>
+                                <div class="bar-segment gray" style="height: 15%;"></div>
+                            </div>
+                            <span class="bar-label">04/04</span>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar-stack" style="height: 130px;">
+                                <div class="bar-segment green" style="height: 50%;"></div>
+                                <div class="bar-segment yellow" style="height: 15%;"></div>
+                                <div class="bar-segment red" style="height: 10%;"></div>
+                                <div class="bar-segment gray" style="height: 25%;"></div>
+                            </div>
+                            <span class="bar-label">04/05</span>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar-stack" style="height: 115px;">
+                                <div class="bar-segment green" style="height: 42%;"></div>
+                                <div class="bar-segment yellow" style="height: 22%;"></div>
+                                <div class="bar-segment red" style="height: 18%;"></div>
+                                <div class="bar-segment gray" style="height: 18%;"></div>
+                            </div>
+                            <span class="bar-label">04/06</span>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar-stack" style="height: 105px;">
+                                <div class="bar-segment green" style="height: 38%;"></div>
+                                <div class="bar-segment yellow" style="height: 28%;"></div>
+                                <div class="bar-segment red" style="height: 12%;"></div>
+                                <div class="bar-segment gray" style="height: 22%;"></div>
+                            </div>
+                            <span class="bar-label">04/07</span>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar-stack" style="height: 125px;">
+                                <div class="bar-segment green" style="height: 48%;"></div>
+                                <div class="bar-segment yellow" style="height: 18%;"></div>
+                                <div class="bar-segment red" style="height: 14%;"></div>
+                                <div class="bar-segment gray" style="height: 20%;"></div>
+                            </div>
+                            <span class="bar-label">04/08</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 16px; margin-top: 8px;">
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8899aa;">
+                        <div style="width: 12px; height: 12px; background: #00b578; border-radius: 2px;"></div>
+                        <span>正常施工</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8899aa;">
+                        <div style="width: 12px; height: 12px; background: #ff9500; border-radius: 2px;"></div>
+                        <span>现场整改</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8899aa;">
+                        <div style="width: 12px; height: 12px; background: #ff4d4f; border-radius: 2px;"></div>
+                        <span>停工整改</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #8899aa;">
+                        <div style="width: 12px; height: 12px; background: #8899aa; border-radius: 2px;"></div>
+                        <span>已核销</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间 - 地图 -->
+        <div class="home-center">
+            <div class="panel" style="height: 100%;">
+                <div class="panel-title">工程分布地图</div>
+                <div class="map-container" style="height: calc(100% - 40px);">
+                    <div class="map-bg"></div>
+                    <div class="map-content">
+                        <div class="map-title">青浦区工程点位分布</div>
+                        <p style="color: #667788; font-size: 14px;">点击镇级标记查看详情</p>
+                    </div>
+                    <!-- 镇级标记 -->
+                    <div class="town-markers">
+                        <div class="town-marker town-zhujiajiao" onclick="showPage('page-town')">
+                            <div class="marker-pin red"></div>
+                            <div class="marker-label">朱家角镇</div>
+                        </div>
+                        <div class="town-marker town-xujing" onclick="showPage('page-town')">
+                            <div class="marker-pin yellow"></div>
+                            <div class="marker-label">徐泾镇</div>
+                        </div>
+                        <div class="town-marker town-huaxin" onclick="showPage('page-town')">
+                            <div class="marker-pin green"></div>
+                            <div class="marker-label">华新镇</div>
+                        </div>
+                        <div class="town-marker town-zhaoxiang" onclick="showPage('page-town')">
+                            <div class="marker-pin red"></div>
+                            <div class="marker-label">赵巷镇</div>
+                        </div>
+                        <div class="town-marker town-chonggu" onclick="showPage('page-town')">
+                            <div class="marker-pin gray"></div>
+                            <div class="marker-label">重固镇</div>
+                        </div>
+                        <div class="town-marker town-yingpu" onclick="showPage('page-town')">
+                            <div class="marker-pin green"></div>
+                            <div class="marker-label">盈浦街道</div>
+                        </div>
+                    </div>
+                    <!-- 图例 -->
+                    <div class="map-legend">
+                        <div class="legend-title">点位状态标识</div>
+                        <div class="legend-item">
+                            <div class="legend-dot red"></div>
+                            <span>存在未闭环隐患（红色闪烁）</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot yellow"></div>
+                            <span>整改中</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot green"></div>
+                            <span>近7天已巡查</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot gray"></div>
+                            <span>近7天未巡查</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧 - 隐患分布统计 -->
+        <div class="home-right">
+            <!-- 隐患等级分布 -->
+            <div class="panel">
+                <div class="panel-title">隐患等级分布</div>
+                <div class="two-col">
+                    <div class="pie-chart-box"></div>
+                    <div>
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 13px; color: #ccddee;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; background: #ff4d4f; border-radius: 50%; margin-right: 6px;"></span>
+                                    较大隐患
+                                </span>
+                                <span style="font-size: 14px; font-weight: 600; color: #ff4d4f;">35个</span>
+                            </div>
+                            <div style="font-size: 12px; color: #8899aa; margin-top: 2px;">占比 15.4%</div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 13px; color: #ccddee;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; background: #ff9500; border-radius: 50%; margin-right: 6px;"></span>
+                                    一般隐患
+                                </span>
+                                <span style="font-size: 14px; font-weight: 600; color: #ff9500;">192个</span>
+                            </div>
+                            <div style="font-size: 12px; color: #8899aa; margin-top: 2px;">占比 84.6%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 隐患类别 TOP5 -->
+            <div class="panel">
+                <div class="panel-title">隐患类别 TOP5</div>
+                <ul class="data-list">
+                    <li class="data-list-item" onclick="showPage('page-danger')">
+                        <div class="item-left">
+                            <span class="rank-badge top">1</span>
+                            <span class="item-name">信息登记</span>
+                        </div>
+                        <span class="item-value">58个</span>
+                    </li>
+                    <li class="data-list-item" onclick="showPage('page-danger')">
+                        <div class="item-left">
+                            <span class="rank-badge top">2</span>
+                            <span class="item-name">高处作业</span>
+                        </div>
+                        <span class="item-value">47个</span>
+                    </li>
+                    <li class="data-list-item" onclick="showPage('page-danger')">
+                        <div class="item-left">
+                            <span class="rank-badge top">3</span>
+                            <span class="item-name">施工用电</span>
+                        </div>
+                        <span class="item-value">39个</span>
+                    </li>
+                    <li class="data-list-item" onclick="showPage('page-danger')">
+                        <div class="item-left">
+                            <span class="rank-badge">4</span>
+                            <span class="item-name">安全管理</span>
+                        </div>
+                        <span class="item-value">31个</span>
+                    </li>
+                    <li class="data-list-item" onclick="showPage('page-danger')">
+                        <div class="item-left">
+                            <span class="rank-badge">5</span>
+                            <span class="item-name">消防安全</span>
+                        </div>
+                        <span class="item-value">26个</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 整改状态分布 -->
+            <div class="panel">
+                <div class="panel-title">整改状态分布</div>
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: #ccddee;">待整改</span>
+                        <span style="font-size: 13px; color: #ff4d4f; font-weight: 600;">18个</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 41.9%; background: #ff4d4f;"></div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: #ccddee;">整改中</span>
+                        <span style="font-size: 13px; color: #1890ff; font-weight: 600;">25个</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 58.1%; background: #1890ff;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: #ccddee;">已整改</span>
+                        <span style="font-size: 13px; color: #00b578; font-weight: 600;">184个</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 81.1%; background: #00b578;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面2: 镇级详情页 ==================== -->
+<div class="page" id="page-town">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title">朱家角镇 - 详情</h2>
+        </div>
+        <div class="header-right">
+            <span>数据更新时间：2026-04-08 14:30:00</span>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">工程总数</div>
+            <div class="info-value">156</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">高风险工程</div>
+            <div class="info-value" style="color: #ff4d4f;">47</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">隐患数量</div>
+            <div class="info-value" style="color: #ff9500;">47</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">整改率</div>
+            <div class="info-value" style="color: #00b578;">68.3%</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">停工项目</div>
+            <div class="info-value">8</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">本月巡查次数</div>
+            <div class="info-value">128</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="panel">
+            <div class="panel-title">工程状态分布</div>
+            <div class="chart-box" style="height: 200px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
+                    <div>工程状态堆叠图</div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-title">隐患类型分布</div>
+            <div class="chart-box" style="height: 200px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 8px;">🥧</div>
+                    <div>隐患类型饼图</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top: 20px;">
+        <div class="panel-title">该街道工程列表</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>工程名称</th>
+                    <th>工程地址</th>
+                    <th>状态</th>
+                    <th>风险等级</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td>XX小区外墙维修工程</td>
+                    <td>朱家角镇XX路XX号</td>
+                    <td><span class="tag tag-green">正常施工</span></td>
+                    <td><span class="tag tag-orange">一般风险</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td>XX商场装修工程</td>
+                    <td>朱家角镇XX街XX号</td>
+                    <td><span class="tag tag-orange">现场整改</span></td>
+                    <td><span class="tag tag-red">高风险</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('project-modal')" style="cursor: pointer;">
+                    <td>XX厂房改造工程</td>
+                    <td>朱家角镇XX工业区</td>
+                    <td><span class="tag tag-red">停工整改</span></td>
+                    <td><span class="tag tag-red">高风险</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面3: 巡查记录列表页 ==================== -->
+<div class="page" id="page-patrol">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title">巡查记录</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary">导出数据</button>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-item">
+            <span class="filter-label">巡查日期：</span>
+            <input type="text" class="filter-input" value="2026-04-01 至 2026-04-08" style="width: 200px;">
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">所属街道：</span>
+            <select class="filter-select">
+                <option>全部街道</option>
+                <option>朱家角镇</option>
+                <option>徐泾镇</option>
+                <option>华新镇</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">巡查类型：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>街道巡查</option>
+                <option>社区巡查</option>
+                <option>物业巡查</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">是否发现隐患：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>有隐患</option>
+                <option>无隐患</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <input type="text" class="filter-input" placeholder="搜索工程名称/巡查人员" style="width: 200px;">
+            <button class="btn btn-primary">查询</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>巡查编号</th>
+                    <th>工程名称</th>
+                    <th>工程地址</th>
+                    <th>巡查时间</th>
+                    <th>巡查人员</th>
+                    <th>巡查类型</th>
+                    <th>隐患数量</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td>XC20260408001</td>
+                    <td>XX小区外墙维修工程</td>
+                    <td>朱家角镇XX路XX号</td>
+                    <td>2026-04-08 14:30</td>
+                    <td>张三</td>
+                    <td><span class="tag tag-blue">街道巡查</span></td>
+                    <td style="color: #ff4d4f; font-weight: 600;">2</td>
+                    <td><span class="tag tag-orange">待整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td>XC20260408002</td>
+                    <td>XX商场装修工程</td>
+                    <td>徐泾镇XX街XX号</td>
+                    <td>2026-04-08 11:20</td>
+                    <td>李四</td>
+                    <td><span class="tag tag-green">社区巡查</span></td>
+                    <td>0</td>
+                    <td><span class="tag tag-green">正常</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td>XC20260408003</td>
+                    <td>XX厂房改造工程</td>
+                    <td>华新镇XX工业区</td>
+                    <td>2026-04-08 09:15</td>
+                    <td>王五</td>
+                    <td><span class="tag tag-blue">街道巡查</span></td>
+                    <td style="color: #ff4d4f; font-weight: 600;">5</td>
+                    <td><span class="tag tag-red">停工整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td>XC20260407001</td>
+                    <td>XX大厦外墙清洗</td>
+                    <td>赵巷镇XX路XX号</td>
+                    <td>2026-04-07 16:45</td>
+                    <td>赵六</td>
+                    <td><span class="tag tag-green">社区巡查</span></td>
+                    <td>0</td>
+                    <td><span class="tag tag-green">正常</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('patrol-modal')" style="cursor: pointer;">
+                    <td>XC20260407002</td>
+                    <td>XX学校改造工程</td>
+                    <td>重固镇XX路XX号</td>
+                    <td>2026-04-07 14:30</td>
+                    <td>钱七</td>
+                    <td><span class="tag tag-green">社区巡查</span></td>
+                    <td style="color: #ff9500; font-weight: 600;">1</td>
+                    <td><span class="tag tag-orange">现场整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">4</button>
+            <button class="page-btn">5</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 页面4: 隐患管理页 ==================== -->
+<div class="page" id="page-danger">
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="showPage('page-home')">← 返回首页</button>
+            <h2 class="page-title">隐患管理</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary">导出隐患清单</button>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">隐患总数</div>
+            <div class="info-value">227</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">待整改</div>
+            <div class="info-value" style="color: #ff4d4f;">18</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">整改中</div>
+            <div class="info-value" style="color: #1890ff;">25</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">已整改</div>
+            <div class="info-value" style="color: #00b578;">184</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">较大隐患</div>
+            <div class="info-value" style="color: #ff4d4f;">35</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">整改率</div>
+            <div class="info-value" style="color: #00b578;">81.1%</div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-item">
+            <span class="filter-label">隐患等级：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>较大隐患</option>
+                <option>一般隐患</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">整改状态：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>待整改</option>
+                <option>整改中</option>
+                <option>已整改</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <span class="filter-label">隐患类别：</span>
+            <select class="filter-select">
+                <option>全部</option>
+                <option>信息登记</option>
+                <option>高处作业</option>
+                <option>施工用电</option>
+                <option>消防安全</option>
+                <option>脚手架</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <input type="text" class="filter-input" placeholder="搜索工程名称" style="width: 200px;">
+            <button class="btn btn-primary">查询</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>隐患编号</th>
+                    <th>所属工程</th>
+                    <th>隐患类别</th>
+                    <th>隐患等级</th>
+                    <th>发现时间</th>
+                    <th>整改期限</th>
+                    <th>整改状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td>YH20260408001</td>
+                    <td>XX小区外墙维修工程</td>
+                    <td>高处作业</td>
+                    <td><span class="tag tag-red">较大隐患</span></td>
+                    <td>2026-04-08</td>
+                    <td style="color: #ff4d4f;">2026-04-11</td>
+                    <td><span class="tag tag-red">待整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td>YH20260408002</td>
+                    <td>XX商场装修工程</td>
+                    <td>施工用电</td>
+                    <td><span class="tag tag-orange">一般隐患</span></td>
+                    <td>2026-04-08</td>
+                    <td style="color: #ff9500;">2026-04-15</td>
+                    <td><span class="tag tag-orange">整改中</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td>YH20260407001</td>
+                    <td>XX厂房改造工程</td>
+                    <td>消防安全</td>
+                    <td><span class="tag tag-orange">一般隐患</span></td>
+                    <td>2026-04-07</td>
+                    <td>2026-04-14</td>
+                    <td><span class="tag tag-green">已整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td>YH20260407002</td>
+                    <td>XX大厦外墙清洗</td>
+                    <td>脚手架</td>
+                    <td><span class="tag tag-red">较大隐患</span></td>
+                    <td>2026-04-07</td>
+                    <td style="color: #ff4d4f;">2026-04-10</td>
+                    <td><span class="tag tag-red">待整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+                <tr onclick="openModal('danger-modal')" style="cursor: pointer;">
+                    <td>YH20260406001</td>
+                    <td>XX学校改造工程</td>
+                    <td>信息登记</td>
+                    <td><span class="tag tag-red">较大隐患</span></td>
+                    <td>2026-04-06</td>
+                    <td>2026-04-09</td>
+                    <td><span class="tag tag-green">已整改</span></td>
+                    <td><button class="btn btn-default" style="padding: 4px 12px; font-size: 12px;">查看</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button class="page-btn">上一页</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗1: 工程详情 ==================== -->
+<div class="modal-overlay" id="project-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">工程详情</h3>
+            <button class="modal-close" onclick="closeModal('project-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">备案号</div>
+                    <div class="info-value">BA20260408001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">工程状态</div>
+                    <div class="info-value"><span class="tag tag-green">正常施工</span></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">风险等级</div>
+                    <div class="info-value"><span class="tag tag-orange">一般风险</span></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">基本信息</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+                    <div><span style="color: #8899aa;">工程名称：</span><span>XX小区外墙维修工程</span></div>
+                    <div><span style="color: #8899aa;">工程地址：</span><span>朱家角镇XX路XX号</span></div>
+                    <div><span style="color: #8899aa;">施工单位：</span><span>XX建筑装饰公司</span></div>
+                    <div><span style="color: #8899aa;">负责人：</span><span>张三 138****8888</span></div>
+                    <div><span style="color: #8899aa;">施工时间：</span><span>2026-04-08 至 2026-05-08</span></div>
+                    <div><span style="color: #8899aa;">作业类型：</span><span>高空 | 用电 | 动火</span></div>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="panel">
+                    <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">巡查记录（12次）</div>
+                    <ul class="data-list" style="font-size: 12px;">
+                        <li class="data-list-item">
+                            <span>2026-04-08</span>
+                            <span style="color: #ff4d4f;">发现2处隐患</span>
+                        </li>
+                        <li class="data-list-item">
+                            <span>2026-04-06</span>
+                            <span style="color: #00b578;">正常</span>
+                        </li>
+                        <li class="data-list-item">
+                            <span>2026-04-03</span>
+                            <span style="color: #00b578;">正常</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">隐患记录（2个）</div>
+                    <ul class="data-list" style="font-size: 12px;">
+                        <li class="data-list-item">
+                            <span>高处作业未系安全带</span>
+                            <span class="tag tag-red">待整改</span>
+                        </li>
+                        <li class="data-list-item">
+                            <span>用电设备未接地</span>
+                            <span class="tag tag-red">待整改</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button class="btn btn-primary" style="flex: 1;">查看巡查记录</button>
+                <button class="btn btn-default" style="flex: 1;">查看隐患详情</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗2: 巡查详情 ==================== -->
+<div class="modal-overlay" id="patrol-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">巡查详情</h3>
+            <button class="modal-close" onclick="closeModal('patrol-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">巡查编号</div>
+                    <div class="info-value">XC20260408001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">巡查时间</div>
+                    <div class="info-value">2026-04-08 14:30</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">巡查人员</div>
+                    <div class="info-value">张三（街道）</div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">工程信息</div>
+                <div style="font-size: 13px; line-height: 1.8;">
+                    <div><span style="color: #8899aa;">工程名称：</span>XX小区外墙维修工程</div>
+                    <div><span style="color: #8899aa;">工程地址：</span>朱家角镇XX路XX号</div>
+                    <div><span style="color: #8899aa;">施工单位：</span>XX建筑装饰公司</div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">巡查情况</div>
+                <div style="font-size: 13px; color: #ff4d4f; margin-bottom: 8px;">发现2处隐患：</div>
+                <ul style="font-size: 13px; color: #ccddee; padding-left: 20px; line-height: 1.8;">
+                    <li>1. 高处作业人员未正确佩戴安全带，存在安全隐患</li>
+                    <li>2. 临时用电设备未做接地保护，存在触电风险</li>
+                </ul>
+                <div style="margin-top: 12px; font-size: 13px;">
+                    <span style="color: #8899aa;">现场照片：</span>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <div style="width: 80px; height: 80px; background: rgba(0,0,0,0.3); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #556677;">📷</div>
+                        <div style="width: 80px; height: 80px; background: rgba(0,0,0,0.3); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #556677;">📷</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" style="flex: 1;">查看工程详情</button>
+                <button class="btn btn-default" style="flex: 1;">查看整改记录</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗3: 隐患详情 ==================== -->
+<div class="modal-overlay" id="danger-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">隐患详情</h3>
+            <button class="modal-close" onclick="closeModal('danger-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">隐患编号</div>
+                    <div class="info-value">YH20260408001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">隐患等级</div>
+                    <div class="info-value"><span class="tag tag-red">较大隐患</span></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">整改状态</div>
+                    <div class="info-value"><span class="tag tag-red">待整改</span></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">隐患信息</div>
+                <div style="font-size: 13px; line-height: 1.8;">
+                    <div><span style="color: #8899aa;">所属工程：</span>XX小区外墙维修工程</div>
+                    <div><span style="color: #8899aa;">隐患类别：</span>高处作业</div>
+                    <div><span style="color: #8899aa;">发现时间：</span>2026-04-08</div>
+                    <div><span style="color: #8899aa;">整改期限：</span><span style="color: #ff4d4f;">2026-04-11</span></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">隐患描述</div>
+                <div style="font-size: 13px; color: #ccddee; line-height: 1.6;">
+                    巡查发现，该工程高处作业人员在进行外墙维修作业时，未正确佩戴安全带，安全绳也未固定在可靠锚点上，存在高处坠落的安全隐患。
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; color: #00d4ff; margin-bottom: 12px; font-weight: 600;">整改要求</div>
+                <div style="font-size: 13px; color: #ccddee; line-height: 1.6;">
+                    1. 立即停止高处作业，进行安全教育培训<br>
+                    2. 为作业人员配备符合标准的安全带和安全绳<br>
+                    3. 设置可靠的安全锚点，确保安全防护到位<br>
+                    4. 整改完成后拍照上传，申请复查
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" style="flex: 1;">查看工程详情</button>
+                <button class="btn btn-default" style="flex: 1;">查看巡查记录</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== JavaScript ==================== -->
+<script>
+    // 页面切换
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        document.getElementById(pageId).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    // 打开弹窗
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    // 关闭弹窗
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 点击弹窗遮罩关闭
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    // ESC键关闭弹窗
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
+
+    // 图表标签切换
+    function switchTab(btn, type) {
+        const parent = btn.closest('.panel');
+        parent.querySelectorAll('.chart-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        btn.classList.add('active');
+    }
+</script>
+
+</body>
+</html>

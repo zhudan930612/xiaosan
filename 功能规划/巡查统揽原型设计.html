@@ -49,7 +49,10 @@
             mask-image: linear-gradient(180deg, rgba(0,0,0,.78), transparent 92%);
         }
 
-        button, select { font: inherit; }
+        button, select, input, textarea {
+            font: inherit;
+            color: inherit;
+        }
         button { cursor: pointer; }
 
         .app { min-height: 100vh; padding: 18px 24px 24px; }
@@ -239,6 +242,7 @@
             border: 1px solid var(--line);
             background: linear-gradient(180deg, rgba(15, 41, 60, .92), rgba(8, 23, 37, .95));
             box-shadow: var(--shadow);
+            color: var(--text);
             text-align: left;
             transition: var(--transition);
         }

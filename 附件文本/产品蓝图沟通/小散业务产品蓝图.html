@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>政府监管与事故预防服务产品蓝图（现状版）</title>
+    <style>
+        :root {
+            --bg: #f4f8fc;
+            --panel: rgba(255, 255, 255, 0.88);
+            --line: #b9cce3;
+            --text: #17324d;
+            --muted: #55718e;
+            --gov: #e08b2f;
+            --gov-soft: #fff0dd;
+            --svc: #1b8fe0;
+            --svc-soft: #eaf6ff;
+            --data: #6f7cf5;
+            --data-soft: #eef0ff;
+            --smart: #1fa87c;
+            --smart-soft: #e7f8f2;
+            --shadow: 0 18px 40px rgba(44, 84, 126, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(27, 143, 224, 0.10), transparent 32%),
+                radial-gradient(circle at top right, rgba(224, 139, 47, 0.12), transparent 30%),
+                linear-gradient(180deg, #f9fbfe 0%, #eef4fb 100%);
+            overflow: hidden;
+        }
+
+        .page {
+            height: 100vh;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            margin-bottom: 0;
+        }
+
+        .hero-copy {
+            max-width: 900px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-family: "STZhongsong", "Microsoft YaHei", sans-serif;
+            font-size: 28px;
+            line-height: 1.15;
+            letter-spacing: 0.04em;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(185, 204, 227, 0.9);
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-gov { background: var(--gov); }
+        .dot-svc { background: var(--svc); }
+        .dot-data { background: var(--data); }
+        .dot-smart { background: var(--smart); }
+
+        .canvas {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 180px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid rgba(185, 204, 227, 0.95);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .panel-header {
+            padding: 14px 16px 12px;
+            border-bottom: 1px solid rgba(185, 204, 227, 0.65);
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(244,248,252,0.8));
+        }
+
+        .panel-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            color: #fff;
+            margin-right: 8px;
+        }
+
+        .gov-index { background: linear-gradient(135deg, #ea9d45, #ce6f1c); }
+        .svc-index { background: linear-gradient(135deg, #2aa2f4, #0a72c5); }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .panel-title h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .panel-note {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .content {
+            padding: 12px;
+        }
+
+        .section {
+            border: 1px dashed rgba(185, 204, 227, 0.95);
+            border-radius: 22px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.48);
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 10px;
+        }
+
+        .section-top h3 {
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .section-tag {
+            padding: 5px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .tag-gov {
+            color: #915313;
+            background: var(--gov-soft);
+        }
+
+        .tag-svc {
+            color: #1265a2;
+            background: var(--svc-soft);
+        }
+
+        .tag-data {
+            color: #535ecf;
+            background: var(--data-soft);
+        }
+
+        .entry-grid,
+        .ability-grid,
+        .data-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .entry-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .entry-grid.four {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .entry-card {
+            min-height: 98px;
+            padding: 12px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid rgba(185, 204, 227, 0.95);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+        }
+
+        .entry-card.gov {
+            background: linear-gradient(180deg, #fffaf4 0%, #fff1de 100%);
+        }
+
+        .entry-card.svc {
+            background: linear-gradient(180deg, #f8fcff 0%, #eaf5ff 100%);
+        }
+
+        .entry-type {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .entry-name {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .entry-carrier {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+            padding: 5px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(185, 204, 227, 0.9);
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .ability-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .ability-card {
+            border-radius: 18px;
+            border: 1px solid rgba(185, 204, 227, 0.92);
+            background: rgba(255,255,255,0.88);
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(44, 84, 126, 0.06);
+        }
+
+        .ability-head {
+            padding: 10px 12px;
+            color: #fff;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .ability-head.gov {
+            background: linear-gradient(135deg, #e5963e 0%, #cb6d1a 100%);
+        }
+
+        .ability-head.svc {
+            background: linear-gradient(135deg, #2aa2f4 0%, #0c78cf 100%);
+        }
+
+        .ability-head.smart {
+            background: linear-gradient(135deg, #28b58a 0%, #148565 100%);
+        }
+
+        .ability-head small {
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            opacity: 0.88;
+        }
+
+        .ability-body {
+            padding: 10px;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 0;
+        }
+
+        .chip {
+            padding: 6px 8px;
+            border-radius: 10px;
+            background: #f4f8fc;
+            border: 1px solid rgba(185, 204, 227, 0.88);
+            font-size: 12px;
+            color: #2f4f6f;
+            text-align: center;
+        }
+
+        .support-list {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .support-item {
+            padding: 10px 8px;
+            text-align: center;
+            border-radius: 12px;
+            background: var(--smart-soft);
+            border: 1px solid rgba(125, 209, 179, 0.8);
+            color: #176f56;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .data-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+
+        .data-grid.six {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+
+        .data-pill {
+            padding: 9px 8px;
+            border-radius: 999px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid rgba(185, 204, 227, 0.9);
+            background: rgba(255,255,255,0.95);
+            color: #3a5978;
+        }
+
+        .bridge {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-self: stretch;
+            justify-content: center;
+            min-height: 100%;
+        }
+
+        .bridge-title {
+            padding: 8px 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #314b66;
+        }
+
+        .flow-card {
+            border-radius: 18px;
+            border: 1px solid rgba(185, 204, 227, 0.95);
+            background: rgba(255,255,255,0.92);
+            box-shadow: var(--shadow);
+            padding: 12px 10px;
+        }
+
+        .flow-badge {
+            display: block;
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #fff;
+        }
+
+        .flow-badge.out {
+            background: linear-gradient(135deg, #ea9d45, #ce6f1c);
+        }
+
+        .flow-badge.back {
+            background: linear-gradient(135deg, #2aa2f4, #0a72c5);
+        }
+
+        .flow-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flow-item {
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(185, 204, 227, 0.8);
+            background: linear-gradient(180deg, #fcfdff 0%, #f2f7fc 100%);
+            color: #3e5b78;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+            color: #6a82a0;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+        }
+
+        .arrow-line {
+            width: 2px;
+            height: 26px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(224,139,47,0.7), rgba(27,143,224,0.7));
+        }
+
+        .footer-note {
+            margin-top: 0;
+            padding: 10px 12px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.66);
+            border: 1px solid rgba(185, 204, 227, 0.8);
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1480px) {
+            .canvas {
+                grid-template-columns: 1fr;
+            }
+
+            .bridge {
+                order: 2;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+            }
+
+            .bridge-title {
+                grid-column: 1 / -1;
+            }
+
+            .flow-arrow {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1180px) {
+            .entry-grid,
+            .entry-grid.four,
+            .ability-grid,
+            .support-list,
+            .data-grid,
+            .data-grid.six,
+            .bridge {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 30px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="hero">
+            <div class="hero-copy">
+                <h1>纳管备案与事故预防服务产品蓝图</h1>
+                <p class="subtitle">
+                    以政府监管平台为主线，串联事故预防服务能力与双向数据互通关系。
+                    图中同时呈现入口载体、核心能力、关键功能以及两侧各自沉淀的数据底座。
+                </p>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><span class="dot dot-gov"></span>政府监管平台</div>
+                <div class="legend-item"><span class="dot dot-svc"></span>事故预防服务</div>
+                <div class="legend-item"><span class="dot dot-data"></span>数据流转与互通</div>
+                <div class="legend-item"><span class="dot dot-smart"></span>智能协同能力</div>
+            </div>
+        </div>
+
+        <div class="canvas">
+            <section class="panel panel-left">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-index gov-index">1</span>
+                        <h2>产品主体：政府监管平台</h2>
+                    </div>
+                    <div class="panel-note">聚焦工程纳管、施工监管、闭环销项与监管智能协同，服务属地监管主链路。</div>
+                </div>
+                <div class="content">
+                    <div class="section">
+                        <div class="section-top">
+                            <h3>入口 / 载体层</h3>
+                            <span class="section-tag tag-gov">政府端入口</span>
+                        </div>
+                        <div class="entry-grid">
+                            <article class="entry-card gov">
+                                <div class="entry-type">Entry 01</div>
+                                <div class="entry-name">备案申报端</div>
+                                <div class="entry-carrier">H5 / 小程序</div>
+                            </article>
+                            <article class="entry-card gov">
+                                <div class="entry-type">Entry 02</div>
+                                <div class="entry-name">巡查执行端</div>
+                                <div class="entry-carrier">App / 小程序 / 巡检终端</div>
+                            </article>
+                            <article class="entry-card gov">
+                                <div class="entry-type">Entry 03</div>
+                                <div class="entry-name">监管管理后台</div>
+                                <div class="entry-carrier">PC 管理后台</div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-top">
+                            <h3>能力与功能层</h3>
+                            <span class="section-tag tag-gov">核心监管能力</span>
+                        </div>
+                        <div class="ability-grid">
+                            <article class="ability-card">
+                                <div class="ability-head gov">
+                                    <span>1-1. 备案管理</span>
+                                    <small>申报 / 审核</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">工程信息登记</div>
+                                        <div class="chip">材料上传与校验</div>
+                                        <div class="chip">备案审核</div>
+                                        <div class="chip">回执生成</div>
+                                        <div class="chip">一码安二维码</div>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="ability-card">
+                                <div class="ability-head gov">
+                                    <span>1-2. 日常巡查</span>
+                                    <small>巡查 / 整改</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">巡查发起与记录</div>
+                                        <div class="chip">隐患登记</div>
+                                        <div class="chip">整改跟踪与闭环</div>
+                                        <div class="chip">未备案工程发现与上报</div>
+                                        <div class="chip">违规工程发现与上报</div>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="ability-card">
+                                <div class="ability-head gov">
+                                    <span>1-3. 完工销项</span>
+                                    <small>闭环 / 归档</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">完工申报</div>
+                                        <div class="chip">核实确认</div>
+                                        <div class="chip">销项办理</div>
+                                        <div class="chip">工程归档</div>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="ability-card">
+                                <div class="ability-head gov">
+                                    <span>1-4. 信用记分管理</span>
+                                    <small>评价 / 分层监管</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">违规记分</div>
+                                        <div class="chip">量化评价</div>
+                                        <div class="chip">信用查询</div>
+                                        <div class="chip">差异化监管支撑</div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div style="margin-top:14px;">
+                            <article class="ability-card">
+                                <div class="ability-head smart">
+                                    <span>1-5. 监管支撑与智能协同</span>
+                                    <small>分析 / 识别 / 分拨</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="support-list">
+                                        <div class="support-item">可视化大屏</div>
+                                        <div class="support-item">动态风险量化</div>
+                                        <div class="support-item">AI智能分拨</div>
+                                        <div class="support-item">AI数据报表</div>
+                                        <div class="support-item">AI备案审批</div>
+                                        <div class="support-item">AI隐患识别</div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-top">
+                            <h3>数据底座</h3>
+                            <span class="section-tag tag-data">政府侧沉淀</span>
+                        </div>
+                        <div class="data-grid">
+                            <div class="data-pill">工程信息库</div>
+                            <div class="data-pill">隐患问题库</div>
+                            <div class="data-pill">人员信息库</div>
+                            <div class="data-pill">企业信息库</div>
+                            <div class="data-pill">监管业务数据</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="bridge">
+                <div class="bridge-title">数据流转与互通</div>
+
+                <div class="flow-card">
+                    <span class="flow-badge out">政府监管平台 → 事故预防服务</span>
+                    <div class="flow-list">
+                        <div class="flow-item">工程底数信息</div>
+                        <div class="flow-item">项目备案信息</div>
+                        <div class="flow-item">监管对象信息</div>
+                        <div class="flow-item">工程状态信息</div>
+                    </div>
+                </div>
+
+                <div class="flow-arrow">
+                    <span>双向同步</span>
+                    <div class="arrow-line"></div>
+                </div>
+
+                <div class="flow-card">
+                    <span class="flow-badge back">政府监管平台 ← 事故预防服务</span>
+                    <div class="flow-list">
+                        <div class="flow-item">承保理赔信息</div>
+                        <div class="flow-item">服务记录结果</div>
+                        <div class="flow-item">风险评估结果</div>
+                        <div class="flow-item">隐患排查结果</div>
+                        <div class="flow-item">整改跟踪结果</div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="panel panel-right">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-index svc-index">2</span>
+                        <h2>产品主体：事故预防服务</h2>
+                    </div>
+                    <div class="panel-note">围绕安责险事故预防服务展开，兼顾独立投保入口与服务执行闭环，适配小散当前场景。</div>
+                </div>
+                <div class="content">
+                    <div class="section">
+                        <div class="section-top">
+                            <h3>入口 / 载体层</h3>
+                            <span class="section-tag tag-svc">服务侧入口</span>
+                        </div>
+                        <div class="entry-grid four">
+                            <article class="entry-card svc">
+                                <div class="entry-type">Entry 01</div>
+                                <div class="entry-name">投保入口</div>
+                                <div class="entry-carrier">H5 / 小程序</div>
+                            </article>
+                            <article class="entry-card svc">
+                                <div class="entry-type">Entry 02</div>
+                                <div class="entry-name">宣教培训入口</div>
+                                <div class="entry-carrier">H5 / 小程序</div>
+                            </article>
+                            <article class="entry-card svc">
+                                <div class="entry-type">Entry 03</div>
+                                <div class="entry-name">服务作业端</div>
+                                <div class="entry-carrier">App / 小程序 / 巡检终端</div>
+                            </article>
+                            <article class="entry-card svc">
+                                <div class="entry-type">Entry 04</div>
+                                <div class="entry-name">服务管理/监管端</div>
+                                <div class="entry-carrier">PC 管理后台</div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-top">
+                            <h3>能力与功能层</h3>
+                            <span class="section-tag tag-svc">通用安责险服务能力</span>
+                        </div>
+                        <div class="ability-grid">
+                            <article class="ability-card">
+                                <div class="ability-head svc">
+                                    <span>2-1. 投保入口</span>
+                                    <small>转化 / 协同</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">保险产品选择</div>
+                                        <div class="chip">投保信息填写</div>
+                                        <div class="chip">保单查询</div>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="ability-card">
+                                <div class="ability-head svc">
+                                    <span>2-2. 安全生产宣传教育培训</span>
+                                    <small>宣教 / 留痕</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">宣传教育</div>
+                                        <div class="chip">安全培训</div>
+                                        <div class="chip">培训记录</div>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="ability-card">
+                                <div class="ability-head svc">
+                                    <span>2-3. 风险评估与隐患排查</span>
+                                    <small>评估 / 排查 / 跟踪</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">风险辨识 / 评估</div>
+                                        <div class="chip">风险评估报告</div>
+                                        <div class="chip">隐患排查</div>
+                                        <div class="chip">整改建议</div>
+                                        <div class="chip">标准化体系建设</div>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="ability-card">
+                                <div class="ability-head svc">
+                                    <span>2-4. 应急预案编制和应急救援演练</span>
+                                    <small>预案 / 演练</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="chips">
+                                        <div class="chip">预案编制</div>
+                                        <div class="chip">演练组织</div>
+                                        <div class="chip">演练记录</div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div style="margin-top:14px;">
+                            <article class="ability-card">
+                                <div class="ability-head smart">
+                                    <span>2-5. 服务支撑与智能协同</span>
+                                    <small>方案 / 档案 / 报送</small>
+                                </div>
+                                <div class="ability-body">
+                                    <div class="support-list">
+                                        <div class="support-item">服务方案</div>
+                                        <div class="support-item">档案管理</div>
+                                        <div class="support-item">信息上报</div>
+                                        <div class="support-item">回访确认</div>
+                                        <div class="support-item">过程留痕</div>
+                                        <div class="support-item">统计分析</div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+
+                    </div>
+
+                    <div class="section">
+                        <div class="section-top">
+                            <h3>数据底座</h3>
+                            <span class="section-tag tag-data">服务侧沉淀</span>
+                        </div>
+                        <div class="data-grid six">
+                            <div class="data-pill">保单数据</div>
+                            <div class="data-pill">服务记录数据</div>
+                            <div class="data-pill">风险评估数据</div>
+                            <div class="data-pill">隐患排查数据</div>
+                            <div class="data-pill">宣教培训数据</div>
+                            <div class="data-pill">档案数据</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script>
+        function syncRightPanelHeight() {
+            const left = document.querySelector('.panel-left');
+            const right = document.querySelector('.panel-right');
+            if (!left || !right) return;
+            right.style.height = 'auto';
+            right.style.height = `${left.offsetHeight}px`;
+        }
+
+        window.addEventListener('load', syncRightPanelHeight);
+        window.addEventListener('resize', syncRightPanelHeight);
+    </script>
+</body>
+</html>

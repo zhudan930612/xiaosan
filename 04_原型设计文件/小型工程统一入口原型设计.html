@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小型工程</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background:
+                linear-gradient(180deg, rgba(89, 183, 216, 0.04) 0%, transparent 180px),
+                linear-gradient(180deg, #f6fbf8 0%, #ffffff 100%);
+            min-height: 100vh;
+        }
+        .page { display: none; min-height: 100vh; }
+        .page.active { display: block; }
+
+        /* 状态栏 */
+        .status-bar {
+            height: 34px;
+            background: linear-gradient(90deg, #35ad73, #58b8d7);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .status-icons { display: flex; align-items: center; gap: 5px; }
+        .signal-icon { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+        .signal-bar { width: 3px; background: #fff; border-radius: 1px; }
+        .signal-bar:nth-child(1) { height: 5px; }
+        .signal-bar:nth-child(2) { height: 8px; }
+        .signal-bar:nth-child(3) { height: 11px; }
+        .signal-bar:nth-child(4) { height: 14px; }
+        .wifi-icon { width: 16px; height: 14px; }
+        .battery-icon { width: 22px; height: 11px; border: 1px solid #fff; border-radius: 3px; position: relative; padding: 1px; }
+        .battery-icon::after { content: ''; position: absolute; right: -3px; top: 3px; width: 2px; height: 4px; background: #fff; border-radius: 0 1px 1px 0; }
+        .battery-fill { width: 70%; height: 100%; background: #fff; border-radius: 1px; }
+
+        /* 导航栏 */
+        .nav-bar {
+            background: linear-gradient(90deg, #35ad73, #58b8d7);
+            padding: 10px 18px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-bar .back {
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .nav-bar .title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .nav-bar .right { width: 34px; }
+
+        /* 内容区 */
+        .content { padding: 20px; }
+
+        /* 入口卡片 */
+        .entry-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .entry-card:active { transform: scale(0.98); }
+
+        .entry-card.primary {
+            background: linear-gradient(180deg, #ebf8f1 0%, #ffffff 100%);
+            border: 2px solid rgba(34, 166, 109, 0.5);
+        }
+
+        .entry-card .icon-wrap {
+            width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .entry-card .info { flex: 1; }
+        .entry-card .info .main-title { font-size: 17px; font-weight: 600; color: #333333; margin-bottom: 4px; }
+        .entry-card .info .sub-title { font-size: 13px; color: #999999; }
+
+        .entry-card .arrow {
+            width: 20px; height: 20px;
+            color: #c8c9cc;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* 模拟页面占位 */
+        .mock-page { padding: 60px 20px; text-align: center; }
+        .mock-icon { margin-bottom: 20px; }
+        .mock-title { font-size: 20px; font-weight: 600; color: #333333; margin-bottom: 8px; }
+        .mock-desc { font-size: 14px; color: #999999; margin-bottom: 32px; }
+        .mock-btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(90deg, #27a66d, #4fb3d7);
+            color: #fff;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 12px 26px rgba(34, 166, 109, 0.24);
+        }
+        .mock-btn:active { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<!-- 页面1：小型工程统一入口 -->
+<div id="page-entry" class="page active">
+    <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons">
+            <div class="signal-icon">
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+            </div>
+            <svg class="wifi-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+            <div class="battery-icon"><div class="battery-fill"></div></div>
+        </div>
+    </div>
+    <div class="nav-bar">
+        <div class="back" onclick="goBack()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+        </div>
+        <div class="title">小型工程</div>
+        <div class="right"></div>
+    </div>
+    <div class="content">
+        <!-- 备案审核 -->
+        <div class="entry-card" onclick="goPage('page-record')">
+            <div class="icon-wrap">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1890FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+            </div>
+            <div class="info">
+                <div class="main-title">备案审核</div>
+                <div class="sub-title">工程备案资料审核与管理</div>
+            </div>
+            <div class="arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9,18 15,12 9,6"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 安全巡检 -->
+        <div class="entry-card primary" onclick="goPage('page-inspect')">
+            <div class="icon-wrap">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+            </div>
+            <div class="info">
+                <div class="main-title">安全巡检</div>
+                <div class="sub-title">工程巡查、隐患登记与整改跟踪</div>
+            </div>
+            <div class="arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9,18 15,12 9,6"></polyline>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页面2：备案审核-项目中心（模拟） -->
+<div id="page-record" class="page">
+    <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons">
+            <div class="signal-icon">
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+            </div>
+            <svg class="wifi-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+            <div class="battery-icon"><div class="battery-fill"></div></div>
+        </div>
+    </div>
+    <div class="nav-bar">
+        <div class="back" onclick="goPage('page-entry')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+        </div>
+        <div class="title">项目中心</div>
+        <div class="right"></div>
+    </div>
+    <div class="mock-page">
+        <div class="mock-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#1890FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        </div>
+        <div class="mock-title">备案审核-项目中心</div>
+        <div class="mock-desc">此处为备案审核模块首页，展示待审核/已审核项目列表</div>
+        <div class="mock-btn" onclick="goPage('page-entry')">返回小型工程入口</div>
+    </div>
+</div>
+
+<!-- 页面3：安全巡检-巡检首页（模拟） -->
+<div id="page-inspect" class="page">
+    <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons">
+            <div class="signal-icon">
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+            </div>
+            <svg class="wifi-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+            <div class="battery-icon"><div class="battery-fill"></div></div>
+        </div>
+    </div>
+    <div class="nav-bar">
+        <div class="back" onclick="goPage('page-entry')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+        </div>
+        <div class="title">巡检首页</div>
+        <div class="right"></div>
+    </div>
+    <div class="mock-page">
+        <div class="mock-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00B578" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+        </div>
+        <div class="mock-title">安全巡检-巡检首页</div>
+        <div class="mock-desc">此处为安全巡检模块首页，展示巡查概览、待巡查工程、隐患统计</div>
+        <div class="mock-btn" onclick="goPage('page-entry')">返回小型工程入口</div>
+    </div>
+</div>
+
+<script>
+function goPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+function goBack() {
+    alert('返回政务平台首页/工作台');
+}
+</script>
+
+</body>
+</html>

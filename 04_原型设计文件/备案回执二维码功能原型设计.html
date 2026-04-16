@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>备案回执二维码功能原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --receipt-red: #d32f2f;
+      --receipt-bg: #fff;
+      --mobile-bg: #f5f7fa;
+      --mobile-card: #fff;
+      --accent-green: #52c41a;
+      --accent-blue: #1890ff;
+      --accent-orange: #fa8c16;
+      --accent-red: #ff4d4f;
+      --text-primary: #333;
+      --text-secondary: #666;
+    }
+    body {
+      background: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow-x: hidden;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* 导航 */
+    .nav-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #1a1a2e;
+      color: #fff;
+      padding: 12px 20px;
+      z-index: 80;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      overflow-x: auto;
+    }
+    .nav-bar button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-bar button:hover, .nav-bar button.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+    }
+
+    /* 回执页面 */
+    .receipt-container {
+      max-width: 700px;
+      margin: 80px auto 40px;
+      background: #fff;
+      padding: 40px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+    .receipt-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--receipt-red);
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+    .receipt-table td, .receipt-table th {
+      border: 1.5px solid var(--receipt-red);
+      padding: 10px 12px;
+      vertical-align: middle;
+    }
+    .receipt-table .label {
+      background: rgba(211,47,47,0.04);
+      font-weight: 500;
+      width: 120px;
+      color: var(--text-primary);
+    }
+    .receipt-table .notice-cell {
+      padding: 0;
+    }
+    .notice-inner {
+      display: flex;
+      align-items: stretch;
+      height: 140px;
+    }
+    .notice-text {
+      width: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1.5px solid var(--receipt-red);
+      padding: 10px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--receipt-red);
+      line-height: 1.8;
+    }
+    .notice-qr {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    .qr-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .qr-box {
+      width: 80px;
+      height: 80px;
+      border: 1px solid #ddd;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #999;
+    }
+    .qr-label {
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    /* 移动端模拟器 */
+    .mobile-frame {
+      width: 375px;
+      height: 812px;
+      background: var(--mobile-bg);
+      margin: 80px auto 40px;
+      border-radius: 40px;
+      border: 10px solid #333;
+      overflow: hidden;
+      position: relative;
+    }
+    .mobile-screen {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      background: var(--mobile-bg);
+    }
+    .mobile-header {
+      background: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .mobile-header .back { font-size: 18px; color: #333; cursor: pointer; }
+    .mobile-header .title { font-size: 16px; font-weight: 500; flex: 1; text-align: center; }
+    .mobile-card {
+      background: #fff;
+      margin: 12px;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-default {
+      background: #fff;
+      border: 1px solid #ddd;
+      color: #333;
+      text-align: center;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* 标注系统 */
+    .annotation-toggle {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      z-index: 90;
+      background: #ffc53d;
+      color: #333;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .annotation-sidebar {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 420px;
+      height: 100vh;
+      background: #fffbe6;
+      border-left: 3px solid #ffc53d;
+      z-index: 110;
+      overflow-y: auto;
+      transition: right 0.3s ease;
+      padding: 20px;
+    }
+    .annotation-sidebar.open { right: 0; }
+    .anno-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #666;
+    }
+    .anno-section { margin-bottom: 20px; }
+    .anno-title { font-weight: 700; color: #333; margin-bottom: 8px; font-size: 14px; }
+    .anno-item { font-size: 13px; color: #444; line-height: 1.6; margin-bottom: 6px; padding-left: 12px; position: relative; }
+    .anno-item::before { content: "•"; position: absolute; left: 0; color: #ffc53d; }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      z-index: 100;
+    }
+    .overlay.show { display: block; }
+
+    /* 交互反馈 */
+    .clickable { cursor: pointer; }
+    .clickable:active { opacity: 0.7; }
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 200;
+      display: none;
+    }
+    .toast.show { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="nav-bar">
+  <span style="font-size:13px;color:#999;margin-right:8px;">页面切换：</span>
+  <button class="active" onclick="goTo('page-receipt')">备案回执</button>
+  <button onclick="goTo('page-login-confirm')">扫码确认</button>
+  <button onclick="goTo('page-no-permission')">施工无权限</button>
+  <button onclick="goTo('page-no-permission-inspector')">监管无权限</button>
+  <button onclick="goTo('page-inspection-start')">发起巡查</button>
+  <button onclick="goTo('page-invalid')">失效提示</button>
+</div>
+
+<!-- 标注开关 -->
+<div class="annotation-toggle" onclick="toggleAnnotation()">📋 显示标注</div>
+
+<!-- 标注侧边栏 -->
+<div id="annotationSidebar" class="annotation-sidebar">
+  <div class="anno-close" onclick="toggleAnnotation()">✕</div>
+  <h3 class="text-lg font-bold text-gray-800 mb-4">原型标注说明</h3>
+  <div id="annotationContent"></div>
+</div>
+
+<!-- 遮罩 -->
+<div id="overlay" class="overlay" onclick="toggleAnnotation()"></div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- ==================== 页面1：备案回执 ==================== -->
+<div id="page-receipt" class="page active">
+  <div class="receipt-container">
+    <div class="receipt-title">青浦区限额以下小型工程施工告示牌</div>
+    <table class="receipt-table">
+      <tr>
+        <td class="label">工程名称</td>
+        <td colspan="3">青浦区夏阳街道XX装修工程</td>
+      </tr>
+      <tr>
+        <td class="label">工程地址</td>
+        <td colspan="3">上海市青浦区徐泾镇京华路256弄</td>
+      </tr>
+      <tr>
+        <td class="label">项目类型</td>
+        <td colspan="3">(六)建筑装饰装修工程</td>
+      </tr>
+      <tr>
+        <td class="label">建设单位</td>
+        <td colspan="3">北京携程太美国际旅行社有限公司</td>
+      </tr>
+      <tr>
+        <td class="label">施工单位</td>
+        <td colspan="3">XX装修公司</td>
+      </tr>
+      <tr>
+        <td class="label">监管部门</td>
+        <td colspan="3">徐泾镇</td>
+      </tr>
+      <tr>
+        <td class="label">投诉维权电话</td>
+        <td colspan="3">59760729</td>
+      </tr>
+      <tr>
+        <td class="label">开工日期</td>
+        <td>2026-03-05</td>
+        <td class="label">竣工日期</td>
+        <td>2026-03-26</td>
+      </tr>
+      <tr>
+        <td class="label">建设单位<br>项目负责人</td>
+        <td>
+          <div>姓名：金阳</div>
+          <div style="margin-top:4px;">电话：15361553250</div>
+        </td>
+        <td class="label">施工单位<br>项目负责人</td>
+        <td>
+          <div>姓名：段启明</div>
+          <div style="margin-top:4px;">电话：17727480798</div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" class="notice-cell">
+          <div class="notice-inner">
+            <div class="notice-text">
+              <div>告示栏</div>
+              <div>在此施工</div>
+              <div>带来不便</div>
+              <div>敬请谅解</div>
+            </div>
+            <div class="notice-qr">
+              <div class="qr-item">
+                <div class="qr-box clickable" onclick="showToast('扫码进入施工方端工程详情页')">
+                  <svg width="60" height="60" viewBox="0 0 60 60">
+                    <rect x="5" y="5" width="20" height="20" fill="none" stroke="#333" stroke-width="2"/>
+                    <rect x="10" y="10" width="10" height="10" fill="#333"/>
+                    <rect x="35" y="5" width="20" height="20" fill="none" stroke="#333" stroke-width="2"/>
+                    <rect x="40" y="10" width="10" height="10" fill="#333"/>
+                    <rect x="5" y="35" width="20" height="20" fill="none" stroke="#333" stroke-width="2"/>
+                    <rect x="10" y="40" width="10" height="10" fill="#333"/>
+                    <rect x="35" y="35" width="8" height="8" fill="#333"/>
+                    <rect x="47" y="35" width="8" height="8" fill="#333"/>
+                    <rect x="35" y="47" width="8" height="8" fill="#333"/>
+                    <rect x="47" y="47" width="8" height="8" fill="#333"/>
+                  </svg>
+                </div>
+                <div class="qr-label">施工端</div>
+              </div>
+              <div class="qr-item">
+                <div class="qr-box clickable" onclick="showToast('扫码进入监管端工程详情页')">
+                  <svg width="60" height="60" viewBox="0 0 60 60">
+                    <rect x="5" y="5" width="20" height="20" fill="none" stroke="#333" stroke-width="2"/>
+                    <rect x="10" y="10" width="10" height="10" fill="#333"/>
+                    <rect x="35" y="5" width="20" height="20" fill="none" stroke="#333" stroke-width="2"/>
+                    <rect x="40" y="10" width="10" height="10" fill="#333"/>
+                    <rect x="5" y="35" width="20" height="20" fill="none" stroke="#333" stroke-width="2"/>
+                    <rect x="10" y="40" width="10" height="10" fill="#333"/>
+                    <rect x="35" y="35" width="20" height="20" fill="none" stroke="#333" stroke-width="2"/>
+                    <rect x="40" y="40" width="10" height="10" fill="#333"/>
+                  </svg>
+                </div>
+                <div class="qr-label">监管端</div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== 页面2：扫码确认页（未登录状态） ==================== -->
+<div id="page-login-confirm" class="page">
+  <div class="mobile-frame">
+    <div class="mobile-screen">
+      <div class="mobile-header">
+        <div class="back" onclick="goTo('page-receipt')">←</div>
+        <div class="title">扫码查看工程</div>
+        <div style="width:18px;"></div>
+      </div>
+
+      <div style="padding:40px 24px; text-align:center;">
+        <div style="width:64px;height:64px;background:var(--accent-blue);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;">🏗️</div>
+        <div style="font-size:16px;font-weight:500;color:#333;margin-bottom:8px;">您正在查看工程</div>
+
+        <div class="mobile-card" style="text-align:left;margin:24px 0;">
+          <div style="font-size:13px;color:#666;margin-bottom:6px;">工程名称</div>
+          <div style="font-size:15px;color:#333;font-weight:500;margin-bottom:16px;">青浦区夏阳街道XX装修工程</div>
+          <div style="font-size:13px;color:#666;margin-bottom:6px;">工程地址</div>
+          <div style="font-size:15px;color:#333;">上海市青浦区徐泾镇京华路256弄</div>
+        </div>
+
+        <div style="font-size:14px;color:#666;margin-bottom:24px;">请先登录后继续查看工程详情</div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="btn-primary clickable" onclick="showToast('调起当前容器登录流程')">立即登录</div>
+          <div class="btn-default clickable" onclick="showToast('返回首页')">返回首页</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 页面3：无权限提示页（施工方视角） ==================== -->
+<div id="page-no-permission" class="page">
+  <div class="mobile-frame">
+    <div class="mobile-screen">
+      <div class="mobile-header">
+        <div class="back" onclick="goTo('page-receipt')">←</div>
+        <div class="title">无权限查看</div>
+        <div style="width:18px;"></div>
+      </div>
+
+      <div style="padding:60px 24px; text-align:center;">
+        <div style="width:80px;height:80px;background:#ff4d4f;border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;">✕</div>
+        <div style="font-size:18px;font-weight:500;color:#333;margin-bottom:12px;">您无权限查看该工程</div>
+        <div style="font-size:14px;color:#666;margin-bottom:4px;">工程名称：青浦区夏阳街道XX装修工程</div>
+        <div style="font-size:14px;color:#666;margin-bottom:8px;">工程地址：上海市青浦区徐泾镇京华路256弄</div>
+        <div style="font-size:13px;color:#999;margin-bottom:40px;">您不是该工程的施工方负责人、甲方负责人或施工备案人员</div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="btn-primary clickable" onclick="showToast('返回施工方端首页')">返回首页</div>
+          <div class="btn-default clickable" onclick="showToast('联系客服')">联系客服</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 页面3：无权限提示页（监管端视角） ==================== -->
+<div id="page-no-permission-inspector" class="page">
+  <div class="mobile-frame">
+    <div class="mobile-screen">
+      <div class="mobile-header">
+        <div class="back" onclick="goTo('page-receipt')">←</div>
+        <div class="title">无权限查看</div>
+        <div style="width:18px;"></div>
+      </div>
+
+      <div style="padding:60px 24px; text-align:center;">
+        <div style="width:80px;height:80px;background:#ff4d4f;border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;">✕</div>
+        <div style="font-size:18px;font-weight:500;color:#333;margin-bottom:12px;">您无权限查看该工程</div>
+        <div style="font-size:14px;color:#666;margin-bottom:4px;">工程名称：青浦区夏阳街道XX装修工程</div>
+        <div style="font-size:14px;color:#666;margin-bottom:8px;">工程地址：上海市青浦区徐泾镇京华路256弄</div>
+        <div style="font-size:13px;color:#999;margin-bottom:40px;">该工程不在您的管辖区域内</div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="btn-primary clickable" onclick="showToast('返回监管端首页')">返回首页</div>
+          <div class="btn-default clickable" onclick="showToast('联系客服')">联系客服</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 页面4：发起巡查页（监管端） ==================== -->
+<div id="page-inspection-start" class="page">
+  <div class="mobile-frame">
+    <div class="mobile-screen">
+      <div class="mobile-header">
+        <div class="back" onclick="goTo('page-receipt')">←</div>
+        <div class="title">发起巡查</div>
+        <div style="width:18px;"></div>
+      </div>
+
+      <!-- 工程信息条 -->
+      <div style="background:#e6f7ff;padding:12px 16px;border-bottom:1px solid #bae7ff;">
+        <div style="font-size:14px;color:#333;font-weight:500;">青浦区夏阳街道XX装修工程</div>
+        <div style="font-size:12px;color:#666;margin-top:4px;">上海市青浦区徐泾镇京华路256弄</div>
+      </div>
+
+      <div class="mobile-card">
+        <div style="font-size:15px;font-weight:500;margin-bottom:16px;">巡查信息</div>
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#666;margin-bottom:6px;">巡查时间</div>
+          <div style="font-size:14px;color:#333;">2026-04-16 14:30</div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#666;margin-bottom:6px;">巡查人员</div>
+          <div style="font-size:14px;color:#333;">张三 · 徐泾镇街道巡查员</div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#666;margin-bottom:6px;">是否施工中 <span style="color:#ff4d4f;">*</span></div>
+          <div style="display:flex;gap:16px;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:14px;color:#333;cursor:pointer;">
+              <input type="radio" name="constructing" value="1" checked> 是
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:14px;color:#333;cursor:pointer;">
+              <input type="radio" name="constructing" value="0"> 否
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;color:#666;margin-bottom:6px;">现场施工人员</div>
+          <div style="font-size:14px;color:#999;">可选，支持多选</div>
+        </div>
+      </div>
+
+      <div class="mobile-card">
+        <div style="font-size:15px;font-weight:500;margin-bottom:16px;">巡查结果</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #d9d9d9;border-radius:4px;cursor:pointer;" onclick="showToast('提交后工程状态不变')">
+            <input type="radio" name="result" value="normal">
+            <span style="font-size:14px;color:#333;">未发现违法违规</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--accent-blue);border-radius:4px;background:#e6f7ff;cursor:pointer;" onclick="showToast('进入违规登记页面')">
+            <input type="radio" name="result" value="violation" checked>
+            <span style="font-size:14px;color:#333;">发现违法违规行为</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="padding:12px;">
+        <div class="btn-primary clickable" onclick="showToast('进入违规登记页面')">下一步：登记违规</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 页面4：二维码失效提示页 ==================== -->
+<div id="page-invalid" class="page">
+  <div class="mobile-frame">
+    <div class="mobile-screen">
+      <div class="mobile-header">
+        <div class="back" onclick="goTo('page-receipt')">←</div>
+        <div class="title">提示</div>
+        <div style="width:18px;"></div>
+      </div>
+
+      <div style="padding:60px 24px; text-align:center;">
+        <div style="width:80px;height:80px;background:#999;border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;">!</div>
+        <div style="font-size:18px;font-weight:500;color:#333;margin-bottom:12px;">该工程不存在或二维码已失效</div>
+        <div style="font-size:13px;color:#999;margin-bottom:40px;">请检查二维码是否清晰完整，或联系监管部门核实</div>
+
+        <div class="btn-primary clickable" onclick="showToast('返回首页')">返回首页</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 页面切换
+  function goTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
+    document.querySelector('.nav-bar button[onclick="goTo(\'' + pageId + '\')"]').classList.add('active');
+    window.scrollTo(0, 0);
+    updateAnnotation(pageId);
+  }
+
+  // 标注系统
+  const annotations = {
+    'page-receipt': `
+      <div class="anno-section"><div class="anno-title">页面状态规则</div>
+        <div class="anno-item">备案回执仅在备案审核通过后生成，审核不通过状态不显示二维码区域。</div>
+        <div class="anno-item">右下角原"告示栏"区域调整为：左侧保留告示文字，右侧横向排列"施工端"和"监管端"两个二维码。</div>
+        <div class="anno-item">两个二维码大小一致，间距适中，不影响原有表格整体排版。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">数据规则</div>
+        <div class="anno-item">两个二维码在备案审核通过后同步生成，内容与工程唯一编号绑定。</div>
+        <div class="anno-item">二维码有效期为长期有效，工程核销后仍可扫码查看，仅页面转为只读。</div>
+        <div class="anno-item">由于随申办官方不提供三合一码接口，且系统H5页面分别嵌入在随申办APP、微信小程序、支付宝小程序中，因此两个二维码均采用普通URL（H5链接）形式。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">字段规则</div>
+        <div class="anno-item">施工端二维码下方文字标注为"施工端"。</div>
+        <div class="anno-item">监管端二维码下方文字标注为"监管端"。</div>
+        <div class="anno-item">告示栏文字保持原有"在此施工 带来不便 敬请谅解"。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">交互分支规则</div>
+        <div class="anno-item">施工端二维码扫码后，未登录用户先进入扫码确认页，点击登录后完成认证再进入详情页；已登录且为关联人员直接跳转施工方工程详情页；非关联人员进入施工方无权限提示页。</div>
+        <div class="anno-item">监管端二维码扫码后，未登录用户先进入扫码确认页，点击登录后完成认证再进入详情页；已登录且为管辖范围内巡查人员直接跳转监管端工程详情页；无权限人员进入监管端无权限提示页。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">边界情况规则</div>
+        <div class="anno-item">工程核销后扫码，进入各自详情页只读模式，不显示操作按钮。</div>
+        <div class="anno-item">工程不存在时扫码，统一进入二维码失效提示页。</div>
+      </div>
+    `,
+    'page-login-confirm': `
+      <div class="anno-section"><div class="anno-title">页面状态规则</div>
+        <div class="anno-item">当未登录用户或token已失效用户扫描施工端或监管端二维码时，进入扫码确认页。</div>
+        <div class="anno-item">已登录用户直接跳过此页，进入权限鉴定和详情页加载流程。</div>
+        <div class="anno-item">页面不直接自动跳转登录流程，而是给用户一个主动点击的入口，避免用户被突然拉去登录而产生困惑。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">字段规则</div>
+        <div class="anno-item">页面展示完整的工程名称和工程地址，与备案回执上印刷的信息保持一致。</div>
+        <div class="anno-item">不需要加载完整工程详情数据，仅需根据工程唯一编号查询工程基础信息。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">交互分支规则</div>
+        <div class="anno-item">点击【立即登录】按钮，根据当前运行容器（随申办APP/微信小程序/支付宝小程序/浏览器）调起对应的登录流程。</div>
+        <div class="anno-item">登录成功后，系统自动回跳至当前工程详情页。</div>
+        <div class="anno-item">点击【返回首页】按钮，回到对应端的首页。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">边界情况规则</div>
+        <div class="anno-item">若查询不到工程信息，直接进入二维码失效提示页，不展示本页面。</div>
+        <div class="anno-item">若登录过程中断或失败，用户回到本页面可再次点击登录。</div>
+      </div>
+    `,
+    'page-no-permission': `
+      <div class="anno-section"><div class="anno-title">页面状态规则</div>
+        <div class="anno-item">当已登录用户扫描施工端二维码，但非该工程施工方关联账号时，进入施工方无权限提示页。</div>
+        <div class="anno-item">页面不加载任何工程敏感数据，仅显示工程名称和地址（用于用户确认是否扫错码）。</div>
+        <div class="anno-item">施工方无权限时文案固定为："您不是该工程的施工方负责人、甲方负责人或施工备案人员"。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">交互分支规则</div>
+        <div class="anno-item">点击【返回首页】按钮，跳转至施工方端首页。</div>
+        <div class="anno-item">点击【联系客服】按钮，可唤起客服电话或在线客服窗口。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">边界情况规则</div>
+        <div class="anno-item">未登录用户扫码不进入此页面，而是先进入扫码确认页。</div>
+        <div class="anno-item">工程名称和地址与备案回执信息保持一致，不做脱敏处理。</div>
+      </div>
+    `,
+    'page-no-permission-inspector': `
+      <div class="anno-section"><div class="anno-title">页面状态规则</div>
+        <div class="anno-item">当已登录的区/街道/社区巡查人员扫描监管端二维码，但工程不在其管辖范围内时，进入监管端无权限提示页。</div>
+        <div class="anno-item">页面不加载任何工程敏感数据，仅显示工程名称和地址（用于用户确认是否扫错码）。</div>
+        <div class="anno-item">监管端无权限时文案固定为："该工程不在您的管辖区域内"。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">交互分支规则</div>
+        <div class="anno-item">点击【返回首页】按钮，跳转至监管端首页。</div>
+        <div class="anno-item">点击【联系客服】按钮，可唤起客服电话或在线客服窗口。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">边界情况规则</div>
+        <div class="anno-item">未登录用户扫码不进入此页面，而是先进入扫码确认页。</div>
+        <div class="anno-item">工程名称和地址与备案回执信息保持一致，不做脱敏处理。</div>
+      </div>
+    `,
+    'page-inspection-start': `
+      <div class="anno-section"><div class="anno-title">页面状态规则</div>
+        <div class="anno-item">监管端人员扫码进入工程详情页后，点击底部【新增巡查】按钮进入此页面。</div>
+        <div class="anno-item">顶部工程信息条只读展示，自动带入当前工程名称和地址，无需手动选择工程。</div>
+        <div class="anno-item">巡查时间默认当前时间，巡查人员默认当前登录用户，均为只读。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">数据规则</div>
+        <div class="anno-item">"是否施工中"为必填项，单选：是 / 否。</div>
+        <div class="anno-item">"现场施工人员"为选填项，支持从工程备案人员列表中多选。</div>
+        <div class="anno-item">巡查结果二选一："未发现违法违规"或"发现违法违规行为"。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">交互分支规则</div>
+        <div class="anno-item">选择"未发现违法违规" → 点击下一步直接提交巡查记录，工程状态不变，返回工程详情页。</div>
+        <div class="anno-item">选择"发现违法违规行为" → 点击下一步进入违规登记页面，逐条登记违规内容。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">边界情况规则</div>
+        <div class="anno-item">工程已核销状态下，监管端详情页不显示【新增巡查】按钮，因此无法进入此页面。</div>
+        <div class="anno-item">网络异常时，点击下一步提示"网络连接异常，请检查网络后重试"。</div>
+      </div>
+    `,
+    'page-invalid': `
+      <div class="anno-section"><div class="anno-title">页面状态规则</div>
+        <div class="anno-item">当用户扫描的二维码对应的工程编号在系统中不存在时，统一进入此页面。</div>
+        <div class="anno-item">由于有效期设定为长期有效，工程核销后不会进入此页面，而是进入详情页只读模式。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">交互分支规则</div>
+        <div class="anno-item">页面显示"该工程不存在或二维码已失效"，提供【返回首页】按钮。</div>
+      </div>
+      <div class="anno-section"><div class="anno-title">边界情况规则</div>
+        <div class="anno-item">网络异常导致查询失败时，优先提示网络异常页面，而非直接判定为失效。</div>
+      </div>
+    `
+  };
+
+  function toggleAnnotation() {
+    const sidebar = document.getElementById('annotationSidebar');
+    sidebar.classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+
+  function updateAnnotation(pageId) {
+    const content = document.getElementById('annotationContent');
+    content.innerHTML = annotations[pageId] || '<div class="text-gray-500">暂无标注</div>';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1500);
+  }
+
+  // 初始化
+  updateAnnotation('page-receipt');
+</script>
+
+</body>
+</html>

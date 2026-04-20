@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备案权限体系重构 - 业务流程图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa; padding: 20px; min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 26px; color: #1a1a1a; margin-bottom: 6px; }
+        .subtitle { text-align: center; color: #666; font-size: 13px; margin-bottom: 12px; }
+
+        .toolbar {
+            display: flex; justify-content: center; align-items: center; gap: 12px;
+            margin-bottom: 24px; padding: 10px 20px;
+            background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .btn { padding: 6px 16px; border-radius: 4px; font-size: 13px; border: 1px solid #d9d9d9; background: #fff; cursor: pointer; }
+        .btn-primary { background: #1890ff; color: #fff; border-color: #1890ff; }
+
+        .stage-card {
+            background: #fff; border-radius: 12px; padding: 20px 28px; margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .stage-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #f0f0f0;
+        }
+        .stage-badge {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0;
+        }
+        .stage-title { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+        .stage-desc { font-size: 12px; color: #888; margin-top: 2px; }
+
+        .mermaid { display: flex; justify-content: center; }
+
+        .legend {
+            display: flex; gap: 24px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
+        .legend-box { width: 20px; height: 14px; border-radius: 3px; border: 2px solid; }
+
+        .rules-section { margin-top: 24px; }
+        .rules-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 14px; }
+        .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 14px; }
+        .rule-card { background: #fafafa; border-radius: 8px; padding: 14px 18px; border-left: 3px solid #1890ff; }
+        .rule-card h4 { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .rule-card li { font-size: 13px; color: #555; line-height: 1.8; margin-bottom: 3px; }
+        .rule-card ul { margin-left: 18px; }
+        .tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 12px; margin-right: 4px; }
+        .tag-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .tag-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .tag-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        .tag-red { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e; }
+
+        @media print {
+            body { padding: 0; background: #fff; }
+            .toolbar { display: none !important; }
+            .stage-card { box-shadow: none; border: 1px solid #e8e8e8; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>备案权限体系重构 - 业务流程图</h1>
+        <p class="subtitle">横向不可编辑版本 —— 包含后台配置、备案提交、自动分配、审核处理、跨街镇分派的完整流程</p>
+
+        <div class="toolbar">
+            <div style="font-size:13px;color:#666;">使用浏览器打印功能可导出为PDF</div>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary" onclick="window.print()">打印 / 导出PDF</button>
+        </div>
+
+        <!-- ============ 阶段一：后台配置组织与用户权限 ============ -->
+        <div class="stage-card">
+            <div class="stage-header">
+                <div class="stage-badge" style="background: #1890ff;">1</div>
+                <div>
+                    <div class="stage-title">后台配置：组织权限 + 用户权限</div>
+                    <div class="stage-desc">企业中心 > 监管单位 + 运营管理 > 用户管理</div>
+                </div>
+            </div>
+            <div class="mermaid">
+flowchart LR
+    subgraph 配置组织权限["配置组织权限"]
+        A1["系统管理员登录后台"] --> A2["进入企业中心 > 监管单位"]
+        A2 --> A3["添加监管组织"]
+        A3 --> A4["填写机构编码/组织名称"]
+        A4 --> A5["选择所属街镇"]
+        A5 --> A6["勾选可审核的工程类型<br/>（默认授权模板）"]
+        A6 --> A7{"包含既有建筑修缮?"}
+        A7 -->|是| A8["非住宅类<br/>对应建管"]
+        A7 -->|是| A9["住宅类<br/>对应房管"]
+        A7 -->|否| A10["直接保存"]
+        A8 --> A11["保存组织配置"]
+        A9 --> A11
+        A10 --> A11
+    end
+
+    subgraph 配置用户权限["配置用户权限"]
+        A11 --> B1["进入运营管理<br/>用户管理 > 监管方"]
+        B1 --> B2["填写手机号/用户名"]
+        B2 --> B3["选择所属监管单位"]
+        B3 --> B4{"选择角色"}
+        B4 -->|普通审核员/科室负责人| B5{"权限模式"}
+        B4 -->|街镇领导| B10["全局权限：查看本街镇全部"]
+        B4 -->|区级管理员| B11["全局权限：查看全区全部"]
+        B5 -->|继承组织| B6["自动同步组织模板"]
+        B5 -->|自定义| B7["单独勾选工程类型"]
+        B6 --> B8["保存用户权限"]
+        B7 --> B8
+        B10 --> B8
+        B11 --> B8
+    end
+
+    style A1 fill:#e6f7ff,stroke:#1890ff,stroke-width:2px,color:#096dd9
+    style A11 fill:#1890ff,color:#fff,stroke:#1890ff,stroke-width:2px
+    style B8 fill:#52c41a,color:#fff,stroke:#52c41a,stroke-width:2px
+    style A7 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style B4 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style B5 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+            </div>
+        </div>
+
+        <!-- ============ 阶段二：备案提交与自动分配 ============ -->
+        <div class="stage-card">
+            <div class="stage-header">
+                <div class="stage-badge" style="background: #52c41a;">2</div>
+                <div>
+                    <div class="stage-title">备案提交与自动分配</div>
+                    <div class="stage-desc">用户端提交备案后，系统根据工程类型自动匹配并分配审核</div>
+                </div>
+            </div>
+            <div class="mermaid">
+flowchart LR
+    subgraph 用户提交["用户提交备案"]
+        C1["用户填写备案表单"] --> C2["选择工程类型<br/>（clause_code）"]
+        C2 --> C3["选择街镇社区"]
+        C3 --> C4["提交备案"]
+    end
+
+    subgraph 系统自动分配["系统自动分配"]
+        C4 --> C5["提取street_id<br/>和clause_code"]
+        C5 --> C6["匹配组织：street_id + clause_code"]
+        C6 --> C7{"匹配结果"}
+        C7 -->|匹配到组织| C8["匹配人员：组织内有<br/>该条款权限的审核员"]
+        C7 -->|未匹配到| C12["状态=待分配<br/>需手动分配"]
+        C8 --> C9{"人员匹配"}
+        C9 -->|匹配到| C10["更新备案：org_id + assignee_id<br/>状态=待审核"]
+        C9 -->|未匹配到| C10
+        C10 --> C11["审核员收到<br/>待审核任务"]
+        C12 --> C11
+    end
+
+    style C1 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style C4 fill:#1890ff,color:#fff,stroke:#1890ff,stroke-width:2px
+    style C11 fill:#52c41a,color:#fff,stroke:#52c41a,stroke-width:2px
+    style C7 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style C9 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style C12 fill:#fff1f0,stroke:#ff4d4f,stroke-width:2px,color:#ff4d4f
+            </div>
+        </div>
+
+        <!-- ============ 阶段三：审核处理流程 ============ -->
+        <div class="stage-card">
+            <div class="stage-header">
+                <div class="stage-badge" style="background: #fa8c16;">3</div>
+                <div>
+                    <div class="stage-title">审核处理流程（通过/驳回/转交）</div>
+                    <div class="stage-desc">审核员查看备案详情后进行审核操作</div>
+                </div>
+            </div>
+            <div class="mermaid">
+flowchart LR
+    D1["审核员收到<br/>待审核任务"] --> D2["查看备案详情"]
+    D2 --> D3{"审核操作"}
+
+    D3 -->|通过| D4["确认信息无误"]
+    D4 --> D5["生成备案编号"]
+    D5 --> D6["备案完成<br/>通知用户"]
+
+    D3 -->|驳回| D7["填写驳回原因<br/>和修改意见"]
+    D7 --> D8["退回给用户修改<br/>状态=已驳回"]
+    D8 --> D9["用户修改后<br/>重新提交备案"]
+    D9 --> D1
+
+    D3 -->|转交| D13["选择转交对象"]
+    D13 --> D14{"转交类型"}
+    D14 -->|转给科室负责人| D15["科室负责人<br/>收到待办"]
+    D14 -->|转给其他审核员| D16["新审核员<br/>收到待办"]
+    D15 --> D2
+    D16 --> D2
+
+    style D1 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style D6 fill:#52c41a,color:#fff,stroke:#52c41a,stroke-width:2px
+    style D3 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style D14 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+            </div>
+        </div>
+
+        <!-- ============ 阶段四：跨街镇分派流程 ============ -->
+        <div class="stage-card">
+            <div class="stage-header">
+                <div class="stage-badge" style="background: #722ed1;">4</div>
+                <div>
+                    <div class="stage-title">跨街镇分派流程</div>
+                    <div class="stage-desc">备案在待审核状态下，可跨街镇分派给目标街镇处理</div>
+                </div>
+            </div>
+            <div class="mermaid">
+flowchart LR
+    E1["备案状态=待审核"] --> E2["操作人点击'转派'"]
+    E2 --> E3["选择目标街镇<br/>填写分派原因"]
+    E3 --> E4{"系统校验"}
+    E4 -->|目标街镇无权限| E5["提示：无可处理该类型的组织"]
+    E4 -->|目标街镇有权限| E6["创建分派记录<br/>状态=待分派确认"]
+    E6 --> E7["发送待办给目标街镇<br/>有权限的人员"]
+    E7 --> E8{"目标街镇人员确认"}
+    E8 -->|确认接收| E9["更新备案归属<br/>street_id=目标街镇<br/>状态=待审核"]
+    E8 -->|拒绝接收| E10["填写拒绝原因"]
+    E10 --> E11["恢复原始街镇<br/>状态=待审核"]
+    E11 --> E12{"原街镇可再次发起分派"}
+    E12 -->|是| E2
+    E9 --> E13["通知原街镇发起人<br/>分派已接收"]
+    E10 --> E14["通知原街镇发起人<br/>分派被拒绝"]
+
+    style E1 fill:#e6f7ff,stroke:#1890ff,stroke-width:2px,color:#096dd9
+    style E6 fill:#f9f0ff,stroke:#722ed1,stroke-width:2px,color:#722ed1
+    style E9 fill:#52c41a,color:#fff,stroke:#52c41a,stroke-width:2px
+    style E4 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style E8 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+    style E5 fill:#fff1f0,stroke:#ff4d4f,stroke-width:2px,color:#ff4d4f
+    style E12 fill:#fff7e6,stroke:#fa8c16,stroke-width:2px,color:#d46b08
+            </div>
+        </div>
+
+        <!-- 图例 -->
+        <div class="legend">
+            <div class="legend-item"><div class="legend-box" style="background:#e6f7ff;border-color:#1890ff;"></div>开始节点</div>
+            <div class="legend-item"><div class="legend-box" style="background:#f6ffed;border-color:#52c41a;"></div>操作节点</div>
+            <div class="legend-item"><div class="legend-box" style="background:#fff7e6;border-color:#fa8c16;"></div>判断节点</div>
+            <div class="legend-item"><div class="legend-box" style="background:#1890ff;border-color:#1890ff;"></div>关键节点</div>
+            <div class="legend-item"><div class="legend-box" style="background:#52c41a;border-color:#52c41a;"></div>结束节点</div>
+            <div class="legend-item"><div class="legend-box" style="background:#f9f0ff;border-color:#722ed1;"></div>分派节点</div>
+            <div class="legend-item"><div class="legend-box" style="background:#fff1f0;border-color:#ff4d4f;"></div>异常节点</div>
+            <div class="legend-item">━━▶ 流转方向</div>
+        </div>
+
+        <!-- 关键规则 -->
+        <div class="rules-section">
+            <div class="rules-title">关键规则说明</div>
+            <div class="rules-grid">
+                <div class="rule-card">
+                    <h4>角色与权限对应关系</h4>
+                    <ul>
+                        <li><span class="tag tag-blue">普通审核员</span> 只能审核分配给自己的备案</li>
+                        <li><span class="tag tag-orange">科室负责人</span> 可审核 + 可转交/指派给其他审核员</li>
+                        <li><span class="tag tag-green">街镇领导</span> 仅查看本街镇全部备案，不参与审核</li>
+                        <li><span class="tag tag-red">区级管理员</span> 查看全区全部备案，拥有系统管理权限</li>
+                    </ul>
+                </div>
+                <div class="rule-card">
+                    <h4>权限模式说明</h4>
+                    <ul>
+                        <li><span class="tag tag-green">继承组织</span> 用户权限 = 组织配置的工程类型，组织变更后自动同步</li>
+                        <li><span class="tag tag-blue">自定义</span> 用户权限单独配置，不随组织变更自动更新</li>
+                        <li>普通审核员和科室负责人必须配置具体的工程类型权限</li>
+                        <li>街镇领导/区级管理员无需配置工程类型，拥有全局数据权限</li>
+                    </ul>
+                </div>
+                <div class="rule-card">
+                    <h4>既有建筑修缮的特殊分配规则</h4>
+                    <ul>
+                        <li><b>非住宅类</b>（对应建管）→ 分配给规保办/建设管理部等建管类组织</li>
+                        <li><b>住宅类</b>（对应房管）→ 分配给城建中心等房管类组织</li>
+                        <li>同一街镇内可分别设置两个组织分管两类修缮工程</li>
+                    </ul>
+                </div>
+                <div class="rule-card">
+                    <h4>自动分配逻辑</h4>
+                    <ul>
+                        <li>系统根据备案时选择的<b>工程类型</b>（clause_code）进行匹配</li>
+                        <li>在<b>目标街镇</b>内查找配置了该工程类型的监管组织</li>
+                        <li>在匹配到的组织内查找<b>有该条款权限</b>的审核员</li>
+                        <li>更新备案记录：org_id + assignee_id，状态=待审核</li>
+                        <li>未匹配到组织时状态=待分配，需手动分配</li>
+                    </ul>
+                </div>
+                <div class="rule-card">
+                    <h4>审核操作规则</h4>
+                    <ul>
+                        <li><b>通过</b>：生成备案编号，备案完成，通知用户</li>
+                        <li><b>驳回</b>：填写驳回原因和修改意见，退回给用户修改后重新提交</li>
+                        <li><b>转交</b>：普通审核员可转交给科室负责人或其他审核员，接收人重新审核</li>
+                        <li>科室负责人拥有转交和指派权限，普通审核员只能处理自己的任务</li>
+                    </ul>
+                </div>
+                <div class="rule-card">
+                    <h4>跨街镇分派规则</h4>
+                    <ul>
+                        <li>触发条件：备案处于<b>待审核</b>状态，操作人有分派权限</li>
+                        <li>发起人只需选择<b>目标街镇</b>，系统自动匹配有权限的人员</li>
+                        <li>被分派人需<b>确认接收</b>后方可审核，也可拒绝并填写原因</li>
+                        <li>确认接收后备案归属目标街镇，统计口径随之变更</li>
+                        <li>拒绝后恢复原街镇，原街镇可再次发起分派</li>
+                        <li>分派记录保留，支持多次分派追溯</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 16,
+                nodeSpacing: 60,
+                rankSpacing: 80
+            },
+            themeVariables: {
+                fontSize: '16px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif'
+            }
+        });
+    </script>
+    <style>
+        .mermaid svg { font-size: 18px !important; }
+        .mermaid .nodeLabel { font-size: 16px !important; }
+        .mermaid .node rect, .mermaid .node circle, .mermaid .node polygon, .mermaid .node path { stroke-width: 2.5px; }
+        .mermaid .edgeLabel { font-size: 15px !important; }
+        .mermaid .edge-thickness-normal { stroke-width: 2.5px; }
+        .mermaid .label { font-size: 16px !important; }
+        .mermaid g.node text { font-size: 16px !important; }
+        .mermaid .cluster text { font-size: 15px !important; font-weight: 600; }
+    </style>
+</body>
+</html>

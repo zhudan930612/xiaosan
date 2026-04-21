@@ -144,11 +144,13 @@
         /* 隐藏 */
         .hidden { display: none !important; }
 
-        /* 表格中的工程类型展示 */
-        .type-list { display: flex; flex-wrap: wrap; gap: 4px; }
-        .type-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        /* 表格中的工程类型/场所展示 */
+        .type-list { display: flex; flex-wrap: wrap; gap: 4px; max-height: 52px; overflow: hidden; position: relative; }
+        .type-list.truncated::after { content: '...'; position: absolute; bottom: 0; right: 0; background: #fff; padding: 0 4px; font-size: 12px; color: #999; }
+        .type-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; white-space: nowrap; }
         .type-tag.with-sub { background: #f9f0ff; color: #722ed1; border-color: #d3adf7; }
         .type-tag.all { background: #f6ffed; color: #52c41a; border-color: #b7eb8f; }
+        .type-tag.more { background: #f5f5f5; color: #999; border-color: #d9d9d9; cursor: pointer; }
 
         /* 权限标签 */
         .auth-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
@@ -262,7 +264,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所</span></div></td>
                                     <td><span class="text-link">成员数量(3)</span></td>
                                     <td>2024-01-15 09:30:22</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>2</td><td>白鹤镇-规保办-住宅</td><td>BHG2024005</td>
@@ -271,7 +273,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所</span></div></td>
                                     <td><span class="text-link">成员数量(2)</span></td>
                                     <td>2024-01-15 09:32:10</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>3</td><td>白鹤镇-城建中心</td><td>BHG2024002</td>
@@ -280,7 +282,7 @@
                                     <td><div class="type-list"><span class="type-tag">住宅小区公共区域</span><span class="type-tag">公共绿地公园</span></div></td>
                                     <td><span class="text-link">成员数量(2)</span></td>
                                     <td>2024-01-15 09:31:05</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>4</td><td>白鹤镇-农服中心</td><td>BHG2024003</td>
@@ -289,7 +291,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所</span></div></td>
                                     <td><span class="text-link">成员数量(2)</span></td>
                                     <td>2024-01-15 09:31:30</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>5</td><td>白鹤镇政府</td><td>BHG2024006</td>
@@ -298,7 +300,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所</span></div></td>
                                     <td><span class="text-link">成员数量(1)</span></td>
                                     <td>2024-01-15 09:33:00</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>6</td><td>青浦工业园区-建设管理部</td><td>GY2024001</td>
@@ -314,7 +316,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所</span></div></td>
                                     <td><span class="text-link">成员数量(2)</span></td>
                                     <td>2024-03-20 14:25:10</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>7</td><td>青浦工业园区管委会</td><td>GY2024002</td>
@@ -323,7 +325,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所</span></div></td>
                                     <td><span class="text-link">成员数量(1)</span></td>
                                     <td>2024-03-20 14:27:00</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>8</td><td>西虹桥商务区-建设管理部</td><td>XQ2024001</td>
@@ -339,7 +341,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所</span></div></td>
                                     <td><span class="text-link">成员数量(1)</span></td>
                                     <td>2024-03-20 14:26:22</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>9</td><td>西虹桥商务区管委会</td><td>XQ2024002</td>
@@ -347,7 +349,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部工程类型</span></div></td>
                                     <td><span class="text-link">成员数量(1)</span></td>
                                     <td>2024-03-20 14:28:00</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                                 <tr>
                                     <td>10</td><td>青浦区建管委</td><td>QPQ2024001</td>
@@ -356,7 +358,7 @@
                                     <td><div class="type-list"><span class="type-tag all">全部场所（全区）</span></div></td>
                                     <td><span class="text-link">成员数量(1)</span></td>
                                     <td>2024-01-01 08:00:00</td>
-                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span></td>
+                                    <td><span class="text-link" onclick="showModal('modal-edit-org')">编辑</span><span style="color:#d9d9d9;margin:0 4px;">|</span><span class="text-link" onclick="showModal('modal-sync-auth')">同步权限</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -376,8 +378,16 @@
                         <ul>
                             <li><b>可审核工程类型</b>：该组织可处理的工程类型。系统根据备案时用户选择的工程类型自动分配给对应组织。</li>
                             <li><b>可管理作业场所</b>：该组织可管理的作业场所类型。系统根据备案时用户选择的作业场所自动分配给对应组织，与工程类型形成二维交叉权限。</li>
+                            <li><b>标签展示规则（方案B：固定截断+tooltip）</b>：
+                                <br>· 工程类型标签：单元格最大高度显示2行（约52px），超出用"..."截断，鼠标悬停tooltip显示完整列表。
+                                <br>· 全选时显示绿色"全部工程类型"/"全部场所"标签，不展开。
+                                <br>· 既有建筑修缮勾选子类时，显示"既有建筑修缮(住宅)"或"既有建筑修缮(非住宅)"。</li>
+                            <li><b>作业场所合并展示规则</b>：
+                                <br>· 列表页场所列显示<strong>小型工程场所</strong>与<strong>零星作业场所</strong>的并集（去重）。
+                                <br>· 如果两套配置完全相同，正常展开标签；如不同，tooltip中标注来源："小型工程：商业综合体、工业企业；零星作业：商业综合体"。
+                                <br>· 两套都选"全部场所"时，只显示一个绿色"全部场所"标签。</li>
                             <li><b>既有建筑修缮</b>细分为"住宅"和"非住宅"两种场景，由不同组织审核。</li>
-                            <li><b>街镇政府/园区管委会/区建管委</b>：作为领导和区级管理员挂靠的组织，配置"全部工程类型"和"全部作业场所"权限，可查看对应范围的全部备案数据。</li>
+                            <li><b>街道政府/园区管委会/区建管委</b>：作为领导和区级领导挂靠的组织，配置"全部工程类型"和"全部作业场所"权限，可查看对应范围的全部备案数据。</li>
                             <li>虚拟园区（青浦工业园区、西虹桥商务区）与实体街镇使用同样的管理方式。</li>
                         </ul>
                     </div>
@@ -391,12 +401,13 @@
                 <span>运营管理</span><span class="sep">/</span><span style="color:#333;">用户管理</span>
             </div>
             <div class="card">
-                <div class="card-header" style="flex-direction:column; align-items:flex-start; gap:16px;">
-                    <div class="tabs" style="margin:0; width:100%;">
+                <div class="card-header">
+                    <div class="tabs" style="margin:0;">
                         <div class="tab-item" onclick="switchUserTab('property')">物业</div>
                         <div class="tab-item active" onclick="switchUserTab('regulatory')">监管方</div>
                         <div class="tab-item" onclick="switchUserTab('contractor')">施工方</div>
                     </div>
+                    <button class="btn btn-primary" onclick="showModal('modal-add-user')">+ 添加人员</button>
                 </div>
                 <div class="card-body">
                     <!-- 监管方用户列表 -->
@@ -421,8 +432,8 @@
                                 <option value="">请选择角色</option>
                                 <option>普通审核员</option>
                                 <option>科室负责人</option>
-                                <option>街镇领导</option>
-                                <option>区级管理员</option>
+                                <option>街道领导</option>
+                                <option>区级领导</option>
                             </select>
                             <button class="btn btn-primary">&#128269; 查询</button>
                             <button class="btn btn-default">&#8634; 重置</button>
@@ -515,7 +526,7 @@
                                     <tr>
                                         <td>5</td><td>138****0001</td><td>王镇长</td>
                                         <td>白鹤镇政府</td>
-                                        <td><span class="tag tag-green">街镇领导</span></td>
+                                        <td><span class="tag tag-green">街道领导</span></td>
                                         <td><span class="tag tag-gray">全局权限</span></td>
                                         <td><span style="color:#999;font-size:13px;">查看白鹤镇全部</span></td>
                                         <td>2024-04-18 10:05:30</td><td>2024-02-01 08:00:00</td>
@@ -528,7 +539,7 @@
                                     <tr>
                                         <td>6</td><td>139****0002</td><td>区管理员</td>
                                         <td>青浦区建管委</td>
-                                        <td><span class="tag tag-red">区级管理员</span></td>
+                                        <td><span class="tag tag-red">区级领导</span></td>
                                         <td><span class="tag tag-gray">全局权限</span></td>
                                         <td><span style="color:#999;font-size:13px;">查看全区全部</span></td>
                                         <td>2024-04-18 09:30:00</td><td>2024-01-01 08:00:00</td>
@@ -556,8 +567,9 @@
                             <ul>
                                 <li><b>继承组织</b>：该用户权限继承自所属监管单位的"可审核工程类型"和"可管理作业场所"配置。组织配置变更后，该用户权限自动同步更新。</li>
                                 <li><b>自定义</b>：该用户权限已单独配置工程类型和作业场所，不随组织配置自动变更。如需恢复继承，在编辑中切换权限模式。</li>
-                                <li><b>街镇领导</b>：挂靠在"XX镇政府"或"XX园区管委会"组织下，拥有查看本街镇/园区全部备案的权限。</li>
-                                <li><b>区级管理员</b>：挂靠在"青浦区建管委"组织下，拥有查看全区全部备案的权限。</li>
+                                <li><b>街道领导/区级领导</b>：全局角色，数据查看范围由全局角色独立配置，不受所属组织权限限制。所属组织仅为挂靠关系。</li>
+                                <li><b>普通审核员/科室负责人</b>：组织内角色，权限由组织模板（继承/自定义）决定，只能看到组织权限范围内的备案。</li>
+                                <li><b>自定义权限约束</b>：自定义模式只能在组织模板已有权限范围内选择，不可超出。</li>
                             </ul>
                         </div>
                     </div>
@@ -658,66 +670,60 @@
                     </div>
                     <div class="tree-category">
                         <div class="tree-category-title"><input type="checkbox"> 零星施工作业</div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">①空调、太阳能、雨棚、防盗网、管道、工业环保设备等非主体配套设备设施的安装、维护、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">②建筑外墙清洗、修补、屋面检修等各类建筑外墙零星高处作业</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">③户外小型广告及门楣招牌的安装、维护、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">④新能源汽车、电动自行车充电设施的安装、维护、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑤临时搭建舞台、看台、展台、布景等搭设、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑥锅炉、压力容器（含气瓶）、压力管道、电梯、起重机械等特种设备的安装、改造、修理</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑦住宅区、公共场所绿化枝叶修剪</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑧道路绿化枝叶修剪</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑨供水、排水、通信、电力、燃气等管线设施维护、维修工程</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑩其他存在坍塌/物体打击/高处坠落/消防安全/机械伤害等风险的零星作业活动</span></div>
                     </div>
                 </div>
                 <div class="form-hint">勾选该组织可审核的工程类型。既有建筑修缮工程可进一步细分为"住宅类"和"非住宅类"，由不同组织审核。</div>
             </div>
             <div class="form-item">
-                <label class="form-label">可管理的作业场所（可多选）</label>
+                <label class="form-label">小型工程可管理作业场所（可多选）</label>
                 <div class="project-type-tree">
                     <div class="tree-category">
-                        <div class="tree-category-title"><input type="checkbox"> 全部作业场所</div>
+                        <div class="tree-category-title"><input type="checkbox"> 全部场所</div>
                     </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">工业企业内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">医疗卫生机构内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">学校、幼儿园等教育机构内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">文化场馆、旅游景区场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">体育场馆场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">党政机关集中办公区内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">养老机构、福利院等民政服务机构内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">区属国有企业经营管理场所内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">住宅小区公共区域内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">区管交通设施（如客运站、停车场）范围内场所</span>
-                    </div>
-                    <div class="tree-type-item">
-                        <input type="checkbox">
-                        <span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span>
-                    </div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">工业企业内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">医疗卫生机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">学校、幼儿园等教育机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">文化场馆、旅游景区场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">体育场馆场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">党政机关集中办公区内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">养老机构、福利院等民政服务机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">区属国有企业经营管理场所内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">住宅小区公共区域内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">区管交通设施（如客运站、停车场）范围内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span></div>
                 </div>
-                <div class="form-hint">勾选该组织可管理的作业场所类型。系统根据备案时用户选择的作业场所自动分配给对应组织。</div>
+            </div>
+            <div class="form-item">
+                <label class="form-label">零星作业可管理作业场所（可多选）</label>
+                <div class="project-type-tree">
+                    <div class="tree-category">
+                        <div class="tree-category-title"><input type="checkbox"> 全部场所</div>
+                    </div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">工业企业内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">医疗卫生机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">学校、幼儿园等教育机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">文化场馆、旅游景区场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">体育场馆场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">党政机关集中办公区内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">养老机构、福利院等民政服务机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">区属国有企业经营管理场所内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">住宅小区公共区域内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">区管交通设施（如客运站、停车场）范围内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span></div>
+                </div>
+                <div class="form-hint">小型工程和零星作业的作业场所独立配置，组织可按实际管辖范围分别勾选。</div>
             </div>
         </div>
         <div class="modal-footer">
@@ -781,14 +787,24 @@
                     </div>
                     <div class="tree-category">
                         <div class="tree-category-title"><input type="checkbox"> 零星施工作业</div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">①空调、太阳能、雨棚、防盗网、管道、工业环保设备等非主体配套设备设施的安装、维护、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">②建筑外墙清洗、修补、屋面检修等各类建筑外墙零星高处作业</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">③户外小型广告及门楣招牌的安装、维护、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">④新能源汽车、电动自行车充电设施的安装、维护、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑤临时搭建舞台、看台、展台、布景等搭设、拆除</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑥锅炉、压力容器（含气瓶）、压力管道、电梯、起重机械等特种设备的安装、改造、修理</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑦住宅区、公共场所绿化枝叶修剪</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑧道路绿化枝叶修剪</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑨供水、排水、通信、电力、燃气等管线设施维护、维修工程</span></div>
+                        <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑩其他存在坍塌/物体打击/高处坠落/消防安全/机械伤害等风险的零星作业活动</span></div>
                     </div>
                 </div>
             </div>
             <div class="form-item">
-                <label class="form-label">可管理的作业场所（可多选）</label>
+                <label class="form-label">小型工程可管理作业场所（可多选）</label>
                 <div class="project-type-tree">
                     <div class="tree-category">
-                        <div class="tree-category-title"><input type="checkbox" checked> 全部作业场所</div>
+                        <div class="tree-category-title"><input type="checkbox" checked> 全部场所</div>
                     </div>
                     <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
                     <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">工业企业内场所</span></div>
@@ -804,6 +820,27 @@
                     <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span></div>
                 </div>
             </div>
+            <div class="form-item">
+                <label class="form-label">零星作业可管理作业场所（可多选）</label>
+                <div class="project-type-tree">
+                    <div class="tree-category">
+                        <div class="tree-category-title"><input type="checkbox" checked> 全部场所</div>
+                    </div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">工业企业内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">医疗卫生机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">学校、幼儿园等教育机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">文化场馆、旅游景区场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">体育场馆场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">党政机关集中办公区内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">养老机构、福利院等民政服务机构内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区属国有企业经营管理场所内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">住宅小区公共区域内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区管交通设施（如客运站、停车场）范围内场所</span></div>
+                    <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span></div>
+                </div>
+                <div class="form-hint">小型工程和零星作业的作业场所独立配置，组织可按实际管辖范围分别勾选。</div>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-default" onclick="closeModal('modal-edit-org')">取消</button>
@@ -812,7 +849,125 @@
     </div>
 </div>
 
-<!-- ==================== 弹窗：添加/编辑监管方用户 ==================== -->
+<!-- ==================== 弹窗：同步权限给人员 ==================== -->
+<div class="modal-overlay" id="modal-sync-auth">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">同步权限给人员</div>
+            <div class="modal-close" onclick="closeModal('modal-sync-auth')">&times;</div>
+        </div>
+        <div class="modal-body">
+            <div class="form-item">
+                <p style="color:#666; font-size:14px; line-height:1.6;">
+                    将把组织 <b>白鹤镇-规保办</b> 的默认授权模板（含工程类型和作业场所）同步给该组织下所有人员，是否覆盖个人自定义权限？
+                </p>
+            </div>
+            <div class="form-item">
+                <label class="form-label">同步范围</label>
+                <div class="checkbox-group" style="flex-direction:column; gap:8px;">
+                    <label class="checkbox-item"><input type="radio" name="syncScope" value="inheritOnly" checked> 仅同步继承模式的人员（自定义权限的人员不受影响）</label>
+                    <label class="checkbox-item"><input type="radio" name="syncScope" value="all"> 覆盖全部人员（含自定义权限的人员，同步后重置为继承模式）</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" onclick="closeModal('modal-sync-auth')">取消</button>
+            <button class="btn btn-primary">确认同步</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗：添加监管方用户 ==================== -->
+<div class="modal-overlay" id="modal-add-user">
+    <div class="modal modal-xl">
+        <div class="modal-header">
+            <div class="modal-title">添加监管方用户</div>
+            <div class="modal-close" onclick="closeModal('modal-add-user')">&times;</div>
+        </div>
+        <div class="modal-body">
+            <div class="form-item">
+                <label class="form-label"><span class="required">*</span>手机号</label>
+                <input type="text" class="form-input" placeholder="请输入手机号">
+            </div>
+            <div class="form-item">
+                <label class="form-label"><span class="required">*</span>用户名</label>
+                <input type="text" class="form-input" placeholder="请输入用户名">
+            </div>
+
+            <hr class="divider">
+
+            <div class="two-col">
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>所属监管单位</label>
+                    <select class="form-select">
+                        <option value="">请选择</option>
+                        <option>白鹤镇-规保办</option>
+                        <option>白鹤镇-规保办-住宅</option>
+                        <option>白鹤镇-城建中心</option>
+                        <option>白鹤镇-农服中心</option>
+                        <option>白鹤镇政府</option>
+                        <option>青浦工业园区-建设管理部</option>
+                        <option>青浦工业园区管委会</option>
+                        <option>西虹桥商务区-建设管理部</option>
+                        <option>西虹桥商务区管委会</option>
+                        <option>青浦区建管委</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>角色</label>
+                    <select class="form-select" onchange="toggleRoleAuthAdd()">
+                        <option value="normal" selected>普通审核员</option>
+                        <option value="leader">科室负责人</option>
+                        <option value="street">街道领导</option>
+                        <option value="district">区级领导</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="auth-mode-selector-add" class="form-item">
+                <label class="form-label">权限模式</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="radio" name="authModeAdd" value="inherit" checked> 继承组织模板（随组织配置自动更新）</label>
+                    <label class="checkbox-item"><input type="radio" name="authModeAdd" value="custom"> 自定义（单独配置，不随组织更新）</label>
+                </div>
+            </div>
+
+            <div id="auth-inherit-preview-add-normal" class="form-item">
+                <label class="form-label">组织当前授权</label>
+                <div class="auth-preview">
+                    <div class="auth-preview-title">所选组织 可审核的工程类型</div>
+                    <div class="auth-preview-item">-- 请选择所属监管单位后展示 --</div>
+                </div>
+                <div class="form-hint">该用户权限与组织模板保持一致。</div>
+            </div>
+
+            <div id="auth-inherit-preview-add-leader" class="form-item hidden">
+                <label class="form-label">组织当前授权</label>
+                <div class="auth-preview">
+                    <div class="auth-preview-title">所选组织 可审核的工程类型</div>
+                    <div class="auth-preview-item">&#10003; 全部工程类型（含小型工程12类 + 住宅装修 + 零星作业10类）</div>
+                </div>
+                <div style="margin-top:8px;"></div>
+                <div class="auth-preview">
+                    <div class="auth-preview-title">所选组织 小型工程可管理场所</div>
+                    <div class="auth-preview-item">&#10003; 全部场所</div>
+                </div>
+                <div style="margin-top:8px;"></div>
+                <div class="auth-preview">
+                    <div class="auth-preview-title">所选组织 零星作业可管理场所</div>
+                    <div class="auth-preview-item">&#10003; 全部场所</div>
+                </div>
+                <div class="form-hint">街道领导/区级领导固定继承组织全部权限，不可自定义。</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" onclick="closeModal('modal-add-user')">取消</button>
+            <button class="btn btn-primary">确定</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 弹窗：编辑监管方用户 ==================== -->
 <div class="modal-overlay" id="modal-edit-user">
     <div class="modal modal-xl">
         <div class="modal-header">
@@ -852,14 +1007,14 @@
                     <select class="form-select" id="user-role-select" onchange="toggleRoleAuth()">
                         <option value="normal" selected>普通审核员</option>
                         <option value="leader">科室负责人</option>
-                        <option value="street">街镇领导</option>
-                        <option value="district">区级管理员</option>
+                        <option value="street">街道领导</option>
+                        <option value="district">区级领导</option>
                     </select>
                 </div>
             </div>
 
             <div id="auth-config-section">
-                <div class="form-item">
+                <div class="form-item" id="auth-mode-selector">
                     <label class="form-label">权限模式</label>
                     <div class="checkbox-group">
                         <label class="checkbox-item"><input type="radio" name="authMode" value="inherit" checked onchange="toggleAuthMode()"> 继承组织模板（随组织配置自动更新）</label>
@@ -867,7 +1022,7 @@
                     </div>
                 </div>
 
-                <div id="auth-inherit-preview" class="form-item">
+                <div id="auth-inherit-preview-normal" class="form-item">
                     <label class="form-label">组织当前授权</label>
                     <div class="auth-preview">
                         <div class="auth-preview-title">白鹤镇-规保办 可审核的工程类型</div>
@@ -881,13 +1036,44 @@
                     </div>
                     <div style="margin-top:8px;"></div>
                     <div class="auth-preview">
-                        <div class="auth-preview-title">白鹤镇-规保办 可管理的作业场所</div>
-                        <div class="auth-preview-item">&#10003; 全部作业场所</div>
+                        <div class="auth-preview-title">白鹤镇-规保办 小型工程可管理场所</div>
+                        <div class="auth-preview-item">&#10003; 全部场所</div>
+                    </div>
+                    <div style="margin-top:8px;"></div>
+                    <div class="auth-preview">
+                        <div class="auth-preview-title">白鹤镇-规保办 零星作业可管理场所</div>
+                        <div class="auth-preview-item">&#10003; 全部场所</div>
                     </div>
                     <div class="form-hint">该用户权限与组织模板保持一致。如需调整，请切换到"自定义"模式。</div>
                 </div>
 
+                <div id="auth-inherit-preview-leader" class="form-item hidden">
+                    <label class="form-label">组织当前授权</label>
+                    <div class="auth-preview">
+                        <div class="auth-preview-title">白鹤镇政府 可审核的工程类型</div>
+                        <div class="auth-preview-item">&#10003; 全部工程类型（含小型工程12类 + 住宅装修 + 零星作业10类）</div>
+                    </div>
+                    <div style="margin-top:8px;"></div>
+                    <div class="auth-preview">
+                        <div class="auth-preview-title">白鹤镇政府 小型工程可管理场所</div>
+                        <div class="auth-preview-item">&#10003; 全部场所</div>
+                    </div>
+                    <div style="margin-top:8px;"></div>
+                    <div class="auth-preview">
+                        <div class="auth-preview-title">白鹤镇政府 零星作业可管理场所</div>
+                        <div class="auth-preview-item">&#10003; 全部场所</div>
+                    </div>
+                    <div class="form-hint">街道领导/区级领导固定继承组织全部权限，不可自定义。</div>
+                </div>
+
                 <div id="auth-custom-section" class="form-item hidden">
+                    <div class="annotation" style="margin-bottom:16px;">
+                        <div class="annotation-title">约束说明</div>
+                        <ul>
+                            <li>自定义权限只能在组织已有权限范围内选择，不可超出。</li>
+                            <li>如组织模板中未勾选"水务工程"，则此处无法勾选。</li>
+                        </ul>
+                    </div>
                     <label class="form-label">自定义可审核工程类型</label>
                     <div class="project-type-tree">
                         <div class="tree-category">
@@ -917,13 +1103,43 @@
                         </div>
                         <div class="tree-category">
                             <div class="tree-category-title"><input type="checkbox"> 零星施工作业</div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">①空调、太阳能等非主体配套设备设施的安装、维护、拆除</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">②建筑外墙清洗、修补、屋面检修等高处作业</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">③户外小型广告及门楣招牌的安装、维护、拆除</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">④新能源汽车、电动自行车充电设施的安装、维护、拆除</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑤临时搭建舞台、看台、展台、布景等搭设、拆除</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑥锅炉、压力容器等特种设备的安装、改造、修理</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑦住宅区、公共场所绿化枝叶修剪</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑧道路绿化枝叶修剪</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑨供水、排水、通信、电力、燃气等管线设施维护、维修工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑩其他存在风险的零星作业活动</span></div>
                         </div>
                     </div>
                     <div style="margin-top:16px;">
-                        <label class="form-label">自定义可管理作业场所</label>
+                        <label class="form-label">自定义小型工程可管理场所</label>
                         <div class="project-type-tree">
                             <div class="tree-category">
-                                <div class="tree-category-title"><input type="checkbox" checked> 全部作业场所</div>
+                                <div class="tree-category-title"><input type="checkbox" checked> 全部场所</div>
+                            </div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">工业企业内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">医疗卫生机构内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">学校、幼儿园等教育机构内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">文化场馆、旅游景区场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">体育场馆场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">党政机关集中办公区内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">养老机构、福利院等民政服务机构内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区属国有企业经营管理场所内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">住宅小区公共区域内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区管交通设施（如客运站、停车场）范围内场所</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:16px;">
+                        <label class="form-label">自定义零星作业可管理场所</label>
+                        <div class="project-type-tree">
+                            <div class="tree-category">
+                                <div class="tree-category-title"><input type="checkbox" checked> 全部场所</div>
                             </div>
                             <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
                             <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">工业企业内场所</span></div>
@@ -945,10 +1161,11 @@
             <div id="global-role-section" class="form-item hidden">
                 <label class="form-label">全局数据权限</label>
                 <div class="auth-preview" id="global-auth-preview">
-                    <div class="auth-preview-title">街镇领导 - 白鹤镇</div>
-                    <div class="auth-preview-item">可查看白鹤镇下所有组织的备案数据</div>
-                    <div class="auth-preview-item">可查看白鹤镇下所有工程类型的备案数据</div>
+                    <div class="auth-preview-title">全局角色 - 街道领导</div>
+                    <div class="auth-preview-item">可查看指定区域下所有组织的备案数据</div>
+                    <div class="auth-preview-item">可查看指定区域下所有工程类型的备案数据</div>
                     <div class="auth-preview-item">不参与具体审核，仅做统计和查看</div>
+                    <div class="auth-preview-item" style="color:#fa8c16;">权限来源：全局角色配置，不受所属组织权限限制</div>
                 </div>
             </div>
         </div>
@@ -989,36 +1206,50 @@ function closeModal(id) {
 }
 function toggleRoleAuth() {
     const role = document.getElementById('user-role-select').value;
-    const authSection = document.getElementById('auth-config-section');
-    const globalSection = document.getElementById('global-role-section');
-    const globalPreview = document.getElementById('global-auth-preview');
+    const authModeSelector = document.getElementById('auth-mode-selector');
+    const inheritNormal = document.getElementById('auth-inherit-preview-normal');
+    const inheritLeader = document.getElementById('auth-inherit-preview-leader');
+    const customSection = document.getElementById('auth-custom-section');
+
     if (role === 'street' || role === 'district') {
-        authSection.classList.add('hidden');
-        globalSection.classList.remove('hidden');
-        if (role === 'street') {
-            globalPreview.innerHTML = `
-                <div class="auth-preview-title">街镇领导 - 白鹤镇</div>
-                <div class="auth-preview-item">&#10003; 可查看白鹤镇下所有组织的备案数据</div>
-                <div class="auth-preview-item">&#10003; 可查看白鹤镇下所有工程类型的备案数据</div>
-                <div class="auth-preview-item">&#10003; 不参与具体审核，仅做统计和查看</div>
-            `;
-        } else {
-            globalPreview.innerHTML = `
-                <div class="auth-preview-title">区级管理员</div>
-                <div class="auth-preview-item">&#10003; 可查看全区所有街镇的备案数据</div>
-                <div class="auth-preview-item">&#10003; 可查看所有工程类型的备案数据</div>
-                <div class="auth-preview-item">&#10003; 拥有系统管理权限</div>
-            `;
-        }
+        authModeSelector.classList.add('hidden');
+        inheritNormal.classList.add('hidden');
+        inheritLeader.classList.remove('hidden');
+        customSection.classList.add('hidden');
     } else {
-        authSection.classList.remove('hidden');
-        globalSection.classList.add('hidden');
+        authModeSelector.classList.remove('hidden');
+        inheritNormal.classList.remove('hidden');
+        inheritLeader.classList.add('hidden');
+        const mode = document.querySelector('input[name="authMode"]:checked').value;
+        customSection.classList.toggle('hidden', mode !== 'custom');
     }
 }
 function toggleAuthMode() {
     const mode = document.querySelector('input[name="authMode"]:checked').value;
-    document.getElementById('auth-inherit-preview').classList.toggle('hidden', mode !== 'inherit');
-    document.getElementById('auth-custom-section').classList.toggle('hidden', mode !== 'custom');
+    const role = document.getElementById('user-role-select').value;
+    if (role === 'street' || role === 'district') {
+        document.getElementById('auth-inherit-preview-leader').classList.remove('hidden');
+        document.getElementById('auth-custom-section').classList.add('hidden');
+    } else {
+        document.getElementById('auth-inherit-preview-normal').classList.toggle('hidden', mode !== 'inherit');
+        document.getElementById('auth-inherit-preview-leader').classList.add('hidden');
+        document.getElementById('auth-custom-section').classList.toggle('hidden', mode !== 'custom');
+    }
+}
+function toggleRoleAuthAdd() {
+    const role = document.querySelector('#modal-add-user select[onchange*="toggleRoleAuthAdd"]').value;
+    const authModeSelector = document.getElementById('auth-mode-selector-add');
+    const inheritNormal = document.getElementById('auth-inherit-preview-add-normal');
+    const inheritLeader = document.getElementById('auth-inherit-preview-add-leader');
+    if (role === 'street' || role === 'district') {
+        authModeSelector.classList.add('hidden');
+        inheritNormal.classList.add('hidden');
+        inheritLeader.classList.remove('hidden');
+    } else {
+        authModeSelector.classList.remove('hidden');
+        inheritNormal.classList.remove('hidden');
+        inheritLeader.classList.add('hidden');
+    }
 }
 window.onclick = function(event) {
     if (event.target.classList.contains('modal-overlay')) {

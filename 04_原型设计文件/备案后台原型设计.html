@@ -167,6 +167,16 @@
         .auth-preview { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 4px; padding: 12px 16px; }
         .auth-preview-title { font-weight: 600; color: #52c41a; margin-bottom: 8px; }
         .auth-preview-item { font-size: 13px; color: #666; padding: 2px 0; }
+
+        /* 组织关联卡片 */
+        .org-card { border: 1px solid #e8e8e8; border-radius: 4px; padding: 16px; margin-bottom: 16px; background: #fafafa; }
+        .org-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .org-card-title { font-weight: 600; color: #333; }
+        .org-card-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #e6f7ff; color: #1890ff; margin-left: 8px; }
+        .org-card-remove { color: #ff4d4f; cursor: pointer; font-size: 13px; }
+        .org-card-remove.disabled { color: #d9d9d9; cursor: not-allowed; }
+        .add-org-card { border: 1px dashed #d9d9d9; border-radius: 4px; padding: 12px; text-align: center; color: #1890ff; cursor: pointer; margin-bottom: 16px; }
+        .add-org-card:hover { border-color: #1890ff; background: #f0f5ff; }
     </style>
 </head>
 <body>
@@ -451,9 +461,21 @@
                                 <tbody>
                                     <tr>
                                         <td>1</td><td>182****8740</td><td>张敏杰</td>
-                                        <td>白鹤镇-规保办</td>
-                                        <td><span class="tag tag-blue">普通审核员</span></td>
-                                        <td><span class="auth-tag inherit">继承组织</span></td>
+                                        <td>
+                                            <div class="type-list" style="max-height:none;">
+                                                <span class="type-tag">白鹤镇-规保办</span><span class="type-tag">青浦工业园区-建设管理部</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="type-list" style="max-height:none;">
+                                                <span class="tag tag-blue">普通审核员</span><span class="tag tag-blue">普通审核员</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="type-list" style="max-height:none;">
+                                                <span class="auth-tag inherit">继承组织</span><span class="auth-tag inherit">继承组织</span>
+                                            </div>
+                                        </td>
                                         <td>
                                             <div class="type-list">
                                                 <span class="type-tag">房屋建筑</span><span class="type-tag">交通工程</span>
@@ -565,11 +587,14 @@
                         <div class="annotation">
                             <div class="annotation-title">页面说明</div>
                             <ul>
-                                <li><b>继承组织</b>：该用户权限继承自所属监管单位的"可审核工程类型"和"可管理作业场所"配置。组织配置变更后，该用户权限自动同步更新。</li>
-                                <li><b>自定义</b>：该用户权限已单独配置工程类型和作业场所，不随组织配置自动变更。如需恢复继承，在编辑中切换权限模式。</li>
-                                <li><b>街道领导/区级领导</b>：全局角色，数据查看范围由全局角色独立配置，不受所属组织权限限制。所属组织仅为挂靠关系。</li>
-                                <li><b>普通审核员/科室负责人</b>：组织内角色，权限由组织模板（继承/自定义）决定，只能看到组织权限范围内的备案。</li>
-                                <li><b>自定义权限约束</b>：自定义模式只能在组织模板已有权限范围内选择，不可超出。</li>
+                                <li><b>所属监管单位</b>：用户可同时关联多个监管单位，单位之间无主次之分。所有关联单位平等展示，权限独立计算后取并集。</li>
+                                <li><b>角色</b>：每个组织关联可独立设置角色。同一用户在不同组织中可拥有不同角色。</li>
+                                <li><b>继承组织</b>：该组织关联的权限继承自对应监管单位的"可审核工程类型"和"可管理作业场所"配置。组织配置变更后，该关联权限自动同步更新。</li>
+                                <li><b>自定义</b>：该组织关联的权限已单独配置，不随组织配置自动变更。如需恢复继承，在编辑中切换权限模式。</li>
+                                <li><b>街道领导/区级领导</b>：固定继承组织全部权限，不可自定义。数据查看范围由角色类型决定（街道领导看本区域全部，区级领导看全区全部）。</li>
+                                <li><b>普通审核员/科室负责人</b>：权限由组织模板（继承/自定义）决定，只能看到对应组织权限范围内的备案。</li>
+                                <li><b>自定义权限约束</b>：自定义模式只能在对应组织模板已有权限范围内选择，不可超出。</li>
+                                <li><b>用户来源</b>：用户由数据局同步，后台不可新增。仅可为用户分配/调整组织关联和权限。</li>
                             </ul>
                         </div>
                     </div>
@@ -986,43 +1011,50 @@
 
             <hr class="divider">
 
-            <div class="two-col">
-                <div class="form-item">
-                    <label class="form-label"><span class="required">*</span>所属监管单位</label>
-                    <select class="form-select">
-                        <option selected>白鹤镇-规保办</option>
-                        <option>白鹤镇-规保办-住宅</option>
-                        <option>白鹤镇-城建中心</option>
-                        <option>白鹤镇-农服中心</option>
-                        <option>白鹤镇政府</option>
-                        <option>青浦工业园区-建设管理部</option>
-                        <option>青浦工业园区管委会</option>
-                        <option>西虹桥商务区-建设管理部</option>
-                        <option>西虹桥商务区管委会</option>
-                        <option>青浦区建管委</option>
-                    </select>
-                </div>
-                <div class="form-item">
-                    <label class="form-label"><span class="required">*</span>角色</label>
-                    <select class="form-select" id="user-role-select" onchange="toggleRoleAuth()">
-                        <option value="normal" selected>普通审核员</option>
-                        <option value="leader">科室负责人</option>
-                        <option value="street">街道领导</option>
-                        <option value="district">区级领导</option>
-                    </select>
-                </div>
+            <div class="form-item" style="margin-bottom:12px;">
+                <label class="form-label" style="font-size:15px;">组织关联（至少关联一个）</label>
             </div>
 
-            <div id="auth-config-section">
-                <div class="form-item" id="auth-mode-selector">
-                    <label class="form-label">权限模式</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="radio" name="authMode" value="inherit" checked onchange="toggleAuthMode()"> 继承组织模板（随组织配置自动更新）</label>
-                        <label class="checkbox-item"><input type="radio" name="authMode" value="custom" onchange="toggleAuthMode()"> 自定义（单独配置，不随组织更新）</label>
+            <!-- 组织关联卡片1 -->
+            <div class="org-card">
+                <div class="org-card-header">
+                    <div class="org-card-title">组织关联 1</div>
+                    <span class="org-card-remove disabled">删除（至少保留一个）</span>
+                </div>
+                <div class="two-col">
+                    <div class="form-item" style="margin-bottom:12px;">
+                        <label class="form-label"><span class="required">*</span>所属监管单位</label>
+                        <select class="form-select">
+                            <option selected>白鹤镇-规保办</option>
+                            <option>白鹤镇-规保办-住宅</option>
+                            <option>白鹤镇-城建中心</option>
+                            <option>白鹤镇-农服中心</option>
+                            <option>白鹤镇政府</option>
+                            <option>青浦工业园区-建设管理部</option>
+                            <option>青浦工业园区管委会</option>
+                            <option>西虹桥商务区-建设管理部</option>
+                            <option>西虹桥商务区管委会</option>
+                            <option>青浦区建管委</option>
+                        </select>
+                    </div>
+                    <div class="form-item" style="margin-bottom:12px;">
+                        <label class="form-label"><span class="required">*</span>角色</label>
+                        <select class="form-select" onchange="toggleRoleAuthCard(this)">
+                            <option value="normal" selected>普通审核员</option>
+                            <option value="leader">科室负责人</option>
+                            <option value="street">街道领导</option>
+                            <option value="district">区级领导</option>
+                        </select>
                     </div>
                 </div>
-
-                <div id="auth-inherit-preview-normal" class="form-item">
+                <div class="form-item auth-mode-card" style="margin-bottom:12px;">
+                    <label class="form-label">权限模式</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="radio" name="authMode1" value="inherit" checked onchange="toggleAuthModeCard(this)"> 继承组织模板</label>
+                        <label class="checkbox-item"><input type="radio" name="authMode1" value="custom" onchange="toggleAuthModeCard(this)"> 自定义</label>
+                    </div>
+                </div>
+                <div class="auth-inherit-card">
                     <label class="form-label">组织当前授权</label>
                     <div class="auth-preview">
                         <div class="auth-preview-title">白鹤镇-规保办 可审核的工程类型</div>
@@ -1044,128 +1076,154 @@
                         <div class="auth-preview-title">白鹤镇-规保办 零星作业可管理场所</div>
                         <div class="auth-preview-item">&#10003; 全部场所</div>
                     </div>
-                    <div class="form-hint">该用户权限与组织模板保持一致。如需调整，请切换到"自定义"模式。</div>
                 </div>
 
-                <div id="auth-inherit-preview-leader" class="form-item hidden">
-                    <label class="form-label">组织当前授权</label>
-                    <div class="auth-preview">
-                        <div class="auth-preview-title">白鹤镇政府 可审核的工程类型</div>
-                        <div class="auth-preview-item">&#10003; 全部工程类型（含小型工程12类 + 住宅装修 + 零星作业10类）</div>
-                    </div>
-                    <div style="margin-top:8px;"></div>
-                    <div class="auth-preview">
-                        <div class="auth-preview-title">白鹤镇政府 小型工程可管理场所</div>
-                        <div class="auth-preview-item">&#10003; 全部场所</div>
-                    </div>
-                    <div style="margin-top:8px;"></div>
-                    <div class="auth-preview">
-                        <div class="auth-preview-title">白鹤镇政府 零星作业可管理场所</div>
-                        <div class="auth-preview-item">&#10003; 全部场所</div>
-                    </div>
-                    <div class="form-hint">街道领导/区级领导固定继承组织全部权限，不可自定义。</div>
-                </div>
-
-                <div id="auth-custom-section" class="form-item hidden">
-                    <div class="annotation" style="margin-bottom:16px;">
-                        <div class="annotation-title">约束说明</div>
-                        <ul>
-                            <li>自定义权限只能在组织已有权限范围内选择，不可超出。</li>
-                            <li>如组织模板中未勾选"水务工程"，则此处无法勾选。</li>
-                        </ul>
-                    </div>
-                    <label class="form-label">自定义可审核工程类型</label>
-                    <div class="project-type-tree">
+                <div class="auth-custom-card hidden">
+                    <label class="form-label">自定义权限配置（不可超出组织模板范围）</label>
+                    <div class="project-type-tree" style="margin-bottom:12px;">
                         <div class="tree-category">
-                            <div class="tree-category-title"><input type="checkbox" checked> 小型工程</div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">①房屋建筑工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">②交通工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">③水务工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">④园林绿化工程</span></div>
+                            <div class="tree-category-title"><input type="checkbox" checked disabled> 小型工程</div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">① 房屋建筑工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">② 交通工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">③ 水务工程（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">④ 园林绿化工程（组织未配置，不可选）</span></div>
                             <div class="tree-type-item">
                                 <input type="checkbox" checked>
-                                <span class="tree-type-label">⑤既有建筑修缮工程</span>
+                                <span class="tree-type-label">⑤ 既有建筑修缮工程</span>
                                 <div class="tree-sub-options">
                                     <label class="sub-option"><input type="checkbox" checked> 非住宅类</label>
-                                    <label class="sub-option"><input type="checkbox"> 住宅类</label>
+                                    <label class="sub-option"><input type="checkbox" disabled><span style="color:#999;"> 住宅类（组织未配置）</span></label>
                                 </div>
                             </div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑥非住宅既有建筑装饰装修工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑦加装电梯工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑧临时建设工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑨农民自建房</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑩农业设施工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑪农村综合工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑫人防工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑥ 非住宅既有建筑装饰装修工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">⑦ 加装电梯工程（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑧ 临时建设工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑨ 农民自建或翻建低层住宅</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">⑩ 农业设施工程（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">⑪ 农村综合建设工程（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑫ 人防工程</span></div>
                         </div>
                         <div class="tree-category">
-                            <div class="tree-category-title"><input type="checkbox"> 住宅室内装饰装修工程</div>
+                            <div class="tree-category-title"><input type="checkbox" disabled> 住宅室内装饰装修工程（组织未配置）</div>
                         </div>
                         <div class="tree-category">
-                            <div class="tree-category-title"><input type="checkbox"> 零星施工作业</div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">①空调、太阳能等非主体配套设备设施的安装、维护、拆除</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">②建筑外墙清洗、修补、屋面检修等高处作业</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">③户外小型广告及门楣招牌的安装、维护、拆除</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">④新能源汽车、电动自行车充电设施的安装、维护、拆除</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑤临时搭建舞台、看台、展台、布景等搭设、拆除</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑥锅炉、压力容器等特种设备的安装、改造、修理</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑦住宅区、公共场所绿化枝叶修剪</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑧道路绿化枝叶修剪</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑨供水、排水、通信、电力、燃气等管线设施维护、维修工程</span></div>
-                            <div class="tree-type-item"><input type="checkbox"><span class="tree-type-label">⑩其他存在风险的零星作业活动</span></div>
+                            <div class="tree-category-title"><input type="checkbox" disabled> 零星施工作业（组织未配置）</div>
                         </div>
                     </div>
-                    <div style="margin-top:16px;">
-                        <label class="form-label">自定义小型工程可管理场所</label>
-                        <div class="project-type-tree">
-                            <div class="tree-category">
-                                <div class="tree-category-title"><input type="checkbox" checked> 全部场所</div>
-                            </div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">工业企业内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">医疗卫生机构内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">学校、幼儿园等教育机构内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">文化场馆、旅游景区场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">体育场馆场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">党政机关集中办公区内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">养老机构、福利院等民政服务机构内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区属国有企业经营管理场所内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">住宅小区公共区域内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区管交通设施（如客运站、停车场）范围内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span></div>
-                        </div>
-                    </div>
-                    <div style="margin-top:16px;">
-                        <label class="form-label">自定义零星作业可管理场所</label>
-                        <div class="project-type-tree">
-                            <div class="tree-category">
-                                <div class="tree-category-title"><input type="checkbox" checked> 全部场所</div>
-                            </div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">商业综合体、大型商场、超市、商品交易市场等商贸场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">工业企业内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">医疗卫生机构内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">学校、幼儿园等教育机构内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">文化场馆、旅游景区场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">体育场馆场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">党政机关集中办公区内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">养老机构、福利院等民政服务机构内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区属国有企业经营管理场所内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">住宅小区公共区域内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">区管交通设施（如客运站、停车场）范围内场所</span></div>
-                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">涉及公共绿地、公园、环卫设施等场所</span></div>
-                        </div>
-                    </div>
+                    <div class="form-hint" style="color:#fa8c16;">灰色选项为组织模板未配置项，不可勾选。用户自定义权限只能在组织模板已有范围内选择。</div>
                 </div>
             </div>
 
-            <div id="global-role-section" class="form-item hidden">
-                <label class="form-label">全局数据权限</label>
-                <div class="auth-preview" id="global-auth-preview">
-                    <div class="auth-preview-title">全局角色 - 街道领导</div>
+            <!-- 组织关联卡片2 -->
+            <div class="org-card">
+                <div class="org-card-header">
+                    <div class="org-card-title">组织关联 2</div>
+                    <span class="org-card-remove">删除</span>
+                </div>
+                <div class="two-col">
+                    <div class="form-item" style="margin-bottom:12px;">
+                        <label class="form-label"><span class="required">*</span>所属监管单位</label>
+                        <select class="form-select">
+                            <option>白鹤镇-规保办</option>
+                            <option>白鹤镇-规保办-住宅</option>
+                            <option>白鹤镇-城建中心</option>
+                            <option>白鹤镇-农服中心</option>
+                            <option>白鹤镇政府</option>
+                            <option selected>青浦工业园区-建设管理部</option>
+                            <option>青浦工业园区管委会</option>
+                            <option>西虹桥商务区-建设管理部</option>
+                            <option>西虹桥商务区管委会</option>
+                            <option>青浦区建管委</option>
+                        </select>
+                    </div>
+                    <div class="form-item" style="margin-bottom:12px;">
+                        <label class="form-label"><span class="required">*</span>角色</label>
+                        <select class="form-select" onchange="toggleRoleAuthCard(this)">
+                            <option value="normal" selected>普通审核员</option>
+                            <option value="leader">科室负责人</option>
+                            <option value="street">街道领导</option>
+                            <option value="district">区级领导</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-item auth-mode-card" style="margin-bottom:12px;">
+                    <label class="form-label">权限模式</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="radio" name="authMode2" value="inherit" checked onchange="toggleAuthModeCard(this)"> 继承组织模板</label>
+                        <label class="checkbox-item"><input type="radio" name="authMode2" value="custom" onchange="toggleAuthModeCard(this)"> 自定义</label>
+                    </div>
+                </div>
+                <div class="auth-inherit-card">
+                    <label class="form-label">组织当前授权</label>
+                    <div class="auth-preview">
+                        <div class="auth-preview-title">青浦工业园区-建设管理部 可审核的工程类型</div>
+                        <div class="auth-preview-item">&#10003; 房屋建筑工程</div>
+                        <div class="auth-preview-item">&#10003; 交通工程</div>
+                        <div class="auth-preview-item">&#10003; 园林绿化工程</div>
+                        <div class="auth-preview-item">&#10003; 既有建筑修缮工程</div>
+                        <div class="auth-preview-item">&#10003; 非住宅既有建筑装饰装修工程</div>
+                        <div class="auth-preview-item">&#10003; 加装电梯工程</div>
+                        <div class="auth-preview-item">&#10003; 临时建设工程</div>
+                        <div class="auth-preview-item">&#10003; 人防工程</div>
+                    </div>
+                    <div style="margin-top:8px;"></div>
+                    <div class="auth-preview">
+                        <div class="auth-preview-title">青浦工业园区-建设管理部 小型工程可管理场所</div>
+                        <div class="auth-preview-item">&#10003; 全部场所</div>
+                    </div>
+                    <div style="margin-top:8px;"></div>
+                    <div class="auth-preview">
+                        <div class="auth-preview-title">青浦工业园区-建设管理部 零星作业可管理场所</div>
+                        <div class="auth-preview-item">&#10003; 全部场所</div>
+                    </div>
+                </div>
+
+                <div class="auth-custom-card hidden">
+                    <label class="form-label">自定义权限配置（不可超出组织模板范围）</label>
+                    <div class="project-type-tree" style="margin-bottom:12px;">
+                        <div class="tree-category">
+                            <div class="tree-category-title"><input type="checkbox" checked disabled> 小型工程</div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">① 房屋建筑工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">② 交通工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">③ 水务工程（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">④ 园林绿化工程</span></div>
+                            <div class="tree-type-item">
+                                <input type="checkbox" checked>
+                                <span class="tree-type-label">⑤ 既有建筑修缮工程</span>
+                                <div class="tree-sub-options">
+                                    <label class="sub-option"><input type="checkbox" checked> 非住宅类</label>
+                                    <label class="sub-option"><input type="checkbox" disabled><span style="color:#999;"> 住宅类（组织未配置）</span></label>
+                                </div>
+                            </div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑥ 非住宅既有建筑装饰装修工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑦ 加装电梯工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑧ 临时建设工程</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">⑨ 农民自建房（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">⑩ 农业设施工程（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" disabled><span class="tree-type-label" style="color:#999;">⑪ 农村综合建设工程（组织未配置，不可选）</span></div>
+                            <div class="tree-type-item"><input type="checkbox" checked><span class="tree-type-label">⑫ 人防工程</span></div>
+                        </div>
+                        <div class="tree-category">
+                            <div class="tree-category-title"><input type="checkbox" disabled> 住宅室内装饰装修工程（组织未配置）</div>
+                        </div>
+                        <div class="tree-category">
+                            <div class="tree-category-title"><input type="checkbox" disabled> 零星施工作业（组织未配置）</div>
+                        </div>
+                    </div>
+                    <div class="form-hint" style="color:#fa8c16;">灰色选项为组织模板未配置项，不可勾选。用户自定义权限只能在组织模板已有范围内选择。</div>
+                </div>
+            </div>
+
+            <div class="add-org-card" onclick="alert('点击添加新的组织关联卡片')">+ 添加组织关联</div>
+
+            <div id="leader-scope-section" class="form-item hidden">
+                <label class="form-label">数据查看范围</label>
+                <div class="auth-preview">
+                    <div class="auth-preview-title">街道领导 / 区级领导 数据范围</div>
                     <div class="auth-preview-item">可查看指定区域下所有组织的备案数据</div>
                     <div class="auth-preview-item">可查看指定区域下所有工程类型的备案数据</div>
                     <div class="auth-preview-item">不参与具体审核，仅做统计和查看</div>
-                    <div class="auth-preview-item" style="color:#fa8c16;">权限来源：全局角色配置，不受所属组织权限限制</div>
+                    <div class="auth-preview-item" style="color:#fa8c16;">数据范围由角色类型决定，权限仍继承自组织模板</div>
                 </div>
             </div>
         </div>
@@ -1249,6 +1307,46 @@ function toggleRoleAuthAdd() {
         authModeSelector.classList.remove('hidden');
         inheritNormal.classList.remove('hidden');
         inheritLeader.classList.add('hidden');
+    }
+}
+function toggleAuthModeCard(radio) {
+    const card = radio.closest('.org-card');
+    const inheritDiv = card.querySelector('.auth-inherit-card');
+    const customDiv = card.querySelector('.auth-custom-card');
+    if (radio.value === 'inherit') {
+        if (inheritDiv) inheritDiv.classList.remove('hidden');
+        if (customDiv) customDiv.classList.add('hidden');
+    } else {
+        if (inheritDiv) inheritDiv.classList.add('hidden');
+        if (customDiv) customDiv.classList.remove('hidden');
+    }
+}
+function toggleRoleAuthCard(select) {
+    const card = select.closest('.org-card');
+    const role = select.value;
+    const authModeDiv = card.querySelector('.auth-mode-card');
+    const inheritDiv = card.querySelector('.auth-inherit-card');
+    const customDiv = card.querySelector('.auth-custom-card');
+    if (role === 'street' || role === 'district') {
+        if (authModeDiv) authModeDiv.classList.add('hidden');
+        if (inheritDiv) {
+            inheritDiv.classList.remove('hidden');
+            const title = inheritDiv.querySelector('.auth-preview-title');
+            if (title) {
+                title.innerHTML = role === 'street' ? '街道领导 - 固定继承全部权限' : '区级领导 - 固定继承全部权限';
+            }
+        }
+        if (customDiv) customDiv.classList.add('hidden');
+    } else {
+        if (authModeDiv) authModeDiv.classList.remove('hidden');
+        const modeRadio = card.querySelector('input[type="radio"][value="inherit"]');
+        if (modeRadio && modeRadio.checked) {
+            if (inheritDiv) inheritDiv.classList.remove('hidden');
+            if (customDiv) customDiv.classList.add('hidden');
+        } else {
+            if (inheritDiv) inheritDiv.classList.add('hidden');
+            if (customDiv) customDiv.classList.remove('hidden');
+        }
     }
 }
 window.onclick = function(event) {

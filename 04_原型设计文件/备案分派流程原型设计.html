@@ -9,12 +9,20 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
   background: #e8e8e8;
-  padding: 40px;
+  padding: 40px 20px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 40px;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
+.page-label {
+  text-align: center;
+  font-size: 15px;
+  color: #666;
+  font-weight: 600;
+  margin: 32px 0 12px;
+}
+.page-label:first-child { margin-top: 0; }
 
 .phone-frame {
   width: 390px;
@@ -481,7 +489,8 @@ body {
 </head>
 <body>
 
-<!-- ========== 页面1：审核详情页（底部驳回/通过/转派三按钮） ========== -->
+<!-- ========== 页面1：审核详情页 ========== -->
+<div class="page-label">页面1：审核详情页（底部常驻驳回/通过/转派三按钮）</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -541,7 +550,8 @@ body {
   </div>
 </div>
 
-<!-- ========== 页面2：选择目标街道 ========== -->
+<!-- ========== 页面2：选择目标街道页 ========== -->
+<div class="page-label">页面2：选择目标街道页（含街道列表、搜索、转派原因）</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -568,16 +578,8 @@ body {
         <input type="text" placeholder="搜索街道名称" readonly>
       </div>
     </div>
-    <div class="page-header">青浦区街镇（11个）</div>
+    <div class="page-header">青浦区街镇</div>
     <div class="content-card">
-      <div class="street-item">
-        <div class="radio-circle checked"></div>
-        <div class="street-icon">赵</div>
-        <div class="street-info">
-          <div class="street-name">赵巷镇</div>
-          <div class="street-count">当前待审核 <span class="num">5</span> 条</div>
-        </div>
-      </div>
       <div class="street-item">
         <div class="radio-circle"></div>
         <div class="street-icon" style="background:linear-gradient(135deg,#FF9500,#FFB700);">夏</div>
@@ -587,7 +589,7 @@ body {
         </div>
       </div>
       <div class="street-item">
-        <div class="radio-circle"></div>
+        <div class="radio-circle checked"></div>
         <div class="street-icon" style="background:linear-gradient(135deg,#1890FF,#36CFC9);">盈</div>
         <div class="street-info">
           <div class="street-name">盈浦街道</div>
@@ -610,6 +612,81 @@ body {
           <div class="street-count">当前待审核 <span class="num">1</span> 条</div>
         </div>
       </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#00B578,#58b8d7);">练</div>
+        <div class="street-info">
+          <div class="street-name">练塘镇</div>
+        </div>
+      </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#00B578,#58b8d7);">金</div>
+        <div class="street-info">
+          <div class="street-name">金泽镇</div>
+        </div>
+      </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#00B578,#58b8d7);">赵</div>
+        <div class="street-info">
+          <div class="street-name">赵巷镇</div>
+        </div>
+      </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#00B578,#58b8d7);">徐</div>
+        <div class="street-info">
+          <div class="street-name">徐泾镇</div>
+        </div>
+      </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#00B578,#58b8d7);">华</div>
+        <div class="street-info">
+          <div class="street-name">华新镇</div>
+        </div>
+      </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#00B578,#58b8d7);">重</div>
+        <div class="street-info">
+          <div class="street-name">重固镇</div>
+        </div>
+      </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#00B578,#58b8d7);">白</div>
+        <div class="street-info">
+          <div class="street-name">白鹤镇</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-header">虚拟园区</div>
+    <div class="content-card">
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#722ED1,#B37FEB);">工</div>
+        <div class="street-info">
+          <div class="street-name">青浦工业园区</div>
+        </div>
+      </div>
+      <div class="street-item">
+        <div class="radio-circle"></div>
+        <div class="street-icon" style="background:linear-gradient(135deg,#722ED1,#B37FEB);">西</div>
+        <div class="street-info">
+          <div class="street-name">西虹桥商务区</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-header">转派原因</div>
+    <div class="content-card">
+      <div style="border:1px solid #e5e5e5;border-radius:10px;padding:12px;min-height:80px;background:#fafafa;">
+        <span style="color:#999;font-size:14px;">请填写转派原因（必填，限200字）</span>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#999;margin-top:6px;">0/200</div>
     </div>
     <div class="bottom-actions-3">
       <button class="btn btn-secondary" style="flex:1;">取消</button>
@@ -619,6 +696,7 @@ body {
 </div>
 
 <!-- ========== 页面3：转派成功确认页 ========== -->
+<div class="page-label">页面3：转派成功确认页</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -646,19 +724,14 @@ body {
       <div class="info-item"><span class="info-label">转派时间</span><span class="info-value">2026-03-19 16:02</span></div>
       <div class="info-item"><span class="info-label">当前状态</span><span class="info-value"><span class="status-tag confirm-pending">待确认接收</span></span></div>
     </div>
-    <div class="annotation">
-      <div class="annotation-title">转派后流程说明</div>
-      <div>1. 赵巷镇下所有有审核权限的人员均可在待确认列表中查看</div>
-      <div>2. 该备案从您的待审核列表中移除</div>
-      <div>3. 目标街道确认接收后，方可进行审核</div>
-    </div>
     <div style="padding:12px 16px;">
       <button class="btn btn-primary btn-full">返回项目列表</button>
     </div>
   </div>
 </div>
 
-<!-- ========== 页面4：目标街道-待确认接收列表 ========== -->
+<!-- ========== 页面4：待确认列表（目标街道查看） ========== -->
+<div class="page-label">页面4：待确认列表（目标街道查看待确认接收的备案）</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -722,7 +795,8 @@ body {
   </div>
 </div>
 
-<!-- ========== 页面5：确认接收详情页（底部确认接收/不是本街道） ========== -->
+<!-- ========== 页面5：确认接收详情页 ========== -->
+<div class="page-label">页面5：确认接收详情页（底部确认接收/不是本街道）</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -792,6 +866,7 @@ body {
 </div>
 
 <!-- ========== 页面6：确认接收成功页 ========== -->
+<div class="page-label">页面6：确认接收成功页</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -820,19 +895,14 @@ body {
       <div class="info-item"><span class="info-label">确认人</span><span class="info-value">张伟</span></div>
       <div class="info-item"><span class="info-label">当前状态</span><span class="info-value"><span class="status-tag audit-pending">待审核</span></span></div>
     </div>
-    <div class="annotation">
-      <div class="annotation-title">后续操作</div>
-      <div>1. 该备案已进入待审核状态</div>
-      <div>2. 您可以通过项目中心-待审核列表查看</div>
-      <div>3. 点击备案可进行通过或驳回操作</div>
-    </div>
     <div style="padding:12px 16px;">
       <button class="btn btn-primary btn-full">前往审核</button>
     </div>
   </div>
 </div>
 
-<!-- ========== 页面7：确认后审核详情页（底部驳回/通过/转派） ========== -->
+<!-- ========== 页面7：已确认审核详情页 ========== -->
+<div class="page-label">页面7：已确认审核详情页（显示转派来源信息，底部驳回/通过）</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -909,6 +979,7 @@ body {
 </div>
 
 <!-- ========== 页面8：驳回操作页 ========== -->
+<div class="page-label">页面8：驳回操作页</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -952,6 +1023,7 @@ body {
 </div>
 
 <!-- ========== 页面9：审核通过结果页 ========== -->
+<div class="page-label">页面9：审核通过结果页</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -980,19 +1052,14 @@ body {
       <div class="info-item"><span class="info-label">审核员</span><span class="info-value">张伟</span></div>
       <div class="info-item"><span class="info-label">备案编号</span><span class="info-value">QPBAB-2026-0319001</span></div>
     </div>
-    <div class="annotation">
-      <div class="annotation-title">后续流程</div>
-      <div>1. 系统自动生成备案回执（含"一码安"二维码）</div>
-      <div>2. 短信通知申报人审核通过</div>
-      <div>3. 工程进入日常巡查监管阶段</div>
-    </div>
     <div style="padding:12px 16px;">
       <button class="btn btn-primary btn-full">返回项目列表</button>
     </div>
   </div>
 </div>
 
-<!-- ========== 页面10：转派记录页 ========== -->
+<!-- ========== 页面10：转派记录页（我发起的） ========== -->
+<div class="page-label">页面10：转派记录页（我发起的视角）</div>
 <div class="phone-frame">
   <div class="phone-screen">
     <div class="status-bar">
@@ -1007,6 +1074,10 @@ body {
       <div class="back-btn">&#8249;</div>
       <div class="nav-title">转派记录</div>
       <div style="width:44px;"></div>
+    </div>
+    <div class="sub-tab-bar">
+      <div class="sub-tab-item active">我发起的</div>
+      <div class="sub-tab-item">我接收的</div>
     </div>
     <div class="filter-bar" style="margin-top:8px;">
       <div class="filter-select">全部街道 <div class="arrow"></div></div>
@@ -1053,6 +1124,68 @@ body {
           <div class="record-desc">庆华居委会 · 零星作业</div>
         </div>
         <div style="flex-shrink:0;"><span class="result-tag pass">已通过</span></div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:20px;color:#999;font-size:13px;">没有更多了</div>
+  </div>
+</div>
+
+<!-- ========== 页面11：转派记录页（我接收的） ========== -->
+<div class="page-label">页面11：转派记录页（我接收的视角）</div>
+<div class="phone-frame">
+  <div class="phone-screen">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons">
+        <div class="signal-icon"><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div></div>
+        <div class="wifi-icon"></div>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="back-btn">&#8249;</div>
+      <div class="nav-title">转派记录</div>
+      <div style="width:44px;"></div>
+    </div>
+    <div class="sub-tab-bar">
+      <div class="sub-tab-item">我发起的</div>
+      <div class="sub-tab-item active">我接收的</div>
+    </div>
+    <div class="filter-bar" style="margin-top:8px;">
+      <div class="filter-select">全部街道 <div class="arrow"></div></div>
+      <div style="flex:1;"></div>
+      <div class="filter-select">近7天 <div class="arrow"></div></div>
+    </div>
+    <div class="content-card" style="margin-top:8px;">
+      <div class="record-item">
+        <div class="record-time-col"><div class="record-time">03-20<br>09:15</div></div>
+        <div class="record-dot-line"><div class="record-dot done"></div><div class="record-line"></div></div>
+        <div class="record-content">
+          <div class="record-title">夏阳街道 → 赵巷镇（本街道）</div>
+          <div class="record-desc">青浦区XX路外立面装修工程</div>
+          <div class="record-desc">转派人：李四 · 确认人：张伟</div>
+        </div>
+        <div style="flex-shrink:0;"><span class="result-tag pass">已通过</span></div>
+      </div>
+      <div class="record-item">
+        <div class="record-time-col"><div class="record-time">03-19<br>16:02</div></div>
+        <div class="record-dot-line"><div class="record-dot done"></div><div class="record-line"></div></div>
+        <div class="record-content">
+          <div class="record-title">香花桥街道 → 赵巷镇（本街道）</div>
+          <div class="record-desc">0318小型6666666</div>
+          <div class="record-desc">转派人：王五 · 确认人：张伟</div>
+        </div>
+        <div style="flex-shrink:0;"><span class="result-tag wait">待审核</span></div>
+      </div>
+      <div class="record-item">
+        <div class="record-time-col"><div class="record-time">03-18<br>10:30</div></div>
+        <div class="record-dot-line"><div class="record-dot done"></div><div class="record-line"></div></div>
+        <div class="record-content">
+          <div class="record-title">朱家角镇 → 赵巷镇（本街道）</div>
+          <div class="record-desc">青浦工业园区道路维修工程</div>
+          <div class="record-desc">转派人：赵六 · 确认人：张伟</div>
+        </div>
+        <div style="flex-shrink:0;"><span class="result-tag reject">已驳回</span></div>
       </div>
     </div>
     <div style="text-align:center;padding:20px;color:#999;font-size:13px;">没有更多了</div>

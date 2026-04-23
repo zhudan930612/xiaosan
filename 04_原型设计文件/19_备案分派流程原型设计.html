@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>备案分派流程原型设计</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #e8e8e8;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ========== 主容器 ========== */
+        .main-container {
+            display: flex;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        /* ========== 左侧：手机原型区 ========== */
+        .prototype-area {
+            flex-shrink: 0;
+        }
+
+        /* ========== 手机框架 ========== */
+        .phone-frame {
+            width: 390px;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .phone-screen {
+            width: 100%;
+            min-height: 720px;
+            background: linear-gradient(180deg, #f6fbf8 0%, #ffffff 100%);
+            position: relative;
+            padding-bottom: 30px;
+        }
+
+        /* ========== 状态栏 ========== */
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(90deg, #35ad73, #58b8d7);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .status-bar .time { font-weight: 800; font-size: 15px; }
+        .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+        .status-bar .icons svg { width: 18px; height: 18px; }
+
+        /* ========== 导航栏 ========== */
+        .nav-bar {
+            background: linear-gradient(90deg, #35ad73, #58b8d7);
+            padding: 10px 16px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        .nav-bar .back-btn {
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 28px; font-weight: 300;
+            cursor: pointer;
+        }
+        .nav-bar .title {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            color: white; font-size: 18px; font-weight: 800;
+        }
+        .nav-bar .right-btn {
+            min-width: 60px; height: 34px;
+            display: flex; align-items: center; justify-content: flex-end;
+            color: white; font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* ========== Tab栏 ========== */
+        .tab-bar {
+            background: #f1f3f1;
+            border-radius: 30px 30px 0 0;
+            display: flex;
+            padding: 14px 4px 12px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.32);
+            position: relative;
+            z-index: 2;
+        }
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px 4px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #303631;
+            border-radius: 26px 0 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-item.active {
+            background: linear-gradient(135deg, #ffffff 0%, #eef9f3 60%, #f4fcff 100%);
+            color: #1a8f62;
+            font-weight: 800;
+            box-shadow: -10px 0 20px rgba(83, 183, 216, 0.08);
+        }
+
+        /* ========== 内容区 ========== */
+        .content-area {
+            padding: 16px;
+            min-height: 500px;
+        }
+
+        /* ========== 卡片通用 ========== */
+        .card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+            margin-bottom: 16px;
+        }
+        .card.primary {
+            background: linear-gradient(180deg, #ebf8f1 0%, #ffffff 100%);
+            border: 2px solid rgba(34, 166, 109, 0.5);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000000;
+        }
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 12px;
+            padding-left: 8px;
+            border-left: 3px solid #00B578;
+        }
+
+        /* ========== 信息项 ========== */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label {
+            font-size: 14px;
+            color: #8E8E93;
+            flex-shrink: 0;
+            min-width: 80px;
+        }
+        .info-value {
+            font-size: 14px;
+            color: #000000;
+            text-align: right;
+            flex: 1;
+            word-break: break-all;
+        }
+
+        /* ========== 状态标签 ========== */
+        .status-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-tag.green { background: #E6F7F0; color: #00B578; }
+        .status-tag.orange { background: #FFF7E6; color: #FF9500; }
+        .status-tag.red { background: #FFF2F0; color: #FF4D4F; }
+        .status-tag.blue { background: #E6F4FF; color: #1890FF; }
+        .status-tag.gray { background: #F5F5F5; color: #999999; }
+
+        /* ========== 按钮 ========== */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #27a66d, #4fb3d7);
+            color: white;
+            box-shadow: 0 12px 26px rgba(34, 166, 109, 0.24);
+        }
+        .btn-secondary {
+            background: white;
+            color: #00B578;
+            border: 1px solid #00B578;
+        }
+        .btn-danger {
+            background: white;
+            color: #FF4D4F;
+            border: 1px solid #FF4D4F;
+        }
+        .btn-gray {
+            background: #F5F5F5;
+            color: #666666;
+            border: 1px solid #E5E5E5;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            padding: 16px 20px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+        }
+        .btn-group .btn { flex: 1; }
+
+        /* ========== 底部固定按钮区 ========== */
+        .bottom-actions {
+            padding: 16px 20px 24px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+        }
+        .bottom-actions.three-btn {
+            display: flex;
+            gap: 10px;
+        }
+        .bottom-actions.three-btn .btn { flex: 1; }
+        .bottom-actions.three-btn .btn.reject {
+            background: white; color: #FF4D4F;
+            border: 1px solid #FF4D4F;
+        }
+        .bottom-actions.three-btn .btn.pass {
+            background: linear-gradient(90deg, #27a66d, #4fb3d7);
+            color: white;
+        }
+        .bottom-actions.three-btn .btn.transfer {
+            background: #E6F7F0; color: #00B578;
+            border: 1px solid #00B578;
+        }
+
+        /* ========== 列表项 ========== */
+        .list-item {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        .list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .list-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333333;
+        }
+        .list-item-desc {
+            font-size: 13px;
+            color: #666666;
+            margin-bottom: 4px;
+        }
+        .list-item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .list-item-time {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        /* ========== 搜索栏 ========== */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: #F2F2F7;
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-bottom: 16px;
+        }
+        .search-bar input {
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            flex: 1;
+            outline: none;
+            margin-left: 8px;
+        }
+        .search-bar input::placeholder { color: #999999; }
+
+        /* ========== 单选列表 ========== */
+        .radio-list {
+            background: #ffffff;
+            border-radius: 18px;
+            border: 1px solid #d7e3db;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        .radio-item:last-child { border-bottom: none; }
+        .radio-item.selected { background: #F6FFFB; }
+        .radio-circle {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border: 2px solid #CCCCCC;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .radio-item.selected .radio-circle {
+            border-color: #00B578;
+            background: #00B578;
+        }
+        .radio-circle::after {
+            content: '';
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: white;
+            display: none;
+        }
+        .radio-item.selected .radio-circle::after { display: block; }
+        .radio-text {
+            font-size: 15px;
+            color: #333333;
+            flex: 1;
+        }
+        .radio-item.selected .radio-text {
+            color: #00B578;
+            font-weight: 600;
+        }
+
+        /* ========== 文本域 ========== */
+        .textarea-box {
+            width: 100%;
+            min-height: 100px;
+            border: 1px solid #E5E5E5;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 15px;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+        }
+        .textarea-box:focus { border-color: #00B578; }
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #999999;
+            margin-top: 6px;
+        }
+
+        /* ========== 结果页 ========== */
+        .result-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .result-icon {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .result-icon.success {
+            background: linear-gradient(135deg, #27a66d, #4fb3d7);
+        }
+        .result-icon.success::after {
+            content: '✓';
+            color: white;
+            font-size: 40px;
+            font-weight: 800;
+        }
+        .result-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 12px;
+        }
+        .result-desc {
+            font-size: 15px;
+            color: #666666;
+            margin-bottom: 40px;
+        }
+
+        /* ========== 转派记录卡片 ========== */
+        .record-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+            margin-bottom: 12px;
+        }
+        .record-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .record-card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333333;
+        }
+        .record-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .record-info-item {
+            color: #666666;
+        }
+        .record-info-item span {
+            color: #333333;
+        }
+
+        /* ========== 时间线 ========== */
+        .timeline {
+            padding-left: 24px;
+            position: relative;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #E5E5E5;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -24px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00B578;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #00B578;
+        }
+        .timeline-dot.done::after {
+            content: '✓';
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 10px;
+        }
+        .timeline-dot.gray {
+            background: #E5E5E5;
+            box-shadow: 0 0 0 2px #E5E5E5;
+        }
+        .timeline-content {
+            font-size: 14px;
+            color: #333333;
+        }
+        .timeline-time {
+            font-size: 12px;
+            color: #999999;
+            margin-top: 4px;
+        }
+
+        /* ========== 来源信息条 ========== */
+        .source-bar {
+            background: linear-gradient(90deg, #f2faf5, #f5fbfe);
+            border: 1px solid rgba(34, 166, 109, 0.12);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .source-bar-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #27a66d, #4fb3d7);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        .source-bar-text {
+            font-size: 14px;
+            color: #333333;
+        }
+        .source-bar-text span {
+            color: #00B578;
+            font-weight: 600;
+        }
+
+        /* ========== 页面切换 ========== */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ========== 右侧：需求说明区域 ========== */
+        .annotation-area {
+            flex: 1;
+            min-width: 400px;
+            max-width: 600px;
+        }
+        .page-annotation {
+            display: none;
+            background: #FFFBE6;
+            border: 2px dashed #FFC53D;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .page-annotation.active {
+            display: block;
+        }
+        .page-annotation h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #FFC53D;
+        }
+        .page-annotation .anno-section {
+            margin-bottom: 16px;
+        }
+        .page-annotation .anno-section:last-child {
+            margin-bottom: 0;
+        }
+        .page-annotation .anno-section h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #D48806;
+            margin-bottom: 8px;
+        }
+        .page-annotation .anno-section p,
+        .page-annotation .anno-section li {
+            font-size: 13px;
+            color: #595959;
+            line-height: 1.8;
+        }
+        .page-annotation .anno-section ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+        .page-annotation .anno-section li {
+            margin-bottom: 4px;
+        }
+
+        /* ========== F8 快捷键提示 ========== */
+        .shortcut-hint {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 1000;
+        }
+
+        /* ========== 浮动导航（F8控制） ========== */
+        .float-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .float-nav.show {
+            display: flex;
+        }
+        .float-nav-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90vw;
+        }
+        .float-nav-buttons button {
+            padding: 6px 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .float-nav-buttons button:hover {
+            background: rgba(0,0,0,0.9);
+        }
+        .float-nav-indicator {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* ========== 标注抽屉 ========== */
+        .annotation-panel {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-start;
+        }
+        .annotation-toggle {
+            background: linear-gradient(90deg, #27a66d, #4fb3d7);
+            color: white;
+            padding: 12px 8px;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            writing-mode: vertical-rl;
+            letter-spacing: 4px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+        .annotation-content {
+            width: 0;
+            overflow: hidden;
+            transition: width 0.3s ease;
+            background: #FFFBE6;
+            border: 1px dashed #FFC53D;
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+        }
+        .annotation-content.open {
+            width: 380px;
+            padding: 16px;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        .annotation-content h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #FFC53D;
+        }
+        .annotation-content p,
+        .annotation-content li {
+            font-size: 13px;
+            color: #666666;
+            line-height: 1.7;
+            margin-bottom: 6px;
+        }
+        .annotation-content ul {
+            padding-left: 16px;
+            margin-bottom: 12px;
+        }
+        .annotation-content .anno-section {
+            margin-bottom: 16px;
+        }
+        .annotation-content .anno-section:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ========== 空状态 ========== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+        .empty-icon {
+            width: 80px; height: 80px;
+            background: #F5F5F5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: #CCCCCC;
+            font-size: 32px;
+        }
+        .empty-text {
+            font-size: 15px;
+            color: #999999;
+        }
+
+        /* ========== 页面指示器 ========== */
+        .page-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px;
+        }
+        .page-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #E5E5E5;
+        }
+        .page-dot.active { background: #00B578; }
+
+        /* ========== 标签页（记录页） ========== */
+        .record-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .record-tab {
+            flex: 1;
+            text-align: center;
+            padding: 14px;
+            font-size: 15px;
+            color: #666666;
+            cursor: pointer;
+            position: relative;
+        }
+        .record-tab.active {
+            color: #00B578;
+            font-weight: 600;
+        }
+        .record-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #00B578;
+            border-radius: 2px;
+        }
+
+        /* ========== 筛选栏 ========== */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: white;
+            overflow-x: auto;
+        }
+        .filter-tag {
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #666666;
+            background: #F5F5F5;
+            border: 1px solid #E5E5E5;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .filter-tag.active {
+            background: #E6F7F0;
+            color: #00B578;
+            border-color: #00B578;
+        }
+    </style>
+</head>
+<body>
+
+<!-- F8快捷键提示 -->
+<div class="shortcut-hint">按 F8 切换页面导航</div>
+
+<div class="main-container">
+
+<!-- ============ 左侧：手机原型区 ============ -->
+<div class="prototype-area">
+<div class="phone-frame">
+    <div class="phone-screen">
+
+        <!-- ========== 页面1: 审核详情页 ========== -->
+        <div class="page active" id="page1">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" onclick="goBack()">&#8249;</div>
+                <div class="title">备案审核</div>
+                <div class="right-btn">记录</div>
+            </div>
+            <div class="content-area">
+                <!-- 状态卡片 -->
+                <div class="card primary">
+                    <div class="card-header">
+                        <span class="card-title">备案状态</span>
+                        <span class="status-tag orange">待审核</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">备案编号</span>
+                        <span class="info-value">BA-20260422-001</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">提交时间</span>
+                        <span class="info-value">2026-04-22 14:30</span>
+                    </div>
+                </div>
+                <!-- 基本信息 -->
+                <div class="card">
+                    <div class="section-title">基本信息</div>
+                    <div class="info-row">
+                        <span class="info-label">工程名称</span>
+                        <span class="info-value">青浦区XX路商铺装修工程</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">所属街镇</span>
+                        <span class="info-value">夏阳街道</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工地址</span>
+                        <span class="info-value">青浦区XX路123号</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工单位</span>
+                        <span class="info-value">上海XX建筑装饰有限公司</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">联系人</span>
+                        <span class="info-value">张三 138****8888</span>
+                    </div>
+                </div>
+                <!-- 施工信息 -->
+                <div class="card">
+                    <div class="section-title">施工信息</div>
+                    <div class="info-row">
+                        <span class="info-label">施工内容</span>
+                        <span class="info-value">室内装修、水电改造</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工面积</span>
+                        <span class="info-value">120平方米</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工周期</span>
+                        <span class="info-value">2026-04-25 至 2026-06-25</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">工人数量</span>
+                        <span class="info-value">8人</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 底部三按钮 -->
+            <div class="bottom-actions three-btn">
+                <div class="btn reject" onclick="showPage('page8')">驳回</div>
+                <div class="btn pass" onclick="showPage('page9')">通过</div>
+                <div class="btn transfer" onclick="showPage('page2')">转派</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面2: 选择目标街道页 ========== -->
+        <div class="page" id="page2">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" onclick="showPage('page1')">&#8249;</div>
+                <div class="title">选择目标街道</div>
+                <div class="right-btn"></div>
+            </div>
+            <div class="content-area">
+                <!-- 搜索栏 -->
+                <div class="search-bar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <input type="text" placeholder="搜索街道名称">
+                </div>
+                <!-- 当前街道提示 -->
+                <div style="padding: 0 8px 12px; font-size: 13px; color: #999;">
+                    当前所属街道：<span style="color: #00B578; font-weight: 600;">夏阳街道</span>（不可选）
+                </div>
+                <!-- 街道列表 -->
+                <div class="radio-list">
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">盈浦街道</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">香花桥街道</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">朱家角镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">练塘镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">金泽镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">赵巷镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">徐泾镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">华新镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">重固镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">白鹤镇</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">青浦工业园区</span>
+                    </div>
+                    <div class="radio-item" onclick="selectStreet(this)">
+                        <div class="radio-circle"></div>
+                        <span class="radio-text">西虹桥商务区</span>
+                    </div>
+                </div>
+                <!-- 转派原因 -->
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 14px; color: #333; margin-bottom: 8px; font-weight: 500;">
+                        转派原因 <span style="color: #FF4D4F;">*</span>
+                    </div>
+                    <textarea class="textarea-box" placeholder="请填写转派原因，如：该地址实际属于目标街道管辖范围"></textarea>
+                    <div class="char-count">0/200</div>
+                </div>
+            </div>
+            <div class="bottom-actions">
+                <div class="btn btn-primary" onclick="showPage('page3')">确认转派</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面3: 转派成功确认页 ========== -->
+        <div class="page" id="page3">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" style="opacity:0;">&#8249;</div>
+                <div class="title">转派结果</div>
+                <div class="right-btn"></div>
+            </div>
+            <div class="content-area">
+                <div class="result-page">
+                    <div class="result-icon success"></div>
+                    <div class="result-title">转派成功</div>
+                    <div class="result-desc">备案已转派至目标街道，等待对方确认接收</div>
+                    <!-- 转派信息卡片 -->
+                    <div class="card" style="width: 100%; text-align: left;">
+                        <div class="info-row">
+                            <span class="info-label">备案编号</span>
+                            <span class="info-value">BA-20260422-001</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">目标街道</span>
+                            <span class="info-value">盈浦街道</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">转派时间</span>
+                            <span class="info-value">2026-04-22 15:20</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">当前状态</span>
+                            <span class="info-value"><span class="status-tag blue">转派中</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-actions">
+                <div class="btn btn-primary" onclick="showPage('page1')">返回审核列表</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面4: 待确认列表 ========== -->
+        <div class="page" id="page4">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" style="opacity:0;">&#8249;</div>
+                <div class="title">项目中心</div>
+                <div class="right-btn"></div>
+            </div>
+            <div class="tab-bar">
+                <div class="tab-item" onclick="switchTab(this, 'tab1')">待受理</div>
+                <div class="tab-item active" onclick="switchTab(this, 'tab2')">待审核</div>
+                <div class="tab-item" onclick="switchTab(this, 'tab3')">待确认</div>
+                <div class="tab-item" onclick="switchTab(this, 'tab4')">已办结</div>
+            </div>
+            <div class="content-area">
+                <!-- 列表项1 -->
+                <div class="list-item" onclick="showPage('page5')">
+                    <div class="list-item-header">
+                        <span class="list-item-title">青浦区XX路商铺装修工程</span>
+                        <span class="status-tag blue">转派中</span>
+                    </div>
+                    <div class="list-item-desc">BA-20260422-001 | 夏阳街道转派</div>
+                    <div class="list-item-desc">青浦区XX路123号</div>
+                    <div class="list-item-meta">
+                        <span class="list-item-time">转派时间：2026-04-22 15:20</span>
+                        <span class="status-tag orange">待确认</span>
+                    </div>
+                </div>
+                <!-- 列表项2 -->
+                <div class="list-item" onclick="showPage('page5')">
+                    <div class="list-item-header">
+                        <span class="list-item-title">XX小区电梯改造工程</span>
+                        <span class="status-tag blue">转派中</span>
+                    </div>
+                    <div class="list-item-desc">BA-20260421-003 | 赵巷镇转派</div>
+                    <div class="list-item-desc">青浦区XX路456号</div>
+                    <div class="list-item-meta">
+                        <span class="list-item-time">转派时间：2026-04-21 10:15</span>
+                        <span class="status-tag orange">待确认</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 页面5: 确认接收详情页 ========== -->
+        <div class="page" id="page5">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" onclick="showPage('page4')">&#8249;</div>
+                <div class="title">备案确认</div>
+                <div class="right-btn"></div>
+            </div>
+            <div class="content-area">
+                <!-- 转派来源信息条 -->
+                <div class="source-bar">
+                    <div class="source-bar-icon">转</div>
+                    <div class="source-bar-text">
+                        由 <span>夏阳街道</span> 转派至本街道，请确认是否属于本街道管辖范围
+                    </div>
+                </div>
+                <!-- 状态卡片 -->
+                <div class="card primary">
+                    <div class="card-header">
+                        <span class="card-title">备案状态</span>
+                        <span class="status-tag blue">转派中</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">备案编号</span>
+                        <span class="info-value">BA-20260422-001</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">转派时间</span>
+                        <span class="info-value">2026-04-22 15:20</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">转派原因</span>
+                        <span class="info-value">该地址实际属于盈浦街道管辖范围</span>
+                    </div>
+                </div>
+                <!-- 基本信息 -->
+                <div class="card">
+                    <div class="section-title">基本信息</div>
+                    <div class="info-row">
+                        <span class="info-label">工程名称</span>
+                        <span class="info-value">青浦区XX路商铺装修工程</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">所属街镇</span>
+                        <span class="info-value">夏阳街道（转派前）</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工地址</span>
+                        <span class="info-value">青浦区XX路123号</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工单位</span>
+                        <span class="info-value">上海XX建筑装饰有限公司</span>
+                    </div>
+                </div>
+                <!-- 施工信息 -->
+                <div class="card">
+                    <div class="section-title">施工信息</div>
+                    <div class="info-row">
+                        <span class="info-label">施工内容</span>
+                        <span class="info-value">室内装修、水电改造</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工面积</span>
+                        <span class="info-value">120平方米</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工周期</span>
+                        <span class="info-value">2026-04-25 至 2026-06-25</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 底部确认按钮 -->
+            <div class="bottom-actions three-btn">
+                <div class="btn btn-danger" onclick="showPage('page2')">不是本街道</div>
+                <div class="btn btn-primary" onclick="showPage('page6')">确认接收</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面6: 确认接收成功页 ========== -->
+        <div class="page" id="page6">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" style="opacity:0;">&#8249;</div>
+                <div class="title">确认结果</div>
+                <div class="right-btn"></div>
+            </div>
+            <div class="content-area">
+                <div class="result-page">
+                    <div class="result-icon success"></div>
+                    <div class="result-title">确认接收成功</div>
+                    <div class="result-desc">该备案已进入本街道待审核列表，可进行审核操作</div>
+                    <!-- 状态流转信息 -->
+                    <div class="card" style="width: 100%; text-align: left;">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot done"></div>
+                                <div class="timeline-content">夏阳街道发起转派</div>
+                                <div class="timeline-time">2026-04-22 15:20</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot done"></div>
+                                <div class="timeline-content">盈浦街道确认接收</div>
+                                <div class="timeline-time">2026-04-22 16:05</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot gray"></div>
+                                <div class="timeline-content">等待审核</div>
+                                <div class="timeline-time">当前状态：待审核</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-actions">
+                <div class="btn btn-primary" onclick="showPage('page7')">去审核</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面7: 已确认审核详情页 ========== -->
+        <div class="page" id="page7">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" onclick="showPage('page4')">&#8249;</div>
+                <div class="title">备案审核</div>
+                <div class="right-btn">记录</div>
+            </div>
+            <div class="content-area">
+                <!-- 转派来源信息条 -->
+                <div class="source-bar">
+                    <div class="source-bar-icon">转</div>
+                    <div class="source-bar-text">
+                        转派来源：<span>夏阳街道</span> | 转派时间：2026-04-22 15:20 | 确认人：李四
+                    </div>
+                </div>
+                <!-- 状态卡片 -->
+                <div class="card primary">
+                    <div class="card-header">
+                        <span class="card-title">备案状态</span>
+                        <span class="status-tag orange">待审核</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">备案编号</span>
+                        <span class="info-value">BA-20260422-001</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">提交时间</span>
+                        <span class="info-value">2026-04-22 14:30</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">确认时间</span>
+                        <span class="info-value">2026-04-22 16:05</span>
+                    </div>
+                </div>
+                <!-- 基本信息 -->
+                <div class="card">
+                    <div class="section-title">基本信息</div>
+                    <div class="info-row">
+                        <span class="info-label">工程名称</span>
+                        <span class="info-value">青浦区XX路商铺装修工程</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">所属街镇</span>
+                        <span class="info-value">盈浦街道（已确认）</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工地址</span>
+                        <span class="info-value">青浦区XX路123号</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工单位</span>
+                        <span class="info-value">上海XX建筑装饰有限公司</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">联系人</span>
+                        <span class="info-value">张三 138****8888</span>
+                    </div>
+                </div>
+                <!-- 施工信息 -->
+                <div class="card">
+                    <div class="section-title">施工信息</div>
+                    <div class="info-row">
+                        <span class="info-label">施工内容</span>
+                        <span class="info-value">室内装修、水电改造</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工面积</span>
+                        <span class="info-value">120平方米</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">施工周期</span>
+                        <span class="info-value">2026-04-25 至 2026-06-25</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">工人数量</span>
+                        <span class="info-value">8人</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 底部按钮 -->
+            <div class="bottom-actions three-btn">
+                <div class="btn reject" onclick="showPage('page8')">驳回</div>
+                <div class="btn pass" onclick="showPage('page9')">通过</div>
+                <div class="btn transfer" onclick="showPage('page2')">转派</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面8: 驳回操作页 ========== -->
+        <div class="page" id="page8">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" onclick="showPage('page1')">&#8249;</div>
+                <div class="title">驳回备案</div>
+                <div class="right-btn"></div>
+            </div>
+            <div class="content-area">
+                <!-- 备案信息摘要 -->
+                <div class="card">
+                    <div class="info-row">
+                        <span class="info-label">备案编号</span>
+                        <span class="info-value">BA-20260422-001</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">工程名称</span>
+                        <span class="info-value">青浦区XX路商铺装修工程</span>
+                    </div>
+                </div>
+                <!-- 驳回原因 -->
+                <div class="card">
+                    <div class="section-title">驳回原因 <span style="color: #FF4D4F;">*</span></div>
+                    <textarea class="textarea-box" placeholder="请填写驳回原因，如：材料不齐全、信息有误等"></textarea>
+                    <div class="char-count">0/500</div>
+                    <!-- 快捷标签 -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                        <span style="padding: 6px 12px; background: #F5F5F5; border-radius: 12px; font-size: 13px; color: #666;">材料不齐全</span>
+                        <span style="padding: 6px 12px; background: #F5F5F5; border-radius: 12px; font-size: 13px; color: #666;">信息填写有误</span>
+                        <span style="padding: 6px 12px; background: #F5F5F5; border-radius: 12px; font-size: 13px; color: #666;">不符合施工条件</span>
+                        <span style="padding: 6px 12px; background: #F5F5F5; border-radius: 12px; font-size: 13px; color: #666;">地址信息有误</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-actions">
+                <div class="btn btn-danger" onclick="showPage('page1')">确认驳回</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面9: 审核通过结果页 ========== -->
+        <div class="page" id="page9">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" style="opacity:0;">&#8249;</div>
+                <div class="title">审核结果</div>
+                <div class="right-btn"></div>
+            </div>
+            <div class="content-area">
+                <div class="result-page">
+                    <div class="result-icon success"></div>
+                    <div class="result-title">审核通过</div>
+                    <div class="result-desc">备案审核已通过，已生成备案回执</div>
+                    <!-- 备案信息 -->
+                    <div class="card" style="width: 100%; text-align: left;">
+                        <div class="info-row">
+                            <span class="info-label">备案编号</span>
+                            <span class="info-value">BA-20260422-001</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">审核结果</span>
+                            <span class="info-value"><span class="status-tag green">已通过</span></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">审核时间</span>
+                            <span class="info-value">2026-04-22 16:30</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">审核人</span>
+                            <span class="info-value">李四</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">所属街镇</span>
+                            <span class="info-value">盈浦街道</span>
+                        </div>
+                    </div>
+                    <!-- 二维码区域 -->
+                    <div class="card" style="width: 100%; text-align: center; margin-top: 16px;">
+                        <div style="font-size: 14px; color: #666; margin-bottom: 12px;">备案回执二维码</div>
+                        <div style="width: 160px; height: 160px; background: #F5F5F5; margin: 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 14px;">
+                            二维码占位
+                        </div>
+                        <div style="font-size: 13px; color: #999; margin-top: 12px;">扫码查看备案详情</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-actions">
+                <div class="btn btn-primary" onclick="showPage('page1')">返回审核列表</div>
+            </div>
+        </div>
+
+        <!-- ========== 页面10: 转派记录页 ========== -->
+        <div class="page" id="page10">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" onclick="showPage('page1')">&#8249;</div>
+                <div class="title">转派记录</div>
+                <div class="right-btn"></div>
+            </div>
+            <!-- 记录标签页 -->
+            <div class="record-tabs">
+                <div class="record-tab active" onclick="switchRecordTab(this, 'sent')">我发起的</div>
+                <div class="record-tab" onclick="switchRecordTab(this, 'received')">我接收的</div>
+            </div>
+            <!-- 筛选栏 -->
+            <div class="filter-bar">
+                <div class="filter-tag active">全部</div>
+                <div class="filter-tag">转派中</div>
+                <div class="filter-tag">已确认</div>
+                <div class="filter-tag">已驳回</div>
+                <div class="filter-tag">已通过</div>
+            </div>
+            <div class="content-area" style="padding-top: 8px;">
+                <!-- 记录项1 -->
+                <div class="record-card">
+                    <div class="record-card-header">
+                        <span class="record-card-title">青浦区XX路商铺装修工程</span>
+                        <span class="status-tag blue">转派中</span>
+                    </div>
+                    <div class="record-info">
+                        <div class="record-info-item">目标街道：<span>盈浦街道</span></div>
+                        <div class="record-info-item">转派时间：<span>2026-04-22</span></div>
+                        <div class="record-info-item">转派原因：<span>地址归属错误</span></div>
+                        <div class="record-info-item">当前状态：<span>等待确认</span></div>
+                    </div>
+                </div>
+                <!-- 记录项2 -->
+                <div class="record-card">
+                    <div class="record-card-header">
+                        <span class="record-card-title">XX小区外墙维修工程</span>
+                        <span class="status-tag green">已通过</span>
+                    </div>
+                    <div class="record-info">
+                        <div class="record-info-item">目标街道：<span>赵巷镇</span></div>
+                        <div class="record-info-item">转派时间：<span>2026-04-18</span></div>
+                        <div class="record-info-item">转派原因：<span>跨街道工程</span></div>
+                        <div class="record-info-item">确认时间：<span>2026-04-18</span></div>
+                    </div>
+                </div>
+                <!-- 记录项3 -->
+                <div class="record-card">
+                    <div class="record-card-header">
+                        <span class="record-card-title">XX商场消防设施改造</span>
+                        <span class="status-tag red">已驳回</span>
+                    </div>
+                    <div class="record-info">
+                        <div class="record-info-item">目标街道：<span>徐泾镇</span></div>
+                        <div class="record-info-item">转派时间：<span>2026-04-15</span></div>
+                        <div class="record-info-item">转派原因：<span>区域调整</span></div>
+                        <div class="record-info-item">确认时间：<span>2026-04-15</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============ 右侧：需求说明区域 ============ -->
+<div class="annotation-area">
+
+    <!-- 页面1：审核详情页 -->
+    <div class="page-annotation active" id="anno-page1">
+        <h3>页面1：审核详情页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>备案状态为"待审核"时显示此页面</li>
+                <li>底部常驻驳回/通过/转派三个操作按钮</li>
+                <li>转派按钮与驳回/通过并列，不根据归属权动态显示/隐藏</li>
+                <li>审核员可随时发起转派，无需先判断归属权</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>备案基本信息从备案记录表读取</li>
+                <li>状态标签根据备案当前状态动态显示颜色</li>
+                <li>施工信息展示完整的施工内容、面积、周期、工人数量</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"驳回" → 进入驳回操作页，需填写驳回原因</li>
+                <li>点击"通过" → 直接审核通过，进入通过结果页</li>
+                <li>点击"转派" → 进入选择目标街道页</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>转派中的备案，发起方不可再进行驳回或通过操作</li>
+                <li>同一条备案在"转派中"状态下，不可再次发起转派</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面2：选择目标街道页 -->
+    <div class="page-annotation" id="anno-page2">
+        <h3>页面2：选择目标街道页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>从审核详情页点击"转派"后进入</li>
+                <li>页面顶部显示当前所属街道（不可选）</li>
+                <li>街道列表默认不预选任何选项</li>
+                <li>选中街道后显示选中样式</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>街道列表数据来源：青浦区11个实体街镇 + 虚拟园区</li>
+                <li>排序：按街道名称字母顺序排序</li>
+                <li>搜索：支持按街道名称实时筛选</li>
+                <li>当前街道标记为不可选，但仍在列表中展示（仅置灰提示）</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>字段规则</h4>
+            <ul>
+                <li>目标街道：单选，必填，不能与当前街道相同</li>
+                <li>转派原因：文本，必填，限制200字</li>
+                <li>转派原因仅对审核端可见，申报人不可见</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>未选择目标街道 → 点击"确认转派"按钮置灰不可用</li>
+                <li>未填写转派原因 → 点击"确认转派"按钮置灰不可用</li>
+                <li>选择目标街道=当前街道 → 提示"不能转派至当前街道"</li>
+                <li>校验通过 → 备案状态变更为"转派中" → 生成转派记录 → 推送通知 → 显示成功页</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>V1版本暂不支持批量转派</li>
+                <li>一次只能选择一个目标街道</li>
+                <li>转派后备案从发起方列表中移除，不可撤回</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面3：转派成功确认页 -->
+    <div class="page-annotation" id="anno-page3">
+        <h3>页面3：转派成功确认页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>转派操作成功后显示此结果页</li>
+                <li>展示转派后的关键信息摘要</li>
+                <li>状态显示为"转派中"</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>展示备案编号、目标街道、转派时间、当前状态</li>
+                <li>数据来源于刚生成的转派记录</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"返回审核列表" → 回到审核列表，该备案已从列表中移除</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>转派成功后，系统自动向目标街道所有有审核权限的人员推送待确认通知</li>
+                <li>该备案从发起方待审核列表中移除</li>
+                <li>发起方可在"转派记录-我发起的"中查看此记录</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面4：待确认列表 -->
+    <div class="page-annotation" id="anno-page4">
+        <h3>页面4：待确认列表 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>项目中心Tab栏切换到"待确认"时展示</li>
+                <li>仅展示转派至本街道且状态为"转派中"的备案</li>
+                <li>列表项标注"转派中"及转派来源信息</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>筛选条件：目标街道=当前登录人员所在街道 AND 状态=转派中</li>
+                <li>排序：按转派时间倒序排列（最新的在前）</li>
+                <li>列表项显示：工程名称、备案编号、来源街道、地址、转派时间</li>
+                <li>无待确认备案时显示空状态</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击列表项 → 进入确认接收详情页</li>
+                <li>目标街道下所有具有"备案审核"权限的人员均可查看此列表</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>多个有权限人员同时查看，列表内容一致</li>
+                <li>第一个确认接收的人员即为该备案的确认人</li>
+                <li>已被其他同事确认接收的备案从列表中移除</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面5：确认接收详情页 -->
+    <div class="page-annotation" id="anno-page5">
+        <h3>页面5：确认接收详情页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>点击待确认列表项后进入</li>
+                <li>页面顶部显示转派来源信息条（绿色渐变背景）</li>
+                <li>备案状态显示为"转派中"</li>
+                <li>底部显示"确认接收"和"不是本街道"两个按钮</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>展示完整的备案基本信息和施工信息</li>
+                <li>额外显示转派来源信息：来源街道、转派时间、转派原因</li>
+                <li>转派原因仅对审核端可见</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"确认接收" → 状态变更为"待审核" → 生成确认接收记录 → 进入本街道待审核列表 → 显示确认成功页</li>
+                <li>点击"不是本街道" → 保持"转派中"状态 → 进入选择目标街道页 → 由当前人员继续转派</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>"不是本街道"后目标街道可选择原街道（转回发起方）或其他任意街道</li>
+                <li>确认接收不限定由确认人本人审核，街道内任何有权限人员均可审核</li>
+                <li>有确认权限即等同于有审核权限</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面6：确认接收成功页 -->
+    <div class="page-annotation" id="anno-page6">
+        <h3>页面6：确认接收成功页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>确认接收操作成功后显示此结果页</li>
+                <li>展示状态流转时间线</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>时间线展示：发起转派 → 确认接收 → 等待审核</li>
+                <li>每个节点显示操作内容和操作时间</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"去审核" → 进入已确认审核详情页</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>确认接收后该备案进入本街道待审核列表</li>
+                <li>本街道下所有有审核权限的人员均可在待审核列表中看到此备案</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面7：已确认审核详情页 -->
+    <div class="page-annotation" id="anno-page7">
+        <h3>页面7：已确认审核详情页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>确认接收后进入正常审核流程</li>
+                <li>页面顶部显示转派来源信息条</li>
+                <li>备案状态显示为"待审核"</li>
+                <li>底部常驻驳回/通过/转派三按钮</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>审核详情页需显示转派来源信息（来源街道、转派时间）</li>
+                <li>所属街镇显示为确认后的街道（如：盈浦街道（已确认））</li>
+                <li>其余信息与正常备案完全一致</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"驳回" → 进入驳回操作页</li>
+                <li>点击"通过" → 直接审核通过</li>
+                <li>点击"转派" → 可再次转派至其他街道</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>审核通过后生成备案回执，归属街道以备案信息中的"所属街镇"字段为准</li>
+                <li>转派记录永久保留，可在转派记录页查看</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面8：驳回操作页 -->
+    <div class="page-annotation" id="anno-page8">
+        <h3>页面8：驳回操作页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>从审核详情页点击"驳回"后进入</li>
+                <li>顶部展示备案信息摘要（编号+名称）</li>
+                <li>下方为驳回原因输入区</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>字段规则</h4>
+            <ul>
+                <li>驳回原因：文本，必填，限制500字</li>
+                <li>提供快捷标签供选择：材料不齐全、信息填写有误、不符合施工条件、地址信息有误</li>
+                <li>快捷标签可多选，选中后自动拼接至文本域</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>未填写驳回原因 → "确认驳回"按钮置灰不可用</li>
+                <li>点击快捷标签 → 自动追加到文本域内容末尾</li>
+                <li>点击"确认驳回" → 状态变更为"已驳回" → 通知申报人（施工方）</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>驳回后申报人（施工方）会收到驳回通知</li>
+                <li>施工方修改后可重新提交，备案回到"待审核"状态</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面9：审核通过结果页 -->
+    <div class="page-annotation" id="anno-page9">
+        <h3>页面9：审核通过结果页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>审核通过操作成功后显示此结果页</li>
+                <li>状态标签显示"已通过"（绿色）</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>展示备案编号、审核结果、审核时间、审核人、所属街镇</li>
+                <li>生成备案回执二维码</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"返回审核列表" → 回到待审核列表</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>审核通过后，备案状态不可逆</li>
+                <li>转派记录中的状态同步更新为"已通过"</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面10：转派记录页 -->
+    <div class="page-annotation" id="anno-page10">
+        <h3>页面10：转派记录页 — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>分"我发起的"和"我接收的"两个视角</li>
+                <li>默认展示"我发起的"视角</li>
+                <li>每个视角下可进一步按状态筛选</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>"我发起的"：展示当前登录人员作为转派人发起的所有转派记录</li>
+                <li>"我接收的"：展示转派至当前登录人员所在街道的所有转派记录</li>
+                <li>筛选条件：全部、转派中、已确认、已驳回、已通过</li>
+                <li>记录排序：按转派时间倒序排列</li>
+                <li>每个审核员只能查看与自己相关的转派记录</li>
+                <li>区级不干预，不增加区级查看视角</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>字段规则</h4>
+            <ul>
+                <li>"我发起的"字段：转派时间、目标街道、备案名称、转派原因、当前状态</li>
+                <li>"我接收的"字段：转派时间、来源街道、备案名称、转派原因、确认人、确认时间、当前状态</li>
+                <li>记录状态：转派中/已确认/已驳回/已通过</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击备案名称 → 进入备案详情（只读）</li>
+                <li>点击筛选标签 → 按状态过滤记录列表</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>转派记录永久保留，不随备案归档而删除</li>
+                <li>支持按时间范围、街道、状态筛选</li>
+                <li>支持按备案名称搜索</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- 关闭 main-container -->
+</div>
+
+<!-- ========== 浮动导航（F8控制） ========== -->
+<div class="float-nav" id="floatNav">
+    <div class="float-nav-indicator" id="pageIndicator">页面 1 / 10：审核详情页</div>
+    <div class="float-nav-buttons">
+        <button onclick="showPage('page1')">1.审核</button>
+        <button onclick="showPage('page2')">2.选街道</button>
+        <button onclick="showPage('page3')">3.转派成功</button>
+        <button onclick="showPage('page4')">4.待确认</button>
+        <button onclick="showPage('page5')">5.确认详情</button>
+        <button onclick="showPage('page6')">6.确认成功</button>
+        <button onclick="showPage('page7')">7.已确认审核</button>
+        <button onclick="showPage('page8')">8.驳回</button>
+        <button onclick="showPage('page9')">9.通过</button>
+        <button onclick="showPage('page10')">10.记录</button>
+    </div>
+</div>
+
+<script>
+    // 页面切换
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+
+        const pageNames = {
+            'page1': '审核详情页',
+            'page2': '选择目标街道页',
+            'page3': '转派成功确认页',
+            'page4': '待确认列表',
+            'page5': '确认接收详情页',
+            'page6': '确认接收成功页',
+            'page7': '已确认审核详情页',
+            'page8': '驳回操作页',
+            'page9': '审核通过结果页',
+            'page10': '转派记录页'
+        };
+        const pageNum = pageId.replace('page', '');
+        document.getElementById('pageIndicator').textContent = `页面 ${pageNum} / 10：${pageNames[pageId]}`;
+    }
+
+    // Tab切换（项目中心）
+    function switchTab(el, tabId) {
+        el.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        // 如果切换到"待确认"，演示进入待确认列表逻辑
+        if (tabId === 'tab3') {
+            // 保持当前页（page4就是待确认列表页）
+        }
+    }
+
+    // 记录Tab切换
+    function switchRecordTab(el, type) {
+        el.parentElement.querySelectorAll('.record-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    // 街道选择
+    function selectStreet(el) {
+        el.parentElement.querySelectorAll('.radio-item').forEach(item => item.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    // 标注抽屉切换
+    function toggleAnnotation() {
+        document.getElementById('annotationContent').classList.toggle('open');
+    }
+
+    // 返回（默认返回首页）
+    function goBack() {
+        showPage('page1');
+    }
+
+    // F8 快捷键切换导航显示/隐藏
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F8') {
+            e.preventDefault();
+            document.getElementById('floatNav').classList.toggle('show');
+        }
+    });
+</script>
+
+</body>
+</html>

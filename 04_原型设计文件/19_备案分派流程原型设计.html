@@ -11,15 +11,20 @@
             background: #e8e8e8;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
         }
 
         /* ========== 主容器 ========== */
         .main-container {
             display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
             gap: 24px;
-            max-width: 1400px;
-            margin: 0 auto;
             align-items: flex-start;
+            min-width: fit-content;
+            margin: 0 auto;
         }
 
         /* ========== 左侧：手机原型区 ========== */
@@ -643,67 +648,159 @@
             font-size: 13px;
         }
 
-        /* ========== 标注抽屉 ========== */
-        .annotation-panel {
+        /* ========== 审批记录弹窗 ========== */
+        .record-popup {
+            display: none;
             position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 0; left: 0; right: 0; bottom: 0;
             z-index: 1000;
+        }
+        .record-popup.show {
+            display: block;
+        }
+        .record-popup-mask {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .record-popup-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+        .record-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .record-popup-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #333;
+            flex: 1;
+            text-align: center;
+        }
+        .record-popup-close {
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            width: 32px;
+            text-align: right;
+        }
+        .record-timeline {
+            padding: 20px;
+            position: relative;
+        }
+        .record-timeline::before {
+            content: '';
+            position: absolute;
+            left: 34px;
+            top: 30px;
+            bottom: 30px;
+            width: 2px;
+            background: #E5E5E5;
+        }
+        .record-timeline-item {
             display: flex;
             align-items: flex-start;
+            margin-bottom: 24px;
+            position: relative;
         }
-        .annotation-toggle {
-            background: linear-gradient(90deg, #27a66d, #4fb3d7);
-            color: white;
-            padding: 12px 8px;
-            border-radius: 8px 0 0 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            writing-mode: vertical-rl;
-            letter-spacing: 4px;
-            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-        }
-        .annotation-content {
-            width: 0;
-            overflow: hidden;
-            transition: width 0.3s ease;
-            background: #FFFBE6;
-            border: 1px dashed #FFC53D;
-            border-right: none;
-            border-radius: 8px 0 0 8px;
-        }
-        .annotation-content.open {
-            width: 380px;
-            padding: 16px;
-            overflow-y: auto;
-            max-height: 80vh;
-        }
-        .annotation-content h4 {
-            font-size: 14px;
-            font-weight: 700;
-            color: #333333;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #FFC53D;
-        }
-        .annotation-content p,
-        .annotation-content li {
-            font-size: 13px;
-            color: #666666;
-            line-height: 1.7;
-            margin-bottom: 6px;
-        }
-        .annotation-content ul {
-            padding-left: 16px;
-            margin-bottom: 12px;
-        }
-        .annotation-content .anno-section {
-            margin-bottom: 16px;
-        }
-        .annotation-content .anno-section:last-child {
+        .record-timeline-item:last-child {
             margin-bottom: 0;
+        }
+        .record-timeline-time {
+            width: 60px;
+            font-size: 13px;
+            color: #999;
+            padding-top: 8px;
+            flex-shrink: 0;
+        }
+        .record-timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #CCCCCC;
+            margin: 0 12px;
+            margin-top: 10px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .record-timeline-item.current .record-timeline-dot {
+            background: white;
+            border: 2px solid #00B578;
+            width: 14px;
+            height: 14px;
+            margin-top: 8px;
+        }
+        .record-timeline-card {
+            flex: 1;
+            background: #F8F8F8;
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .record-timeline-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .record-timeline-icon.green {
+            background: #E6F7F0;
+        }
+        .record-timeline-icon.green::after {
+            content: '';
+            width: 14px;
+            height: 14px;
+            background: #00B578;
+            border-radius: 50%;
+        }
+        .record-timeline-icon.blue {
+            background: #E6F4FF;
+        }
+        .record-timeline-icon.blue::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 6px solid #1890FF;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            margin-left: 2px;
+        }
+        .record-timeline-info {
+            flex: 1;
+        }
+        .record-timeline-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .record-timeline-desc {
+            font-size: 13px;
+            color: #666;
+        }
+        .record-timeline-remark {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #eee;
         }
 
         /* ========== 空状态 ========== */
@@ -823,7 +920,7 @@
             <div class="nav-bar">
                 <div class="back-btn" onclick="goBack()">&#8249;</div>
                 <div class="title">备案审核</div>
-                <div class="right-btn">记录</div>
+                <div class="right-btn" onclick="showRecordPopup()">记录</div>
             </div>
             <div class="content-area">
                 <!-- 状态卡片 -->
@@ -891,6 +988,66 @@
                 <div class="btn reject" onclick="showPage('page8')">驳回</div>
                 <div class="btn pass" onclick="showPage('page9')">通过</div>
                 <div class="btn transfer" onclick="showPage('page2')">转派</div>
+            </div>
+        </div>
+
+        <!-- 审批记录弹窗 -->
+        <div class="record-popup" id="recordPopup">
+            <div class="record-popup-mask" onclick="hideRecordPopup()"></div>
+            <div class="record-popup-content">
+                <div class="record-popup-header">
+                    <div class="record-popup-title">审批记录</div>
+                    <div class="record-popup-close" onclick="hideRecordPopup()">&#10005;</div>
+                </div>
+                <div class="record-timeline">
+                    <!-- 当前节点：待街道审核 -->
+                    <div class="record-timeline-item current">
+                        <div class="record-timeline-dot"></div>
+                        <div class="record-timeline-card">
+                            <div class="record-timeline-icon green"></div>
+                            <div class="record-timeline-info">
+                                <div class="record-timeline-name">待街道审核</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 转派发起 -->
+                    <div class="record-timeline-item">
+                        <div class="record-timeline-time">02-07 14:12</div>
+                        <div class="record-timeline-dot"></div>
+                        <div class="record-timeline-card">
+                            <div class="record-timeline-icon blue"></div>
+                            <div class="record-timeline-info">
+                                <div class="record-timeline-name">转派发起</div>
+                                <div class="record-timeline-desc">李四 | 夏阳街道 → 盈浦街道</div>
+                                <div class="record-timeline-remark">转派原因：该地址实际属于盈浦街道管辖范围</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 提交备案申请 -->
+                    <div class="record-timeline-item">
+                        <div class="record-timeline-time">02-07 14:11</div>
+                        <div class="record-timeline-dot"></div>
+                        <div class="record-timeline-card">
+                            <div class="record-timeline-icon green"></div>
+                            <div class="record-timeline-info">
+                                <div class="record-timeline-name">提交备案申请</div>
+                                <div class="record-timeline-desc">张三(施工用户) | 138****8888</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 发起备案 -->
+                    <div class="record-timeline-item">
+                        <div class="record-timeline-time">01-29 16:19</div>
+                        <div class="record-timeline-dot"></div>
+                        <div class="record-timeline-card">
+                            <div class="record-timeline-icon green"></div>
+                            <div class="record-timeline-info">
+                                <div class="record-timeline-name">发起备案</div>
+                                <div class="record-timeline-desc">张三(施工用户) | 138****8888</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1028,7 +1185,7 @@
             </div>
         </div>
 
-        <!-- ========== 页面4: 待确认列表 ========== -->
+        <!-- ========== 页面4: 项目中心（整合待确认列表） ========== -->
         <div class="page" id="page4">
             <div class="status-bar">
                 <span class="time">9:41</span>
@@ -1042,14 +1199,148 @@
                 <div class="title">项目中心</div>
                 <div class="right-btn"></div>
             </div>
-            <div class="tab-bar">
-                <div class="tab-item" onclick="switchTab(this, 'tab1')">待受理</div>
-                <div class="tab-item active" onclick="switchTab(this, 'tab2')">待审核</div>
-                <div class="tab-item" onclick="switchTab(this, 'tab3')">待确认</div>
-                <div class="tab-item" onclick="switchTab(this, 'tab4')">已办结</div>
+
+            <!-- 搜索区域 -->
+            <div style="background: linear-gradient(90deg, #35ad73, #58b8d7); padding: 0 16px 16px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="background: white; border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #333; min-width: 70px; text-align: center;">
+                        请选择 <span style="color: #999;">&#9662;</span>
+                    </div>
+                    <div style="flex: 1; background: white; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <span style="font-size: 14px; color: #999;">搜索工程名称或地址</span>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 8px 14px; font-size: 14px; color: #00B578; font-weight: 600;">
+                        搜索
+                    </div>
+                </div>
             </div>
-            <div class="content-area">
-                <!-- 列表项1 -->
+
+            <!-- 工程类型Tab -->
+            <div style="background: #f1f3f1; border-radius: 30px 30px 0 0; padding: 14px 16px 12px; display: flex; gap: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.32);">
+                <div style="background: linear-gradient(135deg, #27a66d, #4fb3d7); color: white; padding: 10px 16px; border-radius: 12px; font-size: 15px; font-weight: 700; position: relative;">
+                    小型工程(235)
+                    <span style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #FF4D4F; border-radius: 50%;"></span>
+                </div>
+                <div style="padding: 10px 16px; font-size: 15px; font-weight: 600; color: #333;">
+                    住宅装修(95)
+                    <span style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #FF4D4F; border-radius: 50%;"></span>
+                </div>
+                <div style="padding: 10px 16px; font-size: 15px; font-weight: 600; color: #333;">
+                    零星作业(161)
+                </div>
+            </div>
+
+            <!-- 审核状态筛选标签 -->
+            <div style="background: white; padding: 12px 16px; display: flex; gap: 16px; border-bottom: 1px solid #f0f0f0;">
+                <div style="font-size: 14px; color: #666;">待填报 (60)</div>
+                <div style="font-size: 14px; color: #00B578; font-weight: 600; border-bottom: 2px solid #00B578;">待审核 (21)</div>
+                <div style="font-size: 14px; color: #666;">已驳回 (50)</div>
+                <div style="font-size: 14px; color: #666;">已通过 (104)</div>
+                <div style="font-size: 14px; color: #FF9500; font-weight: 600;">待确认 (2)</div>
+            </div>
+
+            <div class="content-area" style="padding-top: 12px;">
+                <!-- 待审核：正常待审核 -->
+                <div class="list-item" onclick="showPage('page1')">
+                    <div class="list-item-header">
+                        <span class="list-item-title">青浦区XX路办公楼装修</span>
+                        <span class="status-tag orange">待审核</span>
+                    </div>
+                    <div class="list-item-desc">青浦区XX路88号</div>
+                    <div class="list-item-meta">
+                        <span class="list-item-time">提交时间：2026-04-22 10:30</span>
+                    </div>
+                </div>
+                <!-- 待审核：转派退回（被退回的，需要重新处理） -->
+                <div class="list-item" onclick="showPage('page2')">
+                    <div class="list-item-header">
+                        <span class="list-item-title">XX商场消防设施改造</span>
+                        <span class="status-tag red">转派退回</span>
+                    </div>
+                    <div class="list-item-desc">BA-20260420-005 | 徐泾镇退回</div>
+                    <div class="list-item-desc">青浦区XX路789号</div>
+                    <div class="list-item-meta">
+                        <span class="list-item-time">退回时间：2026-04-20 16:30</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部导航 -->
+            <div style="display: flex; background: white; border-top: 1px solid #f0f0f0; padding: 10px 0;">
+                <div style="flex: 1; text-align: center; color: #00B578; font-size: 12px;">
+                    <div style="width: 24px; height: 24px; background: #00B578; border-radius: 6px; margin: 0 auto 4px;"></div>
+                    项目中心
+                </div>
+                <div style="flex: 1; text-align: center; color: #999; font-size: 12px;">
+                    <div style="width: 24px; height: 24px; background: #ccc; border-radius: 6px; margin: 0 auto 4px;"></div>
+                    个人中心
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 页面4-2: 待确认列表（我接收的） ========== -->
+        <div class="page" id="page4-2">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" style="opacity:0;">&#8249;</div>
+                <div class="title">项目中心</div>
+                <div class="right-btn"></div>
+            </div>
+
+            <!-- 搜索区域 -->
+            <div style="background: linear-gradient(90deg, #35ad73, #58b8d7); padding: 0 16px 16px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="background: white; border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #333; min-width: 70px; text-align: center;">
+                        请选择 <span style="color: #999;">&#9662;</span>
+                    </div>
+                    <div style="flex: 1; background: white; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <span style="font-size: 14px; color: #999;">搜索工程名称或地址</span>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 8px 14px; font-size: 14px; color: #00B578; font-weight: 600;">
+                        搜索
+                    </div>
+                </div>
+            </div>
+
+            <!-- 工程类型Tab -->
+            <div style="background: #f1f3f1; border-radius: 30px 30px 0 0; padding: 14px 16px 12px; display: flex; gap: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.32);">
+                <div style="background: linear-gradient(135deg, #27a66d, #4fb3d7); color: white; padding: 10px 16px; border-radius: 12px; font-size: 15px; font-weight: 700; position: relative;">
+                    小型工程(235)
+                    <span style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #FF4D4F; border-radius: 50%;"></span>
+                </div>
+                <div style="padding: 10px 16px; font-size: 15px; font-weight: 600; color: #333;">
+                    住宅装修(95)
+                </div>
+                <div style="padding: 10px 16px; font-size: 15px; font-weight: 600; color: #333;">
+                    零星作业(161)
+                </div>
+            </div>
+
+            <!-- 审核状态筛选标签 -->
+            <div style="background: white; padding: 12px 16px; display: flex; gap: 16px; border-bottom: 1px solid #f0f0f0;">
+                <div style="font-size: 14px; color: #666;">待填报 (60)</div>
+                <div style="font-size: 14px; color: #666;">待审核 (21)</div>
+                <div style="font-size: 14px; color: #666;">已驳回 (50)</div>
+                <div style="font-size: 14px; color: #666;">已通过 (104)</div>
+                <div style="font-size: 14px; color: #FF9500; font-weight: 600; border-bottom: 2px solid #FF9500;">待确认 (2)</div>
+            </div>
+
+            <!-- 待确认子Tab -->
+            <div style="background: white; padding: 12px 16px; display: flex; gap: 24px; border-bottom: 1px solid #f0f0f0;">
+                <div style="font-size: 14px; color: #00B578; font-weight: 600; border-bottom: 2px solid #00B578;">我接收的 (1)</div>
+                <div style="font-size: 14px; color: #666;">我发起的 (1)</div>
+            </div>
+
+            <div class="content-area" style="padding-top: 12px;">
+                <!-- 我接收的：别人转派给我 -->
                 <div class="list-item" onclick="showPage('page5')">
                     <div class="list-item-header">
                         <span class="list-item-title">青浦区XX路商铺装修工程</span>
@@ -1059,21 +1350,107 @@
                     <div class="list-item-desc">青浦区XX路123号</div>
                     <div class="list-item-meta">
                         <span class="list-item-time">转派时间：2026-04-22 15:20</span>
-                        <span class="status-tag orange">待确认</span>
                     </div>
                 </div>
-                <!-- 列表项2 -->
-                <div class="list-item" onclick="showPage('page5')">
+            </div>
+
+            <!-- 底部导航 -->
+            <div style="display: flex; background: white; border-top: 1px solid #f0f0f0; padding: 10px 0;">
+                <div style="flex: 1; text-align: center; color: #00B578; font-size: 12px;">
+                    <div style="width: 24px; height: 24px; background: #00B578; border-radius: 6px; margin: 0 auto 4px;"></div>
+                    项目中心
+                </div>
+                <div style="flex: 1; text-align: center; color: #999; font-size: 12px;">
+                    <div style="width: 24px; height: 24px; background: #ccc; border-radius: 6px; margin: 0 auto 4px;"></div>
+                    个人中心
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 页面4-3: 待确认列表（我发起的） ========== -->
+        <div class="page" id="page4-3">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <div class="back-btn" style="opacity:0;">&#8249;</div>
+                <div class="title">项目中心</div>
+                <div class="right-btn"></div>
+            </div>
+
+            <!-- 搜索区域 -->
+            <div style="background: linear-gradient(90deg, #35ad73, #58b8d7); padding: 0 16px 16px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="background: white; border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #333; min-width: 70px; text-align: center;">
+                        请选择 <span style="color: #999;">&#9662;</span>
+                    </div>
+                    <div style="flex: 1; background: white; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <span style="font-size: 14px; color: #999;">搜索工程名称或地址</span>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 8px 14px; font-size: 14px; color: #00B578; font-weight: 600;">
+                        搜索
+                    </div>
+                </div>
+            </div>
+
+            <!-- 工程类型Tab -->
+            <div style="background: #f1f3f1; border-radius: 30px 30px 0 0; padding: 14px 16px 12px; display: flex; gap: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.32);">
+                <div style="background: linear-gradient(135deg, #27a66d, #4fb3d7); color: white; padding: 10px 16px; border-radius: 12px; font-size: 15px; font-weight: 700; position: relative;">
+                    小型工程(235)
+                    <span style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #FF4D4F; border-radius: 50%;"></span>
+                </div>
+                <div style="padding: 10px 16px; font-size: 15px; font-weight: 600; color: #333;">
+                    住宅装修(95)
+                </div>
+                <div style="padding: 10px 16px; font-size: 15px; font-weight: 600; color: #333;">
+                    零星作业(161)
+                </div>
+            </div>
+
+            <!-- 审核状态筛选标签 -->
+            <div style="background: white; padding: 12px 16px; display: flex; gap: 16px; border-bottom: 1px solid #f0f0f0;">
+                <div style="font-size: 14px; color: #666;">待填报 (60)</div>
+                <div style="font-size: 14px; color: #666;">待审核 (21)</div>
+                <div style="font-size: 14px; color: #666;">已驳回 (50)</div>
+                <div style="font-size: 14px; color: #666;">已通过 (104)</div>
+                <div style="font-size: 14px; color: #FF9500; font-weight: 600; border-bottom: 2px solid #FF9500;">待确认 (2)</div>
+            </div>
+
+            <!-- 待确认子Tab -->
+            <div style="background: white; padding: 12px 16px; display: flex; gap: 24px; border-bottom: 1px solid #f0f0f0;">
+                <div style="font-size: 14px; color: #666;">我接收的 (1)</div>
+                <div style="font-size: 14px; color: #00B578; font-weight: 600; border-bottom: 2px solid #00B578;">我发起的 (1)</div>
+            </div>
+
+            <div class="content-area" style="padding-top: 12px;">
+                <!-- 我发起的：我转派出去 -->
+                <div class="list-item" onclick="showPage('page3')">
                     <div class="list-item-header">
                         <span class="list-item-title">XX小区电梯改造工程</span>
                         <span class="status-tag blue">转派中</span>
                     </div>
-                    <div class="list-item-desc">BA-20260421-003 | 赵巷镇转派</div>
+                    <div class="list-item-desc">BA-20260421-003 | 转派至：赵巷镇</div>
                     <div class="list-item-desc">青浦区XX路456号</div>
                     <div class="list-item-meta">
                         <span class="list-item-time">转派时间：2026-04-21 10:15</span>
-                        <span class="status-tag orange">待确认</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- 底部导航 -->
+            <div style="display: flex; background: white; border-top: 1px solid #f0f0f0; padding: 10px 0;">
+                <div style="flex: 1; text-align: center; color: #00B578; font-size: 12px;">
+                    <div style="width: 24px; height: 24px; background: #00B578; border-radius: 6px; margin: 0 auto 4px;"></div>
+                    项目中心
+                </div>
+                <div style="flex: 1; text-align: center; color: #999; font-size: 12px;">
+                    <div style="width: 24px; height: 24px; background: #ccc; border-radius: 6px; margin: 0 auto 4px;"></div>
+                    个人中心
                 </div>
             </div>
         </div>
@@ -1405,77 +1782,8 @@
             </div>
         </div>
 
-        <!-- ========== 页面10: 转派记录页 ========== -->
-        <div class="page" id="page10">
-            <div class="status-bar">
-                <span class="time">9:41</span>
-                <div class="icons">
-                    <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-                    <svg viewBox="0 0 24 24" fill="white"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
-                </div>
-            </div>
-            <div class="nav-bar">
-                <div class="back-btn" onclick="showPage('page1')">&#8249;</div>
-                <div class="title">转派记录</div>
-                <div class="right-btn"></div>
-            </div>
-            <!-- 记录标签页 -->
-            <div class="record-tabs">
-                <div class="record-tab active" onclick="switchRecordTab(this, 'sent')">我发起的</div>
-                <div class="record-tab" onclick="switchRecordTab(this, 'received')">我接收的</div>
-            </div>
-            <!-- 筛选栏 -->
-            <div class="filter-bar">
-                <div class="filter-tag active">全部</div>
-                <div class="filter-tag">转派中</div>
-                <div class="filter-tag">已确认</div>
-                <div class="filter-tag">已驳回</div>
-                <div class="filter-tag">已通过</div>
-            </div>
-            <div class="content-area" style="padding-top: 8px;">
-                <!-- 记录项1 -->
-                <div class="record-card">
-                    <div class="record-card-header">
-                        <span class="record-card-title">青浦区XX路商铺装修工程</span>
-                        <span class="status-tag blue">转派中</span>
-                    </div>
-                    <div class="record-info">
-                        <div class="record-info-item">目标街道：<span>盈浦街道</span></div>
-                        <div class="record-info-item">转派时间：<span>2026-04-22</span></div>
-                        <div class="record-info-item">转派原因：<span>地址归属错误</span></div>
-                        <div class="record-info-item">当前状态：<span>等待确认</span></div>
-                    </div>
-                </div>
-                <!-- 记录项2 -->
-                <div class="record-card">
-                    <div class="record-card-header">
-                        <span class="record-card-title">XX小区外墙维修工程</span>
-                        <span class="status-tag green">已通过</span>
-                    </div>
-                    <div class="record-info">
-                        <div class="record-info-item">目标街道：<span>赵巷镇</span></div>
-                        <div class="record-info-item">转派时间：<span>2026-04-18</span></div>
-                        <div class="record-info-item">转派原因：<span>跨街道工程</span></div>
-                        <div class="record-info-item">确认时间：<span>2026-04-18</span></div>
-                    </div>
-                </div>
-                <!-- 记录项3 -->
-                <div class="record-card">
-                    <div class="record-card-header">
-                        <span class="record-card-title">XX商场消防设施改造</span>
-                        <span class="status-tag red">已驳回</span>
-                    </div>
-                    <div class="record-info">
-                        <div class="record-info-item">目标街道：<span>徐泾镇</span></div>
-                        <div class="record-info-item">转派时间：<span>2026-04-15</span></div>
-                        <div class="record-info-item">转派原因：<span>区域调整</span></div>
-                        <div class="record-info-item">确认时间：<span>2026-04-15</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
+</div>
 </div>
 
 <!-- ============ 右侧：需求说明区域 ============ -->
@@ -1543,14 +1851,32 @@
             <h4>字段规则</h4>
             <ul>
                 <li>目标街道：单选，必填，不能与当前街道相同</li>
+                <li>目标居委会：根据备案的工程类型和场所选项动态决定是否展示，具体规则见下方"居委会选择规则"</li>
                 <li>转派原因：文本，必填，限制200字</li>
                 <li>转派原因仅对审核端可见，申报人不可见</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>居委会选择规则</h4>
+            <ul>
+                <li>需要选择【街镇+村居委会】的情况：工程类型为"9.依法获得批准建设的农民自建或翻建低层住宅"</li>
+                <li>需要选择【街镇+居委会】的情况：
+                    <ul>
+                        <li>工程类型为第2项，且场所选项为"住宅小区内部道路"</li>
+                        <li>工程类型为第5、7、8、12项，且场所选项为"住宅小区公共区域内场所"</li>
+                    </ul>
+                </li>
+                <li>不需要选择居委会的情况：不符合上述条件的备案，仅选择街镇即可</li>
+                <li>居委会列表数据来源：系统根据所选街镇加载对应的居委会/村居委会列表</li>
+                <li>居委会排序：按名称字母顺序排序</li>
+                <li>居委会搜索：支持按居委会名称实时筛选</li>
             </ul>
         </div>
         <div class="anno-section">
             <h4>交互分支规则</h4>
             <ul>
                 <li>未选择目标街道 → 点击"确认转派"按钮置灰不可用</li>
+                <li>需要选择居委会的场景，未选择居委会 → 点击"确认转派"按钮置灰不可用</li>
                 <li>未填写转派原因 → 点击"确认转派"按钮置灰不可用</li>
                 <li>选择目标街道=当前街道 → 提示"不能转派至当前街道"</li>
                 <li>校验通过 → 备案状态变更为"转派中" → 生成转派记录 → 推送通知 → 显示成功页</li>
@@ -1562,6 +1888,7 @@
                 <li>V1版本暂不支持批量转派</li>
                 <li>一次只能选择一个目标街道</li>
                 <li>转派后备案从发起方列表中移除，不可撤回</li>
+                <li>若备案信息中工程类型或场所选项为空/异常，按仅需选择街镇处理</li>
             </ul>
         </div>
     </div>
@@ -1600,15 +1927,53 @@
         </div>
     </div>
 
-    <!-- 页面4：待确认列表 -->
+    <!-- 页面4：项目中心-待审核 -->
     <div class="page-annotation" id="anno-page4">
-        <h3>页面4：待确认列表 — 需求说明</h3>
+        <h3>页面4：项目中心-待审核 — 需求说明</h3>
         <div class="anno-section">
             <h4>页面状态规则</h4>
             <ul>
-                <li>项目中心Tab栏切换到"待确认"时展示</li>
-                <li>仅展示转派至本街道且状态为"转派中"的备案</li>
-                <li>列表项标注"转派中"及转派来源信息</li>
+                <li>此为已上线的项目中心页面，状态标签保持原有：待填报、待审核、已驳回、已通过</li>
+                <li>新增状态标签：待确认（展示与转派相关的备案，详见页面4-2和4-3）</li>
+                <li>"待审核"标签下只显示两种卡片标签：待审核、转派退回</li>
+                <li>工程类型Tab保持不变：小型工程、住宅装修、零星作业</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>卡片标签"待审核"：正常提交后等待审核的备案</li>
+                <li>卡片标签"转派退回"：我转派出去、对方点击"不是本街道"后退回给我的备案</li>
+                <li>排序：按提交/退回时间倒序排列（最新的在前）</li>
+                <li>各状态标签显示对应状态的数量</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"待审核"列表项 → 进入正常审核详情页</li>
+                <li>点击"转派退回"列表项 → 重新选择目标街道继续转派</li>
+                <li>点击"待确认"状态标签 → 进入待确认列表（分"我接收的"和"我发起的"两个子Tab）</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>转派退回的备案回到发起方待审核列表，发起方可重新转派</li>
+                <li>转派过程在审批记录中留痕，不单独建设转派记录页面</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面4-2：项目中心-待确认（我接收的） -->
+    <div class="page-annotation" id="anno-page4-2">
+        <h3>页面4-2：项目中心-待确认（我接收的） — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>点击"待确认"状态标签后，默认显示"我接收的"子Tab</li>
+                <li>"我接收的"展示别人转派给我、我需要确认的备案</li>
+                <li>子Tab：我接收的（当前）、我发起的</li>
             </ul>
         </div>
         <div class="anno-section">
@@ -1617,14 +1982,13 @@
                 <li>筛选条件：目标街道=当前登录人员所在街道 AND 状态=转派中</li>
                 <li>排序：按转派时间倒序排列（最新的在前）</li>
                 <li>列表项显示：工程名称、备案编号、来源街道、地址、转派时间</li>
-                <li>无待确认备案时显示空状态</li>
             </ul>
         </div>
         <div class="anno-section">
             <h4>交互分支规则</h4>
             <ul>
-                <li>点击列表项 → 进入确认接收详情页</li>
-                <li>目标街道下所有具有"备案审核"权限的人员均可查看此列表</li>
+                <li>点击"我发起的"子Tab → 切换到"我发起的"列表</li>
+                <li>点击列表项 → 进入确认接收详情页，底部显示"确认接收"和"不是本街道"两个按钮</li>
             </ul>
         </div>
         <div class="anno-section">
@@ -1633,6 +1997,40 @@
                 <li>多个有权限人员同时查看，列表内容一致</li>
                 <li>第一个确认接收的人员即为该备案的确认人</li>
                 <li>已被其他同事确认接收的备案从列表中移除</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面4-3：项目中心-待确认（我发起的） -->
+    <div class="page-annotation" id="anno-page4-3">
+        <h3>页面4-3：项目中心-待确认（我发起的） — 需求说明</h3>
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>"我发起的"展示我转派出去、对方尚未确认或退回的备案</li>
+                <li>子Tab：我接收的、我发起的（当前）</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>筛选条件：转派人=当前登录人员 AND 状态=转派中</li>
+                <li>排序：按转派时间倒序排列（最新的在前）</li>
+                <li>列表项显示：工程名称、备案编号、目标街道、地址、转派时间</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"我接收的"子Tab → 切换到"我接收的"列表</li>
+                <li>列表项为只读展示，不需要主动追踪</li>
+            </ul>
+        </div>
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>对方确认接收后，该备案从列表中移除，进入对方待审核列表</li>
+                <li>对方点击"不是本街道"后，该备案退回到我的待审核列表（标记为"转派退回"）</li>
             </ul>
         </div>
     </div>
@@ -1811,52 +2209,6 @@
         </div>
     </div>
 
-    <!-- 页面10：转派记录页 -->
-    <div class="page-annotation" id="anno-page10">
-        <h3>页面10：转派记录页 — 需求说明</h3>
-        <div class="anno-section">
-            <h4>页面状态规则</h4>
-            <ul>
-                <li>分"我发起的"和"我接收的"两个视角</li>
-                <li>默认展示"我发起的"视角</li>
-                <li>每个视角下可进一步按状态筛选</li>
-            </ul>
-        </div>
-        <div class="anno-section">
-            <h4>数据规则</h4>
-            <ul>
-                <li>"我发起的"：展示当前登录人员作为转派人发起的所有转派记录</li>
-                <li>"我接收的"：展示转派至当前登录人员所在街道的所有转派记录</li>
-                <li>筛选条件：全部、转派中、已确认、已驳回、已通过</li>
-                <li>记录排序：按转派时间倒序排列</li>
-                <li>每个审核员只能查看与自己相关的转派记录</li>
-                <li>区级不干预，不增加区级查看视角</li>
-            </ul>
-        </div>
-        <div class="anno-section">
-            <h4>字段规则</h4>
-            <ul>
-                <li>"我发起的"字段：转派时间、目标街道、备案名称、转派原因、当前状态</li>
-                <li>"我接收的"字段：转派时间、来源街道、备案名称、转派原因、确认人、确认时间、当前状态</li>
-                <li>记录状态：转派中/已确认/已驳回/已通过</li>
-            </ul>
-        </div>
-        <div class="anno-section">
-            <h4>交互分支规则</h4>
-            <ul>
-                <li>点击备案名称 → 进入备案详情（只读）</li>
-                <li>点击筛选标签 → 按状态过滤记录列表</li>
-            </ul>
-        </div>
-        <div class="anno-section">
-            <h4>边界情况</h4>
-            <ul>
-                <li>转派记录永久保留，不随备案归档而删除</li>
-                <li>支持按时间范围、街道、状态筛选</li>
-                <li>支持按备案名称搜索</li>
-            </ul>
-        </div>
-    </div>
 
 </div>
 
@@ -1865,41 +2217,49 @@
 
 <!-- ========== 浮动导航（F8控制） ========== -->
 <div class="float-nav" id="floatNav">
-    <div class="float-nav-indicator" id="pageIndicator">页面 1 / 10：审核详情页</div>
+    <div class="float-nav-indicator" id="pageIndicator">页面 1 / 11：审核详情页</div>
     <div class="float-nav-buttons">
         <button onclick="showPage('page1')">1.审核</button>
         <button onclick="showPage('page2')">2.选街道</button>
         <button onclick="showPage('page3')">3.转派成功</button>
-        <button onclick="showPage('page4')">4.待确认</button>
-        <button onclick="showPage('page5')">5.确认详情</button>
-        <button onclick="showPage('page6')">6.确认成功</button>
-        <button onclick="showPage('page7')">7.已确认审核</button>
-        <button onclick="showPage('page8')">8.驳回</button>
-        <button onclick="showPage('page9')">9.通过</button>
-        <button onclick="showPage('page10')">10.记录</button>
+        <button onclick="showPage('page4')">4.待审核</button>
+        <button onclick="showPage('page4-2')">5.待确认-接收</button>
+        <button onclick="showPage('page4-3')">6.待确认-发起</button>
+        <button onclick="showPage('page5')">7.确认详情</button>
+        <button onclick="showPage('page6')">8.确认成功</button>
+        <button onclick="showPage('page7')">9.已确认审核</button>
+        <button onclick="showPage('page8')">10.驳回</button>
+        <button onclick="showPage('page9')">11.通过</button>
     </div>
 </div>
 
 <script>
     // 页面切换
     function showPage(pageId) {
+        // 切换原型页面
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
+
+        // 同步切换右侧需求说明
+        document.querySelectorAll('.page-annotation').forEach(a => a.classList.remove('active'));
+        const annoEl = document.getElementById('anno-' + pageId);
+        if (annoEl) annoEl.classList.add('active');
 
         const pageNames = {
             'page1': '审核详情页',
             'page2': '选择目标街道页',
             'page3': '转派成功确认页',
-            'page4': '待确认列表',
+            'page4': '项目中心-待审核',
+            'page4-2': '项目中心-待确认(我接收的)',
+            'page4-3': '项目中心-待确认(我发起的)',
             'page5': '确认接收详情页',
             'page6': '确认接收成功页',
             'page7': '已确认审核详情页',
             'page8': '驳回操作页',
-            'page9': '审核通过结果页',
-            'page10': '转派记录页'
+            'page9': '审核通过结果页'
         };
         const pageNum = pageId.replace('page', '');
-        document.getElementById('pageIndicator').textContent = `页面 ${pageNum} / 10：${pageNames[pageId]}`;
+        document.getElementById('pageIndicator').textContent = '页面 ' + pageNum + ' / 10：' + pageNames[pageId];
     }
 
     // Tab切换（项目中心）
@@ -1924,14 +2284,17 @@
         el.classList.add('selected');
     }
 
-    // 标注抽屉切换
-    function toggleAnnotation() {
-        document.getElementById('annotationContent').classList.toggle('open');
-    }
-
     // 返回（默认返回首页）
     function goBack() {
         showPage('page1');
+    }
+
+    // 审批记录弹窗
+    function showRecordPopup() {
+        document.getElementById('recordPopup').classList.add('show');
+    }
+    function hideRecordPopup() {
+        document.getElementById('recordPopup').classList.remove('show');
     }
 
     // F8 快捷键切换导航显示/隐藏

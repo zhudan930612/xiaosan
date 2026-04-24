@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备案分派流程PC端原型设计</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== 顶部栏 ========== */
+        .top-header {
+            height: 56px;
+            background: linear-gradient(90deg, #35ad73, #58b8d7);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            color: white;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .top-header .logo {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .top-header .logo svg {
+            width: 28px; height: 28px;
+        }
+        .top-header .top-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+        }
+        .top-header .platform-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .top-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .top-header .user-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ========== 左侧导航 ========== */
+        .sidebar {
+            width: 200px;
+            background: linear-gradient(180deg, #2d8f5f, #3a9d7a);
+            position: fixed;
+            top: 56px; left: 0; bottom: 0;
+            z-index: 999;
+            padding: 12px 0;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: rgba(255,255,255,0.85);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .nav-item.active {
+            background: rgba(255,255,255,0.18);
+            color: white;
+            font-weight: 600;
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: white;
+            border-radius: 0 2px 2px 0;
+        }
+        .nav-item .nav-icon {
+            width: 20px; height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-item .badge {
+            margin-left: auto;
+            background: #FF4D4F;
+            color: white;
+            font-size: 12px;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+
+        /* ========== 主内容区 ========== */
+        .main-content {
+            margin-left: 200px;
+            margin-top: 56px;
+            padding: 20px 24px;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* ========== 搜索区域 ========== */
+        .search-area {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-item label {
+            font-size: 14px;
+            color: #606266;
+            white-space: nowrap;
+        }
+        .search-item input, .search-item select {
+            height: 36px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #606266;
+            width: 180px;
+        }
+        .search-item input::placeholder {
+            color: #c0c4cc;
+        }
+        .btn {
+            height: 36px;
+            padding: 0 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #00B578;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #009a65;
+        }
+        .btn-default {
+            background: white;
+            color: #606266;
+            border: 1px solid #dcdfe6;
+        }
+        .btn-default:hover {
+            color: #00B578;
+            border-color: #00B578;
+        }
+        .btn-danger {
+            background: #FF4D4F;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #e64446;
+        }
+        .btn-text {
+            background: transparent;
+            color: #409EFF;
+            padding: 0 8px;
+        }
+        .btn-text:hover {
+            color: #66b1ff;
+        }
+        .btn-success {
+            background: #00B578;
+            color: white;
+        }
+        .btn-warning {
+            background: #FF9500;
+            color: white;
+        }
+
+        /* ========== 统计卡片 ========== */
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .stat-card.active {
+            border-color: #00B578;
+        }
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .stat-icon.blue { background: #e6f4ff; color: #1890FF; }
+        .stat-icon.orange { background: #fff7e6; color: #FF9500; }
+        .stat-icon.red { background: #fff2f0; color: #FF4D4F; }
+        .stat-icon.green { background: #e6f7f0; color: #00B578; }
+        .stat-info { flex: 1; }
+        .stat-label {
+            font-size: 14px;
+            color: #8c8c8c;
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        /* ========== Tab标签 ========== */
+        .tabs-bar {
+            display: flex;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            padding: 0 20px;
+            border-bottom: 1px solid #e4e7ed;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .tab-item {
+            padding: 14px 20px;
+            font-size: 14px;
+            color: #606266;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .tab-item:hover {
+            color: #00B578;
+        }
+        .tab-item.active {
+            color: #00B578;
+            border-bottom-color: #00B578;
+            font-weight: 600;
+        }
+        .tab-item .tab-badge {
+            display: inline-block;
+            background: #FF4D4F;
+            color: white;
+            font-size: 11px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            text-align: center;
+            line-height: 18px;
+            margin-left: 4px;
+            padding: 0 5px;
+        }
+
+        /* ========== 内容卡片 ========== */
+        .content-card {
+            background: white;
+            border-radius: 0 0 8px 8px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+
+        /* ========== 表格 ========== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .data-table th {
+            background: #f5f7fa;
+            color: #909399;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid #ebeef5;
+        }
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #ebeef5;
+            color: #606266;
+        }
+        .data-table tr:hover td {
+            background: #f5f7fa;
+        }
+        .data-table .op-btns {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .data-table .op-btns .sep {
+            color: #dcdfe6;
+        }
+
+        /* ========== 状态标签 ========== */
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .tag-green { background: #e6f7f0; color: #00B578; }
+        .tag-orange { background: #fff7e6; color: #FF9500; }
+        .tag-red { background: #fff2f0; color: #FF4D4F; }
+        .tag-blue { background: #e6f4ff; color: #1890FF; }
+        .tag-gray { background: #f5f5f5; color: #999; }
+        .tag-purple { background: #f0e6ff; color: #722ed1; }
+
+        /* ========== 分页 ========== */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 0 0;
+            font-size: 13px;
+            color: #606266;
+        }
+        .pagination .page-btn {
+            min-width: 32px;
+            height: 32px;
+            border: 1px solid #dcdfe6;
+            background: white;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            color: #606266;
+        }
+        .pagination .page-btn:hover {
+            color: #409EFF;
+            border-color: #409EFF;
+        }
+        .pagination .page-btn.active {
+            background: #409EFF;
+            color: white;
+            border-color: #409EFF;
+        }
+        .pagination .page-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .pagination select {
+            height: 32px;
+            border: 1px solid #dcdfe6;
+            border-radius: 2px;
+            padding: 0 8px;
+        }
+        .pagination .page-jump {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pagination .page-jump input {
+            width: 40px;
+            height: 32px;
+            border: 1px solid #dcdfe6;
+            border-radius: 2px;
+            text-align: center;
+        }
+
+        /* ========== 弹窗 ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-lg { width: 900px; }
+        .modal-md { width: 600px; }
+        .modal-sm { width: 420px; }
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e4e7ed;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #303133;
+        }
+        .modal-close {
+            font-size: 20px;
+            color: #909399;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 32px; height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .modal-close:hover {
+            background: #f5f7fa;
+            color: #606266;
+        }
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-footer {
+            padding: 12px 24px;
+            border-top: 1px solid #e4e7ed;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* ========== 详情信息展示 ========== */
+        .info-section {
+            margin-bottom: 20px;
+        }
+        .info-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #00B578;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0;
+            border: 1px solid #ebeef5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .info-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .info-item {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #ebeef5;
+        }
+        .info-item:nth-last-child(-n+2) {
+            border-bottom: none;
+        }
+        .info-item-label {
+            color: #909399;
+            font-size: 14px;
+            width: 120px;
+            flex-shrink: 0;
+        }
+        .info-item-value {
+            color: #606266;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        /* ========== 审批记录时间线 ========== */
+        .timeline {
+            padding: 8px 0;
+        }
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding-bottom: 24px;
+            position: relative;
+        }
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 30px;
+            bottom: 0;
+            width: 2px;
+            background: #e5e5e5;
+        }
+        .timeline-item:last-child::before {
+            display: none;
+        }
+        .timeline-dot {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+            z-index: 1;
+        }
+        .timeline-dot.green { background: #e6f7f0; color: #00B578; }
+        .timeline-dot.red { background: #fff2f0; color: #FF4D4F; }
+        .timeline-dot.blue { background: #e6f4ff; color: #1890FF; }
+        .timeline-dot.gray { background: #f5f5f5; color: #999; }
+        .timeline-content {
+            flex: 1;
+            background: #f5f7fa;
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #303133;
+        }
+        .timeline-time {
+            font-size: 13px;
+            color: #909399;
+        }
+        .timeline-body {
+            font-size: 13px;
+            color: #606266;
+            line-height: 1.6;
+        }
+        .timeline-body .highlight {
+            color: #FF9500;
+            font-weight: 500;
+        }
+
+        /* ========== 表单组件 ========== */
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+        .form-item {
+            flex: 1;
+        }
+        .form-item.full {
+            width: 100%;
+        }
+        .form-item-label {
+            font-size: 14px;
+            color: #606266;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-item-label .required {
+            color: #f56c6c;
+            margin-right: 4px;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #606266;
+            transition: all 0.2s;
+        }
+        .form-input, .form-select {
+            height: 40px;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #409EFF;
+            box-shadow: 0 0 0 2px rgba(64,158,255,0.2);
+        }
+        .form-textarea {
+            padding: 10px 12px;
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #909399;
+            margin-top: 4px;
+        }
+
+        /* ========== 标注抽屉 ========== */
+        .anno-drawer {
+            position: fixed;
+            right: -420px;
+            top: 56px;
+            bottom: 0;
+            width: 400px;
+            background: #FFFBE6;
+            border-left: 2px dashed #FFC53D;
+            z-index: 3000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .anno-drawer.open {
+            right: 0;
+        }
+        .anno-drawer h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #FFC53D;
+        }
+        .anno-section {
+            margin-bottom: 16px;
+        }
+        .anno-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .anno-section ul {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.8;
+            padding-left: 18px;
+        }
+        .anno-section ul ul {
+            margin-top: 4px;
+        }
+        .anno-toggle {
+            position: fixed;
+            right: 20px;
+            bottom: 80px;
+            width: 48px; height: 48px;
+            background: #FFC53D;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3001;
+            box-shadow: 0 4px 12px rgba(255,197,61,0.4);
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+        }
+        .anno-toggle:hover {
+            background: #ffd666;
+        }
+
+        /* ========== 页面导航 ========== */
+        .page-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: none;
+            gap: 8px;
+            z-index: 2500;
+            align-items: center;
+        }
+        .page-nav.show {
+            display: flex;
+        }
+        .page-nav-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .page-nav-btn:hover, .page-nav-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        .page-nav-label {
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            padding: 0 8px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* ========== 提示条 ========== */
+        .notice-bar {
+            background: #e6f4ff;
+            border: 1px solid #91d5ff;
+            border-radius: 4px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #1890FF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .notice-bar.warning {
+            background: #fff7e6;
+            border-color: #ffd591;
+            color: #FF9500;
+        }
+
+        /* ========== 空状态 ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #909399;
+        }
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        /* ========== 隐藏页面 ========== */
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
+        }
+
+        /* ========== 确认弹窗 ========== */
+        .confirm-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .confirm-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .confirm-icon.warning {
+            background: #fff7e6;
+            color: #FF9500;
+        }
+        .confirm-icon.success {
+            background: #e6f7f0;
+            color: #00B578;
+        }
+        .confirm-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 8px;
+        }
+        .confirm-desc {
+            font-size: 14px;
+            color: #606266;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部栏 -->
+    <div class="top-header">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            青浦区小型工程综合管理平台
+        </div>
+        <div class="top-right">
+            <span class="platform-tag">政务平台</span>
+            <span>2026/04/23 18:37:20</span>
+            <div class="user-info">
+                <div class="user-avatar">测</div>
+                <span>测试</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧导航 -->
+    <div class="sidebar">
+        <div class="nav-item active" onclick="showPage('list-page')">
+            <div class="nav-icon">🏗</div>
+            <span>小型工程</span>
+            <span class="badge">2</span>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">🏠</div>
+            <span>住宅装修</span>
+            <span class="badge">5</span>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">🔧</div>
+            <span>零星作业</span>
+            <span class="badge">6</span>
+        </div>
+        <div class="nav-item" onclick="showPage('recycle-page')">
+            <div class="nav-icon">🗑</div>
+            <span>备案回收站</span>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+
+        <!-- 页面1：备案管理列表页 -->
+        <div class="page-section active" id="list-page">
+            <!-- 搜索区域 -->
+            <div class="search-area">
+                <div class="search-row">
+                    <div class="search-item">
+                        <label>工程名称：</label>
+                        <input type="text" placeholder="请输入">
+                    </div>
+                    <div class="search-item">
+                        <label>工程地址：</label>
+                        <input type="text" placeholder="请输入">
+                    </div>
+                    <div class="search-item">
+                        <label>所属街道社区：</label>
+                        <select><option>请选择</option><option>夏阳街道</option><option>盈浦街道</option></select>
+                    </div>
+                    <button class="btn btn-primary">🔍 查询</button>
+                    <button class="btn btn-default">⟲ 重置</button>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stats-row">
+                <div class="stat-card" onclick="switchListTab('draft')">
+                    <div class="stat-icon blue">📝</div>
+                    <div class="stat-info">
+                        <div class="stat-label">待填报</div>
+                        <div class="stat-value" style="color:#1890FF">48</div>
+                    </div>
+                </div>
+                <div class="stat-card active" onclick="switchListTab('pending')">
+                    <div class="stat-icon orange">⏳</div>
+                    <div class="stat-info">
+                        <div class="stat-label">待审核</div>
+                        <div class="stat-value" style="color:#FF9500">2</div>
+                    </div>
+                </div>
+                <div class="stat-card" onclick="switchListTab('rejected')">
+                    <div class="stat-icon red">✕</div>
+                    <div class="stat-info">
+                        <div class="stat-label">已驳回</div>
+                        <div class="stat-value" style="color:#FF4D4F">31</div>
+                    </div>
+                </div>
+                <div class="stat-card" onclick="switchListTab('approved')">
+                    <div class="stat-icon green">✓</div>
+                    <div class="stat-info">
+                        <div class="stat-label">已通过</div>
+                        <div class="stat-value" style="color:#00B578">27</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab栏 -->
+            <div class="tabs-bar">
+                <div class="tab-item" onclick="switchListTab('draft')">待填报</div>
+                <div class="tab-item active" onclick="switchListTab('pending')">待审核 <span class="tab-badge">2</span></div>
+                <div class="tab-item" onclick="showPage('confirm-page')">待确认 <span class="tab-badge">25</span></div>
+                <div class="tab-item" onclick="switchListTab('rejected')">已驳回</div>
+                <div class="tab-item" onclick="switchListTab('approved')">已通过</div>
+            </div>
+
+            <!-- 表格内容 -->
+            <div class="content-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>工程名称</th>
+                            <th>所属街道社区</th>
+                            <th>工程地址</th>
+                            <th>工程面积</th>
+                            <th>工程造价</th>
+                            <th>备案时间 ↕</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span>小散工程基础信息提交-待填报</span>
+                                    <span class="tag tag-purple">转派退回</span>
+                                </div>
+                            </td>
+                            <td>青浦区/夏阳街道</td>
+                            <td>大厦1308房间</td>
+                            <td>1000.03m²</td>
+                            <td>999999.11万元</td>
+                            <td>2026-04-22 16:10:20</td>
+                            <td>
+                                <div class="op-btns">
+                                    <button class="btn btn-text" onclick="openModal('audit-modal')">备案审核</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>小散工程基础信息提交-待填报</td>
+                            <td>青浦区/夏阳街道</td>
+                            <td>大厦1308房间</td>
+                            <td>1000.03m²</td>
+                            <td>999999.11万元</td>
+                            <td>2026-04-22 16:12:24</td>
+                            <td>
+                                <div class="op-btns">
+                                    <button class="btn btn-text" onclick="openModal('audit-modal')">备案审核</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <span>共 2 条</span>
+                    <select><option>20条/页</option></select>
+                    <button class="page-btn" disabled>&lt;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn" disabled>&gt;</button>
+                    <div class="page-jump">
+                        <span>前往</span>
+                        <input type="text" value="1">
+                        <span>页</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面2：待确认列表页 -->
+        <div class="page-section" id="confirm-page">
+            <!-- 搜索区域 -->
+            <div class="search-area">
+                <div class="search-row">
+                    <div class="search-item">
+                        <label>工程名称：</label>
+                        <input type="text" placeholder="请输入">
+                    </div>
+                    <div class="search-item">
+                        <label>工程地址：</label>
+                        <input type="text" placeholder="请输入">
+                    </div>
+                    <button class="btn btn-primary">🔍 查询</button>
+                    <button class="btn btn-default">⟲ 重置</button>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stats-row">
+                <div class="stat-card" onclick="switchConfirmTab('received')">
+                    <div class="stat-icon blue">📥</div>
+                    <div class="stat-info">
+                        <div class="stat-label">我接收的</div>
+                        <div class="stat-value" style="color:#1890FF">12</div>
+                    </div>
+                </div>
+                <div class="stat-card" onclick="switchConfirmTab('sent')">
+                    <div class="stat-icon orange">📤</div>
+                    <div class="stat-info">
+                        <div class="stat-label">我发起的</div>
+                        <div class="stat-value" style="color:#FF9500">13</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab栏 -->
+            <div class="tabs-bar">
+                <div class="tab-item active" onclick="switchConfirmTab('received')">我接收的 <span class="tab-badge">12</span></div>
+                <div class="tab-item" onclick="switchConfirmTab('sent')">我发起的 <span class="tab-badge">13</span></div>
+            </div>
+
+            <!-- 表格内容 -->
+            <div class="content-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>工程名称</th>
+                            <th>工程地址</th>
+                            <th>来源街道</th>
+                            <th>目标街道</th>
+                            <th>转派人</th>
+                            <th>转派时间 ↕</th>
+                            <th>转派原因</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>青浦区练塘镇北埭村网埭188号自建房</td>
+                            <td>上海市青浦区练塘镇北埭村网埭188号</td>
+                            <td>夏阳街道</td>
+                            <td>练塘镇</td>
+                            <td>张三</td>
+                            <td>2026-04-22 14:30:00</td>
+                            <td>该地址实际属于练塘镇管辖范围</td>
+                            <td>
+                                <div class="op-btns">
+                                    <button class="btn btn-success" style="height:32px;padding:0 16px;" onclick="openModal('confirm-modal')">确认接收</button>
+                                    <span class="sep">|</span>
+                                    <button class="btn btn-text" style="color:#FF4D4F;" onclick="openModal('transfer-modal')">不是本街道</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>小散工程基础信息提交-待填报</td>
+                            <td>大厦1308房间</td>
+                            <td>盈浦街道</td>
+                            <td>夏阳街道</td>
+                            <td>李四</td>
+                            <td>2026-04-22 10:15:00</td>
+                            <td>地址归属有误，实际属于夏阳街道</td>
+                            <td>
+                                <div class="op-btns">
+                                    <button class="btn btn-success" style="height:32px;padding:0 16px;" onclick="openModal('confirm-modal')">确认接收</button>
+                                    <span class="sep">|</span>
+                                    <button class="btn btn-text" style="color:#FF4D4F;" onclick="openModal('transfer-modal')">不是本街道</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <span>共 12 条</span>
+                    <select><option>20条/页</option></select>
+                    <button class="page-btn" disabled>&lt;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">&gt;</button>
+                    <div class="page-jump">
+                        <span>前往</span>
+                        <input type="text" value="1">
+                        <span>页</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面3：备案回收站 -->
+        <div class="page-section" id="recycle-page">
+            <div class="search-area">
+                <div class="search-row">
+                    <div class="search-item">
+                        <label>工程名称：</label>
+                        <input type="text" placeholder="请输入">
+                    </div>
+                    <button class="btn btn-primary">🔍 查询</button>
+                    <button class="btn btn-default">⟲ 重置</button>
+                </div>
+            </div>
+            <div class="content-card">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🗑</div>
+                    <div>暂无回收站数据</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 弹窗层 ========== -->
+
+    <!-- 审核详情弹窗 -->
+    <div class="modal-overlay" id="audit-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div class="modal-title">备案审核详情</div>
+                <button class="modal-close" onclick="closeModal('audit-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- 转派来源提示条 -->
+                <div class="notice-bar">
+                    <span>ℹ</span>
+                    <span>该备案由 <strong>夏阳街道</strong> 转派至 <strong>盈浦街道</strong>，转派人：张三，转派时间：2026-04-22 14:30:00</span>
+                </div>
+
+                <!-- 内部Tab -->
+                <div class="tabs-bar" style="margin-bottom:16px;border-radius:4px;">
+                    <div class="tab-item active" onclick="switchDetailTab(this,'base-info')">基础信息</div>
+                    <div class="tab-item" onclick="switchDetailTab(this,'eng-info')">工程信息</div>
+                    <div class="tab-item" onclick="switchDetailTab(this,'safe-info')">安全信息</div>
+                    <div class="tab-item" onclick="switchDetailTab(this,'policy-info')">匹配保单</div>
+                    <div class="tab-item" onclick="openModal('record-modal')">审批记录</div>
+                </div>
+
+                <!-- 基础信息 -->
+                <div id="base-info">
+                    <div class="info-section">
+                        <div class="info-section-title">项目信息</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-item-label">工程名称</span>
+                                <span class="info-item-value">0318小型6666666</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">工程类型</span>
+                                <span class="info-item-value">(六)建筑装饰装修工程</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">是否涉及用途转换装修工程</span>
+                                <span class="info-item-value"><span class="tag tag-green">否</span></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">作业场所</span>
+                                <span class="info-item-value">公共文化与展览类/体育场馆</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">工程地址</span>
+                                <span class="info-item-value">深圳市前海小麦互联网金融服务有限公司</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">所属街镇</span>
+                                <span class="info-item-value">赵巷镇/北崧居委会</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">所属物业</span>
+                                <span class="info-item-value">131</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">工程总额(万)</span>
+                                <span class="info-item-value">15</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">建筑面积(m²)</span>
+                                <span class="info-item-value">16</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-section-title">建设单位</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-item-label">建设单位身份类型</span>
+                                <span class="info-item-value"><span class="tag tag-green">个人</span></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-item-label">甲方负责人身份证</span>
+                                <span class="info-item-value">点击查看</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="openModal('reject-modal')">驳回</button>
+                <button class="btn btn-success" onclick="openModal('approve-modal')">通过</button>
+                <button class="btn btn-warning" onclick="openModal('transfer-modal')">转派</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 转派弹窗 -->
+    <div class="modal-overlay" id="transfer-modal">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <div class="modal-title">转派备案</div>
+                <button class="modal-close" onclick="closeModal('transfer-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-item">
+                        <label class="form-item-label"><span class="required">*</span>目标街道</label>
+                        <select class="form-select" onchange="showCommittee(this)">
+                            <option value="">请选择目标街道</option>
+                            <option value="xiayang">夏阳街道</option>
+                            <option value="yingpu" selected>盈浦街道</option>
+                            <option value="xianghuaqiao">香花桥街道</option>
+                            <option value="zhujiajiao">朱家角镇</option>
+                            <option value="liantang">练塘镇</option>
+                            <option value="jinze">金泽镇</option>
+                            <option value="zhaoxiang">赵巷镇</option>
+                            <option value="xujing">徐泾镇</option>
+                            <option value="huaxin">华新镇</option>
+                            <option value="zhonggu">重固镇</option>
+                            <option value="baihe">白鹤镇</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 居委会选择（动态展示） -->
+                <div class="form-row" id="committee-select">
+                    <div class="form-item">
+                        <label class="form-item-label"><span class="required">*</span>目标居委会</label>
+                        <select class="form-select">
+                            <option value="">请选择居委会</option>
+                            <option value="dongcheng">东盛社区居委会</option>
+                            <option value="dongfang" selected>东方社区居委会</option>
+                            <option value="xiecheng">崧泽社区居委会</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="notice-bar" style="margin-bottom:16px;">
+                    <span>ℹ</span>
+                    <span>当前所属街道：<strong>夏阳街道</strong>（不可选为转派目标）</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-item full">
+                        <label class="form-item-label"><span class="required">*</span>转派原因</label>
+                        <textarea class="form-textarea" placeholder="请填写转派原因，如：该地址实际属于目标街道管辖范围">该地址实际属于盈浦街道管辖范围</textarea>
+                        <div class="char-count">22/200</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeModal('transfer-modal')">取消</button>
+                <button class="btn btn-primary" onclick="closeModal('transfer-modal');openModal('transfer-success-modal')">确认转派</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 转派成功弹窗 -->
+    <div class="modal-overlay" id="transfer-success-modal">
+        <div class="modal modal-sm">
+            <div class="modal-body">
+                <div class="confirm-box">
+                    <div class="confirm-icon success">✓</div>
+                    <div class="confirm-title">转派成功</div>
+                    <div class="confirm-desc">备案已转派至目标街道，等待对方确认接收</div>
+                    <div style="margin-top:16px;text-align:left;background:#f5f7fa;padding:12px 16px;border-radius:4px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                            <span style="color:#909399;">备案编号</span>
+                            <span>BA-20260422-001</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                            <span style="color:#909399;">目标街道</span>
+                            <span>盈浦街道/东方社区居委会</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="color:#909399;">转派时间</span>
+                            <span>2026-04-23 10:30:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content:center;">
+                <button class="btn btn-primary" onclick="closeModal('transfer-success-modal')">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认接收详情弹窗 -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div class="modal-title">确认接收备案</div>
+                <button class="modal-close" onclick="closeModal('confirm-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="notice-bar warning">
+                    <span>⚠</span>
+                    <span>该备案由 <strong>夏阳街道</strong> 转派至本街道，请确认是否属于本街道管辖范围</span>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-section-title">项目信息</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-item-label">工程名称</span>
+                            <span class="info-item-value">青浦区练塘镇北埭村网埭188号自建房</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-item-label">工程类型</span>
+                            <span class="info-item-value">(九)依法获得批准建设的农民自建或翻建低层住宅</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-item-label">工程地址</span>
+                            <span class="info-item-value">上海市青浦区练塘镇北埭村网埭188号</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-item-label">所属街镇</span>
+                            <span class="info-item-value">夏阳街道</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-item-label">转派人</span>
+                            <span class="info-item-value">张三（夏阳街道-城建中心）</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-item-label">转派时间</span>
+                            <span class="info-item-value">2026-04-22 14:30:00</span>
+                        </div>
+                        <div class="info-item" style="grid-column:span 2;">
+                            <span class="info-item-label">转派原因</span>
+                            <span class="info-item-value">该地址实际属于练塘镇管辖范围</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeModal('confirm-modal');openModal('transfer-modal')">不是本街道</button>
+                <button class="btn btn-primary" onclick="closeModal('confirm-modal');openModal('confirm-success-modal')">确认接收</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认接收成功弹窗 -->
+    <div class="modal-overlay" id="confirm-success-modal">
+        <div class="modal modal-sm">
+            <div class="modal-body">
+                <div class="confirm-box">
+                    <div class="confirm-icon success">✓</div>
+                    <div class="confirm-title">确认接收成功</div>
+                    <div class="confirm-desc">该备案已进入本街道待审核列表</div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content:center;">
+                <button class="btn btn-primary" onclick="closeModal('confirm-success-modal');openModal('audit-modal')">去审核</button>
+                <button class="btn btn-default" onclick="closeModal('confirm-success-modal')">返回列表</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 审批记录弹窗 -->
+    <div class="modal-overlay" id="record-modal">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <div class="modal-title">审批记录</div>
+                <button class="modal-close" onclick="closeModal('record-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot green">✓</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-title">备案完成</span>
+                                <span class="timeline-time">--</span>
+                            </div>
+                            <div class="timeline-body">审核通过，备案已完成</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot gray">○</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-title">人工审核</span>
+                                <span class="timeline-time">--</span>
+                            </div>
+                            <div class="timeline-body">等待街镇审核员审核</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot green">✓</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-title">转派接收</span>
+                                <span class="timeline-time">2026-04-22 16:00:00</span>
+                            </div>
+                            <div class="timeline-body">
+                                审批人：李四<br>
+                                青浦工业园区确认接收，该备案进入青浦工业园区待审核列表
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot blue">→</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-title">转派发起</span>
+                                <span class="timeline-time">2026-04-22 14:30:00</span>
+                            </div>
+                            <div class="timeline-body">
+                                审批人：张三（夏阳街道-城建中心）<br>
+                                转派原因：该地址实际属于青浦工业园区管辖范围<br>
+                                从【夏阳街道】转派至【青浦工业园区】
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot green">✓</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-title">AI审核</span>
+                                <span class="timeline-time">2026-04-22 14:25:00</span>
+                            </div>
+                            <div class="timeline-body">系统自动审核通过</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot blue">●</div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-title">施工方提交备案申请</span>
+                                <span class="timeline-time">2026-04-22 14:20:00</span>
+                            </div>
+                            <div class="timeline-body">施工方（系统自动记录）</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeModal('record-modal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 驳回弹窗 -->
+    <div class="modal-overlay" id="reject-modal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <div class="modal-title">驳回备案</div>
+                <button class="modal-close" onclick="closeModal('reject-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-item full">
+                        <label class="form-item-label"><span class="required">*</span>驳回原因</label>
+                        <textarea class="form-textarea" placeholder="请输入驳回原因"></textarea>
+                        <div class="char-count">0/500</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeModal('reject-modal')">取消</button>
+                <button class="btn btn-danger" onclick="closeModal('reject-modal')">确认驳回</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 审核通过弹窗 -->
+    <div class="modal-overlay" id="approve-modal">
+        <div class="modal modal-sm">
+            <div class="modal-body">
+                <div class="confirm-box">
+                    <div class="confirm-icon success">✓</div>
+                    <div class="confirm-title">审核通过</div>
+                    <div class="confirm-desc">备案审核已通过，系统将自动生成备案回执</div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content:center;">
+                <button class="btn btn-primary" onclick="closeModal('approve-modal')">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 标注抽屉 ========== -->
+    <button class="anno-toggle" onclick="toggleAnno()" title="按F8切换标注">标注</button>
+    <div class="anno-drawer" id="anno-drawer">
+        <h3>备案分派流程PC端 — 需求说明</h3>
+
+        <div class="anno-section">
+            <h4>页面状态规则</h4>
+            <ul>
+                <li>列表页为PC端备案管理主页面，顶部常驻搜索区域</li>
+                <li>统计卡片点击后切换对应状态的列表数据，当前选中卡片高亮边框</li>
+                <li>Tab标签栏与统计卡片联动，显示当前列表状态</li>
+                <li>待确认Tab点击进入独立的待确认列表页面</li>
+                <li>表格行悬停高亮，操作列显示可用操作按钮</li>
+            </ul>
+        </div>
+
+        <div class="anno-section">
+            <h4>数据规则</h4>
+            <ul>
+                <li>列表数据来源：当前登录人员所在街道的备案数据</li>
+                <li>待审核列表：本街道下状态为"待审核"的备案（含原始备案和已确认接收的转派备案）</li>
+                <li>转派退回标签：仅对待审核列表中"被退回"的备案显示</li>
+                <li>列表排序：转派退回>正常待审核；转派退回按驳回时间倒序排列</li>
+                <li>待确认列表-我接收的：目标街道=当前登录街道 AND 状态=转派中</li>
+                <li>待确认列表-我发起的：转派人=当前登录人员 AND 状态=转派中</li>
+            </ul>
+        </div>
+
+        <div class="anno-section">
+            <h4>字段规则</h4>
+            <ul>
+                <li>工程名称：字符串，展示前30字，超出省略</li>
+                <li>所属街道社区：格式"区/街道"</li>
+                <li>工程面积：保留2位小数+m²单位</li>
+                <li>工程造价：保留2位小数+万元单位</li>
+                <li>备案时间：YYYY-MM-DD HH:mm:ss格式</li>
+                <li>操作列：根据状态显示不同操作按钮</li>
+            </ul>
+        </div>
+
+        <div class="anno-section">
+            <h4>居委会选择规则（转派弹窗）</h4>
+            <ul>
+                <li>需要选择【街镇+村居委会】：工程类型为"9.依法获得批准建设的农民自建或翻建低层住宅"</li>
+                <li>需要选择【街镇+居委会】：
+                    <ul>
+                        <li>工程类型为第2项，且场所选项为"住宅小区内部道路"</li>
+                        <li>工程类型为第5、7、8、12项，且场所选项为"住宅小区公共区域内场所"</li>
+                    </ul>
+                </li>
+                <li>不需要选择居委会：不符合上述条件的备案</li>
+                <li>居委会列表根据所选街镇动态加载</li>
+            </ul>
+        </div>
+
+        <div class="anno-section">
+            <h4>交互分支规则</h4>
+            <ul>
+                <li>点击"备案审核" → 打开审核详情弹窗</li>
+                <li>点击"驳回" → 打开驳回原因弹窗，填写后确认驳回</li>
+                <li>点击"通过" → 直接审核通过，显示通过成功弹窗</li>
+                <li>点击"转派" → 打开转派弹窗，选择目标街道+居委会+填写原因</li>
+                <li>转派确认：校验目标街道≠当前街道、居委会必填（如需）、原因必填</li>
+                <li>点击"确认接收" → 状态变更为"待审核"，进入本街道待审核列表</li>
+                <li>点击"不是本街道" → 打开转派弹窗，由当前人员继续转派</li>
+                <li>点击"审批记录" → 打开审批记录弹窗，按时间倒序展示</li>
+            </ul>
+        </div>
+
+        <div class="anno-section">
+            <h4>边界情况</h4>
+            <ul>
+                <li>V1版本暂不支持批量转派，仅支持单条转派</li>
+                <li>转派后备案从发起方列表中移除，不可撤回</li>
+                <li>转派中的备案，发起方不可再进行驳回或通过操作</li>
+                <li>同一条备案在"转派中"状态下，不可再次发起转派</li>
+                <li>确认接收后的备案，审核流程与正常备案完全一致</li>
+                <li>确认接收后，所属街镇字段更新为接收街道+居委会</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 页面导航 -->
+    <div class="page-nav" id="page-nav">
+        <span class="page-nav-label">页面导航</span>
+        <button class="page-nav-btn active" onclick="showPage('list-page')">列表页</button>
+        <button class="page-nav-btn" onclick="showPage('confirm-page')">待确认</button>
+        <button class="page-nav-btn" onclick="showPage('recycle-page')">回收站</button>
+    </div>
+
+    <script>
+        // 弹窗控制
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            // 更新导航按钮状态
+            document.querySelectorAll('.page-nav-btn').forEach(btn => btn.classList.remove('active'));
+            const navMap = {'list-page': 0, 'confirm-page': 1, 'recycle-page': 2};
+            const idx = navMap[pageId];
+            if (idx !== undefined) {
+                document.querySelectorAll('.page-nav-btn')[idx].classList.add('active');
+            }
+        }
+
+        // 列表Tab切换
+        function switchListTab(tab) {
+            document.querySelectorAll('#list-page .tab-item').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('#list-page .stat-card').forEach(c => c.classList.remove('active'));
+        }
+
+        // 待确认Tab切换
+        function switchConfirmTab(tab) {
+            document.querySelectorAll('#confirm-page .tab-item').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // 详情内部Tab切换
+        function switchDetailTab(el, contentId) {
+            el.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // 标注抽屉
+        function toggleAnno() {
+            document.getElementById('anno-drawer').classList.toggle('open');
+        }
+
+        // 居委会动态展示
+        function showCommittee(select) {
+            const committeeDiv = document.getElementById('committee-select');
+            if (select.value) {
+                committeeDiv.style.display = 'flex';
+            } else {
+                committeeDiv.style.display = 'none';
+            }
+        }
+
+        // F8快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F8') {
+                e.preventDefault();
+                toggleAnno();
+            }
+        });
+
+        // 点击遮罩关闭弹窗
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+
+        // 显示页面导航（3秒后自动显示）
+        setTimeout(() => {
+            document.getElementById('page-nav').classList.add('show');
+        }, 500);
+    </script>
+</body>
+</html>

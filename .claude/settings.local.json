@@ -6,7 +6,9 @@
       "Bash(git push)",
       "Bash(git add \"功能规划/PC版备案审核原型设计要点.md\")",
       "WebSearch",
-      "Bash(npm --version)"
+      "Bash(npm --version)",
+      "Bash(node -e ' *)",
+      "Bash(git checkout *)"
     ]
   }
 }

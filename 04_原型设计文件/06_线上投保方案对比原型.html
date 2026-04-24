@@ -45,11 +45,178 @@
 
         .wrap {
             min-height: 100vh;
-            padding: 28px 16px 40px;
+            padding: 28px 24px 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 18px;
+        }
+
+        .main-stage {
+            display: flex;
+            gap: 100px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .desc-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .desc-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 18px 20px;
+            border: 1.5px solid #e8e8e8;
+            box-shadow: 0 4px 16px rgba(26,41,32,0.04);
+            transition: all 0.25s;
+            opacity: 0.5;
+        }
+        .desc-card.active {
+            opacity: 1;
+            border-color: rgba(34,166,109,0.4);
+            box-shadow: 0 8px 28px rgba(34,166,109,0.1);
+        }
+        .desc-card.recommended {
+            background: linear-gradient(180deg, #f4fdfa 0%, #ffffff 100%);
+        }
+
+        .desc-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .desc-title {
+            font-size: 17px;
+            font-weight: 900;
+            color: #1d2b24;
+        }
+        .desc-tag {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+        .desc-tag.recommend {
+            background: linear-gradient(90deg, #22a66d, #4fb3d7);
+            color: #fff;
+        }
+        .desc-tag.alternative {
+            background: #f0f0f0;
+            color: #888;
+        }
+
+        .desc-section {
+            margin-top: 10px;
+        }
+        .desc-section-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #22a66d;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .desc-section-title.warning {
+            color: #FF9500;
+        }
+        .desc-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #51625a;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .desc-text {
+            font-size: 13px;
+            color: #51625a;
+            line-height: 1.7;
+        }
+
+        /* 关联保单状态页 */
+        .linked-card {
+            background: linear-gradient(180deg, #f0f8ff 0%, #ffffff 100%);
+            border: 2px solid rgba(24,144,255,0.3);
+            border-radius: 22px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .linked-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px;
+            background: linear-gradient(90deg, #e6f4ff, #f0f8ff);
+        }
+        .linked-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #1890FF, #52c41a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .linked-title {
+            font-size: 17px;
+            font-weight: 900;
+            color: #1d2b24;
+        }
+        .linked-body {
+            padding: 16px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f8f8;
+            border-radius: 12px;
+            margin-top: 12px;
+        }
+        .file-icon {
+            width: 40px;
+            height: 48px;
+            background: linear-gradient(135deg, #FF4D4F, #FF9500);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .file-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+        .file-size {
+            font-size: 12px;
+            color: #999;
+        }
+
+        @media (max-width: 900px) {
+            .main-stage {
+                flex-direction: column;
+                align-items: center;
+            }
+            .desc-panel {
+                max-width: 390px;
+                width: 100%;
+            }
         }
 
         .toolbar {
@@ -80,14 +247,13 @@
         }
 
         .stage {
-            width: 100%;
+            flex-shrink: 0;
             display: flex;
             justify-content: center;
         }
 
         .phone {
-            width: 100%;
-            max-width: 390px;
+            width: 390px;
             background: linear-gradient(180deg, #f5faf7 0%, #ffffff 100%);
             border-radius: 34px;
             overflow: hidden;
@@ -645,6 +811,47 @@
             box-shadow: 0 12px 30px rgba(34, 166, 109, 0.26);
         }
 
+        /* 保险公司横向Tab */
+        .ins-tab {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: #fff;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ins-tab.active {
+            border-color: #22a66d;
+            background: linear-gradient(180deg, #ebf8f1 0%, #ffffff 100%);
+            box-shadow: 0 4px 12px rgba(34, 166, 109, 0.15);
+        }
+        .ins-tab span {
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        /* 保障类型Tab */
+        .cov-tab {
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cov-tab.active {
+            background: #22a66d;
+            color: #fff;
+            font-weight: 700;
+        }
+
         @media (max-width: 520px) {
             .wrap {
                 padding-left: 10px;
@@ -655,14 +862,19 @@
 </head>
 <body>
     <div class="wrap">
+        <div style="font-size:20px;font-weight:900;color:#1d2b24;text-align:center;" contenteditable="true">线上投保方案对比原型</div>
+        <div style="font-size:13px;color:#6f7d75;text-align:center;" contenteditable="true">点击顶部工具栏切换 A/B/C 三个版本，方案说明自动同步高亮</div>
+
         <div class="toolbar">
             <button class="tool-btn active" type="button" onclick="switchVersion('a')">版本 A</button>
             <button class="tool-btn" type="button" onclick="switchVersion('b')">版本 B</button>
             <button class="tool-btn" type="button" onclick="switchVersion('c')">版本 C</button>
+            <button class="tool-btn" type="button" onclick="switchVersion('d')">版本 D</button>
         </div>
 
-        <div class="stage">
-            <div class="phone">
+        <div class="main-stage">
+            <div class="stage">
+                <div class="phone">
                 <div class="status">
                     <div contenteditable="true">9:41</div>
                     <div class="status-icons">
@@ -757,6 +969,274 @@
                         </div>
                     </div>
 
+                    <!-- 版本 C：线上吸引力强化版 -->
+                    <div id="versionC" style="display:none;">
+                        <div class="entry-card primary" style="position:relative;overflow:hidden;">
+                            <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,#FF9500,#FF6B35);color:#fff;font-size:11px;font-weight:800;padding:6px 14px;border-radius:0 16px 0 12px;">推荐</div>
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span style="font-size:20px;font-weight:900;color:#1d2b24;" contenteditable="true">线上投保</span>
+                            </div>
+                            <div style="font-size:16px;font-weight:800;color:#1a8f62;margin-bottom:6px;" contenteditable="true">一键投保，免填资料</div>
+                            <div style="font-size:14px;color:#51625a;line-height:1.7;margin-bottom:12px;" contenteditable="true">备案信息自动同步保险公司，无需重复填写</div>
+
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                                <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#4b5f56;background:rgba(34,166,109,0.08);padding:5px 10px;border-radius:999px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span contenteditable="true">快捷出单</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#4b5f56;background:rgba(34,166,109,0.08);padding:5px 10px;border-radius:999px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span contenteditable="true">保单免审核</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#4b5f56;background:rgba(34,166,109,0.08);padding:5px 10px;border-radius:999px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span contenteditable="true">信息复用</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#4b5f56;background:rgba(34,166,109,0.08);padding:5px 10px;border-radius:999px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span contenteditable="true">大平台有保障</span>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(34,166,109,0.06);border-radius:12px;margin-bottom:14px;">
+                                <div style="display:flex;align-items:center;gap:5px;font-size:13px;color:#4b5f56;">
+                                    <div style="width:20px;height:20px;border-radius:50%;background:#22a66d;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">1</div>
+                                    <span contenteditable="true">选公司</span>
+                                </div>
+                                <span style="color:#ccc;font-size:12px;">›</span>
+                                <div style="display:flex;align-items:center;gap:5px;font-size:13px;color:#4b5f56;">
+                                    <div style="width:20px;height:20px;border-radius:50%;background:#22a66d;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">2</div>
+                                    <span contenteditable="true">确认保障</span>
+                                </div>
+                                <span style="color:#ccc;font-size:12px;">›</span>
+                                <div style="display:flex;align-items:center;gap:5px;font-size:13px;color:#4b5f56;">
+                                    <div style="width:20px;height:20px;border-radius:50%;background:#22a66d;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">3</div>
+                                    <span contenteditable="true">完成支付</span>
+                                </div>
+                            </div>
+
+                            <button class="button primary" type="button" onclick="showInsuranceFlow()">
+                                <span contenteditable="true">去线上投保</span>
+                            </button>
+                        </div>
+
+                        <div class="entry-card" style="background:#fafafa;border-color:#e8e8e8;box-shadow:none;padding:14px 16px;cursor:pointer;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <div style="font-size:15px;font-weight:700;color:#888;" contenteditable="true">已有保单？直接上传</div>
+                                    <div style="font-size:12px;color:#bbb;margin-top:3px;" contenteditable="true">如您已在线下完成投保，可直接上传保单继续备案</div>
+                                </div>
+                                <span style="font-size:16px;color:#ccc;">›</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 版本 D：弱化政策说明，极致突出线上投保 -->
+                    <div id="versionD" style="display:none;">
+                        <!-- 线上投保超大卡片 -->
+                        <div class="entry-card primary" style="position:relative;overflow:hidden;padding:24px 20px;">
+                            <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,#FF9500,#FF6B35);color:#fff;font-size:12px;font-weight:800;padding:8px 18px;border-radius:0 16px 0 14px;">强烈推荐</div>
+
+                            <div style="text-align:center;margin-bottom:16px;">
+                                <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:linear-gradient(135deg,#22a66d,#4fb3d7);border-radius:50%;margin-bottom:12px;">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                </div>
+                                <div style="font-size:22px;font-weight:900;color:#1d2b24;" contenteditable="true">线上投保</div>
+                                <div style="font-size:15px;font-weight:800;color:#1a8f62;margin-top:6px;" contenteditable="true">一键投保，免填资料，快捷出单</div>
+                            </div>
+
+                            <div style="font-size:14px;color:#51625a;text-align:center;line-height:1.7;margin-bottom:16px;" contenteditable="true">
+                                备案信息自动同步保险公司，无需重复填写任何资料
+                            </div>
+
+                            <!-- 利益点 -->
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                                <div style="display:flex;align-items:center;gap:6px;padding:10px;background:rgba(34,166,109,0.08);border-radius:12px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span style="font-size:13px;color:#4b5f56;font-weight:600;" contenteditable="true">快捷出单</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;padding:10px;background:rgba(34,166,109,0.08);border-radius:12px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span style="font-size:13px;color:#4b5f56;font-weight:600;" contenteditable="true">保单免审核</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;padding:10px;background:rgba(34,166,109,0.08);border-radius:12px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span style="font-size:13px;color:#4b5f56;font-weight:600;" contenteditable="true">信息复用</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;padding:10px;background:rgba(34,166,109,0.08);border-radius:12px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span style="font-size:13px;color:#4b5f56;font-weight:600;" contenteditable="true">大平台有保障</span>
+                                </div>
+                            </div>
+
+                            <!-- 步骤示意 -->
+                            <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:12px;background:rgba(34,166,109,0.06);border-radius:12px;margin-bottom:18px;">
+                                <div style="text-align:center;">
+                                    <div style="width:32px;height:32px;border-radius:50%;background:#22a66d;color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;">1</div>
+                                    <div style="font-size:12px;color:#4b5f56;font-weight:600;" contenteditable="true">选公司</div>
+                                </div>
+                                <div style="width:24px;height:2px;background:linear-gradient(90deg,#22a66d,#4fb3d7);"></div>
+                                <div style="text-align:center;">
+                                    <div style="width:32px;height:32px;border-radius:50%;background:#22a66d;color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;">2</div>
+                                    <div style="font-size:12px;color:#4b5f56;font-weight:600;" contenteditable="true">确认保障</div>
+                                </div>
+                                <div style="width:24px;height:2px;background:linear-gradient(90deg,#22a66d,#4fb3d7);"></div>
+                                <div style="text-align:center;">
+                                    <div style="width:32px;height:32px;border-radius:50%;background:#22a66d;color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;">3</div>
+                                    <div style="font-size:12px;color:#4b5f56;font-weight:600;" contenteditable="true">完成支付</div>
+                                </div>
+                            </div>
+
+                            <button class="button primary" type="button" onclick="showInsuranceFlow()" style="font-size:17px;padding:16px;">
+                                <span contenteditable="true">立即线上投保</span>
+                            </button>
+                        </div>
+
+                        <!-- 线下入口：极简文字链接 -->
+                        <div style="text-align:center;padding:12px 0;">
+                            <span style="font-size:13px;color:#bbb;" contenteditable="true">已有保单？</span>
+                            <span style="font-size:13px;color:#999;font-weight:600;cursor:pointer;text-decoration:underline;" contenteditable="true">点击上传</span>
+                        </div>
+
+                        <!-- 政策说明：底部折叠 -->
+                        <div style="margin-top:8px;padding:12px 16px;background:#f8f8f8;border-radius:12px;cursor:pointer;">
+                            <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12.01" y2="16"/><path d="M12 8v4"/></svg>
+                                <span style="font-size:12px;color:#999;" contenteditable="true">点击了解安全生产责任保险政策要求</span>
+                                <span style="font-size:12px;color:#ccc;">›</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 投保后流程：选择承保公司页 -->
+                    <div id="flow-insurance" style="display:none;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                            <div style="font-size:16px;font-weight:900;color:#1d2b24;" contenteditable="true">选择承保公司</div>
+                            <div style="display:flex;align-items:center;gap:4px;background:rgba(34,166,109,0.1);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;color:#22a66d;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span contenteditable="true">均已备案 免核验</span>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:16px;scrollbar-width:none;">
+                            <div class="ins-tab active" onclick="switchInsTab(this)">
+                                <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#22a66d,#4fb3d7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;">太</div>
+                                <span contenteditable="true">太平财险</span>
+                            </div>
+                            <div class="ins-tab" onclick="switchInsTab(this)">
+                                <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#1890FF,#52c41a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;">国</div>
+                                <span contenteditable="true">国任财险</span>
+                            </div>
+                            <div class="ins-tab" onclick="switchInsTab(this)">
+                                <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#FF4D4F,#FF9500);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;">人</div>
+                                <span contenteditable="true">人保财险</span>
+                            </div>
+                            <div class="ins-tab" onclick="switchInsTab(this)">
+                                <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#722ed1,#eb2f96);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;">中</div>
+                                <span contenteditable="true">中国人寿</span>
+                            </div>
+                        </div>
+
+                        <div class="entry-card">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                <span style="font-size:16px;font-weight:900;color:#1d2b24;" contenteditable="true">基础信息</span>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:12px;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">投保人</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">企业</span></div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保障地区</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">中国境内</span></div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保障范围</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">保单载明工程区域</span></div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保障人员</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">施工单位雇员、第三者</span></div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保障期限</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">与施工合同工期一致</span></div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">预估保费</span><span style="font-size:14px;color:#22a66d;font-weight:700;" contenteditable="true">500 元</span></div>
+                            </div>
+                        </div>
+
+                        <div class="entry-card">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span style="font-size:16px;font-weight:900;color:#1d2b24;" contenteditable="true">保障详情</span>
+                            </div>
+                            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                                <div class="cov-tab active" onclick="switchCovTab(this)" contenteditable="true">医疗费用</div>
+                                <div class="cov-tab" onclick="switchCovTab(this)" contenteditable="true">财产损失</div>
+                                <div class="cov-tab" onclick="switchCovTab(this)" contenteditable="true">救援诉讼</div>
+                                <div class="cov-tab" onclick="switchCovTab(this)" contenteditable="true">猝死责任</div>
+                            </div>
+                            <div style="font-size:32px;font-weight:900;color:#22a66d;margin:8px 0;" contenteditable="true">500<span style="font-size:16px;font-weight:700;color:#333;" contenteditable="true">万 雇员、第三者死亡、伤残、医疗费用</span></div>
+                            <div style="font-size:13px;color:#666;line-height:1.8;max-height:100px;overflow-y:auto;" contenteditable="true">在保险期限内，被保险人在保险单载明的建筑施工项目的施工区域和生活区域范围内依法从事建筑施工及相关工作的过程中，因发生生产安全事故造成从业人员及第三者人身伤亡，依据中华人民共和国法律应由被保险人承担的以下经济赔偿责任，保险人根据本保险合同的约定予以赔偿。</div>
+                        </div>
+
+                        <div style="display:flex;gap:10px;margin-top:16px;">
+                            <button class="button ghost" type="button" onclick="backToMatch()" style="flex:1;">
+                                <span contenteditable="true">上一步</span>
+                            </button>
+                            <button class="button primary" type="button" onclick="showPayFlow()" style="flex:2;">
+                                <span contenteditable="true">确定投保</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 投保后流程：支付页 -->
+                    <div id="flow-pay" style="display:none;">
+                        <div class="entry-card" style="text-align:center;padding:30px 20px;">
+                            <div style="font-size:14px;color:#999;margin-bottom:8px;" contenteditable="true">太平财险</div>
+                            <div style="font-size:42px;font-weight:900;color:#1d2b24;margin-bottom:8px;" contenteditable="true">¥500</div>
+                            <div style="font-size:14px;color:#666;" contenteditable="true">XX小区住宅装修工程</div>
+                        </div>
+
+                        <div class="entry-card">
+                            <div style="font-size:16px;font-weight:900;color:#1d2b24;margin-bottom:14px;" contenteditable="true">选择支付方式</span></div>
+                            <div style="display:flex;flex-direction:column;gap:12px;">
+                                <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#f8f8f8;border-radius:12px;">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:#07C160;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;">微</div>
+                                    <span style="font-size:15px;color:#333;flex:1;" contenteditable="true">微信支付</span>
+                                    <div style="width:20px;height:20px;border:2px solid #22a66d;border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;background:#22a66d;border-radius:50%;"></div></div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#f8f8f8;border-radius:12px;">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:#1677FF;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;">支</div>
+                                    <span style="font-size:15px;color:#333;flex:1;" contenteditable="true">支付宝</span>
+                                    <div style="width:20px;height:20px;border:2px solid #ddd;border-radius:50%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="padding:16px 0;text-align:center;">
+                            <div style="font-size:12px;color:#999;line-height:1.6;" contenteditable="true">收款方：太平财险<br>平台仅提供支付通道，无收款资质</div>
+                        </div>
+
+                        <div style="display:flex;gap:10px;margin-top:8px;">
+                            <button class="button ghost" type="button" onclick="showInsuranceFlow()" style="flex:1;">
+                                <span contenteditable="true">上一步</span>
+                            </button>
+                            <button class="button primary" type="button" onclick="showSuccessFlow()" style="flex:2;">
+                                <span contenteditable="true">确认支付</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 投保后流程：支付成功页 -->
+                    <div id="flow-success" style="display:none;text-align:center;">
+                        <div style="width:80px;height:80px;background:linear-gradient(135deg,#22a66d,#4fb3d7);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:40px auto 20px;box-shadow:0 12px 30px rgba(34,166,109,0.3);">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div style="font-size:22px;font-weight:900;color:#1d2b24;margin-bottom:8px;" contenteditable="true">保单投保成功</div>
+                        <div style="font-size:14px;color:#999;margin-bottom:30px;" contenteditable="true">保单信息已自动关联到当前备案</div>
+
+                        <div class="entry-card" style="text-align:left;">
+                            <div style="display:flex;flex-direction:column;gap:12px;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保险公司</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">太平财险</span></div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保单号</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">待定（同步中）</span></div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保险期限</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">与施工合同工期一致</span></div>
+                            </div>
+                        </div>
+
+                        <button class="button primary" type="button" onclick="backToMatch()" style="margin-top:20px;">
+                            <span contenteditable="true">返回备案页面</span>
+                        </button>
+                    </div>
+
                     <div class="service-bar">
                         <div class="service-text" contenteditable="true">系统操作及保单问题咨询小型工程管理平台</div>
                         <button class="service-btn" type="button" contenteditable="true">客服电话</button>
@@ -765,6 +1245,152 @@
                     <button class="submit-btn" type="button">
                         <span contenteditable="true">提交备案申请</span>
                     </button>
+
+                    <!-- 投保成功后：关联保单状态 -->
+                    <div id="linkedPolicy" style="display:none;">
+                        <div class="linked-card">
+                            <div class="linked-head">
+                                <div class="linked-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                                <span class="linked-title" contenteditable="true">已查询到关联保单</span>
+                            </div>
+                            <div class="linked-body">
+                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    <span style="font-size:16px;font-weight:900;color:#1d2b24;" contenteditable="true">相关信息</span>
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:12px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">被保险人</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">王琪</span></div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">保险期限</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">2023-04-21 至 2026-04-21</span></div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">工程造价</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">1123</span></div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">项目名称</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">小型房屋建筑工程</span></div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">项目地址</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">福保街道福保社区</span></div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">每次事故限额</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">11</span></div>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:14px;color:#8E8E93;" contenteditable="true">每人限额</span><span style="font-size:14px;color:#333;font-weight:500;" contenteditable="true">11</span></div>
+                                </div>
+
+                                <div class="file-item">
+                                    <div class="file-icon">PDF</div>
+                                    <div style="flex:1;">
+                                        <div class="file-name" contenteditable="true">小散安责险保单-益田村1栋应急评估...</div>
+                                        <div class="file-size" contenteditable="true">3.35KB</div>
+                                    </div>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="submit-btn" type="button">
+                            <span contenteditable="true">提交备案申请</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧方案说明 -->
+            <div class="desc-panel">
+                <div class="desc-card active" id="descA" data-version="a">
+                    <div class="desc-header">
+                        <span class="desc-title" contenteditable="true">方案 A：同屏主次分明</span>
+                        <span class="desc-tag alternative" contenteditable="true">保守备选</span>
+                    </div>
+                    <div class="desc-text" contenteditable="true">
+                        页面同时展示"线上投保"和"上传保单"两条路径。线上投保放在主卡位，作为主推荐入口；上传保单放在下方副卡位，弱化但始终可见。
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 优点</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">风险最低，容易被业务、合规和审核端接受</li>
+                            <li contenteditable="true">用户一眼能看到两种方式，不会误解为平台禁止线下</li>
+                            <li contenteditable="true">适合当前保司接入方式未定的阶段</li>
+                        </ul>
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 不足</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">线下入口仍持续可见，容易让用户沿用旧习惯直接上传保单</li>
+                            <li contenteditable="true">只能做到"线上更显眼"，不一定能形成明显导流</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="desc-card" id="descB" data-version="b">
+                    <div class="desc-header">
+                        <span class="desc-title" contenteditable="true">方案 B：默认线上，线下可切换</span>
+                        <span class="desc-tag alternative" contenteditable="true">次选</span>
+                    </div>
+                    <div class="desc-text" contenteditable="true">
+                        页面默认只展开线上投保主流程，同时保留明确的线下切换入口。用户点击后切换为上传保单态，且需保留回切入口。
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 优点</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">比方案 A 更能体现"线上优先"的产品态度</li>
+                            <li contenteditable="true">又没有把线下入口隐藏成异常兜底，风险可控</li>
+                            <li contenteditable="true">与"线上复用备案资料、减少重复填写"的业务事实更匹配</li>
+                        </ul>
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 不足</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">对入口文案、回切逻辑、默认态表达要求更高</li>
+                            <li contenteditable="true">若线下入口过弱，容易引发"被引导得过头"的感受</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="desc-card recommended" id="descC" data-version="c">
+                    <div class="desc-header">
+                        <span class="desc-title" contenteditable="true">方案 C：线上吸引力强化版</span>
+                        <span class="desc-tag recommend" contenteditable="true">推荐</span>
+                    </div>
+                    <div class="desc-text" contenteditable="true">
+                        页面同屏展示两条路径，线上投保区域通过视觉设计、文案包装、利益点展示、步骤引导等多种手段强化吸引力，让用户主动愿意选择线上投保；线下上传入口缩小但不隐藏，保持合规底线。
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 优点</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">线上路径的视觉吸引力和转化动机最强</li>
+                            <li contenteditable="true">两条路径始终同屏可见，合规风险低</li>
+                            <li contenteditable="true">通过利益点包装和步骤简化，降低用户心理门槛</li>
+                            <li contenteditable="true">适合需要在合规边界内最大化线上转化的业务目标</li>
+                        </ul>
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 不足</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">需要更精细的文案打磨和视觉设计投入</li>
+                            <li contenteditable="true">利益点承诺需与实际产品能力严格对齐，避免过度承诺</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="desc-card" id="descD" data-version="d">
+                    <div class="desc-header">
+                        <span class="desc-title" contenteditable="true">方案 D：极致突出线上投保</span>
+                        <span class="desc-tag alternative" contenteditable="true">次选（待合规确认）</span>
+                    </div>
+                    <div class="desc-text" contenteditable="true">
+                        在方案 C 基础上，进一步弱化政策说明类内容的视觉权重，将页面首屏全部留给线上投保核心内容。政策说明不做为页面主体元素出现，而是以最小化方式提供（底部折叠或弹窗查看）。
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 优点</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">线上投保路径的视觉占比和注意力集中度最高</li>
+                            <li contenteditable="true">首屏信息极度聚焦，用户几乎不存在路径犹豫</li>
+                            <li contenteditable="true">政策说明没有消失，只是后置/折叠，合规底线保留</li>
+                            <li contenteditable="true">与"平台需要控制投保流程"的业务方向最匹配</li>
+                        </ul>
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 不足</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">政策说明后置可能引起部分用户困惑</li>
+                            <li contenteditable="true">已有线下保单的用户需要滚动才能发现上传入口</li>
+                            <li contenteditable="true">对政策合规审查的接受度要求更高</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -818,17 +1444,118 @@
         function switchVersion(version) {
             const buttons = document.querySelectorAll('.tool-btn');
             buttons.forEach((btn, index) => {
-                btn.classList.toggle('active', (version === 'a' && index === 0) || (version === 'b' && index === 1));
+                btn.classList.toggle('active',
+                    (version === 'a' && index === 0) ||
+                    (version === 'b' && index === 1) ||
+                    (version === 'c' && index === 2) ||
+                    (version === 'd' && index === 3)
+                );
             });
 
             document.getElementById('versionA').style.display = version === 'a' ? 'block' : 'none';
             document.getElementById('versionB').style.display = version === 'b' ? 'block' : 'none';
+            document.getElementById('versionC').style.display = version === 'c' ? 'block' : 'none';
+            document.getElementById('versionD').style.display = version === 'd' ? 'block' : 'none';
+
+            // 重置投保流程页面和关联保单状态
+            document.getElementById('flow-insurance').style.display = 'none';
+            document.getElementById('flow-pay').style.display = 'none';
+            document.getElementById('flow-success').style.display = 'none';
+            document.getElementById('linkedPolicy').style.display = 'none';
+
+            // 显示/隐藏保单匹配页的公共元素
+            const policyEl = document.querySelector('.policy');
+            const sectionTitleEl = document.querySelector('.section-title');
+            const serviceBarEl = document.querySelector('.service-bar');
+            const submitBtnEl = document.querySelector('.submit-btn');
+
+            // 版本 D 隐藏顶部政策说明，其他版本显示
+            if (policyEl) policyEl.style.display = version === 'd' ? 'none' : 'block';
+            if (sectionTitleEl) sectionTitleEl.style.display = 'block';
+            if (serviceBarEl) serviceBarEl.style.display = 'flex';
+            if (submitBtnEl) submitBtnEl.style.display = 'block';
 
             if (version === 'b') {
                 showOnline();
             }
 
+            // 同步高亮右侧方案说明
+            document.querySelectorAll('.desc-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.version === version);
+            });
+
             closeOfflineModal();
+        }
+
+        function hideMatchElements() {
+            const policyEl = document.querySelector('.policy');
+            const sectionTitleEl = document.querySelector('.section-title');
+            const serviceBarEl = document.querySelector('.service-bar');
+            const submitBtnEl = document.querySelector('.submit-btn');
+            if (policyEl) policyEl.style.display = 'none';
+            if (sectionTitleEl) sectionTitleEl.style.display = 'none';
+            if (serviceBarEl) serviceBarEl.style.display = 'none';
+            if (submitBtnEl) submitBtnEl.style.display = 'none';
+            document.getElementById('versionA').style.display = 'none';
+            document.getElementById('versionB').style.display = 'none';
+            document.getElementById('versionC').style.display = 'none';
+            document.getElementById('versionD').style.display = 'none';
+            document.getElementById('linkedPolicy').style.display = 'none';
+        }
+
+        function showInsuranceFlow() {
+            hideMatchElements();
+            document.getElementById('flow-insurance').style.display = 'block';
+            document.getElementById('flow-pay').style.display = 'none';
+            document.getElementById('flow-success').style.display = 'none';
+        }
+
+        function showPayFlow() {
+            hideMatchElements();
+            document.getElementById('flow-insurance').style.display = 'none';
+            document.getElementById('flow-pay').style.display = 'block';
+            document.getElementById('flow-success').style.display = 'none';
+        }
+
+        function showSuccessFlow() {
+            hideMatchElements();
+            document.getElementById('flow-insurance').style.display = 'none';
+            document.getElementById('flow-pay').style.display = 'none';
+            document.getElementById('flow-success').style.display = 'block';
+        }
+
+        function backToMatch() {
+            // 隐藏所有流程页面
+            document.getElementById('flow-insurance').style.display = 'none';
+            document.getElementById('flow-pay').style.display = 'none';
+            document.getElementById('flow-success').style.display = 'none';
+            document.getElementById('versionA').style.display = 'none';
+            document.getElementById('versionB').style.display = 'none';
+            document.getElementById('versionC').style.display = 'none';
+            document.getElementById('versionD').style.display = 'none';
+
+            // 隐藏保单匹配页公共元素
+            const policyEl = document.querySelector('.policy');
+            const sectionTitleEl = document.querySelector('.section-title');
+            const serviceBarEl = document.querySelector('.service-bar');
+            const submitBtnEl = document.querySelector('.submit-btn');
+            if (policyEl) policyEl.style.display = 'none';
+            if (sectionTitleEl) sectionTitleEl.style.display = 'none';
+            if (serviceBarEl) serviceBarEl.style.display = 'none';
+            if (submitBtnEl) submitBtnEl.style.display = 'none';
+
+            // 显示关联保单状态页（投保成功后返回备案）
+            document.getElementById('linkedPolicy').style.display = 'block';
+        }
+
+        function switchInsTab(el) {
+            document.querySelectorAll('.ins-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function switchCovTab(el) {
+            document.querySelectorAll('.cov-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
         }
 
         function showUpload() {

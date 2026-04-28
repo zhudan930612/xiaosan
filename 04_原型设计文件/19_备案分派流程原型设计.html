@@ -27,6 +27,158 @@
             margin: 0 auto;
         }
 
+        /* ========== 左侧：流程图区域 ========== */
+        .flow-area {
+            flex-shrink: 0;
+            width: 380px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+            padding-right: 4px;
+        }
+        .flow-area::-webkit-scrollbar { width: 4px; }
+        .flow-area::-webkit-scrollbar-thumb { background: #d7e3db; border-radius: 4px; }
+        .flow-panel {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+            margin-bottom: 16px;
+        }
+        .flow-panel h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00B578;
+        }
+        .flow-panel h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin: 14px 0 10px;
+        }
+        .flow-panel h4:first-child { margin-top: 0; }
+        /* 流程图节点 */
+        .flow-chart { display: flex; flex-direction: column; gap: 0; }
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            position: relative;
+        }
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 32px;
+            bottom: -8px;
+            width: 2px;
+            background: #E5E5E5;
+        }
+        .flow-step:last-child::before { display: none; }
+        .flow-step-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+        .flow-step-num.green { background: #E6F7F0; color: #00B578; }
+        .flow-step-num.blue { background: #E6F4FF; color: #1890FF; }
+        .flow-step-num.orange { background: #FFF7E6; color: #FF9500; }
+        .flow-step-num.red { background: #FFF2F0; color: #FF4D4F; }
+        .flow-step-num.gray { background: #F5F5F5; color: #999; }
+        .flow-step-content { flex: 1; padding-bottom: 14px; }
+        .flow-step-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            line-height: 32px;
+        }
+        .flow-step-desc {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+            margin-top: 2px;
+        }
+        /* 分支节点 */
+        .flow-branch {
+            margin: 6px 0 6px 42px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .flow-branch.yes { background: #F6FFFB; border-left: 3px solid #00B578; color: #00B578; }
+        .flow-branch.no { background: #FFF2F0; border-left: 3px solid #FF4D4F; color: #FF4D4F; }
+        /* 状态流转图 */
+        .state-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .state-node {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .state-node.pending { background: #FFF7E6; color: #FF9500; border: 1px solid #FF9500; }
+        .state-node.transfer { background: #E6F4FF; color: #1890FF; border: 1px solid #1890FF; }
+        .state-node.confirmed { background: #E6F7F0; color: #00B578; border: 1px solid #00B578; }
+        .state-node.rejected { background: #FFF2F0; color: #FF4D4F; border: 1px solid #FF4D4F; }
+        .state-node.approved { background: #E6F7F0; color: #00B578; border: 1px solid #00B578; }
+        .state-arrow {
+            color: #999;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .state-arrow-label {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            width: 100%;
+            margin-top: 2px;
+        }
+        .state-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .state-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #E5E5E5;
+        }
+        .state-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #666;
+        }
+        .state-legend-dot {
+            width: 12px; height: 12px;
+            border-radius: 3px;
+        }
+
         /* ========== 左侧：手机原型区 ========== */
         .prototype-area {
             flex-shrink: 0;
@@ -903,6 +1055,184 @@
 
 <div class="main-container">
 
+<!-- ============ 左侧：流程图区域 ============ -->
+<div class="flow-area">
+
+    <!-- 业务流程图 -->
+    <div class="flow-panel">
+        <h3>业务流程图</h3>
+
+        <h4>一、发起转派流程</h4>
+        <div class="flow-chart">
+            <div class="flow-step">
+                <div class="flow-step-num blue">1</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">审核员进入备案审核详情页</div>
+                    <div class="flow-step-desc">在项目中心待审核列表中点击备案卡片进入</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num blue">2</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">发现备案所属街道不一致</div>
+                    <div class="flow-step-desc">审核员发现该备案实际不归本街道管辖</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num orange">3</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">点击底部"转派"按钮</div>
+                    <div class="flow-step-desc">转派按钮常驻在审核详情页底部，与驳回/通过并列</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num orange">4</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">进入选择目标街道页面</div>
+                    <div class="flow-step-desc">从11个青浦区街镇列表中选择目标街道，支持搜索筛选</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num green">5</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">填写转派原因并确认</div>
+                    <div class="flow-step-desc">转派原因必填，限200字。系统校验目标街道≠当前街道</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num green">6</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">转派成功</div>
+                    <div class="flow-step-desc">备案状态变更为"转派中"，推送通知给目标街道审核员</div>
+                </div>
+            </div>
+        </div>
+
+        <h4>二、确认接收流程</h4>
+        <div class="flow-chart">
+            <div class="flow-step">
+                <div class="flow-step-num blue">1</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">目标街道审核员进入项目中心</div>
+                    <div class="flow-step-desc">Tab切换到"待确认"状态，查看待确认备案列表</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num blue">2</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">点击待确认备案进入详情</div>
+                    <div class="flow-step-desc">查看备案基本信息及转派来源信息</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num orange">3</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">判断是否为本街道管辖</div>
+                </div>
+            </div>
+            <div class="flow-branch yes">是 → 点击"确认接收" → 状态变"待审核" → 进入本街道待审核列表</div>
+            <div class="flow-branch no">否 → 点击【退回】→ 填写退回原因 → 备案退回至发起方待审核列表，标签显示【转派退回】</div>
+        </div>
+
+        <h4>三、审核流程（确认接收后）</h4>
+        <div class="flow-chart">
+            <div class="flow-step">
+                <div class="flow-step-num blue">1</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">进入待审核列表</div>
+                    <div class="flow-step-desc">已确认接收的备案显示在待审核列表中</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num blue">2</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">点击备案进入审核详情</div>
+                    <div class="flow-step-desc">页面显示转派来源信息条</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num orange">3</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">点击"驳回"或"通过"</div>
+                    <div class="flow-step-desc">审核流程与正常备案完全一致</div>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-step-num green">4</div>
+                <div class="flow-step-content">
+                    <div class="flow-step-title">完成审核</div>
+                    <div class="flow-step-desc">生成备案回执，归属街道以备案信息中的所属街镇字段为准</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 状态流转图 -->
+    <div class="flow-panel">
+        <h3>状态流转图</h3>
+
+        <div class="state-row">
+            <div class="state-node pending">待审核</div>
+            <div class="state-arrow">→</div>
+            <div class="state-node transfer">转派中</div>
+            <div class="state-arrow">→</div>
+            <div class="state-node confirmed">待审核(已确认)</div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:14px;padding-left:4px;">
+            <span style="color:#1890FF;">转派</span> → <span style="color:#00B578;">确认接收</span>
+        </div>
+
+        <div class="state-row">
+            <div class="state-node confirmed">待审核(已确认)</div>
+            <div class="state-arrow">→</div>
+            <div class="state-node approved">已通过</div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:14px;padding-left:4px;">
+            <span style="color:#00B578;">审核通过</span>
+        </div>
+
+        <div class="state-row">
+            <div class="state-node confirmed">待审核(已确认)</div>
+            <div class="state-arrow">→</div>
+            <div class="state-node rejected">已驳回</div>
+            <div class="state-arrow">→</div>
+            <div class="state-node pending">待审核</div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:14px;padding-left:4px;">
+            <span style="color:#FF4D4F;">审核驳回</span> → <span style="color:#1890FF;">施工方重新提交</span>
+        </div>
+
+        <div class="state-row">
+            <div class="state-node transfer">转派中</div>
+            <div class="state-arrow">↺</div>
+            <div class="state-node transfer">转派中(新目标)</div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:6px;padding-left:4px;">
+            <span style="color:#FF4D4F;">退回 → 退回至发起方待审核列表</span>
+        </div>
+
+        <div class="state-legend">
+            <div class="state-legend-item">
+                <div class="state-legend-dot" style="background:#FFF7E6;border:1px solid #FF9500;"></div>
+                <span>待审核</span>
+            </div>
+            <div class="state-legend-item">
+                <div class="state-legend-dot" style="background:#E6F4FF;border:1px solid #1890FF;"></div>
+                <span>转派中</span>
+            </div>
+            <div class="state-legend-item">
+                <div class="state-legend-dot" style="background:#E6F7F0;border:1px solid #00B578;"></div>
+                <span>已确认/已通过</span>
+            </div>
+            <div class="state-legend-item">
+                <div class="state-legend-dot" style="background:#FFF2F0;border:1px solid #FF4D4F;"></div>
+                <span>已驳回</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 <!-- ============ 左侧：手机原型区 ============ -->
 <div class="prototype-area">
 <div class="phone-frame">
@@ -1535,7 +1865,7 @@
             </div>
             <!-- 底部确认按钮 -->
             <div class="bottom-actions three-btn">
-                <div class="btn btn-danger" onclick="showPage('page2')">不是本街道</div>
+                <div class="btn btn-danger" onclick="showPage('page5-return')">退回</div>
                 <div class="btn btn-primary" onclick="showPage('page6')">确认接收</div>
             </div>
         </div>
@@ -1943,7 +2273,7 @@
             <h4>数据规则</h4>
             <ul>
                 <li>卡片标签"待审核"：正常提交后等待审核的备案</li>
-                <li>卡片标签"转派退回"：我转派出去、对方点击"不是本街道"后退回给我的备案</li>
+                <li>卡片标签"转派退回"：我转派出去、对方点击"退回"后退回给我的备案</li>
                 <li>排序：按提交/退回时间倒序排列（最新的在前）</li>
                 <li>各状态标签显示对应状态的数量</li>
             </ul>
@@ -1988,7 +2318,7 @@
             <h4>交互分支规则</h4>
             <ul>
                 <li>点击"我发起的"子Tab → 切换到"我发起的"列表</li>
-                <li>点击列表项 → 进入确认接收详情页，底部显示"确认接收"和"不是本街道"两个按钮</li>
+                <li>点击列表项 → 进入确认接收详情页，底部显示"确认接收"和"退回"两个按钮</li>
             </ul>
         </div>
         <div class="anno-section">
@@ -2030,7 +2360,7 @@
             <h4>边界情况</h4>
             <ul>
                 <li>对方确认接收后，该备案从列表中移除，进入对方待审核列表</li>
-                <li>对方点击"不是本街道"后，该备案退回到我的待审核列表（标记为"转派退回"）</li>
+                <li>对方点击"退回"后，该备案退回到我的待审核列表（标记为"转派退回"）</li>
             </ul>
         </div>
     </div>
@@ -2044,7 +2374,7 @@
                 <li>点击待确认列表项后进入</li>
                 <li>页面顶部显示转派来源信息条（绿色渐变背景）</li>
                 <li>备案状态显示为"转派中"</li>
-                <li>底部显示"确认接收"和"不是本街道"两个按钮</li>
+                <li>底部显示"确认接收"和"退回"两个按钮</li>
             </ul>
         </div>
         <div class="anno-section">
@@ -2059,13 +2389,13 @@
             <h4>交互分支规则</h4>
             <ul>
                 <li>点击"确认接收" → 状态变更为"待审核" → 生成确认接收记录 → 进入本街道待审核列表 → 显示确认成功页</li>
-                <li>点击"不是本街道" → 保持"转派中"状态 → 进入选择目标街道页 → 由当前人员继续转派</li>
+                <li>点击"退回" → 弹出退回原因输入页 → 填写退回原因（必填，限200字）→ 备案退回至发起方待审核列表 → 发起方列表项显示【转派退回】标签</li>
             </ul>
         </div>
         <div class="anno-section">
             <h4>边界情况</h4>
             <ul>
-                <li>"不是本街道"后目标街道可选择原街道（转回发起方）或其他任意街道</li>
+                <li>发起方在待审核列表中点击【转派退回】标签的备案 → 进入选择目标街道页 → 重新选择目标街道继续转派</li>
                 <li>确认接收不限定由确认人本人审核，街道内任何有权限人员均可审核</li>
                 <li>有确认权限即等同于有审核权限</li>
             </ul>

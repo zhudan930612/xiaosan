@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI助手与报表功能 - 移动端原型</title>
+    <style>
+        /* ========== 全局样式 ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f0f2f5;
+            overflow-x: auto;
+        }
+
+        /* ========== 主布局：左侧原型 + 右侧标注 ========== */
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 24px;
+            padding: 40px;
+            min-width: fit-content;
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        /* ========== 左侧原型区域 ========== */
+        .prototype-area {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* ========== 手机框架 ========== */
+        .phone-frame {
+            width: 375px;
+            background: white;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.15);
+            border: 8px solid #1a1a1a;
+            position: relative;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #1a1a1a;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+
+        .phone-screen {
+            height: auto;
+            min-height: 812px;
+            background: linear-gradient(180deg, #f6fbf8 0%, #ffffff 100%);
+            position: relative;
+            padding-bottom: 90px;
+        }
+
+        /* ========== 状态栏 ========== */
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(90deg, #35ad73, #58b8d7);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: 800;
+            padding-top: 12px;
+        }
+
+        /* ========== 导航栏 ========== */
+        .nav-bar {
+            background: linear-gradient(90deg, #35ad73, #58b8d7);
+            padding: 10px 18px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-back {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: 300;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .nav-menu {
+            width: 78px;
+            height: 36px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* ========== Tab栏 ========== */
+        .tab-bar {
+            background: #f1f3f1;
+            border-radius: 30px 30px 0 0;
+            display: flex;
+            padding: 18px 4px 16px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.32);
+            margin-top: -10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #303631;
+            border-radius: 26px 0 0 0;
+            cursor: pointer;
+        }
+
+        .tab-item.active {
+            background: linear-gradient(135deg, #ffffff 0%, #eef9f3 60%, #f4fcff 100%);
+            color: #1a8f62;
+            font-weight: 800;
+            box-shadow: -10px 0 20px rgba(83, 183, 216, 0.08);
+        }
+
+        /* ========== 内容区域 ========== */
+        .content-area {
+            padding: 16px 16px 24px;
+        }
+
+        /* ========== 个人统计卡片 ========== */
+        .user-stats-card {
+            background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+            border-radius: 18px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0, 181, 120, 0.25);
+        }
+
+        .user-stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .user-info-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .user-info-role {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .stat-item {
+            flex: 1;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-item-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-item-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* 进度条 */
+        .progress-section {
+            margin-top: 12px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+        }
+
+        /* ========== 待办卡片 ========== */
+        .todo-card {
+            background: white;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+        }
+
+        .todo-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .todo-header.urgent { color: #FF3B30; }
+        .todo-header.warning { color: #FF9500; }
+        .todo-header.normal { color: #00B578; }
+
+        .todo-count {
+            background: #FF3B30;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .todo-count.warning { background: #FF9500; }
+
+        .todo-item {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border-left: 3px solid #FF3B30;
+            background: #FFF2F0;
+        }
+
+        .todo-item.warning {
+            border-left-color: #FF9500;
+            background: #FFFBE6;
+        }
+
+        .todo-item-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .todo-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .todo-item-time {
+            font-size: 12px;
+            color: #FF3B30;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* ========== 快捷入口 ========== */
+        .quick-entry-section {
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .quick-item {
+            background: white;
+            border-radius: 18px;
+            padding: 16px 8px;
+            text-align: center;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+            cursor: pointer;
+        }
+
+        .quick-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #E6F7F0 0%, #f4fcff 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 24px;
+            color: #00B578;
+        }
+
+        .quick-label {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* ========== AI对话页面 ========== */
+        .chat-container {
+            padding: 16px;
+            min-height: 600px;
+        }
+
+        .chat-welcome {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .chat-welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00B578 0%, #58b8d7 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 36px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0, 181, 120, 0.3);
+        }
+
+        .chat-welcome-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .chat-welcome-desc {
+            font-size: 14px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        .chat-bubbles {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .chat-bubble.ai {
+            align-self: flex-start;
+            background: #f5f5f5;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-bubble.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #00B578 0%, #58b8d7 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .chat-suggestion {
+            padding: 8px 14px;
+            background: white;
+            border: 1px solid #d7e3db;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #00B578;
+            cursor: pointer;
+        }
+
+        /* ========== 报表列表 ========== */
+        .report-list {
+            padding: 16px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+            cursor: pointer;
+        }
+
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .report-type-tag {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .report-type-tag.weekly {
+            background: #E6F7F0;
+            color: #00B578;
+        }
+
+        .report-type-tag.monthly {
+            background: #E6F4FF;
+            color: #1890FF;
+        }
+
+        .report-type-tag.special {
+            background: #FFFBE6;
+            color: #FF9500;
+        }
+
+        .report-status {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .report-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .report-meta {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .report-summary {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .report-action-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .report-action-btn.primary {
+            background: #00B578;
+            color: white;
+        }
+
+        .report-action-btn.secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        /* ========== 报表详情 ========== */
+        .report-detail {
+            padding: 16px;
+        }
+
+        .report-detail-header {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #d7e3db;
+        }
+
+        .report-detail-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .report-detail-meta {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+
+        .report-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .report-metric {
+            text-align: center;
+            padding: 12px;
+            background: #f8f8f8;
+            border-radius: 12px;
+        }
+
+        .report-metric-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .report-metric-label {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .report-section {
+            background: white;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #d7e3db;
+        }
+
+        .report-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .report-section-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .highlight-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .highlight-item:last-child {
+            border-bottom: none;
+        }
+
+        .highlight-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .highlight-icon.success { background: #E6F7F0; color: #00B578; }
+        .highlight-icon.warning { background: #FFFBE6; color: #FF9500; }
+        .highlight-icon.danger { background: #FFF2F0; color: #FF3B30; }
+
+        /* ========== 底部按钮区 ========== */
+        .bottom-actions {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn {
+            flex: 1;
+            height: 50px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #27a66d, #4fb3d7);
+            color: white;
+            box-shadow: 0 12px 26px rgba(34, 166, 109, 0.24);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #00B578;
+            border: 1px solid #00B578;
+        }
+
+        /* ========== 底部导航 ========== */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            padding-bottom: 20px;
+            z-index: 50;
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: #999;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .bottom-nav-item.active {
+            color: #00B578;
+        }
+
+        .bottom-nav-icon {
+            font-size: 22px;
+        }
+
+        .bottom-nav-ai {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #00B578 0%, #58b8d7 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: -28px;
+            border: 4px solid white;
+            box-shadow: 0 4px 16px rgba(0, 181, 120, 0.3);
+        }
+
+        /* ========== 右侧标注区域 ========== */
+        .annotation-area {
+            min-width: 400px;
+            max-width: 600px;
+            flex: 1;
+        }
+
+        .annotation-box {
+            background: #FFFBE6;
+            border: 2px dashed #FFC53D;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .annotation-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 197, 61, 0.3);
+        }
+
+        .annotation-section {
+            margin-bottom: 16px;
+        }
+
+        .annotation-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .annotation-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .annotation-content ul {
+            margin-left: 20px;
+        }
+
+        .annotation-content li {
+            margin-bottom: 6px;
+        }
+
+        /* ========== 浮动导航 ========== */
+        .float-nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            border-radius: 30px;
+            padding: 12px 24px;
+            display: none;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .float-nav.visible {
+            display: flex;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .nav-btn.active {
+            background: #00B578;
+        }
+
+        .nav-indicator {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        /* ========== 提示信息 ========== */
+        .hint-text {
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* ========== 个人工作报表样式 ========== */
+        .personal-report-card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #d7e3db;
+            box-shadow: 0 12px 28px rgba(26, 41, 32, 0.05);
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .rank-badge.top {
+            background: #FFFBE6;
+            color: #FF9500;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .timeline-dot {
+            width: 10px;
+            height: 10px;
+            background: #00B578;
+            border-radius: 50%;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <!-- 浮动导航 -->
+    <div class="float-nav" id="floatNav">
+        <div class="nav-indicator">按 F8 显示/隐藏导航</div>
+        <button class="nav-btn active" onclick="showPage('page1')">首页</button>
+        <button class="nav-btn" onclick="showPage('page2')">AI对话</button>
+        <button class="nav-btn" onclick="showPage('page3')">报表列表</button>
+        <button class="nav-btn" onclick="showPage('page4')">报表详情</button>
+        <button class="nav-btn" onclick="showPage('page5')">个人报表</button>
+    </div>
+
+    <div class="main-container">
+        <!-- 左侧原型区域 -->
+        <div class="prototype-area">
+            <!-- 页面1: AI助手首页 -->
+            <div class="page-section active" id="page1">
+                <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <!-- 状态栏 -->
+                        <div class="status-bar">
+                            <span>9:41</span>
+                            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10v4"/><path d="M10 8v8"/><path d="M14 6v12"/><path d="M18 4v16"/></svg> 5G <svg width="20" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></span>
+                        </div>
+                        <!-- 导航栏 -->
+                        <div class="nav-bar">
+                            <div style="width: 34px;"></div>
+                            <div class="nav-title">AI智能助手</div>
+                            <div class="nav-menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+                        </div>
+                        <!-- 内容 -->
+                        <div class="content-area">
+                            <!-- 个人统计卡片 -->
+                            <div class="user-stats-card">
+                                <div class="user-stats-header">
+                                    <div>
+                                        <div class="user-info-name">张三，您好</div>
+                                        <div class="user-info-role">夏阳街道巡查队</div>
+                                    </div>
+                                    <div class="user-avatar">张</div>
+                                </div>
+                                <div class="stats-row">
+                                    <div class="stat-item">
+                                        <div class="stat-item-value">28</div>
+                                        <div class="stat-item-label">巡查次数</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-item-value">15</div>
+                                        <div class="stat-item-label">覆盖工程</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-item-value">12</div>
+                                        <div class="stat-item-label">发现隐患</div>
+                                    </div>
+                                </div>
+                                <div class="progress-section">
+                                    <div class="progress-label">
+                                        <span>本月巡查进度</span>
+                                        <span>28/30 (93%)</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 93%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 待办事项 -->
+                            <div class="todo-card">
+                                <div class="todo-header urgent">
+                                    <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+                                    <span>今日到期</span>
+                                    <span class="todo-count">2</span>
+                                </div>
+                                <div class="todo-item">
+                                    <div class="todo-item-title">XX花园3栋</div>
+                                    <div class="todo-item-desc">高处作业隐患整改到期</div>
+                                    <div class="todo-item-time">剩余2小时</div>
+                                </div>
+                                <div class="todo-item">
+                                    <div class="todo-item-title">XX大厦</div>
+                                    <div class="todo-item-desc">临边防护隐患整改到期</div>
+                                    <div class="todo-item-time">剩余5小时</div>
+                                </div>
+                            </div>
+
+                            <div class="todo-card">
+                                <div class="todo-header warning">
+                                    <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                                    <span>即将到期</span>
+                                    <span class="todo-count warning">1</span>
+                                </div>
+                                <div class="todo-item warning">
+                                    <div class="todo-item-title">XX小区</div>
+                                    <div class="todo-item-desc">整改到期日：明天</div>
+                                </div>
+                            </div>
+
+                            <!-- 快捷入口 -->
+                            <div class="quick-entry-section">
+                                <div class="section-title">快捷入口</div>
+                                <div class="quick-grid">
+                                    <div class="quick-item" onclick="showPage('page2')">
+                                        <div class="quick-icon">[AI]</div>
+                                        <div class="quick-label">AI问答</div>
+                                    </div>
+                                    <div class="quick-item" onclick="showPage('page3')">
+                                        <div class="quick-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                                        <div class="quick-label">数据报表</div>
+                                    </div>
+                                    <div class="quick-item" onclick="showPage('page5')">
+                                        <div class="quick-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
+                                        <div class="quick-label">个人统计</div>
+                                    </div>
+                                    <div class="quick-item">
+                                        <div class="quick-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01"/><path d="M6 14h.01"/><path d="M10 10h.01"/><path d="M10 14h.01"/></svg></div>
+                                        <div class="quick-label">我的工程</div>
+                                    </div>
+                                    <div class="quick-item">
+                                        <div class="quick-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+                                        <div class="quick-label">提醒设置</div>
+                                    </div>
+                                    <div class="quick-item">
+                                        <div class="quick-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                                        <div class="quick-label">历史记录</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 底部导航 -->
+                        <div class="bottom-nav">
+                            <div class="bottom-nav-item">
+                                <div class="bottom-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                                <div>首页</div>
+                            </div>
+                            <div class="bottom-nav-item">
+                                <div class="bottom-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+                                <div>巡查</div>
+                            </div>
+                            <div class="bottom-nav-item active">
+                                <div class="bottom-nav-ai">AI</div>
+                                <div>助手</div>
+                            </div>
+                            <div class="bottom-nav-item">
+                                <div class="bottom-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                                <div>我的</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面2: AI对话 -->
+            <div class="page-section" id="page2">
+                <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span>
+                            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10v4"/><path d="M10 8v8"/><path d="M14 6v12"/><path d="M18 4v16"/></svg> 5G <svg width="20" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back" onclick="showPage('page1')">‹</div>
+                            <div class="nav-title">AI智能助手</div>
+                            <div style="width: 34px;"></div>
+                        </div>
+                        <div class="chat-container">
+                            <div class="chat-welcome">
+                                <div class="chat-welcome-icon">AI</div>
+                                <div class="chat-welcome-title">AI智能助手</div>
+                                <div class="chat-welcome-desc">基于数据洞察，为您提供智能分析服务</div>
+                            </div>
+                            <div class="chat-suggestions">
+                                <div class="chat-suggestion">生成本周报告</div>
+                                <div class="chat-suggestion">查看待办事项</div>
+                                <div class="chat-suggestion">本月备案量</div>
+                                <div class="chat-suggestion">为什么整改率下降</div>
+                            </div>
+                            <div class="chat-bubbles">
+                                <div class="chat-bubble ai">
+                                    您好，我是您的数据助手，可以帮您：<br>
+                                    • 分析数据：为什么整改率下降<br>
+                                    • 生成报告：生成本周报告<br>
+                                    • 查看待办：我有什么待处理事项<br>
+                                    • 查询统计：本月备案量
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 底部输入 -->
+                        <div style="padding: 12px 16px; background: white; border-top: 1px solid #f0f0f0;">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" placeholder="输入问题..." style="flex: 1; height: 44px; border: 1px solid #e8e8e8; border-radius: 22px; padding: 0 16px; font-size: 14px; outline: none;">
+                                <button style="width: 44px; height: 44px; background: linear-gradient(135deg, #00B578, #58b8d7); border: none; border-radius: 50%; color: white; font-size: 18px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+                            </div>
+                        </div>
+                        <div style="height: 80px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面3: 报表列表 -->
+            <div class="page-section" id="page3">
+                <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span>
+                            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10v4"/><path d="M10 8v8"/><path d="M14 6v12"/><path d="M18 4v16"/></svg> 5G <svg width="20" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back" onclick="showPage('page1')">‹</div>
+                            <div class="nav-title">数据报表</div>
+                            <div style="width: 34px;"></div>
+                        </div>
+                        <div class="tab-bar">
+                            <div class="tab-item active">全部</div>
+                            <div class="tab-item">周报</div>
+                            <div class="tab-item">月报</div>
+                            <div class="tab-item">个人</div>
+                        </div>
+                        <div class="report-list">
+                            <div class="report-card" onclick="showPage('page4')">
+                                <div class="report-card-header">
+                                    <span class="report-type-tag weekly">周报</span>
+                                    <span class="report-status">已生成</span>
+                                </div>
+                                <div class="report-title">青浦区小型工程监管周报（第13周）</div>
+                                <div class="report-meta">2026-03-24 至 2026-03-30 · 夏阳街道</div>
+                                <div class="report-summary">本周备案68个，巡查142次，发现隐患15条，整改完成率93%，整体运行平稳。</div>
+                                <div class="report-actions">
+                                    <button class="report-action-btn primary">查看</button>
+                                    <button class="report-action-btn secondary">下载PDF</button>
+                                </div>
+                            </div>
+                            <div class="report-card">
+                                <div class="report-card-header">
+                                    <span class="report-type-tag monthly">月报</span>
+                                    <span class="report-status">已生成</span>
+                                </div>
+                                <div class="report-title">青浦区小型工程监管月报（2026年3月）</div>
+                                <div class="report-meta">2026-03-01 至 2026-03-31 · 全区</div>
+                                <div class="report-summary">本月新增备案1,245个，巡查3,680次，整改率92.1%，整体监管态势平稳。</div>
+                                <div class="report-actions">
+                                    <button class="report-action-btn primary">查看</button>
+                                    <button class="report-action-btn secondary">下载PDF</button>
+                                </div>
+                            </div>
+                            <div class="report-card">
+                                <div class="report-card-header">
+                                    <span class="report-type-tag special">专项</span>
+                                    <span class="report-status">已生成</span>
+                                </div>
+                                <div class="report-title">住宅装修工程安全分析报告</div>
+                                <div class="report-meta">2026年第一季度 · 住宅装修专项</div>
+                                <div class="report-summary">住宅装修备案1,892个，占总量45%，隐患发现率12%，低于平均水平。</div>
+                                <div class="report-actions">
+                                    <button class="report-action-btn primary">查看</button>
+                                    <button class="report-action-btn secondary">下载PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="height: 80px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面4: 报表详情 -->
+            <div class="page-section" id="page4">
+                <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span>
+                            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10v4"/><path d="M10 8v8"/><path d="M14 6v12"/><path d="M18 4v16"/></svg> 5G <svg width="20" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back" onclick="showPage('page3')">‹</div>
+                            <div class="nav-title">周报详情</div>
+                            <div style="width: 34px;"></div>
+                        </div>
+                        <div class="report-detail">
+                            <div class="report-detail-header">
+                                <div class="report-detail-title">监管周报（第13周）</div>
+                                <div class="report-detail-meta">2026-03-24 至 2026-03-30 · 夏阳街道 · 自动生成</div>
+                                <div class="report-metrics-grid" style="margin-top: 16px;">
+                                    <div class="report-metric">
+                                        <div class="report-metric-value">68</div>
+                                        <div class="report-metric-label">新增备案</div>
+                                    </div>
+                                    <div class="report-metric">
+                                        <div class="report-metric-value">142</div>
+                                        <div class="report-metric-label">巡查次数</div>
+                                    </div>
+                                    <div class="report-metric">
+                                        <div class="report-metric-value">93%</div>
+                                        <div class="report-metric-label">整改率</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="report-section">
+                                <div class="report-section-title">工作亮点</div>
+                                <div class="report-section-content">
+                                    <div class="highlight-item">
+                                        <div class="highlight-icon success">✓</div>
+                                        <div>巡查覆盖率94.7%，高于全区平均，排名第2</div>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <div class="highlight-icon success">✓</div>
+                                        <div>隐患整改率93.3%，环比上周提升5个百分点</div>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <div class="highlight-icon success">✓</div>
+                                        <div>本月无安全事故发生</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="report-section">
+                                <div class="report-section-title">存在问题</div>
+                                <div class="report-section-content">
+                                    <div class="highlight-item">
+                                        <div class="highlight-icon warning">!</div>
+                                        <div>2条隐患即将在3日内到期，需抓紧复核</div>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <div class="highlight-icon warning">!</div>
+                                        <div>3个工程超过7天未巡查</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="report-section">
+                                <div class="report-section-title">下周建议</div>
+                                <div class="report-section-content">
+                                    1. 优先处理即将逾期的2条隐患，确保按期闭环<br>
+                                    2. 对超过7天未巡查的工程安排巡查，提升覆盖率<br>
+                                    3. 针对新入驻施工单位开展整改流程培训
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-actions">
+                            <button class="btn btn-secondary">分享</button>
+                            <button class="btn btn-primary">下载PDF</button>
+                        </div>
+                        <div style="height: 20px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面5: 个人工作报表 -->
+            <div class="page-section" id="page5">
+                <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span>
+                            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10v4"/><path d="M10 8v8"/><path d="M14 6v12"/><path d="M18 4v16"/></svg> 5G <svg width="20" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg></span>
+                        </div>
+                        <div class="nav-bar">
+                            <div class="nav-back" onclick="showPage('page1')">‹</div>
+                            <div class="nav-title">个人工作报表</div>
+                            <div style="width: 34px;"></div>
+                        </div>
+                        <div class="content-area">
+                            <div class="personal-report-card">
+                                <div style="font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px;">张三</div>
+                                <div style="font-size: 13px; color: #999; margin-bottom: 16px;">夏阳街道巡查队 · 2026年3月</div>
+                                <div class="report-metrics-grid">
+                                    <div class="report-metric">
+                                        <div class="report-metric-value">28</div>
+                                        <div class="report-metric-label">巡查次数</div>
+                                    </div>
+                                    <div class="report-metric">
+                                        <div class="report-metric-value">15</div>
+                                        <div class="report-metric-label">覆盖工程</div>
+                                    </div>
+                                    <div class="report-metric">
+                                        <div class="report-metric-value">12</div>
+                                        <div class="report-metric-label">发现隐患</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="personal-report-card">
+                                <div class="section-title">目标完成情况</div>
+                                <div class="progress-section">
+                                    <div class="progress-label">
+                                        <span>巡查次数</span>
+                                        <span>28/30 (93%)</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 93%;"></div>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 12px; display: flex; gap: 12px;">
+                                    <div class="rank-badge top"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg> 隐患发现 第1名</div>
+                                    <div class="rank-badge top"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg> 巡查次数 第2名</div>
+                                </div>
+                            </div>
+
+                            <div class="personal-report-card">
+                                <div class="section-title">工作记录</div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">XX花园3栋 · 发现隐患1条</div>
+                                        <div class="timeline-time">03-28 14:30</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">XX大厦 · 无隐患</div>
+                                        <div class="timeline-time">03-27 09:15</div>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">XX小区 · 发现隐患2条</div>
+                                        <div class="timeline-time">03-26 16:20</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-actions">
+                            <button class="btn btn-secondary">分享</button>
+                            <button class="btn btn-primary">导出PDF</button>
+                        </div>
+                        <div style="height: 20px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧标注区域 -->
+        <div class="annotation-area">
+            <div class="annotation-box" id="annotationBox">
+                <div class="annotation-title">页面1：AI助手首页 — 需求说明</div>
+
+                <div class="annotation-section">
+                    <div class="annotation-section-title">1. 页面状态规则</div>
+                    <div class="annotation-content">
+                        <ul>
+                            <li>首次进入：展示欢迎语+快捷入口+待办提醒</li>
+                            <li>有未读待办：待办卡片显示红点角标</li>
+                            <li>无待办：待办区域显示"暂无待办事项"</li>
+                            <li>网络异常：显示"网络连接异常，请检查网络"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="annotation-section">
+                    <div class="annotation-section-title">2. 数据规则</div>
+                    <div class="annotation-content">
+                        <ul>
+                            <li>巡查次数：本月累计成功提交的巡查记录数</li>
+                            <li>覆盖工程：本月有巡查记录的不重复工程数</li>
+                            <li>发现隐患：本月登记的隐患总数</li>
+                            <li>进度计算：巡查次数 / 目标次数 × 100%</li>
+                            <li>目标次数：按当前日期计算应完成的巡查次数</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="annotation-section">
+                    <div class="annotation-section-title">3. 字段规则</div>
+                    <div class="annotation-content">
+                        <ul>
+                            <li>用户姓名：从登录用户信息获取，必填</li>
+                            <li>所属街道：从用户权限配置获取，必填</li>
+                            <li>待办分级：紧急（今日到期）、重要（3日内）、提示（其他）</li>
+                            <li>待办排序：按紧急程度+到期时间倒序</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="annotation-section">
+                    <div class="annotation-section-title">4. 交互分支规则</div>
+                    <div class="annotation-content">
+                        <ul>
+                            <li>点击待办项：跳转隐患详情页</li>
+                            <li>点击"AI问答"：进入对话页面</li>
+                            <li>点击"数据报表"：进入报表列表页</li>
+                            <li>点击"个人统计"：进入个人工作报表</li>
+                            <li>底部AI按钮：当前已在AI助手页，点击无响应</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="annotation-section">
+                    <div class="annotation-section-title">5. 边界情况</div>
+                    <div class="annotation-content">
+                        <ul>
+                            <li>新用户首次进入：目标次数按默认值计算</li>
+                            <li>跨月切换：数据自动刷新为当月统计</li>
+                            <li>权限不足：个人统计仅显示自己的数据</li>
+                            <li>数据为空：显示"暂无数据"占位图</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+
+            // 更新导航按钮状态
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 更新标注内容
+            updateAnnotation(pageId);
+        }
+
+        // 更新标注内容
+        function updateAnnotation(pageId) {
+            const annotations = {
+                page1: {
+                    title: '页面1：AI助手首页 — 需求说明',
+                    sections: [
+                        {
+                            title: '1. 页面状态规则',
+                            content: `<ul>
+                                <li>首次进入：展示欢迎语+快捷入口+待办提醒</li>
+                                <li>有未读待办：待办卡片显示红点角标</li>
+                                <li>无待办：待办区域显示"暂无待办事项"</li>
+                                <li>网络异常：显示"网络连接异常，请检查网络"</li>
+                            </ul>`
+                        },
+                        {
+                            title: '2. 数据规则',
+                            content: `<ul>
+                                <li>巡查次数：本月累计成功提交的巡查记录数</li>
+                                <li>覆盖工程：本月有巡查记录的不重复工程数</li>
+                                <li>发现隐患：本月登记的隐患总数</li>
+                                <li>进度计算：巡查次数 / 目标次数 × 100%</li>
+                            </ul>`
+                        },
+                        {
+                            title: '3. 字段规则',
+                            content: `<ul>
+                                <li>用户姓名：从登录用户信息获取，必填</li>
+                                <li>所属街道：从用户权限配置获取，必填</li>
+                                <li>待办分级：紧急（今日到期）、重要（3日内）、提示（其他）</li>
+                            </ul>`
+                        },
+                        {
+                            title: '4. 交互分支规则',
+                            content: `<ul>
+                                <li>点击待办项：跳转隐患详情页</li>
+                                <li>点击"AI问答"：进入对话页面</li>
+                                <li>点击"数据报表"：进入报表列表页</li>
+                            </ul>`
+                        },
+                        {
+                            title: '5. 边界情况',
+                            content: `<ul>
+                                <li>新用户首次进入：目标次数按默认值计算</li>
+                                <li>跨月切换：数据自动刷新为当月统计</li>
+                                <li>数据为空：显示"暂无数据"占位图</li>
+                            </ul>`
+                        }
+                    ]
+                },
+                page2: {
+                    title: '页面2：AI对话 — 需求说明',
+                    sections: [
+                        {
+                            title: '1. 页面状态规则',
+                            content: `<ul>
+                                <li>首次进入：展示欢迎语+快捷建议</li>
+                                <li>对话中：消息列表滚动到底部</li>
+                                <li>AI思考中：显示loading动画</li>
+                                <li>网络异常：提示"发送失败，请重试"</li>
+                            </ul>`
+                        },
+                        {
+                            title: '2. 数据规则',
+                            content: `<ul>
+                                <li>对话历史：保留最近20条记录</li>
+                                <li>响应时间：简单查询<2秒，复杂查询<5秒</li>
+                                <li>缓存策略：热点数据缓存1小时</li>
+                            </ul>`
+                        },
+                        {
+                            title: '3. 字段规则',
+                            content: `<ul>
+                                <li>输入框：最多200字，超出禁止输入</li>
+                                <li>AI回复：支持文本/卡片/列表/按钮</li>
+                                <li>快捷建议：最多6个，根据上下文动态推荐</li>
+                            </ul>`
+                        },
+                        {
+                            title: '4. 交互分支规则',
+                            content: `<ul>
+                                <li>发送成功：消息气泡正常显示</li>
+                                <li>发送失败：红色提示+重试按钮</li>
+                                <li>点击卡片按钮：跳转对应页面</li>
+                                <li>长按消息：复制/分享选项</li>
+                            </ul>`
+                        },
+                        {
+                            title: '5. 边界情况',
+                            content: `<ul>
+                                <li>输入为空：发送按钮禁用</li>
+                                <li>AI无答案：提示"暂无法回答该问题"</li>
+                                <li>权限不足：提示"您无权查看该数据"</li>
+                            </ul>`
+                        }
+                    ]
+                },
+                page3: {
+                    title: '页面3：报表列表 — 需求说明',
+                    sections: [
+                        {
+                            title: '1. 页面状态规则',
+                            content: `<ul>
+                                <li>默认加载：按时间倒序展示最近10条</li>
+                                <li>加载更多：上拉加载，每次10条</li>
+                                <li>筛选状态：Tab切换时列表刷新</li>
+                                <li>空状态：显示"暂无报表，点击生成"</li>
+                            </ul>`
+                        },
+                        {
+                            title: '2. 数据规则',
+                            content: `<ul>
+                                <li>排序：按生成时间倒序</li>
+                                <li>筛选：全部/周报/月报/个人</li>
+                                <li>权限：巡查人员仅可见个人报表</li>
+                                <li>存储：历史报表保留12个月</li>
+                            </ul>`
+                        },
+                        {
+                            title: '3. 字段规则',
+                            content: `<ul>
+                                <li>报表类型：周报/月报/季报/专项/个人</li>
+                                <li>状态：生成中/已生成/生成失败</li>
+                                <li>时间范围：开始日期-结束日期</li>
+                                <li>数据范围：全区/本街道/个人</li>
+                            </ul>`
+                        },
+                        {
+                            title: '4. 交互分支规则',
+                            content: `<ul>
+                                <li>点击卡片：进入报表详情页</li>
+                                <li>点击下载：触发PDF下载</li>
+                                <li>长按卡片：分享/删除选项</li>
+                                <li>Tab切换：重新加载对应类型报表</li>
+                            </ul>`
+                        },
+                        {
+                            title: '5. 边界情况',
+                            content: `<ul>
+                                <li>生成中：显示进度条，禁止下载</li>
+                                <li>生成失败：显示重试按钮</li>
+                                <li>网络异常：缓存数据+刷新按钮</li>
+                            </ul>`
+                        }
+                    ]
+                },
+                page4: {
+                    title: '页面4：报表详情 — 需求说明',
+                    sections: [
+                        {
+                            title: '1. 页面状态规则',
+                            content: `<ul>
+                                <li>加载中：骨架屏占位</li>
+                                <li>加载完成：展示完整报表内容</li>
+                                <li>展开/收起：长内容支持折叠</li>
+                                <li>无权限：提示"您无权查看此报表"</li>
+                            </ul>`
+                        },
+                        {
+                            title: '2. 数据规则',
+                            content: `<ul>
+                                <li>指标计算：按报表类型对应的口径</li>
+                                <li>同比环比：与上一周期对比</li>
+                                <li>排名数据：全区/本街道排名</li>
+                                <li>建议生成：基于数据分析自动生成</li>
+                            </ul>`
+                        },
+                        {
+                            title: '3. 字段规则',
+                            content: `<ul>
+                                <li>核心指标：数字+环比变化</li>
+                                <li>亮点/问题：图标+文字描述</li>
+                                <li>建议：序号+具体措施</li>
+                                <li>时间轴：日期+事件+状态</li>
+                            </ul>`
+                        },
+                        {
+                            title: '4. 交互分支规则',
+                            content: `<ul>
+                                <li>点击下载：生成PDF并触发下载</li>
+                                <li>点击分享：唤起系统分享面板</li>
+                                <li>点击展开：显示完整内容</li>
+                                <li>点击返回：返回报表列表</li>
+                            </ul>`
+                        },
+                        {
+                            title: '5. 边界情况',
+                            content: `<ul>
+                                <li>PDF生成中：显示loading，禁止重复点击</li>
+                                <li>分享失败：提示"分享失败，请重试"</li>
+                                <li>数据更新：报表内容冻结，不实时更新</li>
+                            </ul>`
+                        }
+                    ]
+                },
+                page5: {
+                    title: '页面5：个人工作报表 — 需求说明',
+                    sections: [
+                        {
+                            title: '1. 页面状态规则',
+                            content: `<ul>
+                                <li>默认展示：本月数据统计</li>
+                                <li>时间切换：支持切换月份</li>
+                                <li>数据为空：显示"本月暂无巡查记录"</li>
+                                <li>加载中：骨架屏占位</li>
+                            </ul>`
+                        },
+                        {
+                            title: '2. 数据规则',
+                            content: `<ul>
+                                <li>巡查次数：该月成功提交的巡查记录数</li>
+                                <li>覆盖工程：该月巡查的不重复工程数</li>
+                                <li>发现隐患：该月登记的隐患数</li>
+                                <li>排名：在本街道/全区的排名</li>
+                            </ul>`
+                        },
+                        {
+                            title: '3. 字段规则',
+                            content: `<ul>
+                                <li>姓名：从登录信息获取</li>
+                                <li>所属：街道/巡查队名称</li>
+                                <li>目标次数：按月份天数×每日目标</li>
+                                <li>排名：按巡查次数排序</li>
+                            </ul>`
+                        },
+                        {
+                            title: '4. 交互分支规则',
+                            content: `<ul>
+                                <li>点击导出：生成PDF工作报表</li>
+                                <li>点击分享：生成图片分享</li>
+                                <li>点击时间轴项：跳转巡查详情</li>
+                                <li>月份切换：数据重新加载</li>
+                            </ul>`
+                        },
+                        {
+                            title: '5. 边界情况',
+                            content: `<ul>
+                                <li>新入职：显示"暂无数据，开始巡查吧"</li>
+                                <li>跨月查看：显示历史月份数据</li>
+                                <li>权限限制：仅查看自己的数据</li>
+                            </ul>`
+                        }
+                    ]
+                }
+            };
+
+            const anno = annotations[pageId];
+            if (!anno) return;
+
+            let html = `<div class="annotation-title">${anno.title}</div>`;
+            anno.sections.forEach(section => {
+                html += `
+                    <div class="annotation-section">
+                        <div class="annotation-section-title">${section.title}</div>
+                        <div class="annotation-content">${section.content}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('annotationBox').innerHTML = html;
+        }
+
+        // F8切换导航
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F8') {
+                e.preventDefault();
+                document.getElementById('floatNav').classList.toggle('visible');
+            }
+        });
+
+        // 默认显示导航
+        document.getElementById('floatNav').classList.add('visible');
+    </script>
+</body>
+</html>

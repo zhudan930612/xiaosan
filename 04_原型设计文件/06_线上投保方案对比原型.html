@@ -865,7 +865,7 @@
 <body>
     <div class="wrap">
         <div style="font-size:20px;font-weight:900;color:#1d2b24;text-align:center;" contenteditable="true">线上投保方案对比原型</div>
-        <div style="font-size:13px;color:#6f7d75;text-align:center;" contenteditable="true">点击顶部工具栏切换 A/B/C/D/E 五个版本，方案说明自动同步高亮</div>
+        <div style="font-size:13px;color:#6f7d75;text-align:center;" contenteditable="true">点击顶部工具栏切换 A/B/C/D/E/F 六个版本，方案说明自动同步高亮</div>
 
         <div class="toolbar">
             <button class="tool-btn active" type="button" onclick="switchVersion('a')">版本 A</button>
@@ -873,6 +873,7 @@
             <button class="tool-btn" type="button" onclick="switchVersion('c')">版本 C</button>
             <button class="tool-btn" type="button" onclick="switchVersion('d')">版本 D</button>
             <button class="tool-btn" type="button" onclick="switchVersion('e')">版本 E</button>
+            <button class="tool-btn" type="button" onclick="switchVersion('f')">版本 F</button>
         </div>
 
         <div class="main-stage">
@@ -925,7 +926,7 @@
                                 <div class="entry-title" contenteditable="true">推荐线上投保</div>
                             </div>
                             <div class="entry-text" contenteditable="true">已填写的备案信息可直接复用，无需重复填写投保资料。完成投保后返回当前备案流程继续提交。</div>
-                            <button class="button primary" type="button">
+                            <button class="button primary" type="button" onclick="showInsuranceFlow()">
                                 <span contenteditable="true">去线上投保</span>
                             </button>
                         </div>
@@ -949,7 +950,7 @@
                                     <div class="tag" contenteditable="true">推荐</div>
                                 </div>
                                 <div class="entry-text" contenteditable="true">系统将把已填写备案资料直接带给保险公司，无需重复填写投保资料。</div>
-                                <button class="button primary" type="button">
+                                <button class="button primary" type="button" onclick="showInsuranceFlow()">
                                     <span contenteditable="true">下一步：发起线上投保</span>
                                 </button>
                             </div>
@@ -1242,6 +1243,131 @@
                                 </div>
                                 <div class="switch-link" onclick="restoreE()" contenteditable="true">改为线上投保</div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- 版本 F：政策引导 + 保司直选版 -->
+                    <div id="versionF" style="display:none;">
+                        <!-- 政策轮播 Banner -->
+                        <div style="position:relative;margin-bottom:14px;border-radius:16px;overflow:hidden;">
+                            <div id="bannerSlider" style="display:flex;transition:transform 0.4s ease;height:140px;">
+                                <!-- Banner 1：第八条 -->
+                                <div style="flex:0 0 100%;background:linear-gradient(135deg,#1a5fb4,#3584e4);padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+                                    <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.4;margin-bottom:6px;" contenteditable="true">
+                                        青浦区小型工程管理办法 · 第八条
+                                    </div>
+                                    <div style="font-size:12px;color:rgba(255,255,255,0.9);line-height:1.6;" contenteditable="true">
+                                        施工单位必须投保安全生产责任保险，并在工程开工前完成投保手续，保单覆盖完整施工周期。
+                                    </div>
+                                </div>
+                                <!-- Banner 2：保障详情 -->
+                                <div style="flex:0 0 100%;background:linear-gradient(135deg,#22a66d,#4fb3d7);padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+                                    <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.4;margin-bottom:6px;" contenteditable="true">
+                                        保障详情
+                                    </div>
+                                    <div style="font-size:12px;color:rgba(255,255,255,0.9);line-height:1.6;" contenteditable="true">
+                                        保险公司保障详情内容待确定...
+                                    </div>
+                                </div>
+                                <!-- Banner 3：第四十一条 -->
+                                <div style="flex:0 0 100%;background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+                                    <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.4;margin-bottom:6px;" contenteditable="true">
+                                        青浦区小型工程管理办法 · 第四十一条
+                                    </div>
+                                    <div style="font-size:12px;color:rgba(255,255,255,0.9);line-height:1.6;" contenteditable="true">
+                                        保险机构应委托符合资质机构提供事故预防服务，包括风险辨识、隐患排查、教育培训等。
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 左箭头 -->
+                            <div onclick="prevBanner()" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;background:rgba(255,255,255,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:2;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                            </div>
+                            <!-- 右箭头 -->
+                            <div onclick="nextBanner()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;background:rgba(255,255,255,0.85);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:2;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+
+                            <!-- 指示点 -->
+                            <div style="display:flex;justify-content:center;gap:6px;margin-top:10px;">
+                                <div class="banner-dot" data-index="0" style="width:8px;height:8px;border-radius:50%;background:#22a66d;transition:all 0.3s;cursor:pointer;" onclick="goToBanner(0)"></div>
+                                <div class="banner-dot" data-index="1" style="width:8px;height:8px;border-radius:50%;background:#ccc;transition:all 0.3s;cursor:pointer;" onclick="goToBanner(1)"></div>
+                                <div class="banner-dot" data-index="2" style="width:8px;height:8px;border-radius:50%;background:#ccc;transition:all 0.3s;cursor:pointer;" onclick="goToBanner(2)"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-title" contenteditable="true">投保方式</div>
+
+                        <!-- 投保方式选择 -->
+                        <div style="display:flex;gap:10px;margin-bottom:16px;">
+                            <div id="fOnlineOption" style="flex:1;padding:14px;background:#fff;border:2px solid #22a66d;border-radius:14px;cursor:pointer;text-align:center;position:relative;" onclick="switchFMode('online')">
+                                <div style="position:absolute;top:-1px;right:-1px;background:linear-gradient(90deg,#FF9500,#FF6B35);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:0 14px 0 12px;" contenteditable="true">推荐</div>
+                                <div style="font-size:15px;font-weight:800;color:#1d2b24;margin-bottom:4px;" contenteditable="true">线上投保</div>
+                                <div style="font-size:12px;color:#728079;" contenteditable="true">快捷出单，免填资料</div>
+                            </div>
+                            <div id="fOfflineOption" style="flex:1;padding:14px;background:#fafafa;border:1.5px solid #e0e0e0;border-radius:14px;cursor:pointer;text-align:center;" onclick="switchFMode('offline')">
+                                <div style="font-size:15px;font-weight:800;color:#888;margin-bottom:4px;" contenteditable="true">关联线下保单</div>
+                                <div style="font-size:12px;color:#bbb;" contenteditable="true">已有保单直接上传</div>
+                            </div>
+                        </div>
+
+                        <!-- 线上投保：保司选择区 -->
+                        <div id="fInsurerSection">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                <span style="font-size:15px;font-weight:800;color:#1d2b24;" contenteditable="true">保险公司</span>
+                            </div>
+                            <div style="font-size:12px;color:#999;margin-bottom:14px;" contenteditable="true">请选择保险公司</div>
+
+                            <!-- 保司卡片网格 -->
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+                                <div class="ins-logo-card" data-ins="pingan" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;cursor:pointer;transition:all 0.2s;" onclick="selectInsurer(this)">
+                                    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#FF4D4F,#FF9500);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">平安</div>
+                                    <span style="font-size:11px;color:#333;font-weight:600;" contenteditable="true">中国平安</span>
+                                </div>
+                                <div class="ins-logo-card" data-ins="picc" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;cursor:pointer;transition:all 0.2s;" onclick="selectInsurer(this)">
+                                    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#E60012,#FF4D4F);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">人保</div>
+                                    <span style="font-size:11px;color:#333;font-weight:600;" contenteditable="true">中国人保</span>
+                                </div>
+                                <div class="ins-logo-card" data-ins="cpic" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;cursor:pointer;transition:all 0.2s;" onclick="selectInsurer(this)">
+                                    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#004098,#1890FF);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">太平洋</div>
+                                    <span style="font-size:11px;color:#333;font-weight:600;" contenteditable="true">太平洋保险</span>
+                                </div>
+                                <div class="ins-logo-card" data-ins="dajia" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;cursor:pointer;transition:all 0.2s;" onclick="selectInsurer(this)">
+                                    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#FF6B00,#FF9500);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">大家</div>
+                                    <span style="font-size:11px;color:#333;font-weight:600;" contenteditable="true">大家保险</span>
+                                </div>
+                                <div class="ins-logo-card" data-ins="taiping" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;cursor:pointer;transition:all 0.2s;" onclick="selectInsurer(this)">
+                                    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#C41E3A,#FF4D4F);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">太平</div>
+                                    <span style="font-size:11px;color:#333;font-weight:600;" contenteditable="true">中国太平</span>
+                                </div>
+                                <div class="ins-logo-card" data-ins="guoren" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;background:#fff;border:1.5px solid #e0e0e0;border-radius:12px;cursor:pointer;transition:all 0.2s;" onclick="selectInsurer(this)">
+                                    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#0066B3,#53b7d8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">国任</div>
+                                    <span style="font-size:11px;color:#333;font-weight:600;" contenteditable="true">国任保险</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 线下投保：上传保单区 -->
+                        <div id="fOfflineSection" style="display:none;">
+                            <div class="entry-card">
+                                <div class="entry-head">
+                                    <div class="entry-title" contenteditable="true">上传保单</div>
+                                </div>
+                                <div class="entry-text" contenteditable="true">请上传已生效保单文件，后续随备案资料一并进入审核链路。</div>
+                                <div class="upload-area">
+                                    <span contenteditable="true">点击上传</span>
+                                </div>
+                            </div>
+                            <div class="switch-link" onclick="switchFMode('online')" contenteditable="true">改为线上投保</div>
+                        </div>
+
+                        <!-- 确认投保按钮（选中保司后显示） -->
+                        <div id="fConfirmWrap" style="display:none;margin-top:16px;">
+                            <button class="button primary" type="button" onclick="showFConfirmModal()">
+                                <span contenteditable="true">确认投保</span>
+                            </button>
                         </div>
                     </div>
 
@@ -1555,6 +1681,34 @@
                         </ul>
                     </div>
                 </div>
+
+                <div class="desc-card" id="descF" data-version="f" style="display:none;">
+                    <div class="desc-header">
+                        <span class="desc-title" contenteditable="true">方案 F：政策引导 + 保司直选版</span>
+                        <span class="desc-tag recommend" contenteditable="true">新思路</span>
+                    </div>
+                    <div class="desc-text" contenteditable="true">
+                        顶部放置政策宣传Banner引导用户了解法规，下方直接以保险公司Logo网格形式展示各家保司，用户主动点击选择。弱化"线上投保"概念包装，将投保行为转化为"选保司"的自然操作。
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22a66d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 优点</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">政策Banner强化法规教育，降低用户对"为什么要投保"的疑问</li>
+                            <li contenteditable="true">保司直选网格直观展示合作保险公司，增强平台公信力</li>
+                            <li contenteditable="true">用户操作路径更短：选保司 → 跳转中 → 完成，无需理解"线上投保"概念</li>
+                            <li contenteditable="true">符合纳管办法"保险机构应当提供事故预防服务"的法规精神</li>
+                        </ul>
+                    </div>
+                    <div class="desc-section">
+                        <div class="desc-section-title warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 不足</div>
+                        <ul class="desc-list">
+                            <li contenteditable="true">政策Banner占用首屏空间，可能挤压保司选择区域</li>
+                            <li contenteditable="true">需要用户主动点击保司，对用户的操作主动性要求更高</li>
+                            <li contenteditable="true">保司Logo需获得授权，且需保持视觉一致性</li>
+                            <li contenteditable="true">跳转中状态依赖保司实际接入方式（外链/H5/API）</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1600,6 +1754,41 @@
         </div>
     </div>
 
+    <!-- 版本F：即将跳转确认弹窗 -->
+    <div class="modal-mask" id="fJumpModal">
+        <div class="modal" style="text-align:center;">
+            <div style="width:56px;height:56px;background:linear-gradient(135deg,#22a66d,#4fb3d7);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="modal-title" style="margin-bottom:8px;" contenteditable="true">即将跳转投保页面</div>
+            <div style="font-size:13px;color:#728079;line-height:1.7;margin-bottom:18px;" contenteditable="true">
+                您选择的保险公司将为您提供投保服务，点击确认后将跳转至投保页面完成支付。
+            </div>
+            <div class="modal-actions">
+                <button class="button ghost" type="button" onclick="closeFJumpModal()">
+                    <span contenteditable="true">取消</span>
+                </button>
+                <button class="button primary" type="button" onclick="confirmFJump()">
+                    <span contenteditable="true">确认跳转</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 跳转中加载弹窗 -->
+    <div class="modal-mask" id="loadingModal">
+        <div style="width:140px;height:140px;border-radius:20px;background:rgba(0,0,0,0.72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+            <div style="width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+            <div style="font-size:14px;color:#fff;font-weight:700;" contenteditable="true">跳转中...</div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
     <script>
         let offlineTarget = 'b';
         let selectedReason = '';
@@ -1612,7 +1801,8 @@
                     (version === 'b' && index === 1) ||
                     (version === 'c' && index === 2) ||
                     (version === 'd' && index === 3) ||
-                    (version === 'e' && index === 4)
+                    (version === 'e' && index === 4) ||
+                    (version === 'f' && index === 5)
                 );
             });
 
@@ -1621,6 +1811,7 @@
             document.getElementById('versionC').style.display = version === 'c' ? 'block' : 'none';
             document.getElementById('versionD').style.display = version === 'd' ? 'block' : 'none';
             document.getElementById('versionE').style.display = version === 'e' ? 'block' : 'none';
+            document.getElementById('versionF').style.display = version === 'f' ? 'block' : 'none';
 
             // 重置投保流程页面和关联保单状态
             document.getElementById('flow-insurance').style.display = 'none';
@@ -1634,8 +1825,8 @@
             const serviceBarEl = document.querySelector('.service-bar');
             const submitBtnEl = document.querySelector('.submit-btn');
 
-            // 版本 D 隐藏顶部政策说明，其他版本显示
-            if (policyEl) policyEl.style.display = version === 'd' ? 'none' : 'block';
+            // 版本 D/F 隐藏顶部政策说明，其他版本显示
+            if (policyEl) policyEl.style.display = (version === 'd' || version === 'f') ? 'none' : 'block';
             if (sectionTitleEl) sectionTitleEl.style.display = 'block';
             if (serviceBarEl) serviceBarEl.style.display = 'flex';
             if (submitBtnEl) submitBtnEl.style.display = 'block';
@@ -1646,6 +1837,14 @@
 
             if (version === 'e') {
                 restoreE();
+            }
+
+            if (version === 'f') {
+                restoreF();
+                goToBanner(0);
+                startBannerAutoPlay();
+            } else {
+                stopBannerAutoPlay();
             }
 
             // 同步高亮右侧方案说明，只显示当前方案
@@ -1672,6 +1871,7 @@
             document.getElementById('versionC').style.display = 'none';
             document.getElementById('versionD').style.display = 'none';
             document.getElementById('versionE').style.display = 'none';
+            document.getElementById('versionF').style.display = 'none';
             document.getElementById('linkedPolicy').style.display = 'none';
         }
 
@@ -1706,6 +1906,7 @@
             document.getElementById('versionC').style.display = 'none';
             document.getElementById('versionD').style.display = 'none';
             document.getElementById('versionE').style.display = 'none';
+            document.getElementById('versionF').style.display = 'none';
 
             // 隐藏保单匹配页公共元素
             const policyEl = document.querySelector('.policy');
@@ -1770,6 +1971,8 @@
                 showUploadD();
             } else if (offlineTarget === 'e') {
                 showUploadE();
+            } else if (offlineTarget === 'f') {
+                switchFMode('offline');
             }
         }
 
@@ -1821,9 +2024,119 @@
             }
         }
 
+        function selectInsurer(el) {
+            document.querySelectorAll('.ins-logo-card').forEach(card => {
+                card.style.borderColor = '#e0e0e0';
+                card.style.boxShadow = 'none';
+            });
+            el.style.borderColor = '#22a66d';
+            el.style.boxShadow = '0 4px 12px rgba(34,166,109,0.2)';
+            document.getElementById('fConfirmWrap').style.display = 'block';
+        }
+
+        function switchFMode(mode) {
+            const onlineOpt = document.getElementById('fOnlineOption');
+            const offlineOpt = document.getElementById('fOfflineOption');
+            const insurerSection = document.getElementById('fInsurerSection');
+            const offlineSection = document.getElementById('fOfflineSection');
+
+            if (mode === 'online') {
+                onlineOpt.style.background = '#fff';
+                onlineOpt.style.borderColor = '#22a66d';
+                onlineOpt.querySelector('div:first-child').style.color = '#1d2b24';
+                onlineOpt.querySelector('div:last-child').style.color = '#728079';
+
+                offlineOpt.style.background = '#fafafa';
+                offlineOpt.style.borderColor = '#e0e0e0';
+                offlineOpt.querySelector('div:first-child').style.color = '#888';
+                offlineOpt.querySelector('div:last-child').style.color = '#bbb';
+
+                insurerSection.style.display = 'block';
+                offlineSection.style.display = 'none';
+
+                // 重置保司选择和确认按钮
+                document.querySelectorAll('.ins-logo-card').forEach(card => {
+                    card.style.borderColor = '#e0e0e0';
+                    card.style.boxShadow = 'none';
+                });
+                const confirmWrap = document.getElementById('fConfirmWrap');
+                if (confirmWrap) confirmWrap.style.display = 'none';
+            } else {
+                offlineOpt.style.background = '#fff';
+                offlineOpt.style.borderColor = '#22a66d';
+                offlineOpt.querySelector('div:first-child').style.color = '#1d2b24';
+                offlineOpt.querySelector('div:last-child').style.color = '#728079';
+
+                onlineOpt.style.background = '#fafafa';
+                onlineOpt.style.borderColor = '#e0e0e0';
+                onlineOpt.querySelector('div:first-child').style.color = '#888';
+                onlineOpt.querySelector('div:last-child').style.color = '#bbb';
+
+                insurerSection.style.display = 'none';
+                offlineSection.style.display = 'block';
+            }
+        }
+
+        let bannerIndex = 0;
+        const bannerTotal = 3;
+        let bannerAutoPlay;
+
+        function goToBanner(index) {
+            bannerIndex = index;
+            const slider = document.getElementById('bannerSlider');
+            if (slider) {
+                slider.style.transform = 'translateX(-' + (index * 100) + '%)';
+            }
+            document.querySelectorAll('.banner-dot').forEach((dot, i) => {
+                dot.style.background = i === index ? '#22a66d' : '#ccc';
+            });
+        }
+
+        function nextBanner() {
+            goToBanner((bannerIndex + 1) % bannerTotal);
+        }
+
+        function prevBanner() {
+            goToBanner((bannerIndex - 1 + bannerTotal) % bannerTotal);
+        }
+
+        function startBannerAutoPlay() {
+            stopBannerAutoPlay();
+            bannerAutoPlay = setInterval(nextBanner, 3000);
+        }
+
+        function stopBannerAutoPlay() {
+            if (bannerAutoPlay) clearInterval(bannerAutoPlay);
+        }
+
+        function showLoadingThenInsurance() {
+            document.getElementById('loadingModal').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('loadingModal').classList.remove('show');
+                showInsuranceFlow();
+            }, 1500);
+        }
+
+        function showFConfirmModal() {
+            document.getElementById('fJumpModal').classList.add('show');
+        }
+
+        function closeFJumpModal() {
+            document.getElementById('fJumpModal').classList.remove('show');
+        }
+
+        function confirmFJump() {
+            closeFJumpModal();
+            document.getElementById('loadingModal').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('loadingModal').classList.remove('show');
+                showPayFlow();
+            }, 1500);
+        }
+
         function switchToOnlineFromModal() {
             closeOfflineModal();
-            const versions = ['a', 'b', 'c', 'd', 'e'];
+            const versions = ['a', 'b', 'c', 'd', 'e', 'f'];
             let currentVersion = 'b';
             for (const v of versions) {
                 if (document.getElementById('version' + v.toUpperCase()).style.display !== 'none') {
@@ -1833,6 +2146,7 @@
             }
             switchVersion(currentVersion);
             if (currentVersion === 'b') showOnline();
+            if (currentVersion === 'f') switchFMode('online');
         }
     </script>
 </body>

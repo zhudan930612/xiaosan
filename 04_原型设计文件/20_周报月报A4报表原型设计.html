@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>周报月报A4报表原型设计</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: #e8e8e8;
+      padding: 20px;
+    }
+
+    /* ========== 页面导航 ========== */
+    .nav-bar {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a2b4a;
+      border-radius: 30px;
+      padding: 8px 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .nav-bar button {
+      background: transparent;
+      border: none;
+      color: #bfcbd9;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .nav-bar button:hover, .nav-bar button.active {
+      background: #409EFF;
+      color: #fff;
+    }
+
+    /* ========== A4 页面基础样式 ========== */
+    .a4-page {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      margin: 0 auto 30px;
+      padding: 20mm 18mm;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+    .a4-page.hidden { display: none; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .a4-page {
+        box-shadow: none;
+        margin: 0;
+        page-break-after: always;
+      }
+      .nav-bar, .page-indicator { display: none !important; }
+    }
+
+    /* ========== 报表头部 ========== */
+    .report-header {
+      border-bottom: 3px solid #1a2b4a;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .report-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a2b4a;
+      letter-spacing: 1px;
+    }
+    .report-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    .report-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ========== 核心指标卡片 ========== */
+    .kpi-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi-card {
+      flex: 1;
+      background: #f5f7fa;
+      border-radius: 8px;
+      padding: 14px 12px;
+      text-align: center;
+      border-left: 4px solid #409EFF;
+    }
+    .kpi-card.warning { border-left-color: #FF9500; }
+    .kpi-card.danger { border-left-color: #FF4D4F; }
+    .kpi-card.success { border-left-color: #00B578; }
+    .kpi-label {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a2b4a;
+    }
+    .kpi-change {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .kpi-change.up { color: #00B578; }
+    .kpi-change.down { color: #FF4D4F; }
+
+    /* ========== 章节标题 ========== */
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a2b4a;
+      padding: 8px 0;
+      border-bottom: 2px solid #ebeef5;
+      margin: 16px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: #409EFF;
+      border-radius: 2px;
+    }
+
+    /* ========== 表格样式 ========== */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+    .data-table th {
+      background: #f5f7fa;
+      color: #666;
+      font-weight: 600;
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid #ebeef5;
+    }
+    .data-table th.center { text-align: center; }
+    .data-table td {
+      padding: 7px 6px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+    }
+    .data-table td.center { text-align: center; }
+    .data-table tr:hover { background: #fafafa; }
+
+    /* ========== 状态标签 ========== */
+    .tag {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+    .tag-success { background: #e6f7f0; color: #00B578; }
+    .tag-warning { background: #fff7e6; color: #FF9500; }
+    .tag-danger { background: #fff2f0; color: #FF4D4F; }
+    .tag-info { background: #e6f4ff; color: #1890FF; }
+    .tag-gray { background: #f5f5f5; color: #999; }
+
+    /* ========== 进度条 ========== */
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: #f0f0f0;
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 7px;
+      background: linear-gradient(90deg, #409EFF, #66b1ff);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 4px;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 600;
+      min-width: 24px;
+    }
+    .progress-fill.high { background: linear-gradient(90deg, #00B578, #52c41a); }
+    .progress-fill.mid { background: linear-gradient(90deg, #FF9500, #ffc53d); }
+    .progress-fill.low { background: linear-gradient(90deg, #FF4D4F, #ff7875); }
+
+    /* ========== 柱状图（CSS模拟） ========== */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 100px;
+      padding: 10px 0;
+    }
+    .bar-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+      background: linear-gradient(180deg, #409EFF, #66b1ff);
+      position: relative;
+    }
+    .bar-value {
+      font-size: 10px;
+      color: #666;
+      font-weight: 600;
+    }
+    .bar-label {
+      font-size: 9px;
+      color: #999;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* ========== 排行条形图 ========== */
+    .rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rank-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .rank-num.top1 { background: #FFFBE6; color: #FAAD14; }
+    .rank-num.top2 { background: #f5f5f5; color: #999; }
+    .rank-num.top3 { background: #FFF2E8; color: #FA8C16; }
+    .rank-name {
+      width: 70px;
+      font-size: 11px;
+      color: #333;
+      flex-shrink: 0;
+    }
+    .rank-bar-wrap {
+      flex: 1;
+      height: 18px;
+      background: #f0f0f0;
+      border-radius: 9px;
+      overflow: hidden;
+    }
+    .rank-bar-fill {
+      height: 100%;
+      border-radius: 9px;
+      background: linear-gradient(90deg, #409EFF, #66b1ff);
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      min-width: 30px;
+    }
+
+    /* ========== 文字内容 ========== */
+    .summary-text {
+      font-size: 12px;
+      color: #333;
+      line-height: 1.8;
+      padding: 10px 12px;
+      background: #fafafa;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .highlight { color: #409EFF; font-weight: 600; }
+    .highlight-green { color: #00B578; font-weight: 600; }
+    .highlight-red { color: #FF4D4F; font-weight: 600; }
+
+    .list-item {
+      font-size: 11px;
+      color: #333;
+      padding: 4px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .list-item::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #409EFF;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .list-item.warning::before { background: #FF9500; }
+    .list-item.danger::before { background: #FF4D4F; }
+
+    /* ========== 两列布局 ========== */
+    .two-col {
+      display: flex;
+      gap: 16px;
+    }
+    .two-col > div { flex: 1; }
+
+    /* ========== 页脚 ========== */
+    .page-footer {
+      position: absolute;
+      bottom: 12mm;
+      left: 18mm;
+      right: 18mm;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #999;
+      border-top: 1px solid #ebeef5;
+      padding-top: 6px;
+    }
+
+    /* ========== 封面样式 ========== */
+    .cover-title {
+      text-align: center;
+      padding: 40mm 0 20mm;
+    }
+    .cover-title h1 {
+      font-size: 32px;
+      color: #1a2b4a;
+      font-weight: 700;
+      letter-spacing: 3px;
+    }
+    .cover-title .sub {
+      font-size: 14px;
+      color: #666;
+      margin-top: 12px;
+    }
+    .cover-info {
+      margin: 0 auto;
+      width: 70%;
+      border-top: 1px solid #ebeef5;
+      padding-top: 20px;
+    }
+    .cover-info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 12px;
+      border-bottom: 1px dashed #ebeef5;
+    }
+    .cover-info-row .label { color: #666; }
+    .cover-info-row .value { color: #333; font-weight: 500; }
+
+    /* ========== 简报标记 ========== */
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .badge-green { background: #e6f7f0; color: #00B578; }
+    .badge-orange { background: #fff7e6; color: #FF9500; }
+    .badge-red { background: #fff2f0; color: #FF4D4F; }
+
+    /* ========== 折线图模拟 ========== */
+    .line-chart {
+      height: 90px;
+      position: relative;
+      margin: 10px 0;
+    }
+    .line-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ========== 分页指示器 ========== */
+    .page-indicator {
+      text-align: center;
+      padding: 10px;
+      color: #999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 页面导航 -->
+<div class="nav-bar">
+  <button onclick="showPage(0)" class="active" id="btn0">封面</button>
+  <button onclick="showPage(1)" id="btn1">街镇周报</button>
+  <button onclick="showPage(2)" id="btn2">区级周报</button>
+  <button onclick="showPage(3)" id="btn3">隐患周报</button>
+  <button onclick="showPage(4)" id="btn4">巡查周报</button>
+  <button onclick="showPage(5)" id="btn5">区级月报</button>
+  <button onclick="showPage(6)" id="btn6">街镇月报</button>
+  <button onclick="showPage(7)" id="btn7">考核月报</button>
+  <button onclick="showPage(8)" id="btn8">风险月报</button>
+</div>
+
+<!-- ========== 封面 ========== -->
+<div class="a4-page" id="page0">
+  <div class="cover-title">
+    <h1>小型工程安全监管</h1>
+    <h1 style="margin-top:8px;">周报 / 月报模板集</h1>
+    <p class="sub">青浦区小型工程安全纳管系统 · 报表原型设计</p>
+  </div>
+
+  <div style="text-align:center; margin: 20mm 0;">
+    <svg width="120" height="120" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="55" fill="none" stroke="#1a2b4a" stroke-width="2"/>
+      <rect x="35" y="40" width="50" height="40" rx="4" fill="none" stroke="#409EFF" stroke-width="2"/>
+      <line x1="42" y1="52" x2="78" y2="52" stroke="#409EFF" stroke-width="1.5"/>
+      <line x1="42" y1="60" x2="70" y2="60" stroke="#409EFF" stroke-width="1.5"/>
+      <line x1="42" y1="68" x2="74" y2="68" stroke="#409EFF" stroke-width="1.5"/>
+      <circle cx="85" cy="85" r="20" fill="#00B578" opacity="0.15"/>
+      <path d="M78 85 L83 90 L93 80" fill="none" stroke="#00B578" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div class="cover-info">
+    <div class="cover-info-row"><span class="label">文档名称</span><span class="value">周报 / 月报A4报表原型设计</span></div>
+    <div class="cover-info-row"><span class="label">文档版本</span><span class="value">V1.0</span></div>
+    <div class="cover-info-row"><span class="label">设计日期</span><span class="value">2026-04-29</span></div>
+    <div class="cover-info-row"><span class="label">文档状态</span><span class="value">AI草稿，待人工确认</span></div>
+    <div class="cover-info-row"><span class="label">模板数量</span><span class="value">8个（4个周报 + 4个月报）</span></div>
+  </div>
+
+  <div style="margin-top: 30px; padding: 0 20px;">
+    <p style="font-size: 12px; color: #666; line-height: 2;">
+      <b>模板清单：</b><br>
+      01 街镇执行周报 — 面向街镇管理员，侧重日常工作执行<br>
+      02 区级汇总周报 — 面向区级管理人员，侧重各街镇对比和排名<br>
+      03 隐患整改专项周报 — 面向安全管理人员，聚焦隐患闭环跟踪<br>
+      04 巡查执行周报 — 面向巡查主管，聚焦巡查覆盖和执行<br>
+      05 区级监管月报 — 面向区领导，全景月度分析和决策支撑<br>
+      06 街镇执行月报 — 面向街镇主要负责人，工作复盘和向上汇报<br>
+      07 考核排名月报 — 面向考核部门，侧重KPI完成度和排名<br>
+      08 风险分析月报 — 面向安全管理人员，侧重风险态势和预警
+    </p>
+  </div>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统</span>
+    <span>第 1 / 9 页</span>
+  </div>
+</div>
+
+<!-- ========== 模板1：街镇执行周报 ========== -->
+<div class="a4-page hidden" id="page1">
+  <div class="report-header">
+    <div class="report-title">小型工程安全监管周报</div>
+    <div class="report-meta">
+      <span>第18周（2026-04-27 至 2026-05-03）</span>
+      <span>报告对象：夏阳街道</span>
+      <span>生成时间：2026-05-04 08:00</span>
+    </div>
+  </div>
+
+  <div class="summary-text">
+    本周备案<span class="highlight">68个</span>，巡查<span class="highlight">142次</span>，发现隐患<span class="highlight-red">15条</span>，整改完成率<span class="highlight-green">93%</span>。整体运行平稳，需关注<span class="highlight-red">2条即将逾期的隐患</span>。
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card success">
+      <div class="kpi-label">新增备案</div>
+      <div class="kpi-value">68</div>
+      <div class="kpi-change up">+12% 同比上周</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">审核通过</div>
+      <div class="kpi-value">65</div>
+      <div class="kpi-change up">通过率 95.6%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">巡查次数</div>
+      <div class="kpi-value">142</div>
+      <div class="kpi-change up">覆盖率 94.7%</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">发现隐患</div>
+      <div class="kpi-value">15</div>
+      <div class="kpi-change down">整改率 93.3%</div>
+    </div>
+  </div>
+
+  <div class="section-title">备案管理</div>
+  <table class="data-table">
+    <tr><th>工程类型</th><th class="center">新增</th><th class="center">通过</th><th class="center">驳回</th><th class="center">待审核</th><th class="center">通过率</th></tr>
+    <tr><td>小型工程</td><td class="center">28</td><td class="center">26</td><td class="center">2</td><td class="center">0</td><td class="center"><span class="tag tag-success">92.9%</span></td></tr>
+    <tr><td>住宅装修</td><td class="center">32</td><td class="center">32</td><td class="center">0</td><td class="center">0</td><td class="center"><span class="tag tag-success">100%</span></td></tr>
+    <tr><td>零星作业</td><td class="center">8</td><td class="center">7</td><td class="center">0</td><td class="center">1</td><td class="center"><span class="tag tag-success">87.5%</span></td></tr>
+    <tr style="font-weight:600;"><td>合计</td><td class="center">68</td><td class="center">65</td><td class="center">2</td><td class="center">1</td><td class="center">95.6%</td></tr>
+  </table>
+
+  <div class="section-title">日常巡查</div>
+  <div class="two-col">
+    <div>
+      <table class="data-table">
+        <tr><th>巡查主体</th><th class="center">次数</th><th class="center">覆盖工程</th><th class="center">发现隐患</th></tr>
+        <tr><td>街道巡查</td><td class="center">48</td><td class="center">42</td><td class="center">8</td></tr>
+        <tr><td>社区巡查</td><td class="center">36</td><td class="center">30</td><td class="center">4</td></tr>
+        <tr><td>物业巡查</td><td class="center">58</td><td class="center">52</td><td class="center">3</td></tr>
+        <tr style="font-weight:600;"><td>合计</td><td class="center">142</td><td class="center">89</td><td class="center">15</td></tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:11px; color:#666; margin-bottom:6px;">工程状态分布</div>
+      <div style="display:flex; gap:8px; font-size:10px;">
+        <div style="flex:58; background:#00B578; color:#fff; padding:4px 8px; border-radius:4px; text-align:center;">正常施工 58</div>
+        <div style="flex:12; background:#FF9500; color:#fff; padding:4px 8px; border-radius:4px; text-align:center;">现场整改 12</div>
+        <div style="flex:3; background:#FF4D4F; color:#fff; padding:4px 8px; border-radius:4px; text-align:center;">停工 3</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">工作亮点</div>
+  <div class="list-item">巡查覆盖率94.7%，高于全区平均（92%），排名第2</div>
+  <div class="list-item">隐患整改率93.3%，环比上周提升5个百分点</div>
+  <div class="list-item">本周无安全事故发生</div>
+
+  <div class="section-title">存在问题与下周建议</div>
+  <div class="two-col">
+    <div>
+      <div style="font-size:12px; font-weight:600; color:#FF4D4F; margin-bottom:6px;">⚠ 需立即关注</div>
+      <div class="list-item danger">2条隐患即将在3日内到期，需抓紧复核</div>
+      <div class="list-item danger">3个工程超过7天未巡查</div>
+    </div>
+    <div>
+      <div style="font-size:12px; font-weight:600; color:#409EFF; margin-bottom:6px;">→ 下周工作建议</div>
+      <div class="list-item">优先处理即将逾期的2条隐患</div>
+      <div class="list-item">对超过7天未巡查的工程安排巡查</div>
+      <div class="list-item">针对新入驻施工单位开展培训</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 夏阳街道</span>
+    <span>第 2 / 9 页 · 模板01：街镇执行周报</span>
+  </div>
+</div>
+
+<!-- ========== 模板2：区级汇总周报 ========== -->
+<div class="a4-page hidden" id="page2">
+  <div class="report-header">
+    <div class="report-title">小型工程安全监管周报（区级汇总）</div>
+    <div class="report-meta">
+      <span>第18周（2026-04-27 至 2026-05-03）</span>
+      <span>报告对象：全区11个街镇</span>
+      <span>生成时间：2026-05-04 08:00</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">全区新增备案</div>
+      <div class="kpi-value">748</div>
+      <div class="kpi-change up">+8.2% 同比上周</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">全区巡查次数</div>
+      <div class="kpi-value">1,568</div>
+      <div class="kpi-change up">覆盖率 92%</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">发现隐患</div>
+      <div class="kpi-value">168</div>
+      <div class="kpi-change down">整改率 91.5%</div>
+    </div>
+    <div class="kpi-card danger">
+      <div class="kpi-label">逾期隐患</div>
+      <div class="kpi-value">14</div>
+      <div class="kpi-change down">涉及5个街镇</div>
+    </div>
+  </div>
+
+  <div class="section-title">各街镇数据汇总</div>
+  <table class="data-table">
+    <tr>
+      <th>排名</th><th>街镇</th><th class="center">新增备案</th><th class="center">巡查次数</th>
+      <th class="center">覆盖率</th><th class="center">发现隐患</th><th class="center">整改率</th><th class="center">逾期隐患</th><th>综合状态</th>
+    </tr>
+    <tr><td><span class="rank-num top1">1</span></td><td>夏阳街道</td><td class="center">68</td><td class="center">142</td><td class="center">94.7%</td><td class="center">15</td><td class="center">93.3%</td><td class="center">0</td><td><span class="tag tag-success">优秀</span></td></tr>
+    <tr><td><span class="rank-num top2">2</span></td><td>盈浦街道</td><td class="center">52</td><td class="center">128</td><td class="center">93.2%</td><td class="center">12</td><td class="center">94.1%</td><td class="center">0</td><td><span class="tag tag-success">优秀</span></td></tr>
+    <tr><td><span class="rank-num top3">3</span></td><td>徐泾镇</td><td class="center">85</td><td class="center">156</td><td class="center">91.8%</td><td class="center">22</td><td class="center">90.5%</td><td class="center">1</td><td><span class="tag tag-success">良好</span></td></tr>
+    <tr><td>4</td><td>赵巷镇</td><td class="center">78</td><td class="center">148</td><td class="center">90.1%</td><td class="center">18</td><td class="center">92.3%</td><td class="center">0</td><td><span class="tag tag-success">良好</span></td></tr>
+    <tr><td>5</td><td>华新镇</td><td class="center">65</td><td class="center">135</td><td class="center">89.5%</td><td class="center">16</td><td class="center">88.7%</td><td class="center">2</td><td><span class="tag tag-warning">需关注</span></td></tr>
+    <tr><td>6</td><td>朱家角镇</td><td class="center">48</td><td class="center">102</td><td class="center">88.3%</td><td class="center">14</td><td class="center">91.2%</td><td class="center">1</td><td><span class="tag tag-warning">需关注</span></td></tr>
+    <tr><td>7</td><td>香花桥街道</td><td class="center">72</td><td class="center">140</td><td class="center">87.6%</td><td class="center">20</td><td class="center">89.5%</td><td class="center">3</td><td><span class="tag tag-warning">需关注</span></td></tr>
+    <tr><td>8</td><td>重固镇</td><td class="center">55</td><td class="center">98</td><td class="center">85.2%</td><td class="center">15</td><td class="center">86.7%</td><td class="center">2</td><td><span class="tag tag-warning">需关注</span></td></tr>
+    <tr><td>9</td><td>白鹤镇</td><td class="center">82</td><td class="center">152</td><td class="center">83.9%</td><td class="center">24</td><td class="center">84.2%</td><td class="center">4</td><td><span class="tag tag-danger">落后</span></td></tr>
+    <tr><td>10</td><td>练塘镇</td><td class="center">42</td><td class="center">86</td><td class="center">86.4%</td><td class="center">10</td><td class="center">90.0%</td><td class="center">1</td><td><span class="tag tag-warning">需关注</span></td></tr>
+    <tr><td>11</td><td>金泽镇</td><td class="center">38</td><td class="center">76</td><td class="center">87.1%</td><td class="center">8</td><td class="center">93.8%</td><td class="center">0</td><td><span class="tag tag-success">良好</span></td></tr>
+  </table>
+
+  <div class="section-title">重点预警</div>
+  <div class="two-col">
+    <div style="background:#fff2f0; border-radius:6px; padding:10px;">
+      <div style="font-size:12px; font-weight:600; color:#FF4D4F; margin-bottom:6px;">🔴 巡查覆盖率低于85%</div>
+      <div style="font-size:11px; color:#333;">
+        白鹤镇（83.9%）、重固镇（85.2%）巡查覆盖率低于目标线，建议增加巡查力量。
+      </div>
+    </div>
+    <div style="background:#fff7e6; border-radius:6px; padding:10px;">
+      <div style="font-size:12px; font-weight:600; color:#FF9500; margin-bottom:6px;">🟡 隐患整改率低于90%</div>
+      <div style="font-size:11px; color:#333;">
+        白鹤镇（84.2%）、重固镇（86.7%）、华新镇（88.7%）整改率偏低，需加强跟踪督办。
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 区级汇总</span>
+    <span>第 3 / 9 页 · 模板02：区级汇总周报</span>
+  </div>
+</div>
+
+<!-- ========== 模板3：隐患整改专项周报 ========== -->
+<div class="a4-page hidden" id="page3">
+  <div class="report-header">
+    <div class="report-title">隐患整改专项周报</div>
+    <div class="report-meta">
+      <span>第18周（2026-04-27 至 2026-05-03）</span>
+      <span>报告对象：全区</span>
+      <span>生成时间：2026-05-04 08:00</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">本周发现隐患</div>
+      <div class="kpi-value">168</div>
+      <div class="kpi-change up">环比上周 +5.3%</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">本周已整改</div>
+      <div class="kpi-value">154</div>
+      <div class="kpi-change up">整改率 91.7%</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">整改中</div>
+      <div class="kpi-value">42</div>
+      <div class="kpi-change">含14条即将逾期</div>
+    </div>
+    <div class="kpi-card danger">
+      <div class="kpi-label">已逾期</div>
+      <div class="kpi-value">14</div>
+      <div class="kpi-change down">需立即督办</div>
+    </div>
+  </div>
+
+  <div class="section-title">隐患等级分布</div>
+  <table class="data-table">
+    <tr><th>隐患等级</th><th class="center">本周发现</th><th class="center">已整改</th><th class="center">整改中</th><th class="center">已逾期</th><th class="center">整改率</th><th class="center">平均整改周期</th></tr>
+    <tr><td><span class="tag tag-danger">较大隐患</span>（需停工整改）</td><td class="center">28</td><td class="center">24</td><td class="center">3</td><td class="center">1</td><td class="center">85.7%</td><td class="center">5.2天</td></tr>
+    <tr><td><span class="tag tag-warning">一般隐患</span>（需现场整改）</td><td class="center">102</td><td class="center">95</td><td class="center">5</td><td class="center">2</td><td class="center">93.1%</td><td class="center">2.8天</td></tr>
+    <tr><td><span class="tag tag-gray">轻微问题</span>（不需限时整改）</td><td class="center">38</td><td class="center">35</td><td class="center">2</td><td class="center">1</td><td class="center">92.1%</td><td class="center">1.5天</td></tr>
+    <tr style="font-weight:600;"><td>合计</td><td class="center">168</td><td class="center">154</td><td class="center">10</td><td class="center">4</td><td class="center">91.7%</td><td class="center">3.2天</td></tr>
+  </table>
+
+  <div class="section-title">逾期隐患清单（需立即督办）</div>
+  <table class="data-table">
+    <tr><th>序号</th><th>工程名称</th><th>所属街镇</th><th>隐患内容</th><th class="center">等级</th><th class="center">发现时间</th><th class="center">整改期限</th><th class="center">逾期天数</th><th>责任人</th></tr>
+    <tr><td class="center">1</td><td>XX花园3栋装修工程</td><td>白鹤镇</td><td>高处作业未设防护栏杆</td><td class="center"><span class="tag tag-danger">较大</span></td><td class="center">04-22</td><td class="center">04-29</td><td class="center" style="color:#FF4D4F; font-weight:600;">5天</td><td>张三</td></tr>
+    <tr><td class="center">2</td><td>XX大厦外墙清洗</td><td>香花桥街道</td><td>临边洞口防护缺失</td><td class="center"><span class="tag tag-warning">一般</span></td><td class="center">04-24</td><td class="center">05-01</td><td class="center" style="color:#FF4D4F; font-weight:600;">3天</td><td>李四</td></tr>
+    <tr><td class="center">3</td><td>XX小区加装电梯</td><td>重固镇</td><td>临时用电不规范</td><td class="center"><span class="tag tag-warning">一般</span></td><td class="center">04-25</td><td class="center">05-02</td><td class="center" style="color:#FF4D4F; font-weight:600;">2天</td><td>王五</td></tr>
+    <tr><td class="center">4</td><td>XX商铺装修工程</td><td>华新镇</td><td>灭火器配置不足</td><td class="center"><span class="tag tag-gray">轻微</span></td><td class="center">04-26</td><td class="center">05-02</td><td class="center" style="color:#FF4D4F; font-weight:600;">2天</td><td>赵六</td></tr>
+  </table>
+
+  <div class="section-title">隐患类型TOP5</div>
+  <div class="rank-list" style="margin-bottom:12px;">
+    <div class="rank-item"><span class="rank-num top1">1</span><span class="rank-name">高处作业</span><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:92%">46条 27.4%</div></div></div>
+    <div class="rank-item"><span class="rank-num top2">2</span><span class="rank-name">临时用电</span><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:74%">37条 22.0%</div></div></div>
+    <div class="rank-item"><span class="rank-num top3">3</span><span class="rank-name">临边防护</span><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:60%">30条 17.9%</div></div></div>
+    <div class="rank-item"><span class="rank-num">4</span><span class="rank-name">动火作业</span><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:44%">22条 13.1%</div></div></div>
+    <div class="rank-item"><span class="rank-num">5</span><span class="rank-name">脚手架</span><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:32%">16条 9.5%</div></div></div>
+  </div>
+
+  <div class="section-title">整改建议</div>
+  <div class="list-item">对14条逾期隐患启动督办程序，限期3日内完成整改或说明原因</div>
+  <div class="list-item">针对高处作业类隐患占比27.4%的情况，开展专项安全检查</div>
+  <div class="list-item">对白鹤镇、重固镇整改率偏低问题，安排区级督导</div>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 隐患整改专项</span>
+    <span>第 4 / 9 页 · 模板03：隐患整改专项周报</span>
+  </div>
+</div>
+
+<!-- ========== 模板4：巡查执行周报 ========== -->
+<div class="a4-page hidden" id="page4">
+  <div class="report-header">
+    <div class="report-title">巡查执行周报</div>
+    <div class="report-meta">
+      <span>第18周（2026-04-27 至 2026-05-03）</span>
+      <span>报告对象：夏阳街道</span>
+      <span>生成时间：2026-05-04 08:00</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">应巡查工程</div>
+      <div class="kpi-value">94</div>
+      <div class="kpi-change">在建工程总数</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">实际巡查</div>
+      <div class="kpi-value">89</div>
+      <div class="kpi-change up">覆盖率 94.7%</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">应巡未巡</div>
+      <div class="kpi-value">5</div>
+      <div class="kpi-change down">需补巡查</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">人均巡查</div>
+      <div class="kpi-value">20.3</div>
+      <div class="kpi-change">7名巡查员</div>
+    </div>
+  </div>
+
+  <div class="section-title">三方巡查完成情况</div>
+  <table class="data-table">
+    <tr><th>巡查主体</th><th class="center">巡查员数</th><th class="center">应巡次数</th><th class="center">实巡次数</th><th class="center">完成率</th><th class="center">覆盖工程</th><th class="center">发现隐患</th></tr>
+    <tr><td>街道巡查</td><td class="center">3</td><td class="center">52</td><td class="center">48</td><td class="center"><div class="progress-bar"><div class="progress-fill high" style="width:92%">92%</div></div></td><td class="center">42</td><td class="center">8</td></tr>
+    <tr><td>社区巡查</td><td class="center">2</td><td class="center">40</td><td class="center">36</td><td class="center"><div class="progress-bar"><div class="progress-fill high" style="width:90%">90%</div></div></td><td class="center">30</td><td class="center">4</td></tr>
+    <tr><td>物业巡查</td><td class="center">2</td><td class="center">68</td><td class="center">58</td><td class="center"><div class="progress-bar"><div class="progress-fill mid" style="width:85%">85%</div></div></td><td class="center">52</td><td class="center">3</td></tr>
+    <tr style="font-weight:600;"><td>合计</td><td class="center">7</td><td class="center">160</td><td class="center">142</td><td class="center">88.8%</td><td class="center">89</td><td class="center">15</td></tr>
+  </table>
+
+  <div class="section-title">巡查员工作量排名</div>
+  <table class="data-table">
+    <tr><th>排名</th><th>姓名</th><th>巡查次数</th><th class="center">覆盖工程</th><th class="center">发现隐患</th><th class="center">隐患发现率</th><th class="center">平均时长</th><th class="center">照片完整率</th><th>综合评分</th></tr>
+    <tr><td><span class="rank-num top1">1</span></td><td>张XX</td><td>32</td><td class="center">24</td><td class="center">8</td><td class="center">33.3%</td><td class="center">28分钟</td><td class="center">100%</td><td><span class="tag tag-success">96分</span></td></tr>
+    <tr><td><span class="rank-num top2">2</span></td><td>李XX</td><td>28</td><td class="center">22</td><td class="center">3</td><td class="center">13.6%</td><td class="center">22分钟</td><td class="center">96%</td><td><span class="tag tag-success">88分</span></td></tr>
+    <tr><td><span class="rank-num top3">3</span></td><td>王XX</td><td>26</td><td class="center">20</td><td class="center">2</td><td class="center">10.0%</td><td class="center">20分钟</td><td class="center">92%</td><td><span class="tag tag-success">82分</span></td></tr>
+    <tr><td>4</td><td>赵XX</td><td>24</td><td class="center">18</td><td class="center">1</td><td class="center">5.6%</td><td class="center">18分钟</td><td class="center">88%</td><td><span class="tag tag-warning">75分</span></td></tr>
+    <tr><td>5</td><td>刘XX</td><td>20</td><td class="center">16</td><td class="center">1</td><td class="center">6.3%</td><td class="center">19分钟</td><td class="center">85%</td><td><span class="tag tag-warning">72分</span></td></tr>
+    <tr><td>6</td><td>陈XX</td><td>18</td><td class="center">14</td><td class="center">0</td><td class="center">0%</td><td class="center">15分钟</td><td class="center">80%</td><td><span class="tag tag-warning">68分</span></td></tr>
+  </table>
+
+  <div class="section-title">应巡未巡工程清单</div>
+  <table class="data-table">
+    <tr><th>序号</th><th>工程名称</th><th>工程类型</th><th>风险等级</th><th class="center">最后巡查</th><th class="center">应巡日期</th><th class="center">逾期天数</th><th>巡查主体</th></tr>
+    <tr><td class="center">1</td><td>XX小区1栋装修</td><td>住宅装修</td><td><span class="tag tag-danger">高风险</span></td><td class="center">04-20</td><td class="center">04-27</td><td class="center" style="color:#FF4D4F;">7天</td><td>街道</td></tr>
+    <tr><td class="center">2</td><td>XX商铺改造</td><td>小型工程</td><td><span class="tag tag-warning">一般</span></td><td class="center">04-22</td><td class="center">04-29</td><td class="center" style="color:#FF4D4F;">5天</td><td>社区</td></tr>
+    <tr><td class="center">3</td><td>XX大厦空调安装</td><td>零星作业</td><td><span class="tag tag-warning">一般</span></td><td class="center">04-24</td><td class="center">04-30</td><td class="center" style="color:#FF4D4F;">4天</td><td>物业</td></tr>
+    <tr><td class="center">4</td><td>XX路广告牌安装</td><td>零星作业</td><td><span class="tag tag-gray">低风险</span></td><td class="center">04-25</td><td class="center">05-01</td><td class="center" style="color:#FF4D4F;">3天</td><td>物业</td></tr>
+    <tr><td class="center">5</td><td>XX花园绿化修剪</td><td>零星作业</td><td><span class="tag tag-gray">低风险</span></td><td class="center">04-26</td><td class="center">05-02</td><td class="center" style="color:#FF4D4F;">2天</td><td>社区</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 夏阳街道</span>
+    <span>第 5 / 9 页 · 模板04：巡查执行周报</span>
+  </div>
+</div>
+
+<!-- ========== 模板5：区级监管月报 ========== -->
+<div class="a4-page hidden" id="page5">
+  <div class="report-header">
+    <div class="report-title">青浦区小型工程安全监管月报</div>
+    <div class="report-meta">
+      <span>2026年4月</span>
+      <span>报告对象：全区</span>
+      <span>生成时间：2026-05-01 09:00</span>
+    </div>
+  </div>
+
+  <div class="summary-text">
+    4月全区新增备案<span class="highlight">3,245个</span>，巡查<span class="highlight">8,960次</span>，发现隐患<span class="highlight-red">892条</span>，整改率<span class="highlight-green">92.1%</span>。整体监管态势平稳，白鹤镇、重固镇需重点关注。本月无重大安全事故发生。
+  </div>
+
+  <div class="section-title">核心指标仪表盘（月度目标）</div>
+  <div class="kpi-row">
+    <div class="kpi-card success">
+      <div class="kpi-label">备案受理及时率</div>
+      <div class="kpi-value">98.5%</div>
+      <div class="kpi-change up">目标≥95% ✅ 达标</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">巡查覆盖率</div>
+      <div class="kpi-value">92.3%</div>
+      <div class="kpi-change up">目标≥85% ✅ 达标</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">隐患整改率</div>
+      <div class="kpi-value">92.1%</div>
+      <div class="kpi-change up">目标≥90% ✅ 达标</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">逾期隐患率</div>
+      <div class="kpi-value">3.2%</div>
+      <div class="kpi-change down">目标≤3% ⚠️ 超标</div>
+    </div>
+  </div>
+
+  <div class="section-title">近6个月趋势分析</div>
+  <div class="two-col">
+    <div>
+      <div style="font-size:11px; color:#666; margin-bottom:4px;">备案趋势</div>
+      <div class="line-chart">
+        <svg viewBox="0 0 300 80">
+          <polyline fill="none" stroke="#409EFF" stroke-width="2" points="0,60 50,50 100,40 150,35 200,25 250,15 300,10"/>
+          <circle cx="0" cy="60" r="3" fill="#409EFF"/><circle cx="50" cy="50" r="3" fill="#409EFF"/>
+          <circle cx="100" cy="40" r="3" fill="#409EFF"/><circle cx="150" cy="35" r="3" fill="#409EFF"/>
+          <circle cx="200" cy="25" r="3" fill="#409EFF"/><circle cx="250" cy="15" r="3" fill="#409EFF"/>
+          <circle cx="300" cy="10" r="3" fill="#409EFF"/>
+          <text x="0" y="78" font-size="8" fill="#999">11月</text><text x="50" y="78" font-size="8" fill="#999">12月</text>
+          <text x="100" y="78" font-size="8" fill="#999">1月</text><text x="150" y="78" font-size="8" fill="#999">2月</text>
+          <text x="200" y="78" font-size="8" fill="#999">3月</text><text x="250" y="78" font-size="8" fill="#999">4月</text>
+        </svg>
+      </div>
+      <div style="font-size:10px; color:#666;">备案量稳步上升，4月环比增长15%，受春季开工潮影响</div>
+    </div>
+    <div>
+      <div style="font-size:11px; color:#666; margin-bottom:4px;">隐患整改趋势</div>
+      <div class="line-chart">
+        <svg viewBox="0 0 300 80">
+          <polyline fill="none" stroke="#FF9500" stroke-width="2" points="0,50 50,45 100,40 150,42 200,38 250,35 300,32"/>
+          <polyline fill="none" stroke="#00B578" stroke-width="2" points="0,55 50,48 100,42 150,45 200,40 250,37 300,34"/>
+          <text x="250" y="12" font-size="8" fill="#FF9500">发现</text><text x="250" y="45" font-size="8" fill="#00B578">整改</text>
+        </svg>
+      </div>
+      <div style="font-size:10px; color:#666;">隐患发现与整改基本持平，闭环良好，整改率稳定在92%左右</div>
+    </div>
+  </div>
+
+  <div class="section-title">各街道综合排名</div>
+  <table class="data-table">
+    <tr><th>排名</th><th>街镇</th><th class="center">备案量</th><th class="center">巡查覆盖率</th><th class="center">隐患整改率</th><th class="center">及时受理率</th><th class="center">综合得分</th><th>评级</th></tr>
+    <tr><td><span class="rank-num top1">1</span></td><td>夏阳街道</td><td class="center">285</td><td class="center">94.7%</td><td class="center">93.3%</td><td class="center">99.2%</td><td class="center" style="font-weight:700; color:#00B578;">95.6</td><td><span class="tag tag-success">A+</span></td></tr>
+    <tr><td><span class="rank-num top2">2</span></td><td>盈浦街道</td><td class="center">198</td><td class="center">93.2%</td><td class="center">94.1%</td><td class="center">98.8%</td><td class="center" style="font-weight:700; color:#00B578;">94.3</td><td><span class="tag tag-success">A+</span></td></tr>
+    <tr><td><span class="rank-num top3">3</span></td><td>金泽镇</td><td class="center">156</td><td class="center">91.5%</td><td class="center">95.2%</td><td class="center">98.5%</td><td class="center" style="font-weight:700; color:#00B578;">92.8</td><td><span class="tag tag-success">A</span></td></tr>
+    <tr><td>4</td><td>赵巷镇</td><td class="center">245</td><td class="center">90.1%</td><td class="center">92.3%</td><td class="center">97.6%</td><td class="center" style="font-weight:700; color:#409EFF;">90.2</td><td><span class="tag tag-success">A</span></td></tr>
+    <tr><td>5</td><td>徐泾镇</td><td class="center">312</td><td class="center">89.8%</td><td class="center">89.5%</td><td class="center">96.2%</td><td class="center" style="font-weight:700; color:#FF9500;">87.1</td><td><span class="tag tag-warning">B+</span></td></tr>
+    <tr><td>6</td><td>练塘镇</td><td class="center">142</td><td class="center">88.5%</td><td class="center">91.8%</td><td class="center">95.8%</td><td class="center" style="font-weight:700; color:#FF9500;">86.4</td><td><span class="tag tag-warning">B+</span></td></tr>
+    <tr><td>7</td><td>华新镇</td><td class="center">198</td><td class="center">87.2%</td><td class="center">88.7%</td><td class="center">94.5%</td><td class="center" style="font-weight:700; color:#FF9500;">84.2</td><td><span class="tag tag-warning">B</span></td></tr>
+    <tr><td>8</td><td>香花桥街道</td><td class="center">268</td><td class="center">86.9%</td><td class="center">87.3%</td><td class="center">93.8%</td><td class="center" style="font-weight:700; color:#FF9500;">83.5</td><td><span class="tag tag-warning">B</span></td></tr>
+    <tr><td>9</td><td>朱家角镇</td><td class="center">178</td><td class="center">85.6%</td><td class="center">90.1%</td><td class="center">92.5%</td><td class="center" style="font-weight:700; color:#FF9500;">82.8</td><td><span class="tag tag-warning">B-</span></td></tr>
+    <tr><td>10</td><td>重固镇</td><td class="center">165</td><td class="center">82.3%</td><td class="center">84.5%</td><td class="center">91.2%</td><td class="center" style="font-weight:700; color:#FF4D4F;">78.6</td><td><span class="tag tag-danger">C+</span></td></tr>
+    <tr><td>11</td><td>白鹤镇</td><td class="center">198</td><td class="center">81.5%</td><td class="center">82.8%</td><td class="center">89.5%</td><td class="center" style="font-weight:700; color:#FF4D4F;">76.2</td><td><span class="tag tag-danger">C</span></td></tr>
+  </table>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 区级监管月报</span>
+    <span>第 6 / 9 页 · 模板05：区级监管月报</span>
+  </div>
+</div>
+
+<!-- ========== 模板6：街镇执行月报 ========== -->
+<div class="a4-page hidden" id="page6">
+  <div class="report-header">
+    <div class="report-title">夏阳街道小型工程安全监管月报</div>
+    <div class="report-meta">
+      <span>2026年4月</span>
+      <span>报告对象：夏阳街道</span>
+      <span>生成时间：2026-05-01 09:00</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">本月新增备案</div>
+      <div class="kpi-value">285</div>
+      <div class="kpi-change up">环比 +18.2%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">本月巡查次数</div>
+      <div class="kpi-value">628</div>
+      <div class="kpi-change up">覆盖率 94.7%</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">发现隐患</div>
+      <div class="kpi-value">68</div>
+      <div class="kpi-change up">整改率 93.3%</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">全区排名</div>
+      <div class="kpi-value">#1</div>
+      <div class="kpi-change up">综合得分 95.6</div>
+    </div>
+  </div>
+
+  <div class="section-title">本月工作完成情况</div>
+  <table class="data-table">
+    <tr><th>工作项</th><th class="center">目标</th><th class="center">完成</th><th class="center">完成率</th><th>完成情况</th></tr>
+    <tr><td>备案受理</td><td class="center">1个工作日内</td><td class="center">285件</td><td class="center"><div class="progress-bar"><div class="progress-fill high" style="width:99%">99.2%</div></div></td><td><span class="tag tag-success">超额完成</span></td></tr>
+    <tr><td>巡查覆盖</td><td class="center">覆盖率≥85%</td><td class="center">94.7%</td><td class="center"><div class="progress-bar"><div class="progress-fill high" style="width:95%">95%</div></div></td><td><span class="tag tag-success">超额完成</span></td></tr>
+    <tr><td>隐患整改</td><td class="center">整改率≥90%</td><td class="center">93.3%</td><td class="center"><div class="progress-bar"><div class="progress-fill high" style="width:93%">93%</div></div></td><td><span class="tag tag-success">达标</span></td></tr>
+    <tr><td>销项办理</td><td class="center">3个工作日内</td><td class="center">98件</td><td class="center"><div class="progress-bar"><div class="progress-fill high" style="width:97%">97.8%</div></div></td><td><span class="tag tag-success">达标</span></td></tr>
+    <tr><td>系统使用率</td><td class="center">登录≥20天/月</td><td class="center">100%</td><td class="center"><div class="progress-bar"><div class="progress-fill high" style="width:100%">100%</div></div></td><td><span class="tag tag-success">达标</span></td></tr>
+  </table>
+
+  <div class="section-title">工作亮点</div>
+  <div class="list-item">本月备案量285个，创近6个月新高，环比增长18.2%</div>
+  <div class="list-item">巡查覆盖率94.7%，连续3个月位列全区第一</div>
+  <div class="list-item">隐患整改率93.3%，高于全区平均水平1.2个百分点</div>
+  <div class="list-item">本月零安全事故，安全形势总体平稳</div>
+
+  <div class="section-title">存在问题</div>
+  <div class="list-item warning">住宅装修备案量激增，审核压力增大，建议增配审核人手</div>
+  <div class="list-item warning">2个高风险工程巡查频次未达标，需加强跟踪</div>
+  <div class="list-item warning">物业巡查完成率85%，低于街道和社区巡查水平</div>
+
+  <div class="section-title">下月工作计划</div>
+  <div class="two-col">
+    <div>
+      <div style="font-size:12px; font-weight:600; color:#409EFF; margin-bottom:6px;">短期计划（5月执行）</div>
+      <div class="list-item">增配1名备案审核人员，缓解审核压力</div>
+      <div class="list-item">对2个巡查未达标的高风险工程开展专项检查</div>
+      <div class="list-item">组织物业单位巡查工作培训</div>
+    </div>
+    <div>
+      <div style="font-size:12px; font-weight:600; color:#409EFF; margin-bottom:6px;">中期计划（季度内）</div>
+      <div class="list-item">探索引入第三方专业机构补充巡查力量</div>
+      <div class="list-item">完善物业巡查考核机制</div>
+      <div class="list-item">开展新入驻施工单位安全培训</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 夏阳街道</span>
+    <span>第 7 / 9 页 · 模板06：街镇执行月报</span>
+  </div>
+</div>
+
+<!-- ========== 模板7：考核排名月报 ========== -->
+<div class="a4-page hidden" id="page7">
+  <div class="report-header">
+    <div class="report-title">小型工程安全监管考核排名月报</div>
+    <div class="report-meta">
+      <span>2026年4月</span>
+      <span>报告对象：区考核办 / 区建管委</span>
+      <span>生成时间：2026-05-01 09:00</span>
+    </div>
+  </div>
+
+  <div class="summary-text">
+    4月考核周期内，全区11个街镇综合平均得分<span class="highlight">87.3分</span>。<span class="highlight-green">夏阳街道、盈浦街道、金泽镇</span>位列前三，获A级评定。<span class="highlight-red">白鹤镇、重固镇</span>得分低于80分，评定为C级，需限期整改。
+  </div>
+
+  <div class="section-title">考核指标与权重</div>
+  <table class="data-table">
+    <tr><th>考核维度</th><th class="center">权重</th><th class="center">目标值</th><th class="center">全区平均</th><th>计分规则</th></tr>
+    <tr><td>备案受理及时率</td><td class="center">20%</td><td class="center">≥95%</td><td class="center">96.8%</td><td>每低1%扣2分，≥98%加5分</td></tr>
+    <tr><td>巡查覆盖率</td><td class="center">25%</td><td class="center">≥85%</td><td class="center">89.5%</td><td>每低1%扣3分，≥92%加5分</td></tr>
+    <tr><td>隐患整改率</td><td class="center">25%</td><td class="center">≥90%</td><td class="center">89.8%</td><td>每低1%扣3分，≥93%加5分</td></tr>
+    <tr><td>逾期隐患控制</td><td class="center">15%</td><td class="center">≤3%</td><td class="center">3.2%</td><td>每超0.5%扣5分，≤1%加5分</td></tr>
+    <tr><td>系统使用率</td><td class="center">10%</td><td class="center">≥80%</td><td class="center">92.1%</td><td>每低5%扣2分，≥95%加3分</td></tr>
+    <tr><td>安全事故</td><td class="center">5%</td><td class="center">0起</td><td class="center">0起</td><td>发生1起扣20分，2起以上一票否决</td></tr>
+  </table>
+
+  <div class="section-title">考核排名总表</div>
+  <table class="data-table">
+    <tr>
+      <th>排名</th><th>街镇</th><th class="center">备案及时<br>(20)</th><th class="center">巡查覆盖<br>(25)</th>
+      <th class="center">隐患整改<br>(25)</th><th class="center">逾期控制<br>(15)</th>
+      <th class="center">系统使用<br>(10)</th><th class="center">安全<br>(5)</th><th class="center">总分</th><th>等级</th>
+    </tr>
+    <tr style="background:#f6ffed;"><td><span class="rank-num top1">1</span></td><td>夏阳街道</td><td class="center">20</td><td class="center">25</td><td class="center">24</td><td class="center">13</td><td class="center">10</td><td class="center">5</td><td class="center" style="font-weight:700; color:#00B578;">97</td><td><span class="tag tag-success">A+</span></td></tr>
+    <tr style="background:#f6ffed;"><td><span class="rank-num top2">2</span></td><td>盈浦街道</td><td class="center">19</td><td class="center">24</td><td class="center">25</td><td class="center">14</td><td class="center">10</td><td class="center">5</td><td class="center" style="font-weight:700; color:#00B578;">97</td><td><span class="tag tag-success">A+</span></td></tr>
+    <tr style="background:#f6ffed;"><td><span class="rank-num top3">3</span></td><td>金泽镇</td><td class="center">19</td><td class="center">23</td><td class="center">25</td><td class="center">14</td><td class="center">9</td><td class="center">5</td><td class="center" style="font-weight:700; color:#00B578;">95</td><td><span class="tag tag-success">A</span></td></tr>
+    <tr><td>4</td><td>赵巷镇</td><td class="center">18</td><td class="center">22</td><td class="center">23</td><td class="center">13</td><td class="center">9</td><td class="center">5</td><td class="center" style="font-weight:700; color:#409EFF;">90</td><td><span class="tag tag-success">A</span></td></tr>
+    <tr><td>5</td><td>练塘镇</td><td class="center">17</td><td class="center">21</td><td class="center">22</td><td class="center">12</td><td class="center">9</td><td class="center">5</td><td class="center" style="font-weight:700; color:#FF9500;">86</td><td><span class="tag tag-warning">B+</span></td></tr>
+    <tr><td>6</td><td>徐泾镇</td><td class="center">17</td><td class="center">20</td><td class="center">21</td><td class="center">11</td><td class="center">8</td><td class="center">5</td><td class="center" style="font-weight:700; color:#FF9500;">82</td><td><span class="tag tag-warning">B</span></td></tr>
+    <tr><td>7</td><td>华新镇</td><td class="center">16</td><td class="center">19</td><td class="center">20</td><td class="center">10</td><td class="center">8</td><td class="center">5</td><td class="center" style="font-weight:700; color:#FF9500;">78</td><td><span class="tag tag-warning">B-</span></td></tr>
+    <tr><td>8</td><td>香花桥街道</td><td class="center">15</td><td class="center">18</td><td class="center">19</td><td class="center">10</td><td class="center">8</td><td class="center">5</td><td class="center" style="font-weight:700; color:#FF9500;">75</td><td><span class="tag tag-warning">C+</span></td></tr>
+    <tr><td>9</td><td>朱家角镇</td><td class="center">15</td><td class="center">17</td><td class="center">20</td><td class="center">9</td><td class="center">7</td><td class="center">5</td><td class="center" style="font-weight:700; color:#FF4D4F;">73</td><td><span class="tag tag-danger">C</span></td></tr>
+    <tr style="background:#fff2f0;"><td>10</td><td>重固镇</td><td class="center">14</td><td class="center">14</td><td class="center">17</td><td class="center">8</td><td class="center">7</td><td class="center">5</td><td class="center" style="font-weight:700; color:#FF4D4F;">65</td><td><span class="tag tag-danger">C</span></td></tr>
+    <tr style="background:#fff2f0;"><td>11</td><td>白鹤镇</td><td class="center">13</td><td class="center">13</td><td class="center">16</td><td class="center">7</td><td class="center">6</td><td class="center">5</td><td class="center" style="font-weight:700; color:#FF4D4F;">60</td><td><span class="tag tag-danger">C</span></td></tr>
+  </table>
+
+  <div class="section-title">等级说明与奖惩</div>
+  <div class="two-col">
+    <div style="font-size:11px; line-height:2;">
+      <b style="color:#00B578;">A级（≥90分）</b>：优秀，通报表扬，年度考核加分<br>
+      <b style="color:#409EFF;">B级（80-89分）</b>：良好，正常工作要求<br>
+      <b style="color:#FF9500;">B-级（75-79分）</b>：合格，需改进提升<br>
+      <b style="color:#FF4D4F;">C级（＜75分）</b>：不合格，限期整改，约谈负责人
+    </div>
+    <div style="font-size:11px; line-height:2; background:#fafafa; padding:10px; border-radius:6px;">
+      <b>本月奖惩：</b><br>
+      🏆 夏阳街道、盈浦街道获评A+，全区通报表扬<br>
+      ⚠️ 白鹤镇、重固镇被评为C级，限期1个月内整改<br>
+      📋 5月将重点督导C级街镇整改情况
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 考核排名月报</span>
+    <span>第 8 / 9 页 · 模板07：考核排名月报</span>
+  </div>
+</div>
+
+<!-- ========== 模板8：风险分析月报 ========== -->
+<div class="a4-page hidden" id="page8">
+  <div class="report-header">
+    <div class="report-title">小型工程安全风险分析月报</div>
+    <div class="report-meta">
+      <span>2026年4月</span>
+      <span>报告对象：区安委办 / 区建管委</span>
+      <span>生成时间：2026-05-01 09:00</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card danger">
+      <div class="kpi-label">高风险工程</div>
+      <div class="kpi-value">186</div>
+      <div class="kpi-change">占总量 18.2%</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">较大隐患</div>
+      <div class="kpi-value">112</div>
+      <div class="kpi-change down">环比 +12.5%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">隐患发现率</div>
+      <div class="kpi-value">9.8%</div>
+      <div class="kpi-change up">上月 9.2%</div>
+    </div>
+    <div class="kpi-card success">
+      <div class="kpi-label">本月事故</div>
+      <div class="kpi-value">0</div>
+      <div class="kpi-change up">连续6个月零事故</div>
+    </div>
+  </div>
+
+  <div class="section-title">风险类型分布</div>
+  <div class="two-col">
+    <div>
+      <table class="data-table">
+        <tr><th>风险类型</th><th class="center">隐患数</th><th class="center">占比</th><th class="center">环比</th><th>趋势</th></tr>
+        <tr><td>高处作业</td><td class="center">245</td><td class="center">27.5%</td><td class="center" style="color:#FF4D4F;">+15%</td><td><span class="tag tag-danger">上升</span></td></tr>
+        <tr><td>临时用电</td><td class="center">198</td><td class="center">22.2%</td><td class="center" style="color:#FF4D4F;">+8%</td><td><span class="tag tag-danger">上升</span></td></tr>
+        <tr><td>临边洞口</td><td class="center">156</td><td class="center">17.5%</td><td class="center" style="color:#FF9500;">+3%</td><td><span class="tag tag-warning">微升</span></td></tr>
+        <tr><td>动火作业</td><td class="center">112</td><td class="center">12.6%</td><td class="center" style="color:#00B578;">-5%</td><td><span class="tag tag-success">下降</span></td></tr>
+        <tr><td>起重吊装</td><td class="center">89</td><td class="center">10.0%</td><td class="center" style="color:#00B578;">-2%</td><td><span class="tag tag-success">下降</span></td></tr>
+        <tr><td>其他</td><td class="center">92</td><td class="center">10.3%</td><td class="center" style="color:#999;">0%</td><td><span class="tag tag-gray">持平</span></td></tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:11px; color:#666; margin-bottom:8px;">风险隐患占比</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:8px; font-size:10px;">
+          <div style="width:60px;">高处作业</div>
+          <div style="flex:1; height:16px; background:#f0f0f0; border-radius:8px; overflow:hidden;">
+            <div style="width:92%; height:100%; background:#FF4D4F; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:4px; color:#fff; font-size:9px;">27.5%</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:10px;">
+          <div style="width:60px;">临时用电</div>
+          <div style="flex:1; height:16px; background:#f0f0f0; border-radius:8px; overflow:hidden;">
+            <div style="width:74%; height:100%; background:#FF9500; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:4px; color:#fff; font-size:9px;">22.2%</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:10px;">
+          <div style="width:60px;">临边洞口</div>
+          <div style="flex:1; height:16px; background:#f0f0f0; border-radius:8px; overflow:hidden;">
+            <div style="width:59%; height:100%; background:#FAAD14; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:4px; color:#fff; font-size:9px;">17.5%</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:10px;">
+          <div style="width:60px;">动火作业</div>
+          <div style="flex:1; height:16px; background:#f0f0f0; border-radius:8px; overflow:hidden;">
+            <div style="width:42%; height:100%; background:#409EFF; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:4px; color:#fff; font-size:9px;">12.6%</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:10px;">
+          <div style="width:60px;">起重吊装</div>
+          <div style="flex:1; height:16px; background:#f0f0f0; border-radius:8px; overflow:hidden;">
+            <div style="width:33%; height:100%; background:#52c41a; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:4px; color:#fff; font-size:9px;">10.0%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">高风险工程分布（TOP5街镇）</div>
+  <table class="data-table">
+    <tr><th>排名</th><th>街镇</th><th class="center">高风险工程</th><th class="center">占辖区比例</th><th class="center">主要风险类型</th><th class="center">专项巡查次数</th><th class="center">隐患数</th><th>风险等级</th></tr>
+    <tr><td><span class="rank-num top1">1</span></td><td>徐泾镇</td><td class="center">42</td><td class="center">24.3%</td><td class="center">高处/动火</td><td class="center">38</td><td class="center">28</td><td><span class="tag tag-danger">高风险</span></td></tr>
+    <tr><td><span class="rank-num top2">2</span></td><td>香花桥街道</td><td class="center">35</td><td class="center">22.1%</td><td class="center">用电/临边</td><td class="center">32</td><td class="center">24</td><td><span class="tag tag-danger">高风险</span></td></tr>
+    <tr><td><span class="rank-num top3">3</span></td><td>赵巷镇</td><td class="center">28</td><td class="center">19.2%</td><td class="center">高处/起重</td><td class="center">26</td><td class="center">18</td><td><span class="tag tag-warning">中风险</span></td></tr>
+    <tr><td>4</td><td>华新镇</td><td class="center">24</td><td class="center">18.5%</td><td class="center">动火/用电</td><td class="center">22</td><td class="center">16</td><td><span class="tag tag-warning">中风险</span></td></tr>
+    <tr><td>5</td><td>白鹤镇</td><td class="center">22</td><td class="center">17.8%</td><td class="center">临边/高处</td><td class="center">18</td><td class="center">20</td><td><span class="tag tag-warning">中风险</span></td></tr>
+  </table>
+
+  <div class="section-title">风险预警与防控建议</div>
+  <div style="background:#fff2f0; border-radius:6px; padding:10px; margin-bottom:10px;">
+    <div style="font-size:12px; font-weight:600; color:#FF4D4F; margin-bottom:6px;">🔴 高风险预警</div>
+    <div class="list-item danger">高处作业隐患占比上升至27.5%，环比增长15%，需立即开展专项整治</div>
+    <div class="list-item danger">徐泾镇高风险工程占比24.3%，建议增加专项巡查频次至每5天1次</div>
+  </div>
+  <div style="background:#fff7e6; border-radius:6px; padding:10px; margin-bottom:10px;">
+    <div style="font-size:12px; font-weight:600; color:#FF9500; margin-bottom:6px;">🟡 中风险关注</div>
+    <div class="list-item warning">临时用电隐患占比持续高位（22.2%），建议开展专项培训</div>
+    <div class="list-item warning">春季装修旺季住宅装修工程增加，高处作业风险上升</div>
+  </div>
+  <div style="background:#f6ffed; border-radius:6px; padding:10px;">
+    <div style="font-size:12px; font-weight:600; color:#00B578; margin-bottom:6px;">🟢 积极趋势</div>
+    <div class="list-item">动火作业隐患环比下降5%，专项整治成效显著</div>
+    <div class="list-item">连续6个月零重大安全事故，安全态势总体可控</div>
+  </div>
+
+  <div class="section-title">下月风险防控重点</div>
+  <div class="list-item">开展高处作业专项安全检查，重点排查未设防护栏杆、未系安全带等隐患</div>
+  <div class="list-item">对徐泾镇、香花桥街道高风险工程增加巡查频次</div>
+  <div class="list-item">组织施工单位安全负责人专项培训，重点培训高处作业和临时用电</div>
+
+  <div class="page-footer">
+    <span>青浦区小型工程安全纳管系统 · 风险分析月报</span>
+    <span>第 9 / 9 页 · 模板08：风险分析月报</span>
+  </div>
+</div>
+
+<div class="page-indicator">使用底部导航切换不同报表模板 · 按 Ctrl+P 可打印当前页面</div>
+
+<script>
+  function showPage(n) {
+    for (let i = 0; i <= 8; i++) {
+      document.getElementById('page' + i).classList.add('hidden');
+      document.getElementById('btn' + i).classList.remove('active');
+    }
+    document.getElementById('page' + n).classList.remove('hidden');
+    document.getElementById('btn' + n).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>周六专项汇报 - 上海青浦平台业务进展</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --brand: #00B578;
+  --brand-dark: #1a8f62;
+  --brand-light: #E6F7F0;
+  --gradient-start: #35ad73;
+  --gradient-end: #58b8d7;
+  --btn-start: #27a66d;
+  --btn-end: #4fb3d7;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-aux: #999999;
+  --bg-page: #f0f2f5;
+  --bg-card: #ffffff;
+  --warning: #FF9500;
+  --danger: #FF4D4F;
+  --annot-bg: #FFFBE6;
+  --annot-border: #FFC53D;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 主容器 */
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* PPT区域 */
+.ppt-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: auto;
+}
+
+/* 幻灯片容器 - 16:9 */
+.slide-wrapper {
+  width: 100%;
+  max-width: 1280px;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+  padding: 48px 60px;
+  flex-direction: column;
+}
+
+.slide.active { display: flex; }
+
+/* 封面样式 */
+.slide-cover {
+  background: linear-gradient(135deg, #1a2b4a 0%, #2d4a6f 50%, #1a8f62 100%);
+  color: white;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.slide-cover .cover-tag {
+  display: inline-block;
+  padding: 8px 24px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-bottom: 32px;
+}
+
+.slide-cover h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+.slide-cover .cover-sub {
+  font-size: 22px;
+  font-weight: 400;
+  opacity: 0.85;
+  margin-bottom: 48px;
+}
+
+.slide-cover .cover-info {
+  display: flex;
+  gap: 48px;
+  font-size: 15px;
+  opacity: 0.7;
+}
+
+.cover-info span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 内容页通用 */
+.slide-content {
+  background: linear-gradient(180deg, #f8fbfa 0%, #ffffff 100%);
+}
+
+.slide-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+
+.slide-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.slide-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.slide-title-small {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.slide-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 强调卡片 */
+.highlight-box {
+  background: linear-gradient(135deg, var(--brand-light), #f0f9ff);
+  border-left: 4px solid var(--brand);
+  padding: 20px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 20px;
+}
+
+.highlight-box p {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.highlight-box strong {
+  color: var(--brand-dark);
+}
+
+/* 表格 */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.data-table th {
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.data-table th:first-child { border-radius: 8px 0 0 0; }
+.data-table th:last-child { border-radius: 0 8px 0 0; }
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8ecef;
+  background: white;
+  vertical-align: top;
+}
+
+.data-table tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+.data-table tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+
+.data-table .tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tag-green { background: var(--brand-light); color: var(--brand-dark); }
+.tag-orange { background: #FFF7E6; color: var(--warning); }
+.tag-blue { background: #E6F4FF; color: #1890FF; }
+.tag-gray { background: #f5f5f5; color: var(--text-aux); }
+
+/* 卡片网格 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e8ecef;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.info-card .card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.info-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.info-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 时间线/路径 */
+.path-container {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.path-phase {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e8ecef;
+  position: relative;
+}
+
+.path-phase::after {
+  content: "";
+  position: absolute;
+  top: 24px;
+  right: -16px;
+  width: 16px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), var(--gradient-end));
+}
+
+.path-phase:last-child::after { display: none; }
+
+.path-phase .phase-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.phase-short { background: var(--brand-light); color: var(--brand-dark); }
+.phase-mid { background: #E6F4FF; color: #1890FF; }
+.phase-long { background: #f0f0ff; color: #722ed1; }
+
+.path-phase h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.path-phase ul {
+  list-style: none;
+  padding: 0;
+}
+
+.path-phase li {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 3px 0;
+  padding-left: 14px;
+  position: relative;
+}
+
+.path-phase li::before {
+  content: "-";
+  position: absolute;
+  left: 0;
+  color: var(--brand);
+}
+
+/* 里程碑 */
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: white;
+  border-radius: 10px;
+  padding: 14px 20px;
+  border: 1px solid #e8ecef;
+}
+
+.milestone-time {
+  width: 90px;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand-dark);
+  padding-top: 2px;
+}
+
+.milestone-content h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.milestone-content p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* 标注区域 */
+.annotation-area {
+  width: 340px;
+  background: var(--annot-bg);
+  border-left: 2px dashed var(--annot-border);
+  padding: 20px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.annotation-area.hidden {
+  transform: translateX(100%);
+  width: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+}
+
+.annot-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.annot-section {
+  margin-bottom: 16px;
+}
+
+.annot-section h5 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-dark);
+  margin-bottom: 6px;
+}
+
+.annot-section p, .annot-section li {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.annot-section ul {
+  padding-left: 16px;
+}
+
+.annot-section li {
+  margin-bottom: 4px;
+}
+
+/* 导航 */
+.nav-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 43, 74, 0.92);
+  backdrop-filter: blur(12px);
+  border-radius: 999px;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.nav-bar.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+  pointer-events: none;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover { background: rgba(255,255,255,0.2); }
+
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.nav-pages {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.nav-dot.active {
+  background: var(--brand);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.nav-info {
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* 标注切换按钮 */
+.annot-toggle {
+  position: fixed;
+  right: 360px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 60px;
+  background: var(--annot-bg);
+  border: 1px solid var(--annot-border);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  cursor: pointer;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--warning);
+  font-weight: 700;
+  transition: right 0.3s;
+}
+
+.annot-toggle.collapsed { right: 0; }
+
+/* 提示 */
+.hint-bar {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.hint-bar.show { opacity: 1; }
+
+/* 列表 */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+}
+
+.bullet-list li {
+  padding: 8px 0 8px 24px;
+  position: relative;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.bullet-list li:last-child { border-bottom: none; }
+
+.bullet-list li::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 16px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--btn-start), var(--btn-end));
+}
+
+/* 两栏布局 */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.col-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e8ecef;
+}
+
+.col-card h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.col-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 状态标签 */
+.status-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 响应式 */
+@media (max-width: 1400px) {
+  .slide-wrapper { max-width: 960px; }
+  .slide { padding: 32px 40px; }
+  .slide-title { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hint-bar" id="hintBar">按 F8 显示/隐藏导航 | 点击标注按钮收起/展开右侧</div>
+
+<div class="main-container">
+  <div class="ppt-area">
+    <div class="slide-wrapper">
+
+      <!-- 第1页：封面 -->
+      <div class="slide slide-cover active" data-index="0">
+        <div class="cover-tag">周六专项汇报</div>
+        <h1>上海青浦平台业务进展</h1>
+        <p class="cover-sub">产品能力建设 · 商业模式闭环 · 盈利路径规划</p>
+        <div class="cover-info">
+          <span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026年5月
+          </span>
+          <span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            汇报人：朱丹
+          </span>
+        </div>
+      </div>
+
+      <!-- 第2页：一句话定位 -->
+      <div class="slide slide-content" data-index="1">
+        <div class="slide-header">
+          <div class="slide-number">01</div>
+          <div class="slide-title">一句话定位</div>
+        </div>
+        <div class="slide-body">
+          <div class="highlight-box">
+            <p>我们在上海做的平台，本质上是<strong>用政府的监管需求做获客入口，用保险业务做变现出口，用数据积累做长期壁垒</strong>。</p>
+          </div>
+          <div class="two-col" style="margin-top:8px;">
+            <div class="col-card">
+              <h4>
+                <span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#27a66d,#4fb3d7);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;">1</span>
+                不是信息化交付项目
+              </h4>
+              <p>平台不是单纯的"接活的系统"，而是公司在上海市场开展<strong>平台型业务</strong>的基础设施。</p>
+            </div>
+            <div class="col-card">
+              <h4>
+                <span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#27a66d,#4fb3d7);color:white;display:flex;align-items:center;justify-content:center;font-size:14px;">2</span>
+                是商业闭环的抓手
+              </h4>
+              <p>政府侧功能是<strong>免费获客手段</strong>，保险侧功能是<strong>核心营收通道</strong>，数据沉淀是<strong>竞争壁垒</strong>。</p>
+            </div>
+          </div>
+          <div style="margin-top:16px;background:white;border-radius:12px;padding:20px;border:1px solid #e8ecef;">
+            <h4 style="font-size:15px;font-weight:600;margin-bottom:12px;color:var(--brand-dark);">商业模式全景</h4>
+            <div style="display:flex;align-items:center;justify-content:center;gap:20px;padding:16px 0;">
+              <div style="text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">政府（获客端）</div>
+                <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+                  <div>纳管全覆盖</div>
+                  <div>巡检强绑定</div>
+                  <div>政策推动</div>
+                </div>
+              </div>
+              <div style="font-size:24px;color:var(--brand);">→</div>
+              <div style="text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">平台（流量池）</div>
+                <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+                  <div>施工主体沉淀</div>
+                  <div>数据积累</div>
+                  <div>不可替代性</div>
+                </div>
+              </div>
+              <div style="font-size:24px;color:var(--brand);">→</div>
+              <div style="text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">保险（变现端）</div>
+                <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
+                  <div>投保转化</div>
+                  <div>事故预防收费</div>
+                  <div>增值服务费</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第3页：平台建设现状 -->
+      <div class="slide slide-content" data-index="2">
+        <div class="slide-header">
+          <div class="slide-number">02</div>
+          <div class="slide-title">平台现在建到什么程度了</div>
+        </div>
+        <div class="slide-body">
+          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">覆盖青浦区11个街镇，支撑3类工程 + 21个子类全流程监管</p>
+          <table class="data-table">
+            <tr>
+              <th style="width:18%;">商业化环节</th>
+              <th style="width:42%;">具体功能</th>
+              <th style="width:20%;">当前状态</th>
+              <th style="width:20%;">对营收意义</th>
+            </tr>
+            <tr>
+              <td><strong>获客入口</strong><br><span style="font-size:12px;color:var(--text-aux);">备案纳管</span></td>
+              <td>施工端备案、监管端审核（PC+移动）、智慧大屏统揽</td>
+              <td><span class="tag tag-green">已上线试运行</span></td>
+              <td>施工主体必须备案 → 自然沉淀为投保流量池</td>
+            </tr>
+            <tr>
+              <td><strong>过程绑定</strong><br><span style="font-size:12px;color:var(--text-aux);">巡检整改</span></td>
+              <td>政府巡检巡查、隐患整改、施工端整改反馈、完工核销、警示教育</td>
+              <td><span class="tag tag-orange">测试验收中</span></td>
+              <td>反复触达强化使用习惯 → 提高投保转化率</td>
+            </tr>
+            <tr>
+              <td><strong>数据贯通</strong><br><span style="font-size:12px;color:var(--text-aux);">市平台对接</span></td>
+              <td>市小型工程及智慧工地数据对接、巡检相关大屏</td>
+              <td><span class="tag tag-blue">开发中</span></td>
+              <td>与市级系统绑定 → 提高切换成本</td>
+            </tr>
+            <tr>
+              <td><strong>变现通道</strong><br><span style="font-size:12px;color:var(--text-aux);">线上投保</span></td>
+              <td>投保流程嵌入、事故预防服务平台</td>
+              <td><span class="tag tag-orange">一期延期，二期开发中</span></td>
+              <td><strong>核心营收来源</strong>，等保险方案确定后承接</td>
+            </tr>
+            <tr>
+              <td><strong>智能化</strong><br><span style="font-size:12px;color:var(--text-aux);">AI能力</span></td>
+              <td>AI智慧报表、AI隐患识别、备案分派、量化评价</td>
+              <td><span class="tag tag-gray">待排期/规划中</span></td>
+              <td>长期竞争壁垒，随数据沉淀释放</td>
+            </tr>
+          </table>
+          <div class="highlight-box" style="margin-top:4px;">
+            <p><strong>关键结论：</strong>备案和巡检功能已开发完成，待纳管办法正式发布后即可覆盖全量施工主体。保险方案确定后，投保模块进入二期开发（预计6月底上线），经系统对接和验收，预计三季度形成完整商业闭环。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第4页：政府侧 = 获客入口 -->
+      <div class="slide slide-content" data-index="3">
+        <div class="slide-header">
+          <div class="slide-number">03</div>
+          <div class="slide-title">政府侧功能 = 政策驱动的高效获客入口</div>
+        </div>
+        <div class="slide-body">
+          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">传统保险获客靠代理人地推，成本高、效率低。我们的逻辑是<strong>让政府通过政策手段引导施工主体主动进入平台</strong>——施工主体因合规要求必须备案，相较传统地推，获客更精准、效率更高。</p>
+          <div class="card-grid">
+            <div class="info-card">
+              <div class="card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <h4>备案纳管全覆盖</h4>
+              <p><strong>免费获客入口</strong><br>施工主体为合规必须来平台备案，不花一分市场费就获取精准客户</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <h4>巡检整改闭环</h4>
+              <p><strong>客户粘性工具</strong><br>施工主体反复使用平台形成习惯，后续推投保时转化率更高</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <h4>智慧大屏统揽</h4>
+              <p><strong>政府关系抓手</strong><br>领导看到数据 → 政府更愿意推平台 → 流量池持续扩大</p>
+            </div>
+          </div>
+          <div style="margin-top:16px;background:white;border-radius:12px;padding:18px 20px;border:1px solid #e8ecef;">
+            <h4 style="font-size:14px;font-weight:600;color:var(--brand-dark);margin-bottom:8px;">与政府侧汇报内容的衔接</h4>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">纳管和巡检功能不仅是"帮政府做监管"，更是平台型业务的基础设施。朱区长在会上明确提了<strong>"把买保险放到环节里去"</strong>——政府侧已经把路铺好了，平台只要把投保环节承接住，就能自然完成流量到变现的转化。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第5页：保险侧 = 变现通道 -->
+      <div class="slide slide-content" data-index="4">
+        <div class="slide-header">
+          <div class="slide-number">04</div>
+          <div class="slide-title">保险侧 = 核心变现通道</div>
+        </div>
+        <div class="slide-body">
+          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:14px;">平台商业价值的核心——<strong>确保"保费从我们这里过"</strong></p>
+          <table class="data-table">
+            <tr>
+              <th style="width:22%;">环节</th>
+              <th style="width:38%;">平台支撑</th>
+              <th style="width:40%;">营收意义</th>
+            </tr>
+            <tr>
+              <td><strong>投保流程</strong></td>
+              <td>平台内嵌投保链接，跳转随申办完成支付</td>
+              <td>保费流量过平台，获取<strong>佣金/经纪费</strong></td>
+            </tr>
+            <tr>
+              <td><strong>事故预防服务</strong></td>
+              <td>巡检数据、培训记录、隐患整改全留痕</td>
+              <td>支撑TIS机构/自建团队落地服务，可收取<strong>服务费</strong></td>
+            </tr>
+            <tr>
+              <td><strong>数据积累</strong></td>
+              <td>工程信息库、企业画像、风险评分</td>
+              <td>未来支撑<strong>差异化定价</strong>，提升对保险公司的议价权</td>
+            </tr>
+          </table>
+          <div style="margin-top:14px;display:flex;gap:16px;">
+            <div style="flex:1;background:linear-gradient(135deg,#ebf8f1,#f0f9ff);border-radius:12px;padding:16px;border:1px solid rgba(34,166,109,0.2);">
+              <h4 style="font-size:14px;font-weight:600;color:var(--brand-dark);margin-bottom:8px;">与雷鸣内容衔接</h4>
+              <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">雷鸣正在推进<strong>500/1000底层 + 增额险 + 救助险补贴</strong>的方案。平台侧线上投保能力将在保险方案确定后第一时间承接，确保"方案一落地、系统就能跑"。</p>
+            </div>
+            <div style="flex:1;background:linear-gradient(135deg,#fff7e6,#fff);border-radius:12px;padding:16px;border:1px solid rgba(255,149,0,0.2);">
+              <h4 style="font-size:14px;font-weight:600;color:var(--warning);margin-bottom:8px;">关键逻辑</h4>
+              <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">朱区长提出"把买保险放到环节里去"——等于政府帮我们在合规层面铺好了路。平台设计让施工主体<strong>绕不开我们</strong>。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第6页：竞争壁垒 -->
+      <div class="slide slide-content" data-index="5">
+        <div class="slide-header">
+          <div class="slide-number">05</div>
+          <div class="slide-title">平台差异化能力 = 长期竞争壁垒</div>
+        </div>
+        <div class="slide-body">
+          <p style="font-size:14px;color:var(--text-secondary);margin-bottom:14px;">当前壁垒主要来自<strong style="color:var(--brand-dark);">已上线的系统和政府合作关系</strong>。远期能力在架构上预留扩展接口，待数据沉淀后释放。</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:flex-start;gap:14px;background:linear-gradient(135deg,#ebf8f1,#ffffff);border-radius:10px;padding:14px 18px;border:1px solid rgba(34,166,109,0.3);">
+              <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#27a66d,#4fb3d7);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;">1</div>
+              <div>
+                <h4 style="font-size:15px;font-weight:600;margin-bottom:4px;">备案系统已上线（已建成的壁垒）</h4>
+                <p style="font-size:13px;color:var(--text-secondary);">覆盖11个街镇、21个工程子类。切换平台需要重新梳理全部业务流程，行政成本高。</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:14px;background:linear-gradient(135deg,#ebf8f1,#ffffff);border-radius:10px;padding:14px 18px;border:1px solid rgba(34,166,109,0.3);">
+              <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#27a66d,#4fb3d7);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;">2</div>
+              <div>
+                <h4 style="font-size:15px;font-weight:600;margin-bottom:4px;">市级平台对接中（已建成的壁垒）</h4>
+                <p style="font-size:13px;color:var(--text-secondary);">与上海市小型工程系统数据贯通。对接完成后，平台成为政府数据链路的必要节点。</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:14px;background:white;border-radius:10px;padding:14px 18px;border:1px solid #e8ecef;">
+              <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#999,#bbb);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;">3</div>
+              <div>
+                <h4 style="font-size:15px;font-weight:600;margin-bottom:4px;">风险量化模型（远期规划）</h4>
+                <p style="font-size:13px;color:var(--text-secondary);">架构预留扩展接口。有数据+模型后，可反向影响保费定价。</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:14px;background:white;border-radius:10px;padding:14px 18px;border:1px solid #e8ecef;">
+              <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#999,#bbb);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;">4</div>
+              <div>
+                <h4 style="font-size:15px;font-weight:600;margin-bottom:4px;">AI智能分拨（远期规划）</h4>
+                <p style="font-size:13px;color:var(--text-secondary);">AI隐患识别已进入二期开发（预计6月底）。数据越积越厚，后来者无法短期复制。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第7页：盈利路径 -->
+      <div class="slide slide-content" data-index="6">
+        <div class="slide-header">
+          <div class="slide-number">06</div>
+          <div class="slide-title">上海盈利路径</div>
+        </div>
+        <div class="slide-body">
+          <div class="path-container">
+            <div class="path-phase">
+              <span class="phase-tag phase-short">短期</span>
+              <h4>当前已启动</h4>
+              <ul>
+                <li>信息化平台运维费（年度固定）</li>
+                <li>事故预防服务团队搭建（自建/外包方案确定）</li>
+              </ul>
+            </div>
+            <div class="path-phase">
+              <span class="phase-tag phase-short">短期可变现</span>
+              <h4>3-6个月</h4>
+              <ul>
+                <li>投保佣金/经纪费（⚠️ 依赖保险方案5月底确定且开发不延期）</li>
+                <li>事故预防服务费（团队组建完成后）</li>
+              </ul>
+            </div>
+            <div class="path-phase">
+              <span class="phase-tag phase-mid">中期（3-12个月）</span>
+              <h4>规模复制</h4>
+              <ul>
+                <li>从青浦复制到上海其他区</li>
+                <li>一般工贸扩展</li>
+                <li>增值服务（数据报告、定制）</li>
+              </ul>
+            </div>
+            <div class="path-phase">
+              <span class="phase-tag phase-long">长期（1年以上）</span>
+              <h4>壁垒变现</h4>
+              <ul>
+                <li>数据资产变现（风险模型）</li>
+                <li>大安责险模式复制到其他省市</li>
+                <li>人才发展培训商业化</li>
+              </ul>
+            </div>
+          </div>
+          <div class="highlight-box" style="margin-top:16px;">
+            <p><strong>关键逻辑：</strong>青浦是"样板间"。平台能力建好后，复制到其他区的边际成本极低。今年下半年如果青浦出成绩，就可以通过"经验分享会"向全市推广。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第8页：卡点 -->
+      <div class="slide slide-content" data-index="7">
+        <div class="slide-header">
+          <div class="slide-number">07</div>
+          <div class="slide-title">当前卡点 & 需要决策/推动的事项</div>
+        </div>
+        <div class="slide-body">
+          <table class="data-table">
+            <tr>
+              <th style="width:28%;">卡点</th>
+              <th style="width:36%;">对业务的影响</th>
+              <th style="width:36%;">需要什么支持</th>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--danger);">保险方案落地时间</strong><br><span style="font-size:12px;color:var(--text-aux);">500/1000+增额险+救助险补贴</span></td>
+              <td><strong style="color:var(--danger);">直接影响核心营收启动时间</strong></td>
+              <td>雷鸣侧加速推进市住建/金融局拍板</td>
+            </tr>
+            <tr>
+              <td><strong>纳管办法未正式发布</strong></td>
+              <td>平台不能正式运行，无真实数据回流</td>
+              <td>老板推动住建侧尽快发布</td>
+            </tr>
+            <tr>
+              <td><strong>事故预防服务模式</strong><br><span style="font-size:12px;color:var(--text-aux);">自建团队 vs 外包</span></td>
+              <td>影响收入结构和利润率</td>
+              <td>老板决策团队搭建方案</td>
+            </tr>
+            <tr>
+              <td><strong>公司注册进度</strong></td>
+              <td>影响收费主体和合同签署</td>
+              <td>按15号前完成的目标跟进</td>
+            </tr>
+          </table>
+          <div style="margin-top:14px;background:linear-gradient(135deg,#fff2f0,#fff);border-radius:12px;padding:16px 20px;border:1px solid rgba(255,77,79,0.2);">
+            <p style="font-size:14px;color:var(--text-primary);line-height:1.7;"><strong style="color:var(--danger);">当前最大不确定因素：</strong>产品侧能力基本ready，但保险方案的落地时间不定，平台投保模块的开发排期就不确定，直接影响保费收入何时能启动。</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 标注区域 -->
+  <div class="annotation-area" id="annotArea">
+    <div class="annot-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      汇报要点
+    </div>
+    <div id="annotContent">
+      <!-- 动态填充 -->
+    </div>
+  </div>
+</div>
+
+<!-- 标注折叠按钮 -->
+<div class="annot-toggle" id="annotToggle" onclick="toggleAnnot()">标注</div>
+
+<!-- 导航栏 -->
+<div class="nav-bar" id="navBar">
+  <button class="nav-btn" onclick="prevSlide()" id="btnPrev">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="nav-info"><span id="currPage">1</span> / <span id="totalPage">8</span></div>
+  <div class="nav-pages" id="navPages"></div>
+  <button class="nav-btn" onclick="nextSlide()" id="btnNext">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+
+const annotations = [
+  `<div class="annot-section">
+    <h5>开场定调</h5>
+    <p>这是给老板的汇报，开场要传达一个核心信息：我们做的不是"项目交付"，是"平台型业务"。</p>
+  </div>
+  <div class="annot-section">
+    <h5>时长控制</h5>
+    <p>封面1分钟带过，不要停留太久。</p>
+  </div>`,
+
+  `<div class="annot-section">
+    <h5>核心信息</h5>
+    <p>用一句话把整个商业模式讲清楚，让老板记住这个定位。</p>
+  </div>
+  <div class="annot-section">
+    <h5>话术建议</h5>
+    <p>"我们在上海建的不是信息化交付项目，是平台型业务的基础设施。"</p>
+  </div>
+  <div class="annot-section">
+    <h5>重点强调</h5>
+    <ul>
+      <li>政府侧 = 获客入口（免费）</li>
+      <li>保险侧 = 变现通道（核心营收）</li>
+      <li>数据 = 长期壁垒</li>
+    </ul>
+  </div>`,
+
+  `<div class="annot-section">
+    <h5>汇报策略</h5>
+    <p>不要逐行读表格，用一句话概括：获客端ready，变现端等保险方案。</p>
+  </div>
+  <div class="annot-section">
+    <h5>重点强调</h5>
+    <p>"备案和巡检模块上线后，我们就在青浦具备了覆盖全量施工主体的触达能力。"</p>
+  </div>
+  <div class="annot-section">
+    <h5>风险提示</h5>
+    <p>如果老板问到具体功能细节，可以展开讲，但不要主动深入技术实现。</p>
+  </div>`,
+
+  `<div class="annot-section">
+    <h5>核心逻辑</h5>
+    <p>相较传统保险代理人地推，我们的获客更精准、效率更高——施工主体因合规要求主动进入平台。</p>
+  </div>
+  <div class="annot-section">
+    <h5>话术建议</h5>
+    <p>"让政府通过政策手段引导施工主体主动进入平台，获客更精准、效率更高。"</p>
+  </div>
+  <div class="annot-section">
+    <h5>与朱区长衔接</h5>
+    <p>提到朱区长"把买保险放到环节里去"，说明政府侧已经帮我们铺好路了。</p>
+  </div>`,
+
+  `<div class="annot-section">
+    <h5>与雷鸣衔接</h5>
+    <p>这里要和雷鸣的保险方案汇报衔接好，口径一致。</p>
+  </div>
+  <div class="annot-section">
+    <h5>关键话术</h5>
+    <p>"朱区长主动提出把买保险放到环节里去，等于政府帮我们在合规层面铺好了路。"</p>
+  </div>
+  <div class="annot-section">
+    <h5>重点强调</h5>
+    <ul>
+      <li>平台内嵌投保链接，跳转随申办支付</li>
+      <li>确保保费流量过平台</li>
+      <li>事故预防服务数据全留痕</li>
+    </ul>
+  </div>`,
+
+  `<div class="annot-section">
+    <h5>汇报策略</h5>
+    <p>这部分讲"为什么别人抄不走"，让老板看到长期价值。</p>
+  </div>
+  <div class="annot-section">
+    <h5>关键话术</h5>
+    <p>"当前壁垒来自已上线系统和政府合作关系，远期能力在架构上预留扩展接口。"</p>
+  </div>
+  <div class="annot-section">
+    <h5>重点强调</h5>
+    <ul>
+      <li>已上线备案系统覆盖11个街镇 → 切换成本高</li>
+      <li>市级平台对接中 → 成为政府数据链路必要节点</li>
+      <li>远期AI能力 → 架构预留，待数据沉淀后释放</li>
+    </ul>
+  </div>`,
+
+  `<div class="annot-section">
+    <h5>与张辉衔接</h5>
+    <p>盈利路径部分和张辉的内容要呼应，避免口径不一致。</p>
+  </div>
+  <div class="annot-section">
+    <h5>关键话术</h5>
+    <p>"青浦是样板间，复制到其他区的边际成本极低。"</p>
+  </div>
+  <div class="annot-section">
+    <h5>重点强调</h5>
+    <ul>
+      <li>短期：运维费+服务团队搭建</li>
+      <li>短期可变现（3-6个月）：投保佣金（⚠️ 依赖保险方案不延期）</li>
+      <li>中期：跨区复制+工贸扩展</li>
+      <li>长期：数据资产+模式输出</li>
+    </ul>
+  </div>`,
+
+  `<div class="annot-section">
+    <h5>汇报策略</h5>
+    <p>这是最需要老板推动的部分，要明确抛出需要支持的事项。</p>
+  </div>
+  <div class="annot-section">
+    <h5>优先级排序</h5>
+    <p>保险方案落地是最大卡点，放在第一位讲。其他卡点是辅助。</p>
+  </div>
+  <div class="annot-section">
+    <h5>话术建议</h5>
+    <p>"产品侧能力基本ready，最大的不确定因素是保险方案的落地时间。"</p>
+  </div>`,
+
+];
+
+function updateSlide() {
+  slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+  document.getElementById('currPage').textContent = currentSlide + 1;
+
+  document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+  document.getElementById('btnPrev').disabled = currentSlide === 0;
+  document.getElementById('btnNext').disabled = currentSlide === totalSlides - 1;
+
+  document.getElementById('annotContent').innerHTML = annotations[currentSlide] || '';
+}
+
+function nextSlide() { if (currentSlide < totalSlides - 1) { currentSlide++; updateSlide(); } }
+function prevSlide() { if (currentSlide > 0) { currentSlide--; updateSlide(); } }
+function goToSlide(i) { currentSlide = i; updateSlide(); }
+
+function toggleAnnot() {
+  const area = document.getElementById('annotArea');
+  const btn = document.getElementById('annotToggle');
+  area.classList.toggle('hidden');
+  btn.classList.toggle('collapsed');
+}
+
+let navVisible = true;
+function toggleNav() {
+  navVisible = !navVisible;
+  document.getElementById('navBar').classList.toggle('hidden', !navVisible);
+}
+
+// 初始化导航点
+const pagesContainer = document.getElementById('navPages');
+for (let i = 0; i < totalSlides; i++) {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToSlide(i);
+  pagesContainer.appendChild(dot);
+}
+
+document.getElementById('totalPage').textContent = totalSlides;
+updateSlide();
+
+// 键盘事件
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  if (e.key === 'F8') { e.preventDefault(); toggleNav(); }
+});
+
+// 显示提示
+setTimeout(() => {
+  document.getElementById('hintBar').classList.add('show');
+  setTimeout(() => document.getElementById('hintBar').classList.remove('show'), 4000);
+}, 500);
+</script>
+
+</body>
+</html>

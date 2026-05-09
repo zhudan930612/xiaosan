@@ -3,7 +3,9 @@
     "allow": [
       "WebFetch(domain:github.com)",
       "Bash(antiword \"e:/AI知识库/小型工程管理系统/06_附件资料/附件1 青浦区小型工程管理办法 4-23.docx\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(python replace_org_names.py)",
+      "Bash(python fix_remaining.py)"
     ],
     "additionalDirectories": [
       "C:\\Users\\zhulin\\AppData\\Local\\Temp"

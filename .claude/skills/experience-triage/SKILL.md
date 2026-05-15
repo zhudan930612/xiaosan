@@ -1,59 +1,63 @@
 ---
 name: experience-triage
-description: 经验分诊。用于在完成一个真实任务之后，把学到的经验、坑、约束、流程分诊到 agent 架构的正确层级。当用户说"这次学到的该写到哪"、"刚踩了一个坑想沉淀"、"判断这条规则该进 CLAUDE.md 还是 skill"、"有个新流程不知道放哪"时触发。
+description: Use when user asks 'where should this go', 'what layer should this be', 'should this be a skill or CLAUDE.md', 'I learned something new where do I put it', or after completing a task and wants to document the lesson
 ---
 
-# 经验分诊流程
+# Experience Triage
 
-你的任务是带用户完成一次经验分诊，输出明确的「该放在哪一层 + 应该怎么写 + 放到哪个文件」的建议。
+Your task: guide the user through a decision tree to determine which layer of the agent architecture a piece of experience belongs to.
 
-## 第一步：问清楚要分诊的经验是什么
+## Step 1: Clarify the experience
 
-请用户用一句话描述这次想沉淀的内容。如果用户描述太泛，要追问具体场景，比如：
-- 这是一条什么样的规则？是"每次都要做"还是"特定情况下要做"？
-- 这条经验只对某个项目有用，还是跨项目通用？
-- 它需要执行动作，还是只是约束模型行为？
+Ask the user to describe the experience in one sentence. If vague, ask:
+- Is this a rule that applies every time, or only in specific situations?
+- Does this apply to one project or across all projects?
+- Does this require executing actions, or just constraining model behavior?
 
-## 第二步：按下面的判断树走一遍
+## Step 2: Run the decision tree
 
-依次问这五个问题，第一个匹配上的就是答案：
+Ask these five questions in order. The first match wins:
 
-**Q1：这件事是不是"必须每次执行、零例外、不能靠模型自觉"？**
-是 → 推荐放进 `hook`。给出一个 hook 配置示例。
-否 → Q2
+**Q1: Must this execute every time, zero exceptions, cannot rely on model self-discipline?**
+Yes → Recommend `hook`. Give a hook configuration example.
+No → Q2
 
-**Q2：这件事是不是"需要真实执行命令、查询接口、读取数据"？**
-是 → 推荐写成 `script` 或 `MCP tool`，再在相应 skill 里调用。
-否 → Q3
+**Q2: Does this need to execute real commands, query APIs, or read data?**
+Yes → Recommend `script` or `MCP tool`, then call it from the relevant skill.
+No → Q3
 
-**Q3：这件事是不是"只对某个目录、某类文件、某个模块生效"？**
-是 → 推荐放进对应目录的 `nested CLAUDE.md` 或 `path-scoped rule`。
-否 → Q4
+**Q3: Does this only apply to a specific directory, file type, or module?**
+Yes → Recommend `nested CLAUDE.md` or `path-scoped rule` in that directory.
+No → Q4
 
-**Q4：这件事是不是"多步流程、专题 checklist、需要分支判断的过程"？**
-是 → 推荐写成新的 `skill`，给出 description 字段建议（必须写到能被触发的程度）。
-否 → Q5
+**Q4: Is this a multi-step process, checklist, or decision flow?**
+Yes → Recommend a new `skill`. Provide a description field suggestion (must be triggerable).
+No → Q5
 
-**Q5：这件事是不是"每个会话都应该知道的高频默认行为或约束"？**
-是 → 推荐加到 `CLAUDE.md` 或 `AGENTS.md`，并提示用户检查当前文件是否已超过 150 行。
-否 → 这条经验可能太私人、太一次性，不建议沉淀。直接告诉用户。
+**Q5: Is this a high-frequency default behavior or constraint that every session should know?**
+Yes → Recommend adding to `CLAUDE.md` or `AGENTS.md`. Warn if current file exceeds 150 lines.
+No → This experience may be too personal or one-off. Do not document it.
 
-## 第三步：给出可直接执行的写作建议
+## Step 3: Provide a writing template
 
-根据 Q1-Q5 的答案，输出一个可以直接写入对应文件的草稿。草稿要：
-- 格式正确（YAML frontmatter、Markdown 标题、代码块等）
-- 言之有物，不要写"请遵守xxx规则"这种空话
-- 包含至少一个具体例子或反例
+Based on the Q1-Q5 answer, provide a draft that can be written directly into the target file.
 
-## 第四步：提示上移可能性
+Requirements:
+- Correct format (YAML frontmatter, Markdown headers, code blocks)
+- Concrete, not vague ("do X when Y" not "please follow best practices")
+- Include at least one specific example or counter-example
 
-如果用户最近在多次任务里都触发了同一个 skill 里的同一类经验，提醒用户考虑把这部分经验从 skill "上移"到 CLAUDE.md，从专题流程升级为通用约束。
+## Step 4: Suggest promotion
 
-## 输出格式
+If the user has triggered the same skill for the same category of experience multiple times recently, suggest promoting that experience from skill up to CLAUDE.md.
 
-【分诊结论】xxx 层
-【推荐位置】项目根目录/xxx 或 ~/.claude/xxx
-【写作模板】
-（直接给出可复制的 Markdown 草稿）
-【后续提醒】
-（如果适用，提示上移可能性或学习成本）
+## Output Format
+
+```
+[Triage Result] xxx layer
+[Recommended Location] ~/.claude/xxx or project-root/xxx
+[Writing Template]
+(directly copyable Markdown draft)
+[Follow-up]
+(if applicable, suggest promotion or learning curve)
+```

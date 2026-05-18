@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>线上投保方案A原型设计</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f0f2f5;
+  overflow-x: auto;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===== 主容器 ===== */
+.main-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  min-width: fit-content;
+  margin: 0 auto;
+  padding: 40px 24px;
+  gap: 24px;
+}
+
+/* ===== 原型区域 ===== */
+.prototype-area {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  flex-shrink: 0;
+}
+
+/* ===== 手机框架 ===== */
+.phone-frame {
+  width: 375px;
+  background: #fff;
+  border-radius: 40px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.08);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+.phone-frame.hidden { display: none; }
+
+.phone-screen {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 812px;
+  background: linear-gradient(180deg, rgba(89,183,216,0.04) 0%, transparent 180px), linear-gradient(180deg, #f6fbf8 0%, #fff 100%);
+}
+
+/* ===== 状态栏 ===== */
+.status-bar {
+  height: 34px;
+  background: linear-gradient(90deg, #35ad73, #58b8d7);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.status-bar .time { font-size: 13px; }
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.signal-icon { display: flex; align-items: flex-end; gap: 1.5px; height: 14px; }
+.signal-bar { width: 3px; background: #fff; border-radius: 1px; }
+.signal-bar:nth-child(1) { height: 5px; }
+.signal-bar:nth-child(2) { height: 8px; }
+.signal-bar:nth-child(3) { height: 11px; }
+.signal-bar:nth-child(4) { height: 14px; }
+.wifi-icon { width: 16px; height: 12px; }
+.battery-icon {
+  width: 22px; height: 11px;
+  border: 1.5px solid #fff;
+  border-radius: 2.5px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1.5px;
+}
+.battery-icon::after {
+  content: '';
+  position: absolute;
+  right: -3px; top: 3px;
+  width: 1.5px; height: 4px;
+  background: #fff;
+  border-radius: 0 1px 1px 0;
+}
+.battery-fill {
+  width: 60%; height: 100%;
+  background: #fff;
+  border-radius: 1px;
+}
+
+/* ===== 导航栏 ===== */
+.nav-bar {
+  background: linear-gradient(90deg, #35ad73, #58b8d7);
+  padding: 10px 18px 14px;
+  display: grid;
+  grid-template-columns: 44px 1fr 88px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.back-btn {
+  width: 34px; height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 300;
+  cursor: pointer;
+}
+.nav-title {
+  text-align: center;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+}
+.nav-menu {
+  width: 78px; height: 36px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.nav-menu-dot { width: 4px; height: 4px; background: #fff; border-radius: 50%; }
+.nav-menu-line { width: 1px; height: 12px; background: rgba(255,255,255,0.4); }
+.nav-menu-ring {
+  width: 14px; height: 14px;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+}
+
+/* ===== Tab栏 ===== */
+.tab-bar {
+  background: #f1f3f1;
+  border-radius: 30px 30px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.32);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 18px 4px 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.tab-item {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #303631;
+  padding: 8px 0;
+  cursor: pointer;
+  border-radius: 26px 0 0 0;
+  transition: all 0.2s;
+}
+.tab-item.active {
+  background: linear-gradient(135deg, #fff 0%, #eef9f3 60%, #f4fcff 100%);
+  color: #1a8f62;
+  font-weight: 800;
+  box-shadow: -10px 0 20px rgba(83,183,216,0.08);
+}
+
+/* ===== 内容区域 ===== */
+.content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 667px;
+}
+
+/* ===== 政策卡片 ===== */
+.policy-card {
+  background: linear-gradient(180deg, #ecf8f1 0%, #f7fbfd 100%);
+  border: 2px solid rgba(34,166,109,0.72);
+  border-radius: 22px;
+  overflow: hidden;
+}
+.policy-head {
+  background: linear-gradient(90deg, #35ad73, #58b8d7);
+  color: #fff;
+  padding: 14px 16px;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.policy-head-icon {
+  width: 20px; height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.policy-body {
+  padding: 16px;
+}
+.policy-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+}
+.policy-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+.policy-detail-btn {
+  display: inline-block;
+  background: #333;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===== 卡片通用 ===== */
+.entry-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid #d7e3db;
+  box-shadow: 0 12px 28px rgba(26,41,32,0.05);
+}
+
+.section-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::before {
+  content: '';
+  width: 4px; height: 18px;
+  background: linear-gradient(180deg, #35ad73, #58b8d7);
+  border-radius: 2px;
+}
+
+/* ===== 投保方式 ===== */
+.insure-method {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.method-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+.method-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #e6f7f0, #d4f0e5);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.method-icon svg { width: 18px; height: 18px; stroke: #00B578; stroke-width: 2; fill: none; }
+.recommend-tag {
+  background: linear-gradient(90deg, #ff9500, #ffaa33);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===== 步骤指示器 ===== */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #999;
+}
+.step-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #e5e5e5;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.step-item.active .step-num {
+  background: linear-gradient(135deg, #35ad73, #58b8d7);
+  color: #fff;
+}
+.step-item.active {
+  color: #1a8f62;
+  font-weight: 600;
+}
+.step-arrow {
+  color: #ccc;
+  font-size: 12px;
+}
+
+/* ===== 保险公司网格 ===== */
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.company-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border: 2px solid #e5e5e5;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+}
+.company-item:hover, .company-item.selected {
+  border-color: #00B578;
+  background: linear-gradient(180deg, #ebf8f1, #fff);
+  box-shadow: 0 4px 12px rgba(0,181,120,0.12);
+}
+.company-item.selected::after {
+  content: '';
+  position: absolute;
+  top: -1px; right: -1px;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 18px 18px 0;
+  border-color: transparent #00B578 transparent transparent;
+}
+.company-logo {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+.company-name {
+  font-size: 12px;
+  color: #333;
+  font-weight: 500;
+}
+.company-item { position: relative; }
+
+/* 保险公司颜色 */
+.pingan { background: linear-gradient(135deg, #ff6b35, #ff8c5a); }
+.guoren { background: linear-gradient(135deg, #1e5aa8, #3a7bd5); }
+.renbao { background: linear-gradient(135deg, #c41e3a, #e63950); }
+.renshou { background: linear-gradient(135deg, #0d8a56, #1aad6e); }
+.taiping { background: linear-gradient(135deg, #e6a817, #f5c02c); }
+.yangguang { background: linear-gradient(135deg, #f7931e, #ffb347); }
+
+/* ===== 卖点区域 ===== */
+.selling-point {
+  background: linear-gradient(180deg, #ebf8f1 0%, #fff 100%);
+  border: 2px solid rgba(34,166,109,0.5);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.sp-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a8f62;
+  margin-bottom: 4px;
+}
+.sp-desc {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+}
+.sp-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sp-feature {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #333;
+}
+.sp-feature svg {
+  width: 14px; height: 14px;
+  stroke: #00B578;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+/* ===== 关联线下保单 ===== */
+.offline-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+.offline-link-text {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+}
+.offline-link-desc {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+.offline-link-arrow {
+  color: #999;
+  font-size: 18px;
+}
+
+/* ===== 客服栏 ===== */
+.service-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #f2faf5, #f5fbfe);
+  border: 1px solid rgba(34,166,109,0.12);
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.service-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.service-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #35ad73, #58b8d7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+.service-text {
+  font-size: 13px;
+  color: #666;
+}
+.service-btn {
+  background: linear-gradient(90deg, #27a66d, #4fb3d7);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===== 底部按钮区 ===== */
+.bottom-actions {
+  padding: 12px 16px 24px;
+  display: flex;
+  gap: 12px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+.btn-secondary {
+  flex: 1;
+  height: 50px;
+  border: 1px solid #00B578;
+  background: #fff;
+  color: #00B578;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.btn-primary {
+  flex: 2;
+  height: 50px;
+  background: linear-gradient(90deg, #26a66d, #4fb3d7);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(34,166,109,0.26);
+}
+.btn-primary:disabled {
+  background: linear-gradient(90deg, #ccc, #ddd);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ===== 弹窗 ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  width: 300px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 20px 20px;
+  text-align: center;
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #e6f7f0, #d4f0e5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.modal-icon svg { width: 28px; height: 28px; stroke: #00B578; stroke-width: 2; fill: none; }
+.modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+.modal-desc {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+.modal-btn-cancel {
+  flex: 1;
+  height: 44px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: #333;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-btn-confirm {
+  flex: 1;
+  height: 44px;
+  background: linear-gradient(90deg, #26a66d, #4fb3d7);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== 支付页面 ===== */
+.pay-content {
+  padding: 32px 20px;
+  text-align: center;
+  flex: 1;
+}
+.pay-amount {
+  font-size: 48px;
+  font-weight: 700;
+  color: #ff9500;
+  margin-bottom: 32px;
+}
+.pay-amount-unit { font-size: 24px; }
+.pay-info {
+  background: #f8f8f8;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.pay-info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 15px;
+}
+.pay-info-item:not(:last-child) {
+  border-bottom: 1px solid #eee;
+}
+.pay-info-label { color: #666; }
+.pay-info-value { color: #333; font-weight: 500; }
+
+.pay-methods-title {
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+.pay-method-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #fff;
+  border: 2px solid #e5e5e5;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.pay-method-item.selected {
+  border-color: #00B578;
+  background: linear-gradient(90deg, #f2faf5, #f5fbfe);
+}
+.pay-method-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pay-method-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 700;
+}
+.weixin { background: #07c160; }
+.alipay { background: #1677ff; }
+.pay-method-name { font-size: 15px; color: #333; }
+.pay-radio {
+  width: 20px; height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pay-method-item.selected .pay-radio {
+  border-color: #00B578;
+  background: #00B578;
+}
+.pay-radio-inner {
+  width: 8px; height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  display: none;
+}
+.pay-method-item.selected .pay-radio-inner { display: block; }
+
+.pay-btn {
+  margin: 20px 20px 30px;
+  height: 52px;
+  background: linear-gradient(90deg, #ff9500, #ffaa33);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255,149,0,0.3);
+}
+
+/* ===== 回调中页面 ===== */
+.loading-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.loading-spinner {
+  width: 56px; height: 56px;
+  border: 3px solid #e6f7f0;
+  border-top-color: #00B578;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+.loading-sub {
+  font-size: 13px;
+  color: #999;
+}
+
+/* ===== 成功页面 ===== */
+.success-wrap {
+  padding: 24px 16px;
+}
+.success-card {
+  background: linear-gradient(180deg, #ebf8f1 0%, #fff 100%);
+  border: 2px solid rgba(34,166,109,0.5);
+  border-radius: 18px;
+  padding: 24px 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.success-icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #35ad73, #58b8d7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+.success-icon svg { width: 28px; height: 28px; stroke: #fff; stroke-width: 3; fill: none; }
+.success-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a8f62;
+  margin-bottom: 4px;
+}
+.success-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, #35ad73, #58b8d7);
+  color: #fff;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.success-info {
+  text-align: left;
+}
+.success-info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #e8f5ee;
+}
+.success-info-label { color: #666; }
+.success-info-value { color: #333; font-weight: 500; }
+
+.pdf-download {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+.pdf-icon {
+  width: 40px; height: 40px;
+  background: #fff2f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff4d4f;
+  font-size: 12px;
+  font-weight: 700;
+}
+.pdf-info { flex: 1; }
+.pdf-name { font-size: 14px; color: #333; font-weight: 500; }
+.pdf-size { font-size: 12px; color: #999; margin-top: 2px; }
+.pdf-arrow { color: #999; font-size: 18px; }
+
+/* ===== 支付失败页面 ===== */
+.fail-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+.fail-icon {
+  width: 72px; height: 72px;
+  background: #fff2f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.fail-icon svg { width: 36px; height: 36px; stroke: #ff4d4f; stroke-width: 2.5; fill: none; }
+.fail-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+.fail-reason {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 32px;
+  text-align: center;
+  line-height: 1.6;
+}
+.fail-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fail-btn-retry {
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(90deg, #26a66d, #4fb3d7);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(34,166,109,0.26);
+}
+.fail-btn-back {
+  width: 100%;
+  height: 50px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: #666;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===== 中断提示 ===== */
+.interrupt-banner {
+  background: linear-gradient(90deg, #fff7e6, #fffbe6);
+  border: 1px solid #ffd591;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.interrupt-icon {
+  width: 32px; height: 32px;
+  background: #ff9500;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.interrupt-text {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+.interrupt-text strong { color: #ff9500; }
+
+/* ===== 标注区域 ===== */
+.annotation-area {
+  min-width: 400px;
+  max-width: 520px;
+  flex-shrink: 0;
+}
+.annotation-panel {
+  background: #FFFBE6;
+  border: 2px dashed #FFC53D;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  display: none;
+}
+.annotation-panel.active { display: block; }
+.annotation-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #FFC53D;
+}
+.annotation-section {
+  margin-bottom: 14px;
+}
+.annotation-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #d48806;
+  margin-bottom: 6px;
+}
+.annotation-section ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.8;
+}
+.annotation-section li { margin-bottom: 4px; }
+
+/* ===== 浮动导航 ===== */
+.float-nav {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  border-radius: 30px;
+  padding: 10px 20px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  z-index: 999;
+}
+.float-nav.active { display: flex; }
+.float-nav-btn {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.float-nav-btn:hover { background: rgba(255,255,255,0.25); }
+.float-nav-btn.active { background: #00B578; }
+.float-nav-hint {
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+/* ===== 页面标签 ===== */
+.page-label {
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* ===== 选中标记 ===== */
+.selected-mark {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 18px; height: 18px;
+  background: #00B578;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.selected-mark svg { width: 10px; height: 10px; stroke: #fff; stroke-width: 3; fill: none; }
+.company-item.selected .selected-mark { display: flex; }
+
+/* ===== 注意事项文字 ===== */
+.notice-text {
+  font-size: 12px;
+  color: #ff9500;
+  background: #fffbe6;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+/* ===== 小IDI推荐卡片 ===== */
+.xiaoidi-card {
+  background: linear-gradient(135deg, #fff8f0 0%, #fff0e6 100%);
+  border: 2px solid rgba(255, 149, 0, 0.6);
+  border-radius: 18px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.xiaoidi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.xiaoidi-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.xiaoidi-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #ff9500, #ffaa33);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.xiaoidi-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+.xiaoidi-recommend-tag {
+  background: linear-gradient(90deg, #ff4d4f, #ff7875);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.xiaoidi-desc {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+.xiaoidi-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.xiaoidi-benefit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #333;
+  background: rgba(255, 149, 0, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+.xiaoidi-benefit svg {
+  width: 14px; height: 14px;
+  stroke: #ff9500;
+  stroke-width: 2.5;
+  fill: none;
+}
+.xiaoidi-actions {
+  display: flex;
+  gap: 10px;
+}
+.xiaoidi-btn-primary {
+  flex: 1;
+  height: 44px;
+  background: linear-gradient(90deg, #ff9500, #ffaa33);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(255, 149, 0, 0.25);
+}
+.xiaoidi-btn-skip {
+  padding: 0 12px;
+  height: 44px;
+  background: transparent;
+  color: #999;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+.xiaoidi-btn-skip:hover { color: #666; }
+
+/* 收起后的小状态 */
+.xiaoidi-collapsed {
+  display: none;
+  background: linear-gradient(90deg, #fff8f0, #fff0e6);
+  border: 1px solid rgba(255, 149, 0, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+.xiaoidi-collapsed-text {
+  font-size: 14px;
+  color: #666;
+}
+.xiaoidi-collapsed-text span { color: #ff9500; font-weight: 600; }
+.xiaoidi-collapsed-btn {
+  background: linear-gradient(90deg, #ff9500, #ffaa33);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- 浮动导航 -->
+<div class="float-nav active" id="floatNav">
+  <span class="float-nav-hint">按 F8 隐藏</span>
+  <button class="float-nav-btn active" onclick="showPage('page1')">匹配保单</button>
+  <button class="float-nav-btn" onclick="showPage('page2')">支付页</button>
+  <button class="float-nav-btn" onclick="showPage('page3')">回调中</button>
+  <button class="float-nav-btn" onclick="showPage('page4')">投保成功</button>
+  <button class="float-nav-btn" onclick="showPage('page5')">支付失败</button>
+  <button class="float-nav-btn" onclick="showPage('page6')">中断恢复</button>
+</div>
+
+<div class="main-container">
+
+<!-- ===== 原型区域 ===== -->
+<div class="prototype-area">
+
+<!-- 页面1: 匹配保单 -->
+<div class="phone-frame" id="page1">
+  <div class="page-label">页面1：匹配保单（方案三）</div>
+  <div class="phone-screen">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <div class="signal-icon">
+          <div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div>
+        </div>
+        <svg class="wifi-icon" viewBox="0 0 16 12"><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-5-5c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l5 5c.2.2.5.3.7.3z" fill="#fff"/><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-3-3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l3 3c.2.2.5.3.7.3z" fill="#fff" opacity="0.7"/><circle cx="8" cy="10" r="1.5" fill="#fff"/></svg>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+    <!-- 导航栏 -->
+    <div class="nav-bar">
+      <div class="back-btn">&#8249;</div>
+      <div class="nav-title">备案申请</div>
+      <div class="nav-menu">
+        <div class="nav-menu-dot"></div><div class="nav-menu-dot"></div><div class="nav-menu-dot"></div>
+        <div class="nav-menu-line"></div>
+        <div class="nav-menu-ring"></div>
+      </div>
+    </div>
+    <!-- Tab栏 -->
+    <div class="tab-bar">
+      <div class="tab-item">基础信息</div>
+      <div class="tab-item">工程信息</div>
+      <div class="tab-item">安全信息</div>
+      <div class="tab-item active">匹配保单</div>
+    </div>
+    <!-- 内容 -->
+    <div class="content">
+      <!-- 政策卡片 -->
+      <div class="policy-card">
+        <div class="policy-head">
+          <div class="policy-head-icon">!</div>
+          安全生产相关政策
+        </div>
+        <div class="policy-body">
+          <div class="policy-title">依法投保 保障施工安全</div>
+          <div class="policy-subtitle">根据《青浦区小型工程管理办法》第八条规定，除住宅室内装修和零星施工作业外，小型工程施工单位必须在开工前投保安全生产责任保险。</div>
+          <div class="policy-detail-btn">了解详情</div>
+        </div>
+      </div>
+
+      <!-- 投保方式 -->
+      <div class="entry-card">
+        <div class="section-title">投保方式</div>
+        <div class="insure-method">
+          <div class="method-label">
+            <div class="method-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            线上投保
+          </div>
+          <div class="recommend-tag">推荐</div>
+        </div>
+
+        <!-- 步骤 -->
+        <div class="step-indicator">
+          <div class="step-item active">
+            <div class="step-num">1</div>
+            <span>选保司</span>
+          </div>
+          <div class="step-arrow">&#8250;</div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <span>确认信息</span>
+          </div>
+          <div class="step-arrow">&#8250;</div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <span>完成支付</span>
+          </div>
+        </div>
+
+        <!-- 保险公司 -->
+        <div style="font-size:14px;color:#666;margin-bottom:10px;text-align:center;">—— 请选择保险公司 ——</div>
+        <div class="company-grid">
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo pingan">平安</div>
+            <div class="company-name">中国平安</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo guoren">国任</div>
+            <div class="company-name">国任财险</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo renbao">人保</div>
+            <div class="company-name">人保财险</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo renshou">人寿</div>
+            <div class="company-name">中国人寿</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo taiping">太平</div>
+            <div class="company-name">太平洋财险</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo yangguang">阳光</div>
+            <div class="company-name">阳光财险</div>
+          </div>
+        </div>
+
+        <!-- 卖点 -->
+        <div class="selling-point">
+          <div class="sp-title">一键投保，免填资料</div>
+          <div class="sp-desc">备案信息自动同步保险公司，无需重复填写</div>
+          <div class="sp-features">
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>快捷出单</div>
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>保单免审核</div>
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>信息复用</div>
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>大平台有保障</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 关联线下 -->
+      <div class="offline-link" onclick="showPage('page1')">
+        <div>
+          <div class="offline-link-text">关联线下已购保单</div>
+          <div class="offline-link-desc">如您已在线下完成投保，可直接上传保单继续备案</div>
+        </div>
+        <div class="offline-link-arrow">&#8250;</div>
+      </div>
+
+      <!-- 客服 -->
+      <div class="service-bar">
+        <div class="service-info">
+          <div class="service-avatar">客</div>
+          <div class="service-text">系统操作及保单问题，<br>咨询小型工程管理平台</div>
+        </div>
+        <div class="service-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          客服电话
+        </div>
+      </div>
+
+      <!-- 底部提示 -->
+      <div class="notice-text">
+        小型工程必须要投保，不投保无法提交备案申请。住宅装修和零星作业不强制投保，但不投保提交时会弹窗提示。
+      </div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="bottom-actions">
+      <button class="btn-secondary">临时保存</button>
+      <button class="btn-primary" id="submitBtn" disabled>提交备案申请</button>
+    </div>
+  </div>
+</div>
+
+<!-- 页面2: 支付页面 -->
+<div class="phone-frame hidden" id="page2">
+  <div class="page-label">页面2：H5内嵌保险收银台</div>
+  <div class="phone-screen">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <div class="signal-icon">
+          <div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div>
+        </div>
+        <svg class="wifi-icon" viewBox="0 0 16 12"><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-5-5c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l5 5c.2.2.5.3.7.3z" fill="#fff"/><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-3-3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l3 3c.2.2.5.3.7.3z" fill="#fff" opacity="0.7"/><circle cx="8" cy="10" r="1.5" fill="#fff"/></svg>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="showPage('page1')">&#8249;</div>
+      <div class="nav-title">平安保险收银台</div>
+      <div style="width:44px;"></div>
+    </div>
+
+    <div class="pay-content">
+      <div class="pay-amount"><span class="pay-amount-unit">&yen;</span>500.00</div>
+      <div class="pay-info">
+        <div class="pay-info-item">
+          <span class="pay-info-label">保险单号</span>
+          <span class="pay-info-value">02134677643437338745</span>
+        </div>
+        <div class="pay-info-item">
+          <span class="pay-info-label">客户名称</span>
+          <span class="pay-info-value">青浦大力建设有限公司</span>
+        </div>
+        <div class="pay-info-item">
+          <span class="pay-info-label">商品名称</span>
+          <span class="pay-info-value">安全生产责任保险</span>
+        </div>
+      </div>
+
+      <div class="pay-methods-title">选择支付方式</div>
+      <div class="pay-method-item selected" onclick="selectPay(this)">
+        <div class="pay-method-left">
+          <div class="pay-method-icon weixin">微</div>
+          <span class="pay-method-name">微信支付</span>
+        </div>
+        <div class="pay-radio"><div class="pay-radio-inner"></div></div>
+      </div>
+      <div class="pay-method-item" onclick="selectPay(this)">
+        <div class="pay-method-left">
+          <div class="pay-method-icon alipay">支</div>
+          <span class="pay-method-name">支付宝支付</span>
+        </div>
+        <div class="pay-radio"><div class="pay-radio-inner"></div></div>
+      </div>
+    </div>
+
+    <button class="pay-btn" onclick="goToCallback()">确认支付 (500元)</button>
+  </div>
+</div>
+
+<!-- 页面3: 保单回调中 -->
+<div class="phone-frame hidden" id="page3">
+  <div class="page-label">页面3：保单回调中</div>
+  <div class="phone-screen">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <div class="signal-icon">
+          <div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div>
+        </div>
+        <svg class="wifi-icon" viewBox="0 0 16 12"><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-5-5c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l5 5c.2.2.5.3.7.3z" fill="#fff"/><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-3-3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l3 3c.2.2.5.3.7.3z" fill="#fff" opacity="0.7"/><circle cx="8" cy="10" r="1.5" fill="#fff"/></svg>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="back-btn">&#8249;</div>
+      <div class="nav-title">备案申请</div>
+      <div class="nav-menu">
+        <div class="nav-menu-dot"></div><div class="nav-menu-dot"></div><div class="nav-menu-dot"></div>
+        <div class="nav-menu-line"></div>
+        <div class="nav-menu-ring"></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item">基础信息</div>
+      <div class="tab-item">工程信息</div>
+      <div class="tab-item">安全信息</div>
+      <div class="tab-item active">匹配保单</div>
+    </div>
+
+    <div class="loading-wrap">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">保单数据更新中</div>
+      <div class="loading-sub">正在同步保单信息，请稍候...</div>
+    </div>
+
+    <div class="bottom-actions">
+      <button class="btn-secondary">临时保存</button>
+      <button class="btn-primary" disabled>提交备案申请</button>
+    </div>
+  </div>
+</div>
+
+<!-- 页面4: 投保成功 -->
+<div class="phone-frame hidden" id="page4">
+  <div class="page-label">页面4：线上投保成功</div>
+  <div class="phone-screen">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <div class="signal-icon">
+          <div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div>
+        </div>
+        <svg class="wifi-icon" viewBox="0 0 16 12"><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-5-5c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l5 5c.2.2.5.3.7.3z" fill="#fff"/><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-3-3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l3 3c.2.2.5.3.7.3z" fill="#fff" opacity="0.7"/><circle cx="8" cy="10" r="1.5" fill="#fff"/></svg>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="back-btn">&#8249;</div>
+      <div class="nav-title">备案申请</div>
+      <div class="nav-menu">
+        <div class="nav-menu-dot"></div><div class="nav-menu-dot"></div><div class="nav-menu-dot"></div>
+        <div class="nav-menu-line"></div>
+        <div class="nav-menu-ring"></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item">基础信息</div>
+      <div class="tab-item">工程信息</div>
+      <div class="tab-item">安全信息</div>
+      <div class="tab-item active">匹配保单</div>
+    </div>
+
+    <div class="content">
+      <!-- 政策卡片 -->
+      <div class="policy-card">
+        <div class="policy-head">
+          <div class="policy-head-icon">!</div>
+          安全生产相关政策
+        </div>
+        <div class="policy-body">
+          <div class="policy-title">依法投保 保障施工安全</div>
+          <div class="policy-subtitle">根据《青浦区小型工程管理办法》第八条规定，除住宅室内装修和零星施工作业外，小型工程施工单位必须在开工前投保安全生产责任保险。</div>
+          <div class="policy-detail-btn">了解详情</div>
+        </div>
+      </div>
+
+      <div class="success-wrap">
+        <div class="success-card">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24"><polyline points="4,12 9,17 20,6"/></svg>
+          </div>
+          <div class="success-title">保单已关联</div>
+          <div class="success-badge">已投保</div>
+          <div class="success-info">
+            <div class="success-info-item">
+              <span class="success-info-label">保险公司</span>
+              <span class="success-info-value">平安保险</span>
+            </div>
+            <div class="success-info-item">
+              <span class="success-info-label">保单号</span>
+              <span class="success-info-value">PA202604280001</span>
+            </div>
+            <div class="success-info-item">
+              <span class="success-info-label">保险期限</span>
+              <span class="success-info-value">2026-05-01 至 2026-08-01</span>
+            </div>
+            <div class="success-info-item">
+              <span class="success-info-label">保费金额</span>
+              <span class="success-info-value">&yen;500.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 小IDI推荐卡片 -->
+        <div class="xiaoidi-card" id="xiaoidiCard">
+          <div class="xiaoidi-header">
+            <div class="xiaoidi-title-wrap">
+              <div class="xiaoidi-icon">IDI</div>
+              <div class="xiaoidi-title">加一份保障，更安心</div>
+            </div>
+            <div class="xiaoidi-recommend-tag">推荐</div>
+          </div>
+          <div class="xiaoidi-desc">安责险保的是施工人员，再加一份第三者责任险，保障施工期间周边行人、邻居的人身和财产安全。</div>
+          <div class="xiaoidi-benefits">
+            <div class="xiaoidi-benefit"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>保障第三方人身伤亡</div>
+            <div class="xiaoidi-benefit"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>保障第三方财产损失</div>
+            <div class="xiaoidi-benefit"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>线上投保即刻生效</div>
+          </div>
+          <div class="xiaoidi-actions">
+            <button class="xiaoidi-btn-primary" onclick="goToXiaoIDI()">去选购</button>
+            <button class="xiaoidi-btn-skip" onclick="skipXiaoIDI()">暂不需要</button>
+          </div>
+        </div>
+
+        <!-- 小IDI收起状态（默认隐藏） -->
+        <div class="xiaoidi-collapsed" id="xiaoidiCollapsed">
+          <div class="xiaoidi-collapsed-text">已跳过 <span>第三者责任险</span> 补充保障</div>
+          <button class="xiaoidi-collapsed-btn" onclick="restoreXiaoIDI()">重新查看</button>
+        </div>
+
+        <div class="pdf-download">
+          <div class="pdf-icon">PDF</div>
+          <div class="pdf-info">
+            <div class="pdf-name">小散安责险保单-益田村1栋应急评估...</div>
+            <div class="pdf-size">3.35KB</div>
+          </div>
+          <div class="pdf-arrow">&#8250;</div>
+        </div>
+      </div>
+
+      <div class="service-bar">
+        <div class="service-info">
+          <div class="service-avatar">客</div>
+          <div class="service-text">系统操作及保单问题，<br>咨询小型工程管理平台</div>
+        </div>
+        <div class="service-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          客服电话
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-actions">
+      <button class="btn-secondary">临时保存</button>
+      <button class="btn-primary">提交备案申请</button>
+    </div>
+  </div>
+</div>
+
+<!-- 页面5: 支付失败 -->
+<div class="phone-frame hidden" id="page5">
+  <div class="page-label">页面5：支付失败</div>
+  <div class="phone-screen">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <div class="signal-icon">
+          <div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div>
+        </div>
+        <svg class="wifi-icon" viewBox="0 0 16 12"><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-5-5c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l5 5c.2.2.5.3.7.3z" fill="#fff"/><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-3-3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l3 3c.2.2.5.3.7.3z" fill="#fff" opacity="0.7"/><circle cx="8" cy="10" r="1.5" fill="#fff"/></svg>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="back-btn" onclick="showPage('page1')">&#8249;</div>
+      <div class="nav-title">支付结果</div>
+      <div style="width:44px;"></div>
+    </div>
+
+    <div class="fail-wrap">
+      <div class="fail-icon">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <div class="fail-title">支付失败</div>
+      <div class="fail-reason">
+        支付超时，订单已取消<br>
+        请重新发起投保流程
+      </div>
+      <div class="fail-actions">
+        <button class="fail-btn-retry" onclick="showPage('page2')">重新支付</button>
+        <button class="fail-btn-back" onclick="showPage('page1')">返回修改</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页面6: 支付中断后重新进入 -->
+<div class="phone-frame hidden" id="page6">
+  <div class="page-label">页面6：中断后重新进入</div>
+  <div class="phone-screen">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="status-icons">
+        <div class="signal-icon">
+          <div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div>
+        </div>
+        <svg class="wifi-icon" viewBox="0 0 16 12"><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-5-5c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l5 5c.2.2.5.3.7.3z" fill="#fff"/><path d="M8 11.5c.5 0 1-.4 1-1 0-.3-.1-.5-.3-.7l-3-3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l3 3c.2.2.5.3.7.3z" fill="#fff" opacity="0.7"/><circle cx="8" cy="10" r="1.5" fill="#fff"/></svg>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="back-btn">&#8249;</div>
+      <div class="nav-title">备案申请</div>
+      <div class="nav-menu">
+        <div class="nav-menu-dot"></div><div class="nav-menu-dot"></div><div class="nav-menu-dot"></div>
+        <div class="nav-menu-line"></div>
+        <div class="nav-menu-ring"></div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item">基础信息</div>
+      <div class="tab-item">工程信息</div>
+      <div class="tab-item">安全信息</div>
+      <div class="tab-item active">匹配保单</div>
+    </div>
+
+    <div class="content">
+      <!-- 中断提示 -->
+      <div class="interrupt-banner">
+        <div class="interrupt-icon">!</div>
+        <div class="interrupt-text" style="flex:1;">
+          <strong>您有未完成的投保</strong><br>
+          上次选择了中国平安，支付未完成。
+        </div>
+        <button class="modal-btn-confirm" style="height:36px;padding:0 16px;font-size:14px;flex-shrink:0;" onclick="showModal()">继续投保</button>
+      </div>
+
+      <!-- 政策卡片 -->
+      <div class="policy-card">
+        <div class="policy-head">
+          <div class="policy-head-icon">!</div>
+          安全生产相关政策
+        </div>
+        <div class="policy-body">
+          <div class="policy-title">依法投保 保障施工安全</div>
+          <div class="policy-subtitle">根据《青浦区小型工程管理办法》第八条规定，除住宅室内装修和零星施工作业外，小型工程施工单位必须在开工前投保安全生产责任保险。</div>
+          <div class="policy-detail-btn">了解详情</div>
+        </div>
+      </div>
+
+      <!-- 投保方式 -->
+      <div class="entry-card">
+        <div class="section-title">投保方式</div>
+        <div class="insure-method">
+          <div class="method-label">
+            <div class="method-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            线上投保
+          </div>
+          <div class="recommend-tag">推荐</div>
+        </div>
+
+        <div class="step-indicator">
+          <div class="step-item active">
+            <div class="step-num">1</div>
+            <span>选保司</span>
+          </div>
+          <div class="step-arrow">&#8250;</div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <span>确认信息</span>
+          </div>
+          <div class="step-arrow">&#8250;</div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <span>完成支付</span>
+          </div>
+        </div>
+
+        <div style="font-size:14px;color:#666;margin-bottom:10px;text-align:center;">—— 请选择保险公司 ——</div>
+        <div class="company-grid">
+          <div class="company-item selected" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo pingan">平安</div>
+            <div class="company-name">中国平安</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo guoren">国任</div>
+            <div class="company-name">国任财险</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo renbao">人保</div>
+            <div class="company-name">人保财险</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo renshou">人寿</div>
+            <div class="company-name">中国人寿</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo taiping">太平</div>
+            <div class="company-name">太平洋财险</div>
+          </div>
+          <div class="company-item" onclick="selectCompany(this)">
+            <div class="selected-mark"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+            <div class="company-logo yangguang">阳光</div>
+            <div class="company-name">阳光财险</div>
+          </div>
+        </div>
+
+        <div class="selling-point">
+          <div class="sp-title">一键投保，免填资料</div>
+          <div class="sp-desc">备案信息自动同步保险公司，无需重复填写</div>
+          <div class="sp-features">
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>快捷出单</div>
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>保单免审核</div>
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>信息复用</div>
+            <div class="sp-feature"><svg viewBox="0 0 16 16"><polyline points="2,8 6,12 14,4"/></svg>大平台有保障</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="offline-link">
+        <div>
+          <div class="offline-link-text">关联线下已购保单</div>
+          <div class="offline-link-desc">如您已在线下完成投保，可直接上传保单继续备案</div>
+        </div>
+        <div class="offline-link-arrow">&#8250;</div>
+      </div>
+
+      <div class="service-bar">
+        <div class="service-info">
+          <div class="service-avatar">客</div>
+          <div class="service-text">系统操作及保单问题，<br>咨询小型工程管理平台</div>
+        </div>
+        <div class="service-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          客服电话
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-actions">
+      <button class="btn-secondary">临时保存</button>
+      <button class="btn-primary" onclick="showModal()">继续投保</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- prototype-area end -->
+
+<!-- ===== 标注区域 ===== -->
+<div class="annotation-area">
+
+<!-- 页面1标注 -->
+<div class="annotation-panel active" id="anno-page1">
+  <div class="annotation-title">页面1：匹配保单 — 需求说明</div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">页面状态规则</div>
+    <ul>
+      <li>小型工程（限额以下建设工程）：强制投保，未投保则「提交备案申请」按钮置灰不可点</li>
+      <li>住宅装修/零星作业：不强制投保，但未投保提交时会弹窗提示</li>
+      <li>线上投保为默认选中方式，显示「推荐」标签</li>
+      <li>选择保险公司后，按钮变为可点击状态</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">数据规则</div>
+    <ul>
+      <li>保险公司列表由后台配置管理，当前展示6家（平安、国任、人保、人寿、太平洋、阳光）</li>
+      <li>备案基础信息（工程名称、地址、施工单位等）自动同步至保险公司，用户无需重复填写</li>
+      <li>当前保费为固定两档：500元/1000元（方案A）</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">交互分支规则</div>
+    <ul>
+      <li>点击保险公司 → 选中状态 → 提交按钮可用</li>
+      <li>点击「提交备案申请」→ 弹出确认框 → 进入保险收银台</li>
+      <li>点击「关联线下已购保单」→ 跳转至保单上传页面（本原型不展示）</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">边界情况</div>
+    <ul>
+      <li>未选保险公司时点击提交：按钮置灰，无响应</li>
+      <li>保险公司系统故障：显示「该保险公司暂不可用，请选择其他」</li>
+      <li>网络异常：提示检查网络后重试</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 页面2标注 -->
+<div class="annotation-panel" id="anno-page2">
+  <div class="annotation-title">页面2：H5内嵌保险收银台 — 需求说明</div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">页面状态规则</div>
+    <ul>
+      <li>H5页面由保险公司提供，平台通过WebView内嵌展示</li>
+      <li>收银台标题显示「{保险公司名称}保险收银台」</li>
+      <li>默认选中微信支付，用户可切换至支付宝</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">数据规则</div>
+    <ul>
+      <li>保险单号：由保险公司系统生成，格式为数字串</li>
+      <li>客户名称：取自备案信息中的施工单位名称</li>
+      <li>商品名称：固定为「安全生产责任保险」</li>
+      <li>保费金额：当前固定500元（方案A为两档定价）</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">交互分支规则</div>
+    <ul>
+      <li>点击「确认支付」→ 调起微信/支付宝支付SDK</li>
+      <li>支付成功 → 自动返回平台 → 进入回调中页面</li>
+      <li>支付失败/取消 → 返回收银台，可重新选择支付方式</li>
+      <li>点击返回按钮 → 回到匹配保单页，保留已选保险公司</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">边界情况</div>
+    <ul>
+      <li>支付超时（5分钟）：订单自动取消，提示「支付超时」并返回</li>
+      <li>余额不足：支付SDK提示，用户可更换支付方式</li>
+      <li>网络中断：支付结果未知，需主动查询订单状态</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 页面3标注 -->
+<div class="annotation-panel" id="anno-page3">
+  <div class="annotation-title">页面3：保单回调中 — 需求说明</div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">页面状态规则</div>
+    <ul>
+      <li>支付完成后，平台自动轮询保险公司接口查询保单状态</li>
+      <li>显示loading动画，文案「保单数据更新中」</li>
+      <li>此状态下「提交备案申请」按钮置灰</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">数据规则</div>
+    <ul>
+      <li>轮询间隔：每2秒查询一次，最多轮询30秒</li>
+      <li>同步字段：保单号、保险公司、保险期限、保费金额、保单PDF链接</li>
+      <li>同步成功后，保单信息写入工程档案-保险信息库</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">交互分支规则</div>
+    <ul>
+      <li>保单同步成功 → 自动跳转至投保成功页</li>
+      <li>保单同步超时 → 提示「同步超时，请稍后刷新查看」</li>
+      <li>保单同步失败 → 提示「保单同步异常，请联系客服」</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">边界情况</div>
+    <ul>
+      <li>用户在回调中退出应用：再次进入时自动继续查询</li>
+      <li>轮询期间网络断开：恢复后重新发起轮询</li>
+      <li>保险公司回调延迟超过30秒：提示手动刷新</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 页面4标注 -->
+<div class="annotation-panel" id="anno-page4">
+  <div class="annotation-title">页面4：线上投保成功 — 需求说明</div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">页面状态规则</div>
+    <ul>
+      <li>保单同步成功后，匹配保单页变为「已投保」状态</li>
+      <li>展示保单关键信息：保险公司、保单号、保险期限、保费金额</li>
+      <li>显示「已投保」标签，「保单已关联」成功提示</li>
+      <li>「提交备案申请」按钮变为可用状态</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">数据规则</div>
+    <ul>
+      <li>保险期限：根据工程工期自动计算，默认覆盖完整施工周期</li>
+      <li>保单号：由保险公司系统生成，唯一标识</li>
+      <li>保单PDF：由保险公司生成，平台提供下载入口</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">小IDI入口规则（方案B新增）</div>
+    <ul>
+      <li>仅在安责险线上投保成功后展示，线下上传保单成功不展示</li>
+      <li>推荐险种：第三者责任险（类比车险小IDI模式）</li>
+      <li>利益点文案：保障第三方人身伤亡、保障第三方财产损失、线上投保即刻生效</li>
+      <li>用户点击「去选购」→ 跳转铃铛保保险商城选购商业补充险</li>
+      <li>用户点击「暂不需要」→ 卡片收起，展示「已跳过」状态，本次会话可重新查看</li>
+      <li>「小IDI」入口为推荐位，非强制，不影响备案流程</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">交互分支规则</div>
+    <ul>
+      <li>点击「提交备案申请」→ 进入备案提交流程</li>
+      <li>点击「去选购」→ 跳转铃铛保保险商城</li>
+      <li>点击「暂不需要」→ 收起推荐卡片，展示已跳过状态</li>
+      <li>点击「重新查看」→ 恢复展示推荐卡片</li>
+      <li>点击保单PDF → 调起浏览器/系统预览下载PDF</li>
+      <li>点击「临时保存」→ 保存当前备案草稿</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">边界情况</div>
+    <ul>
+      <li>保单PDF下载失败：提示「文件加载失败，请重试」</li>
+      <li>用户更换保险公司：需重新走投保流程，原保单自动解绑</li>
+      <li>从商城返回后：根据回传数据更新「小IDI」展示状态（已选购/未选购）</li>
+      <li>同一用户多次投保：每次线上投保成功均展示「小IDI」入口</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 页面5标注 -->
+<div class="annotation-panel" id="anno-page5">
+  <div class="annotation-title">页面5：支付失败 — 需求说明</div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">页面状态规则</div>
+    <ul>
+      <li>支付失败场景：超时取消、余额不足、用户主动取消、网络异常</li>
+      <li>根据不同失败原因展示对应提示文案</li>
+      <li>提供「重新支付」和「返回修改」两个操作入口</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">数据规则</div>
+    <ul>
+      <li>失败订单状态：在后台标记为「支付失败」</li>
+      <li>用户点击「重新支付」：复用原订单号重新调起支付</li>
+      <li>用户点击「返回修改」：回到匹配保单页，保留已选保险公司</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">交互分支规则</div>
+    <ul>
+      <li>点击「重新支付」→ 回到保险收银台，保留原订单信息</li>
+      <li>点击「返回修改」→ 回到匹配保单页，可更换保险公司</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">边界情况</div>
+    <ul>
+      <li>重复支付：同一订单只允许一笔成功支付，重复支付自动原路退回</li>
+      <li>订单已过期：点击重新支付时提示「订单已过期，请重新选择保险公司」</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 页面6标注 -->
+<div class="annotation-panel" id="anno-page6">
+  <div class="annotation-title">页面6：中断后重新进入 — 需求说明</div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">页面状态规则</div>
+    <ul>
+      <li>用户在支付流程中退出应用/切换页面，再次进入匹配保单页时检测未完成的投保</li>
+      <li>顶部显示中断提示横幅：展示上次选择的保险公司和支付状态</li>
+      <li>保险公司列表中保留上次选择状态</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">数据规则</div>
+    <ul>
+      <li>中断状态保存：本地缓存 + 服务端订单查询双重校验</li>
+      <li>缓存有效期：30分钟，超时后清除中断状态</li>
+      <li>如服务端订单已超时/取消，提示「上次投保已过期，请重新选择」</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">交互分支规则</div>
+    <ul>
+      <li>用户可直接点击「提交备案申请」→ 沿用上次选择继续投保流程</li>
+      <li>用户可更换保险公司 → 取消上次订单，重新发起新投保</li>
+      <li>用户可切换至「关联线下已购保单」→ 取消线上投保流程</li>
+    </ul>
+  </div>
+  <div class="annotation-section">
+    <div class="annotation-section-title">边界情况</div>
+    <ul>
+      <li>同一设备切换账号：不展示其他账号的中断状态</li>
+      <li>中断超过30分钟：清除状态，恢复正常初始页面</li>
+      <li>服务端订单已支付成功但客户端未收到回调：自动跳转成功页</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- annotation-area end -->
+
+</div><!-- main-container end -->
+
+<!-- 确认弹窗 -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><path d="M9 12l2 2 4-4"/></svg>
+    </div>
+    <div class="modal-title">即将进入投保页面</div>
+    <div class="modal-desc">您将跳转至保险公司页面完成支付，是否继续？</div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="hideModal()">取消</button>
+      <button class="modal-btn-confirm" onclick="goToPay()">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 页面切换
+function showPage(pageId) {
+  document.querySelectorAll('.phone-frame').forEach(p => p.classList.add('hidden'));
+  document.getElementById(pageId).classList.remove('hidden');
+
+  // 更新标注
+  document.querySelectorAll('.annotation-panel').forEach(a => a.classList.remove('active'));
+  document.getElementById('anno-' + pageId).classList.add('active');
+
+  // 更新导航按钮状态
+  document.querySelectorAll('.float-nav-btn').forEach(btn => btn.classList.remove('active'));
+  const btnMap = { 'page1':0, 'page2':1, 'page3':2, 'page4':3, 'page5':4, 'page6':5 };
+  const idx = btnMap[pageId];
+  if (idx !== undefined) {
+    document.querySelectorAll('.float-nav-btn')[idx].classList.add('active');
+  }
+}
+
+// 选择保险公司
+let selectedCompany = null;
+function selectCompany(el) {
+  document.querySelectorAll('.company-item').forEach(item => item.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCompany = el;
+  // 选中后立即弹窗确认
+  setTimeout(() => showModal(), 150);
+}
+
+// 弹窗
+function showModal() {
+  if (!selectedCompany && !document.querySelector('.company-item.selected')) {
+    alert('请先选择保险公司');
+    return;
+  }
+  document.getElementById('confirmModal').classList.add('active');
+}
+function hideModal() {
+  document.getElementById('confirmModal').classList.remove('active');
+}
+
+// 去支付
+function goToPay() {
+  hideModal();
+  showPage('page2');
+}
+
+// 选择支付方式
+function selectPay(el) {
+  document.querySelectorAll('.pay-method-item').forEach(item => item.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// 去回调
+function goToCallback() {
+  showPage('page3');
+  // 模拟2秒后成功
+  setTimeout(() => {
+    showPage('page4');
+    // 重置小IDI状态
+    document.getElementById('xiaoidiCard').style.display = 'block';
+    document.getElementById('xiaoidiCollapsed').style.display = 'none';
+  }, 2000);
+}
+
+// 小IDI交互
+function goToXiaoIDI() {
+  alert('跳转至铃铛保保险商城选购第三者责任险\n（独立平台，此处为原型演示）');
+}
+
+function skipXiaoIDI() {
+  document.getElementById('xiaoidiCard').style.display = 'none';
+  document.getElementById('xiaoidiCollapsed').style.display = 'flex';
+}
+
+function restoreXiaoIDI() {
+  document.getElementById('xiaoidiCard').style.display = 'block';
+  document.getElementById('xiaoidiCollapsed').style.display = 'none';
+}
+
+// F8切换导航
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F8') {
+    e.preventDefault();
+    document.getElementById('floatNav').classList.toggle('active');
+  }
+});
+</script>
+
+</body>
+</html>

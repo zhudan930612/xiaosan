@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青浦区小型工程安全纳管数字化平台 - 系统总体架构图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: #ffffff;
+            padding: 30px;
+            min-width: 1000px;
+        }
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 30px;
+        }
+
+        .arch-container {
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #374151;
+            width: 950px;
+            margin: 0 auto;
+        }
+
+        /* 每一行：左边标签 + 右边内容 */
+        .arch-row {
+            display: flex;
+            border-bottom: 2px solid #374151;
+            min-height: 70px;
+        }
+        .arch-row:last-child {
+            border-bottom: none;
+        }
+
+        /* 左侧层级标签 */
+        .row-label {
+            width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 2px solid #374151;
+            background: #f3f4f6;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+            letter-spacing: 4px;
+            flex-shrink: 0;
+        }
+
+        /* 右侧内容区 */
+        .row-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            padding: 14px 20px;
+        }
+
+        /* 方框样式 */
+        .box {
+            border: 1.5px solid #6b7280;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #1f2937;
+            background: white;
+            min-width: 120px;
+        }
+        .box-strong {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* 配色方案 - 柔和色系 */
+        .bg-blue-light { background: #dbeafe; border-color: #3b82f6; }
+        .bg-blue-mid { background: #bfdbfe; border-color: #2563eb; }
+        .bg-red-light { background: #fee2e2; border-color: #ef4444; }
+        .bg-orange-light { background: #ffedd5; border-color: #f97316; }
+        .bg-green-light { background: #dcfce7; border-color: #22c55e; }
+        .bg-purple-light { background: #f3e8ff; border-color: #a855f7; }
+        .bg-gray-light { background: #f3f4f6; border-color: #6b7280; }
+        .bg-yellow-light { background: #fef9c3; border-color: #eab308; }
+
+        /* 服务层复杂布局 */
+        .service-layout {
+            display: flex;
+            width: 100%;
+            gap: 0;
+            align-items: stretch;
+        }
+
+        /* 左侧服务通信 */
+        .service-comm {
+            width: 100px;
+            border-right: 2px solid #374151;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 8px;
+            background: #fef2f2;
+            align-self: stretch;
+        }
+        .comm-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #991b1b;
+            margin-bottom: 2px;
+        }
+        .comm-box {
+            border: 1.5px solid #ef4444;
+            background: #fee2e2;
+            padding: 4px 2px;
+            font-size: 12px;
+            color: #7f1d1d;
+            width: 82px;
+            text-align: center;
+        }
+
+        /* 中间业务区 */
+        .service-middle {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 业务服务模块 */
+        .biz-module {
+            border-bottom: 2px dashed #9ca3af;
+            padding: 12px 16px;
+            background: #eff6ff;
+        }
+        .biz-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 10px;
+            text-align: center;
+            background: #dbeafe;
+            border: 1.5px solid #3b82f6;
+            padding: 6px 0;
+        }
+        .biz-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .biz-item {
+            border: 1.5px solid #3b82f6;
+            background: #dbeafe;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #1e3a8a;
+            text-align: center;
+            min-width: 110px;
+        }
+
+        /* 基础服务组件 */
+        .base-module {
+            padding: 12px 16px;
+            background: #f0fdf4;
+        }
+        .base-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #166534;
+            margin-bottom: 10px;
+            text-align: center;
+            background: #dcfce7;
+            border: 1.5px solid #22c55e;
+            padding: 6px 0;
+        }
+        .base-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .base-item {
+            border: 1.5px solid #22c55e;
+            background: #dcfce7;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #14532d;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        /* 右侧服务管理 */
+        .service-mgmt {
+            width: 110px;
+            border-left: 2px solid #374151;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background: #fff7ed;
+            align-self: stretch;
+        }
+        .mgmt-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #9a3412;
+            margin-bottom: 4px;
+        }
+        .mgmt-box {
+            border: 1.5px solid #f97316;
+            background: #ffedd5;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #7c2d12;
+            width: 85px;
+            text-align: center;
+        }
+
+        /* 资源层 */
+        .resource-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+        }
+        .resource-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .resource-icon {
+            width: 50px;
+            height: 36px;
+            border: 1.5px solid #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .resource-label {
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        /* 数据中台独立行 */
+        .data-platform-row {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #faf5ff;
+        }
+        .data-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #6b21a8;
+            text-align: center;
+            background: #f3e8ff;
+            border: 1.5px solid #a855f7;
+            padding: 6px 0;
+        }
+        .data-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .data-item {
+            border: 1.5px solid #a855f7;
+            background: #f3e8ff;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: #581c87;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .note {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">青浦区小型工程安全纳管数字化平台 — 系统总体架构图</div>
+
+    <div class="arch-container">
+
+        <!-- 访问层 -->
+        <div class="arch-row">
+            <div class="row-label">访问层</div>
+            <div class="row-content">
+                <div class="box box-strong bg-blue-light" style="min-width: 160px;">PC 浏览器</div>
+                <div class="box box-strong bg-blue-light" style="min-width: 160px;">移动设备 H5 / APP</div>
+                <div class="box box-strong bg-blue-light" style="min-width: 160px;">微信小程序 / 支付宝小程序</div>
+                <div class="box box-strong bg-blue-light" style="min-width: 160px;">可视化大屏</div>
+            </div>
+        </div>
+
+        <!-- WEB层 -->
+        <div class="arch-row">
+            <div class="row-label">WEB层</div>
+            <div class="row-content">
+                <div class="box bg-blue-mid" style="min-width: 180px;">PC 管理后台（Vue3 + Element Plus）</div>
+                <div class="box bg-blue-mid" style="min-width: 180px;">移动端应用（Vue3 + Vant）</div>
+                <div class="box bg-blue-mid" style="min-width: 180px;">大屏展示（GIS + 可视化组件）</div>
+                <div class="box bg-blue-mid" style="min-width: 180px;">小程序端（微信 / 支付宝）</div>
+            </div>
+        </div>
+
+        <!-- 接口层 -->
+        <div class="arch-row" style="min-height: 55px;">
+            <div class="row-label">接口层</div>
+            <div class="row-content">
+                <div class="box box-strong bg-red-light" style="min-width: 600px;">API Gateway（统一认证 / 路由转发 / 限流熔断 / 日志审计）</div>
+            </div>
+        </div>
+
+        <!-- 服务层 -->
+        <div class="arch-row" style="min-height: auto;">
+            <div class="row-label">服务层</div>
+            <div class="service-layout">
+                <!-- 左侧：服务通信 -->
+                <div class="service-comm">
+                    <div class="comm-title">服务通信</div>
+                    <div class="comm-box">MQ</div>
+                    <div class="comm-box">RPC</div>
+                    <div class="comm-box">REST</div>
+                    <div class="comm-box">WebSocket</div>
+                </div>
+                <!-- 中间：业务 + 基础 -->
+                <div class="service-middle">
+                    <!-- 业务服务模块 -->
+                    <div class="biz-module">
+                        <div class="biz-title">业务服务模块</div>
+                        <div class="biz-items">
+                            <div class="biz-item">备案管理服务</div>
+                            <div class="biz-item">日常巡查服务</div>
+                            <div class="biz-item">完工销项服务</div>
+                            <div class="biz-item">可视化大屏服务</div>
+                            <div class="biz-item">AI 智能分拨服务</div>
+                            <div class="biz-item">动态风险量化服务</div>
+                            <div class="biz-item">信用记分服务</div>
+                            <div class="biz-item">事故预防服务监管</div>
+                        </div>
+                    </div>
+                    <!-- 基础服务组件 -->
+                    <div class="base-module">
+                        <div class="base-title">基础服务组件</div>
+                        <div class="base-items">
+                            <div class="base-item">统一认证服务</div>
+                            <div class="base-item">流程引擎服务</div>
+                            <div class="base-item">消息通知服务</div>
+                            <div class="base-item">GIS 地图服务</div>
+                            <div class="base-item">AI 智能分析</div>
+                            <div class="base-item">OCR 识别服务</div>
+                            <div class="base-item">报表引擎服务</div>
+                            <div class="base-item">数据交换服务</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 右侧：服务管理 -->
+                <div class="service-mgmt">
+                    <div class="mgmt-title">服务管理</div>
+                    <div class="mgmt-box">配置管理</div>
+                    <div class="mgmt-box">监控报警</div>
+                    <div class="mgmt-box">日志管理</div>
+                    <div class="mgmt-box">注册发现</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据中台 -->
+        <div class="arch-row" style="min-height: auto;">
+            <div class="row-label">数据中台</div>
+            <div class="data-platform-row">
+                <div class="data-title">数据资源层（五库一体 + 数据治理）</div>
+                <div class="data-items">
+                    <div class="data-item">隐患问题库</div>
+                    <div class="data-item">工程信息库</div>
+                    <div class="data-item">人员信息库</div>
+                    <div class="data-item">企业信息库</div>
+                    <div class="data-item">保险信息库</div>
+                    <div class="data-item">数据标准化</div>
+                    <div class="data-item">数据共享交换</div>
+                    <div class="data-item">数据安全管控</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 资源层 -->
+        <div class="arch-row">
+            <div class="row-label">资源层</div>
+            <div class="row-content">
+                <div class="resource-item">
+                    <div class="resource-icon">MySQL</div>
+                    <div class="resource-label">关系型数据库</div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">Redis</div>
+                    <div class="resource-label">缓存</div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">OSS</div>
+                    <div class="resource-label">文件存储</div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">ES</div>
+                    <div class="resource-label">搜索引擎</div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">Docker</div>
+                    <div class="resource-label">容器化部署</div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">政务云</div>
+                    <div class="resource-label">云基础设施</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="note">安全防护体系与标准规范体系纵向贯穿所有层级</div>
+
+</body>
+</html>

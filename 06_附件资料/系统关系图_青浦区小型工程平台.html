@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青浦区小型工程安全纳管数字化平台 - 系统关系图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: #f5f7fa;
+            padding: 40px;
+            min-width: 1200px;
+        }
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            position: relative;
+        }
+        .layer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            padding: 24px 40px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .layer-label {
+            position: absolute;
+            left: -160px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+            width: 140px;
+            text-align: right;
+            line-height: 1.4;
+        }
+        .layer-label .label-en {
+            font-size: 11px;
+            color: #999;
+            font-weight: normal;
+        }
+
+        /* 上级平台层 */
+        .layer-upper {
+            background: #e8f4f8;
+            border: 2px solid #b3d9e8;
+        }
+
+        /* 本项目建设平台 */
+        .layer-core {
+            background: #fff3e0;
+            border: 3px solid #ff9800;
+            padding: 30px 50px;
+        }
+        .layer-core .layer-label {
+            color: #e65100;
+        }
+
+        /* 底座支撑层 */
+        .layer-base {
+            background: #f3e5f5;
+            border: 2px solid #ce93d8;
+        }
+
+        /* 同级部门 */
+        .layer-dept {
+            background: #e8f5e9;
+            border: 2px solid #a5d6a7;
+        }
+
+        /* 末端执行层 */
+        .layer-end {
+            background: #e3f2fd;
+            border: 2px solid #90caf9;
+        }
+
+        /* 社会化服务 */
+        .layer-service {
+            background: #fce4ec;
+            border: 2px solid #f48fb1;
+        }
+
+        .box {
+            background: white;
+            border-radius: 8px;
+            padding: 14px 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-width: 130px;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.5;
+        }
+        .box-primary {
+            background: #1565c0;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .box-secondary {
+            background: #0277bd;
+            color: white;
+        }
+        .box-accent {
+            background: #ff8f00;
+            color: white;
+            font-weight: bold;
+        }
+        .box-green {
+            background: #2e7d32;
+            color: white;
+        }
+        .box-purple {
+            background: #7b1fa2;
+            color: white;
+        }
+        .box-pink {
+            background: #c2185b;
+            color: white;
+        }
+
+        .core-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 20px;
+        }
+        .core-modules {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+        .core-module {
+            background: white;
+            border: 2px solid #ff9800;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 13px;
+            color: #e65100;
+            font-weight: bold;
+        }
+
+        /* 连接线和箭头 */
+        .connector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 36px;
+            position: relative;
+        }
+        .connector-line {
+            width: 2px;
+            height: 100%;
+            background: #bbb;
+            position: relative;
+        }
+        .connector-line::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #bbb;
+        }
+        .connector-bidirectional .connector-line {
+            background: #666;
+        }
+        .connector-bidirectional .connector-line::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 8px solid #666;
+        }
+        .connector-bidirectional .connector-line::after {
+            border-top: 8px solid #666;
+        }
+        .connector-label {
+            position: absolute;
+            right: -200px;
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+        }
+        .connector-label-left {
+            position: absolute;
+            left: -200px;
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        /* 侧边标注 */
+        .side-note {
+            position: absolute;
+            right: -220px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #666;
+            background: #fffde7;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ffe082;
+            max-width: 200px;
+            line-height: 1.6;
+        }
+
+        /* 图例 */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 30px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #555;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        /* 横向连接线 */
+        .horizontal-connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* 底部说明 */
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">青浦区小型工程安全纳管数字化平台</div>
+    <div class="subtitle">系统关系架构图</div>
+
+    <div class="diagram">
+
+        <!-- 上级平台层 -->
+        <div class="layer layer-upper">
+            <div class="layer-label">上级平台层<br><span class="label-en">Vertical Integration</span></div>
+            <div class="box box-primary">市级小型工程<br>管理平台</div>
+            <div class="box box-primary">一网统管<br>市平台</div>
+            <div class="box box-primary">市城运中心</div>
+        </div>
+
+        <!-- 连接 -->
+        <div class="connector connector-bidirectional">
+            <div class="connector-line"></div>
+            <span class="connector-label">数据上报 / 指令下发 / 事件分拨</span>
+        </div>
+
+        <!-- 本项目建设平台 -->
+        <div class="layer layer-core" style="min-width: 900px;">
+            <div class="layer-label" style="color: #e65100;">本项目建设平台<br><span class="label-en">Core Platform</span></div>
+            <div style="width: 100%;">
+                <div class="core-title">青浦区小型工程安全纳管数字化平台</div>
+                <div class="core-modules">
+                    <div class="core-module">备案管理</div>
+                    <div class="core-module">日常巡查</div>
+                    <div class="core-module">完工销项</div>
+                    <div class="core-module">可视化大屏</div>
+                    <div class="core-module">AI智能分拨</div>
+                    <div class="core-module">动态风险量化</div>
+                    <div class="core-module">信用监管</div>
+                    <div class="core-module">事故预防服务监管</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 连接 -->
+        <div class="connector connector-bidirectional">
+            <div class="connector-line"></div>
+            <span class="connector-label">复用底座 / 共享数据 / 统一认证</span>
+        </div>
+
+        <!-- 底座支撑层 -->
+        <div class="layer layer-base">
+            <div class="layer-label">底座支撑层<br><span class="label-en">Infrastructure</span></div>
+            <div class="box box-purple">区政务云<br>基础设施</div>
+            <div class="box box-purple">数据资源<br>共享平台</div>
+            <div class="box box-purple">统一认证<br>体系</div>
+            <div class="box box-purple">视频监控<br>汇聚平台</div>
+        </div>
+
+        <!-- 同级部门层 -->
+        <div style="margin-top: 16px;">
+            <div class="layer layer-dept">
+                <div class="layer-label">同级部门协同<br><span class="label-en">Cross-Dept</span></div>
+                <div class="box box-green">区建管委</div>
+                <div class="box box-green">区房管局</div>
+                <div class="box box-green">区应急局</div>
+                <div class="box box-green">区城管<br>执法局</div>
+                <div class="box box-green">区数据局</div>
+            </div>
+        </div>
+
+        <!-- 末端执行层 + 社会化服务层 并排 -->
+        <div style="display: flex; gap: 40px; margin-top: 16px; justify-content: center; width: 100%; max-width: 1000px;">
+            <div class="layer layer-end" style="flex: 1;">
+                <div class="layer-label" style="left: -140px; width: 120px;">末端执行层<br><span class="label-en">Grassroots</span></div>
+                <div class="box box-secondary">街镇巡查<br>移动端</div>
+                <div class="box box-secondary">社区巡查<br>移动端</div>
+                <div class="box box-secondary">物业巡查<br>移动端</div>
+            </div>
+            <div class="layer layer-service" style="flex: 1;">
+                <div class="layer-label" style="left: auto; right: -140px; width: 120px; text-align: left;">社会化服务监管<br><span class="label-en">Service Supervision</span></div>
+                <div class="box box-pink">安责险<br>业务系统</div>
+                <div class="box box-pink">第三方事故<br>预防服务系统</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 图例 -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #1565c0;"></div>
+            <span>上级平台</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff8f00;"></div>
+            <span>本项目建设平台</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #7b1fa2;"></div>
+            <span>底座支撑</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #2e7d32;"></div>
+            <span>同级部门</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #0277bd;"></div>
+            <span>末端执行</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #c2185b;"></div>
+            <span>社会化服务监管</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #666;"></div>
+            <span>双向数据交互</span>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        注：本图仅展示政府投资项目建设范围内的系统关系，不包含商业化平台
+    </div>
+
+</body>
+</html>

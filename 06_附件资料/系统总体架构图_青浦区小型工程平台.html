@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>青浦区小型工程安全纳管数字化平台 - 系统总体架构图</title>
+    <title>小型工程综合管理系统总体架构图</title>
     <style>
         * {
             margin: 0;
@@ -100,35 +100,6 @@
             width: 100%;
             gap: 0;
             align-items: stretch;
-        }
-
-        /* 左侧服务通信 */
-        .service-comm {
-            width: 100px;
-            border-right: 2px solid #374151;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 10px 8px;
-            background: #fef2f2;
-            align-self: stretch;
-        }
-        .comm-title {
-            font-size: 12px;
-            font-weight: bold;
-            color: #991b1b;
-            margin-bottom: 2px;
-        }
-        .comm-box {
-            border: 1.5px solid #ef4444;
-            background: #fee2e2;
-            padding: 4px 2px;
-            font-size: 12px;
-            color: #7f1d1d;
-            width: 82px;
-            text-align: center;
         }
 
         /* 中间业务区 */
@@ -235,7 +206,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 40px;
+            gap: 70px;
             width: 100%;
         }
         .resource-item {
@@ -304,7 +275,7 @@
     </style>
 </head>
 <body>
-    <div class="title">青浦区小型工程安全纳管数字化平台 — 系统总体架构图</div>
+    <div class="title">小型工程综合管理系统总体架构图</div>
 
     <div class="arch-container">
 
@@ -323,10 +294,10 @@
         <div class="arch-row">
             <div class="row-label">WEB层</div>
             <div class="row-content">
-                <div class="box bg-blue-mid" style="min-width: 180px;">PC 管理后台（Vue3 + Element Plus）</div>
-                <div class="box bg-blue-mid" style="min-width: 180px;">移动端应用（Vue3 + Vant）</div>
-                <div class="box bg-blue-mid" style="min-width: 180px;">大屏展示（GIS + 可视化组件）</div>
-                <div class="box bg-blue-mid" style="min-width: 180px;">小程序端（微信 / 支付宝）</div>
+                <div class="box bg-blue-mid" style="min-width: 180px;">PC 管理后台<br>Vue3 + TS + Vite + Vant</div>
+                <div class="box bg-blue-mid" style="min-width: 180px;">移动端应用<br>Vue3 + TS + Vite + Vant</div>
+                <div class="box bg-blue-mid" style="min-width: 180px;">大屏展示<br>Vue3 + TS + Vite + Element Plus + ECharts</div>
+                <div class="box bg-blue-mid" style="min-width: 180px;">小程序端<br>Vue3 + TS + Vite + Vant</div>
             </div>
         </div>
 
@@ -342,14 +313,6 @@
         <div class="arch-row" style="min-height: auto;">
             <div class="row-label">服务层</div>
             <div class="service-layout">
-                <!-- 左侧：服务通信 -->
-                <div class="service-comm">
-                    <div class="comm-title">服务通信</div>
-                    <div class="comm-box">MQ</div>
-                    <div class="comm-box">RPC</div>
-                    <div class="comm-box">REST</div>
-                    <div class="comm-box">WebSocket</div>
-                </div>
                 <!-- 中间：业务 + 基础 -->
                 <div class="service-middle">
                     <!-- 业务服务模块 -->
@@ -371,7 +334,6 @@
                         <div class="base-title">基础服务组件</div>
                         <div class="base-items">
                             <div class="base-item">统一认证服务</div>
-                            <div class="base-item">流程引擎服务</div>
                             <div class="base-item">消息通知服务</div>
                             <div class="base-item">GIS 地图服务</div>
                             <div class="base-item">AI 智能分析</div>
@@ -385,7 +347,7 @@
                 <div class="service-mgmt">
                     <div class="mgmt-title">服务管理</div>
                     <div class="mgmt-box">配置管理</div>
-                    <div class="mgmt-box">监控报警</div>
+                    <div class="mgmt-box">消息通知</div>
                     <div class="mgmt-box">日志管理</div>
                     <div class="mgmt-box">注册发现</div>
                 </div>
@@ -415,7 +377,7 @@
             <div class="row-label">资源层</div>
             <div class="row-content">
                 <div class="resource-item">
-                    <div class="resource-icon">MySQL</div>
+                    <div class="resource-icon">达梦</div>
                     <div class="resource-label">关系型数据库</div>
                 </div>
                 <div class="resource-item">
@@ -427,14 +389,6 @@
                     <div class="resource-label">文件存储</div>
                 </div>
                 <div class="resource-item">
-                    <div class="resource-icon">ES</div>
-                    <div class="resource-label">搜索引擎</div>
-                </div>
-                <div class="resource-item">
-                    <div class="resource-icon">Docker</div>
-                    <div class="resource-label">容器化部署</div>
-                </div>
-                <div class="resource-item">
                     <div class="resource-icon">政务云</div>
                     <div class="resource-label">云基础设施</div>
                 </div>
@@ -443,7 +397,7 @@
 
     </div>
 
-    <div class="note">安全防护体系与标准规范体系纵向贯穿所有层级</div>
+    <div class="note">安全防护体系与标准规范体系纵向贯穿所有层级 | WEB 层公共基础：Vue Router / Pinia / Axios</div>
 
 </body>
 </html>

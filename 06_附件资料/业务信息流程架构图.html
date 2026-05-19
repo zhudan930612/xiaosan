@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小型工程综合管理平台业务信息流程架构图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: #ffffff;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .container {
+            width: 680px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 箭头 */
+        .arrow-down {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 28px;
+            position: relative;
+        }
+        .arrow-line {
+            width: 1.5px;
+            height: 100%;
+            background: #6b7280;
+            position: relative;
+        }
+        .arrow-line::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 7px solid #6b7280;
+        }
+
+        /* 双向箭头 */
+        .bidir-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 36px;
+            position: relative;
+        }
+        .bidir-line {
+            width: 1.5px;
+            height: 100%;
+            background: #6b7280;
+            position: relative;
+        }
+        .bidir-line::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 7px solid #6b7280;
+        }
+        .bidir-line::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 7px solid #6b7280;
+        }
+        .bidir-label {
+            position: absolute;
+            left: 50%;
+            transform: translateX(18px);
+            font-size: 11px;
+            color: #4b5563;
+            background: white;
+            padding: 0 6px;
+            white-space: nowrap;
+        }
+
+        /* 返回箭头（斜向） */
+        .return-line {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            height: 50px;
+            width: 100%;
+            padding-right: 10px;
+        }
+        .return-text {
+            font-size: 10px;
+            color: #15803d;
+            text-align: right;
+            line-height: 1.5;
+            width: 260px;
+            flex-shrink: 0;
+        }
+
+        /* ================= 一网通办区域 ================= */
+        .ywtb-wrap {
+            width: 100%;
+            border: 2px solid #15803d;
+            background: #f0fdf4;
+            padding: 14px 18px 18px;
+            position: relative;
+        }
+        .ywtb-title {
+            position: absolute;
+            top: -11px;
+            left: 16px;
+            background: white;
+            padding: 0 8px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #15803d;
+        }
+        .ywtb-clouds {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .cloud-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .cloud-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #14532d;
+            background: #dcfce7;
+            border: 1px solid #22c55e;
+            padding: 2px 10px;
+        }
+        .cloud-box {
+            width: 100%;
+            border: 1.5px solid #22c55e;
+            background: #dcfce7;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            color: #14532d;
+            font-weight: bold;
+        }
+        .apply-row {
+            display: flex;
+            gap: 10px;
+        }
+        .apply-box {
+            flex: 1;
+            border: 1.5px solid #3b82f6;
+            background: #dbeafe;
+            padding: 10px 6px;
+            text-align: center;
+        }
+        .apply-box .role {
+            font-weight: bold;
+            font-size: 13px;
+            color: #1e3a8a;
+            margin-bottom: 3px;
+        }
+        .apply-box .user {
+            font-size: 11px;
+            color: #1e40af;
+        }
+        .submit-box {
+            width: 180px;
+            margin: 12px auto 0;
+            border: 2px solid #1e3a5f;
+            background: #dbeafe;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        /* ================= 备案信息管理 ================= */
+        .ba-wrap {
+            width: 100%;
+            border: 2px solid #1e3a5f;
+            background: #f8fafc;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .ba-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+        .ba-cylinder {
+            width: 200px;
+            height: 60px;
+            background: #1e3a5f;
+            border-radius: 100px / 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            position: relative;
+        }
+        .ba-cylinder::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 10px;
+            right: 10px;
+            height: 14px;
+            border-radius: 100px / 10px;
+            background: #3b82f6;
+            opacity: 0.4;
+        }
+        .ba-sub {
+            font-size: 11px;
+            color: #4b5563;
+        }
+
+        /* ================= 政务云区域 ================= */
+        .zwy-wrap {
+            width: 100%;
+            border: 2px solid #4b5563;
+            background: #f9fafb;
+            padding: 14px 16px 18px;
+            position: relative;
+        }
+        .zwy-title {
+            position: absolute;
+            top: -11px;
+            left: 16px;
+            background: white;
+            padding: 0 8px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #374151;
+        }
+        .zwy-inner {
+            display: flex;
+            gap: 14px;
+        }
+        .zwy-col {
+            flex: 1;
+            border: 1.5px solid;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        /* 一网协同 */
+        .col-xt { border-color: #7c3aed; background: #faf5ff; }
+        .col-xt-header {
+            font-size: 13px;
+            font-weight: bold;
+            color: #6d28d9;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .flow-box {
+            border: 1.5px solid #7c3aed;
+            background: #f3e8ff;
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #581c87;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .flow-arrow {
+            text-align: center;
+            font-size: 16px;
+            color: #7c3aed;
+            line-height: 1;
+        }
+        .xt-notify {
+            border: 1px dashed #7c3aed;
+            background: #ede9fe;
+            padding: 8px 10px;
+            font-size: 11px;
+            color: #5b21b6;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* 一网统管 */
+        .col-tg { border-color: #c2410c; background: #fff7ed; }
+        .col-tg-header {
+            font-size: 13px;
+            font-weight: bold;
+            color: #9a3412;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .tg-box {
+            border: 1.5px solid #c2410c;
+            background: #ffedd5;
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #7c2d12;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .tg-arrow { text-align: center; font-size: 16px; color: #c2410c; line-height: 1; }
+        .tg-branch {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .tg-branch-box {
+            border: 1.5px solid #f97316;
+            background: #fef3c7;
+            padding: 6px 8px;
+            font-size: 11px;
+            color: #92400e;
+            text-align: center;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .note {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">小型工程综合管理平台业务信息流程架构图</div>
+
+    <div class="container">
+
+        <!-- 一网通办 -->
+        <div class="ywtb-wrap">
+            <div class="ywtb-title">一网通办</div>
+            <div class="ywtb-clouds">
+                <div class="cloud-item">
+                    <div class="cloud-label">市民云</div>
+                    <div class="cloud-box">随申办小程序 / App</div>
+                </div>
+                <div class="cloud-item">
+                    <div class="cloud-label">企业云</div>
+                    <div class="cloud-box">企业云 App</div>
+                </div>
+            </div>
+            <div class="apply-row">
+                <div class="apply-box">
+                    <div class="role">小型工程</div>
+                    <div class="user">房东、租户</div>
+                </div>
+                <div class="apply-box">
+                    <div class="role">装饰装修</div>
+                    <div class="user">业主、业主授权使用人</div>
+                </div>
+                <div class="apply-box">
+                    <div class="role">零星作业</div>
+                    <div class="user">产权、承租人</div>
+                </div>
+            </div>
+            <div class="submit-box">提交备案信息</div>
+        </div>
+
+        <!-- 箭头 -->
+        <div class="arrow-down">
+            <div class="arrow-line"></div>
+        </div>
+
+        <!-- 备案信息管理 -->
+        <div class="ba-wrap">
+            <div class="ba-title">备案信息管理</div>
+            <div class="ba-cylinder">核心数据枢纽</div>
+            <div class="ba-sub">数据共享 · 业务协同 · 全程留痕</div>
+        </div>
+
+        <!-- 双向箭头 -->
+        <div class="bidir-arrow">
+            <div class="bidir-line"></div>
+            <div class="bidir-label">数据交互 / 业务联动</div>
+        </div>
+
+        <!-- 政务云 -->
+        <div class="zwy-wrap">
+            <div class="zwy-title">政务云</div>
+            <div class="zwy-inner">
+                <!-- 一网协同 -->
+                <div class="zwy-col col-xt">
+                    <div class="col-xt-header">一网协同</div>
+                    <div class="flow-box">根据备案信息<br>流转到对应的<br>街镇审核入口</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box">街镇审核任务</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-box">审核通过 / 退回整改<br>短信通知</div>
+                    <div class="xt-notify">
+                        审核通过短信告知用户进入一网通办查看备案回执<br>
+                        退回整改短信告知用户进入一网通办查看整改事项
+                    </div>
+                </div>
+                <!-- 一网统管 -->
+                <div class="zwy-col col-tg">
+                    <div class="col-tg-header">一网统管</div>
+                    <div class="tg-box">根据备案信息<br>派发巡查任务<br>善治理App / 其他入口</div>
+                    <div class="tg-arrow">↓</div>
+                    <div class="tg-box">街镇巡查工单</div>
+                    <div class="tg-arrow">↓</div>
+                    <div class="tg-box">现场巡查</div>
+                    <div class="tg-arrow">↓</div>
+                    <div class="tg-box">巡查结果</div>
+                    <div class="tg-branch">
+                        <div class="tg-branch-box">未发现隐患<br>→ 巡查记录归档</div>
+                        <div class="tg-branch-box">发现隐患<br>→ 整改通知<br>→ 整改复核</div>
+                        <div class="tg-branch-box">发现未备案<br>→ 派单街镇<br>执法处置</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="note">注：本架构图展示平台与一网通办、一网协同、一网统管的业务流程对接关系</div>
+
+</body>
+</html>

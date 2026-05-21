@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>组织与用户权限开通流程图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 14mm 16mm;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+        .sub {
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .lines { display: flex; gap: 14px; margin-bottom: 24px; }
+        .line-box {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .line-a { background: #e6f7ff; border: 1px solid #91d5ff; }
+        .line-b { background: #f0f5ff; border: 1px solid #adc6ff; }
+        .line-box strong { font-size: 14px; color: #096dd9; }
+
+        .flows { display: flex; gap: 24px; }
+        .flow { flex: 1; }
+        .flow-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .step {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #fff;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .step-num.check { background: #40a9ff; }
+        .step-num.sync { background: #1890ff; }
+        .step-num.sys { background: #096dd9; }
+        .step-num.data { background: #0050b3; }
+        .step-num.wait { background: #69c0ff; }
+        .step-num.end { background: #1890ff; }
+        .step-body { flex: 1; }
+        .step-title {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.6;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+        .step-title.check { background: #e6f7ff; color: #096dd9; }
+        .step-title.sync { background: #f0f5ff; color: #1890ff; border: 1px dashed #adc6ff; }
+        .step-title.sys { background: #e6f7ff; color: #0050b3; }
+        .step-title.data { background: #f0f5ff; color: #096dd9; }
+        .step-title.wait { background: #e6f7ff; color: #40a9ff; }
+        .step-title.end { background: #1890ff; color: #fff; font-weight: bold; }
+
+        .sub-items {
+            margin: 4px 0 8px 38px;
+            padding-left: 12px;
+            border-left: 2px solid #e8e8e8;
+        }
+        .sub-item {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+            padding: 2px 0;
+        }
+        .sub-item b { color: #333; }
+
+        .arrow-down {
+            width: 2px;
+            height: 16px;
+            background: #d9d9d9;
+            margin-left: 13px;
+            margin-bottom: 6px;
+        }
+
+        .note-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.7;
+            color: #389e0d;
+        }
+        .note-box strong { color: #237804; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1>组织与用户权限开通流程图</h1>
+        <p class="sub">青浦区小型工程综合管理平台 — 必须同时完成线A和线B，缺一不可</p>
+
+        <div class="lines">
+            <div class="line-box line-a">
+                <strong>线A · 入口权限</strong>（数据局负责）<br>
+                政务云平台开通备案审核PC端 / 移动端 / 智慧大屏入口图标
+            </div>
+            <div class="line-box line-b">
+                <strong>线B · 数据权限</strong>（系统管理员负责）<br>
+                管理后台配置工程类型、作业场所、角色等数据查看权限
+            </div>
+        </div>
+
+        <div class="flows">
+            <!-- 左：添加监管单位权限 -->
+            <div class="flow">
+                <div class="flow-title">步骤一：添加监管单位权限</div>
+
+                <div class="step">
+                    <div class="step-num check">1</div>
+                    <div class="step-body">
+                        <div class="step-title check">确认单位是否在数据局数据访问范围内</div>
+                        <div class="sub-items">
+                            <div class="sub-item"><b>是</b> → 直接进入步骤3</div>
+                            <div class="sub-item"><b>否</b> → 进入步骤2</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num data">2</div>
+                    <div class="step-body">
+                        <div class="step-title data">联系数据局，申请将该单位纳入数据访问范围</div>
+                        <div class="sub-items">
+                            <div class="sub-item">等待数据局审批并完成配置</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num sync">3</div>
+                    <div class="step-body">
+                        <div class="step-title sync">在管理后台点击【数据同步】按钮</div>
+                        <div class="sub-items">
+                            <div class="sub-item">拉取数据局的组织和用户数据到本系统</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num sys">4</div>
+                    <div class="step-body">
+                        <div class="step-title sys">确认组织已同步到管理后台</div>
+                        <div class="sub-items">
+                            <div class="sub-item">企业中心 → 监管单位</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num sys">5</div>
+                    <div class="step-body">
+                        <div class="step-title sys">在管理后台给组织配置数据权限</div>
+                        <div class="sub-items">
+                            <div class="sub-item">工程类型 + 作业场所</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num end">6</div>
+                    <div class="step-body">
+                        <div class="step-title end">完成</div>
+                        <div class="sub-items">
+                            <div class="sub-item">组织的数据权限已配置完成</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右：添加监管用户权限 -->
+            <div class="flow">
+                <div class="flow-title">步骤二：添加监管用户权限</div>
+
+                <div class="step">
+                    <div class="step-num check">1</div>
+                    <div class="step-body">
+                        <div class="step-title check">确认用户是否已同步到管理后台</div>
+                        <div class="sub-items">
+                            <div class="sub-item"><b>已同步</b> → 直接进入步骤3</div>
+                            <div class="sub-item"><b>未同步</b> → 进入步骤2</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num sync">2</div>
+                    <div class="step-body">
+                        <div class="step-title sync">在管理后台点击【数据同步】按钮</div>
+                        <div class="sub-items">
+                            <div class="sub-item">拉取数据局最新的用户数据</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num sys">3</div>
+                    <div class="step-body">
+                        <div class="step-title sys">在管理后台给用户配置数据权限</div>
+                        <div class="sub-items">
+                            <div class="sub-item">所属组织 + 角色 + 权限模式</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num data">4</div>
+                    <div class="step-body">
+                        <div class="step-title data">整理名单，提交数据局开通政务云入口</div>
+                        <div class="sub-items">
+                            <div class="sub-item">姓名、手机号、所属组织</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num wait">5</div>
+                    <div class="step-body">
+                        <div class="step-title wait">等待数据局开通入口权限</div>
+                    </div>
+                </div>
+                <div class="arrow-down"></div>
+
+                <div class="step">
+                    <div class="step-num end">6</div>
+                    <div class="step-body">
+                        <div class="step-title end">验证用户是否可正常使用系统</div>
+                        <div class="sub-items">
+                            <div class="sub-item">能看到入口 + 能看到数据 = 开通成功</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

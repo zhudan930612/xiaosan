@@ -13,8 +13,8 @@
         body {
             font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
             background: #ffffff;
-            padding: 30px;
-            min-width: 1000px;
+            padding: 30px 20px;
+            min-width: 1050px;
         }
         .title {
             text-align: center;
@@ -29,7 +29,7 @@
             flex-direction: column;
             border: 2px solid #374151;
             width: 950px;
-            margin: 0 auto;
+            flex-shrink: 0;
         }
 
         /* 每一行：左边标签 + 右边内容 */
@@ -84,15 +84,11 @@
             font-size: 14px;
         }
 
-        /* 配色方案 - 柔和色系 */
-        .bg-blue-light { background: #dbeafe; border-color: #3b82f6; }
-        .bg-blue-mid { background: #bfdbfe; border-color: #2563eb; }
-        .bg-red-light { background: #fee2e2; border-color: #ef4444; }
-        .bg-orange-light { background: #ffedd5; border-color: #f97316; }
-        .bg-green-light { background: #dcfce7; border-color: #22c55e; }
-        .bg-purple-light { background: #f3e8ff; border-color: #a855f7; }
-        .bg-gray-light { background: #f3f4f6; border-color: #6b7280; }
-        .bg-yellow-light { background: #fef9c3; border-color: #eab308; }
+        /* 配色方案 - 政务蓝 */
+        .bg-blue-light { background: #eff6ff; border-color: #60a5fa; }
+        .bg-blue-mid { background: #dbeafe; border-color: #3b82f6; }
+        .bg-blue-deep { background: #bfdbfe; border-color: #2563eb; }
+        .bg-gray-light { background: #f1f5f9; border-color: #94a3b8; }
 
         /* 服务层复杂布局 */
         .service-layout {
@@ -144,16 +140,16 @@
         /* 基础服务组件 */
         .base-module {
             padding: 12px 16px;
-            background: #f0fdf4;
+            background: #f0f9ff;
         }
         .base-title {
             font-size: 13px;
             font-weight: bold;
-            color: #166534;
+            color: #0369a1;
             margin-bottom: 10px;
             text-align: center;
-            background: #dcfce7;
-            border: 1.5px solid #22c55e;
+            background: #e0f2fe;
+            border: 1.5px solid #0ea5e9;
             padding: 6px 0;
         }
         .base-items {
@@ -163,11 +159,11 @@
             justify-content: center;
         }
         .base-item {
-            border: 1.5px solid #22c55e;
-            background: #dcfce7;
+            border: 1.5px solid #0ea5e9;
+            background: #e0f2fe;
             padding: 8px 14px;
             font-size: 12px;
-            color: #14532d;
+            color: #075985;
             text-align: center;
             min-width: 100px;
         }
@@ -182,21 +178,21 @@
             justify-content: center;
             gap: 8px;
             padding: 10px;
-            background: #fff7ed;
+            background: #f8fafc;
             align-self: stretch;
         }
         .mgmt-title {
             font-size: 12px;
             font-weight: bold;
-            color: #9a3412;
+            color: #475569;
             margin-bottom: 4px;
         }
         .mgmt-box {
-            border: 1.5px solid #f97316;
-            background: #ffedd5;
+            border: 1.5px solid #94a3b8;
+            background: #f1f5f9;
             padding: 5px 10px;
             font-size: 12px;
-            color: #7c2d12;
+            color: #334155;
             width: 85px;
             text-align: center;
         }
@@ -218,45 +214,46 @@
         .resource-icon {
             width: 50px;
             height: 36px;
-            border: 1.5px solid #6b7280;
+            border: 1.5px solid #64748b;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
             font-weight: bold;
-            background: #f3f4f6;
-            color: #374151;
+            background: #e2e8f0;
+            color: #334155;
         }
         .resource-label {
             font-size: 12px;
-            color: #4b5563;
+            color: #475569;
         }
 
-        /* 数据中台独立行 */
-        .data-platform-row {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            gap: 10px;
+        /* 数据资源层（内嵌于服务层） */
+        .data-module {
             padding: 12px 16px;
             background: #faf5ff;
+            border-top: 2px dashed #9ca3af;
         }
         .data-title {
             font-size: 13px;
             font-weight: bold;
             color: #6b21a8;
+            margin-bottom: 10px;
             text-align: center;
             background: #f3e8ff;
             border: 1.5px solid #a855f7;
             padding: 6px 0;
         }
-        .data-items {
+        .data-db-items, .data-gov-items {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
         }
-        .data-item {
+        .data-db-items {
+            margin-bottom: 8px;
+        }
+        .data-db-item {
             border: 1.5px solid #a855f7;
             background: #f3e8ff;
             padding: 8px 16px;
@@ -264,6 +261,45 @@
             color: #581c87;
             text-align: center;
             min-width: 100px;
+        }
+        .data-gov-item {
+            border: 1.5px solid #a855f7;
+            background: #ffffff;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: #581c87;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        /* 外层框架 — 安全与标准规范 */
+        .outer-wrap {
+            display: flex;
+            align-items: stretch;
+            width: fit-content;
+            margin: 0 auto;
+        }
+        .pillar {
+            width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #2563eb;
+            border-top: 2px solid #1e40af;
+            border-bottom: 2px solid #1e40af;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: 12px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 3px;
+            flex-shrink: 0;
+        }
+        .pillar-left {
+            border-left: 2px solid #1e40af;
+        }
+        .pillar-right {
+            border-right: 2px solid #1e40af;
         }
 
         .note {
@@ -277,7 +313,9 @@
 <body>
     <div class="title">小型工程综合管理系统总体架构图</div>
 
-    <div class="arch-container">
+    <div class="outer-wrap">
+        <div class="pillar pillar-left">安全防护体系</div>
+        <div class="arch-container">
 
         <!-- 访问层 -->
         <div class="arch-row">
@@ -290,14 +328,14 @@
             </div>
         </div>
 
-        <!-- WEB层 -->
+        <!-- 应用层 -->
         <div class="arch-row">
-            <div class="row-label">WEB层</div>
+            <div class="row-label">应用层</div>
             <div class="row-content">
-                <div class="box bg-blue-mid" style="min-width: 180px;">PC 管理后台<br>Vue3 + TS + Vite + Vant</div>
-                <div class="box bg-blue-mid" style="min-width: 180px;">移动端应用<br>Vue3 + TS + Vite + Vant</div>
-                <div class="box bg-blue-mid" style="min-width: 180px;">大屏展示<br>Vue3 + TS + Vite + Element Plus + ECharts</div>
-                <div class="box bg-blue-mid" style="min-width: 180px;">小程序端<br>Vue3 + TS + Vite + Vant</div>
+                <div class="box bg-blue-mid" style="min-width: 160px;">PC 管理后台</div>
+                <div class="box bg-blue-mid" style="min-width: 160px;">移动端应用</div>
+                <div class="box bg-blue-mid" style="min-width: 160px;">大屏展示</div>
+                <div class="box bg-blue-mid" style="min-width: 160px;">小程序端</div>
             </div>
         </div>
 
@@ -305,7 +343,7 @@
         <div class="arch-row" style="min-height: 55px;">
             <div class="row-label">接口层</div>
             <div class="row-content">
-                <div class="box box-strong bg-red-light" style="min-width: 600px;">API Gateway（统一认证 / 路由转发 / 限流熔断 / 日志审计）</div>
+                <div class="box box-strong bg-blue-deep" style="min-width: 600px;">API Gateway（统一认证 / 路由转发 / 限流熔断 / 日志审计）</div>
             </div>
         </div>
 
@@ -342,6 +380,22 @@
                             <div class="base-item">数据交换服务</div>
                         </div>
                     </div>
+                    <!-- 数据资源层 -->
+                    <div class="data-module">
+                        <div class="data-title">数据资源层</div>
+                        <div class="data-db-items">
+                            <div class="data-db-item">隐患问题库</div>
+                            <div class="data-db-item">工程信息库</div>
+                            <div class="data-db-item">人员信息库</div>
+                            <div class="data-db-item">企业信息库</div>
+                            <div class="data-db-item">保险信息库</div>
+                        </div>
+                        <div class="data-gov-items">
+                            <div class="data-gov-item">数据标准化</div>
+                            <div class="data-gov-item">数据共享交换</div>
+                            <div class="data-gov-item">数据安全管控</div>
+                        </div>
+                    </div>
                 </div>
                 <!-- 右侧：服务管理 -->
                 <div class="service-mgmt">
@@ -350,24 +404,6 @@
                     <div class="mgmt-box">消息通知</div>
                     <div class="mgmt-box">日志管理</div>
                     <div class="mgmt-box">注册发现</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 数据中台 -->
-        <div class="arch-row" style="min-height: auto;">
-            <div class="row-label">数据中台</div>
-            <div class="data-platform-row">
-                <div class="data-title">数据资源层（五库一体 + 数据治理）</div>
-                <div class="data-items">
-                    <div class="data-item">隐患问题库</div>
-                    <div class="data-item">工程信息库</div>
-                    <div class="data-item">人员信息库</div>
-                    <div class="data-item">企业信息库</div>
-                    <div class="data-item">保险信息库</div>
-                    <div class="data-item">数据标准化</div>
-                    <div class="data-item">数据共享交换</div>
-                    <div class="data-item">数据安全管控</div>
                 </div>
             </div>
         </div>
@@ -395,9 +431,9 @@
             </div>
         </div>
 
+        </div>
+        <div class="pillar pillar-right">标准规范体系</div>
     </div>
-
-    <div class="note">安全防护体系与标准规范体系纵向贯穿所有层级 | WEB 层公共基础：Vue Router / Pinia / Axios</div>
 
 </body>
 </html>

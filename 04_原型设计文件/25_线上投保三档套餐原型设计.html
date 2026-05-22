@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>25_线上投保三档套餐原型设计</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.demo-header {
+  width: 100%;
+  max-width: 1200px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.demo-title { font-size: 16px; font-weight: 700; color: #333; flex-shrink: 0; }
+.demo-hint { font-size: 13px; color: #999; flex: 1; }
+
+/* 方案切换 */
+.scheme-tabs {
+  display: flex;
+  gap: 8px;
+  background: #f5f5f5;
+  padding: 4px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.scheme-tab {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.scheme-tab:hover { color: #333; }
+.scheme-tab.active {
+  background: #00B578;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,181,120,0.3);
+}
+
+.phone-frame {
+  width: 390px;
+  background: #fff;
+  border-radius: 40px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 844px;
+}
+.phone-screen {
+  display: flex;
+  flex-direction: column;
+  height: 844px;
+  background: #f5f7fa;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.phone-screen::-webkit-scrollbar { width: 4px; }
+.phone-screen::-webkit-scrollbar-track { background: transparent; }
+.phone-screen::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+
+.status-bar {
+  height: 34px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.status-icons { display: flex; align-items: center; gap: 4px; }
+.signal-icon { display: flex; align-items: flex-end; gap: 1.5px; height: 12px; }
+.signal-bar { width: 3px; background: #333; border-radius: 1px; }
+.signal-bar:nth-child(1) { height: 4px; }
+.signal-bar:nth-child(2) { height: 7px; }
+.signal-bar:nth-child(3) { height: 10px; }
+.signal-bar:nth-child(4) { height: 12px; }
+.battery-icon { width: 22px; height: 11px; border: 1.5px solid #333; border-radius: 2.5px; position: relative; display: flex; align-items: center; padding: 1.5px; }
+.battery-icon::after { content: ''; position: absolute; right: -3px; top: 3px; width: 1.5px; height: 4px; background: #333; border-radius: 0 1px 1px 0; }
+.battery-fill { width: 70%; height: 100%; background: #333; border-radius: 1px; }
+
+.product-banner {
+  position: relative;
+  background: linear-gradient(180deg, #E6F7F0 0%, #f5f7fa 100%);
+  padding: 16px 20px 80px;
+  overflow: hidden;
+}
+.banner-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+.banner-back {
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 24px;
+  cursor: pointer;
+}
+.banner-actions { display: flex; gap: 12px; }
+.banner-action {
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.banner-action svg { width: 22px; height: 22px; stroke: #333; stroke-width: 2; fill: none; }
+.banner-illustration {
+  position: absolute;
+  right: -10px;
+  top: 10px;
+  width: 180px;
+  height: 160px;
+  opacity: 0.9;
+}
+.product-name-card {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+.product-name { font-size: 22px; font-weight: 800; color: #1a1a1a; }
+.product-company {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+  position: relative;
+  z-index: 2;
+}
+.company-logo-small {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.feature-card {
+  margin: -56px 16px 16px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  position: relative;
+  z-index: 3;
+}
+.feature-item { display: flex; flex-direction: column; gap: 4px; }
+.feature-item-title { font-size: 14px; font-weight: 700; color: #ff6b35; }
+.feature-item-desc { font-size: 12px; color: #666; line-height: 1.4; }
+
+.tier-section { margin: 0 16px 16px; }
+.tier-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.tier-tab {
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 14px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.tier-tab.active {
+  border-color: #00B578;
+  background: linear-gradient(180deg, #E6F7F0 0%, #f4fcf7 100%);
+}
+.tier-tab.active::after {
+  content: '✓';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 24px; height: 24px;
+  background: #00B578;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px 0 12px 0;
+}
+.tier-name { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 4px; }
+.tier-tab.active .tier-name { color: #00B578; }
+.tier-desc { font-size: 12px; color: #999; }
+
+.protection-section {
+  background: #fff;
+  margin: 0 16px 16px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.protection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.protection-title { font-size: 16px; font-weight: 700; color: #333; }
+.protection-detail { font-size: 13px; color: #00B578; cursor: pointer; }
+
+.base-insurance {
+  padding: 16px;
+  background: linear-gradient(180deg, #ebf8f1 0%, #fff 100%);
+  border-bottom: 1px solid #f0f0f0;
+}
+.base-insurance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.base-insurance-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+}
+.base-tag {
+  background: #00B578;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.base-checked {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #00B578;
+  font-size: 13px;
+}
+.base-checked svg { width: 16px; height: 16px; stroke: #00B578; stroke-width: 2.5; fill: none; }
+.protection-list { font-size: 13px; color: #666; }
+.protection-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+.protection-item-amount { color: #333; font-weight: 600; }
+
+.addon-section { padding: 16px; }
+.addon-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.addon-section-title-icon {
+  width: 4px; height: 16px;
+  background: #00B578;
+  border-radius: 2px;
+}
+.addon-section-subtitle {
+  font-size: 12px;
+  color: #999;
+  font-weight: 400;
+}
+
+.addon-card {
+  background: #fafbfc;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+.addon-card.checked {
+  background: #ebf8f1;
+  border-color: #00B578;
+}
+.addon-card.recommend {
+  border-color: #ff9500;
+}
+.addon-card.recommend.checked {
+  border-color: #00B578;
+  background: #ebf8f1;
+}
+.addon-recommend-badge {
+  position: absolute;
+  top: -1px;
+  left: 14px;
+  background: linear-gradient(90deg, #ff9500, #ffaa33);
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 0 0 8px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.addon-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  margin-top: 6px;
+}
+.addon-name { font-size: 15px; font-weight: 700; color: #333; }
+.addon-checkbox {
+  width: 22px; height: 22px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  flex-shrink: 0;
+}
+.addon-card.checked .addon-checkbox {
+  border-color: #00B578;
+  background: #00B578;
+}
+.addon-checkbox svg {
+  width: 12px; height: 12px;
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+  display: none;
+}
+.addon-card.checked .addon-checkbox svg { display: block; }
+.addon-desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.addon-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.addon-amount { font-size: 13px; color: #666; }
+.addon-amount strong { color: #333; font-weight: 700; }
+.addon-price { font-size: 16px; font-weight: 800; color: #ff6b35; }
+
+/* 尊享版安责险档位选择 */
+.vip-base-tier {
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #ebf8f1 0%, #fff 100%);
+  border-bottom: 1px solid #f0f0f0;
+}
+.vip-base-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.vip-base-tier-title { font-size: 15px; font-weight: 700; color: #333; }
+.vip-base-tier-subtitle { font-size: 12px; color: #999; margin-left: auto; }
+
+.vip-tier-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.vip-tier-option {
+  background: #fff;
+  border: 2px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+.vip-tier-option.active {
+  border-color: #00B578;
+  background: #ebf8f1;
+}
+.vip-tier-option.active::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px; height: 16px;
+  background: #00B578;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vip-tier-option-name { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 4px; }
+.vip-tier-option.active .vip-tier-option-name { color: #00B578; }
+.vip-tier-option-amount { font-size: 11px; color: #666; line-height: 1.4; }
+.vip-tier-option-price { font-size: 14px; font-weight: 800; color: #ff6b35; margin-top: 4px; }
+.vip-tier-option-recommend {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #ff9500, #ffaa33);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* 尊享版"必选"提示 */
+.vip-required-hint {
+  background: linear-gradient(90deg, #fff8f0, #fff0e6);
+  border: 1px solid rgba(255, 149, 0, 0.4);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #ff6b35;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vip-required-hint svg { width: 14px; height: 14px; stroke: #ff6b35; stroke-width: 2; fill: none; flex-shrink: 0; }
+
+.agreement-section {
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fff;
+  margin: 0 16px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+}
+.agreement-check {
+  width: 14px; height: 14px;
+  background: #00B578;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.agreement-check svg { width: 8px; height: 8px; stroke: #fff; stroke-width: 3; fill: none; }
+.agreement-link { color: #00B578; }
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 12px 16px 24px;
+  gap: 8px;
+  border-top: 1px solid #f0f0f0;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+}
+.bottom-actions-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: #666;
+}
+.bottom-action-icon {
+  width: 24px; height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bottom-action-icon svg { width: 22px; height: 22px; stroke: #666; stroke-width: 1.5; fill: none; }
+
+.bottom-price-wrap {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 0 4px;
+}
+.bottom-price-label { font-size: 12px; color: #999; }
+.bottom-price { font-size: 24px; font-weight: 800; color: #ff6b35; }
+.bottom-price-unit { font-size: 14px; color: #ff6b35; font-weight: 600; }
+
+.btn-submit {
+  background: linear-gradient(90deg, #00B578, #00A86B);
+  color: #fff;
+  border: none;
+  padding: 0 28px;
+  height: 44px;
+  border-radius: 22px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 181, 120, 0.3);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  width: 320px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 20px 20px;
+  text-align: center;
+}
+.modal-icon {
+  width: 56px; height: 56px;
+  background: #E6F7F0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.modal-icon svg { width: 28px; height: 28px; stroke: #00B578; stroke-width: 2; fill: none; }
+.modal-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 8px; }
+.modal-desc { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 12px; }
+.modal-btn-cancel { flex: 1; height: 44px; border: 1px solid #e5e5e5; background: #fff; color: #333; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.modal-btn-confirm { flex: 1; height: 44px; background: #00B578; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+.detail-sheet {
+  position: fixed;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 390px;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  transition: bottom 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.detail-sheet.active { bottom: 0; }
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.sheet-title { font-size: 17px; font-weight: 700; color: #333; }
+.sheet-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #999; font-size: 20px; }
+.sheet-body { flex: 1; overflow-y: auto; padding: 20px; }
+.sheet-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.sheet-row-label { color: #666; }
+.sheet-row-value { color: #333; font-weight: 600; }
+
+.success-content { padding: 40px 24px 24px; text-align: center; }
+.success-icon-big {
+  width: 80px; height: 80px;
+  background: #ebf8f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.success-icon-big svg { width: 40px; height: 40px; stroke: #00B578; stroke-width: 3; fill: none; }
+.success-page-title { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 8px; }
+.success-page-desc { font-size: 14px; color: #666; }
+
+.success-policy-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.policy-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.policy-row:last-child { border-bottom: none; }
+.policy-row-label { color: #666; }
+.policy-row-value { color: #333; font-weight: 600; }
+
+.xiaoidi-entry {
+  background: linear-gradient(135deg, #fff8f0, #fff0e6);
+  border: 1px solid rgba(255, 149, 0, 0.4);
+  border-radius: 14px;
+  padding: 16px;
+  margin: 0 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.xiaoidi-entry-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #ff9500, #ffaa33);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.xiaoidi-entry-content { flex: 1; }
+.xiaoidi-entry-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
+.xiaoidi-entry-desc { font-size: 12px; color: #666; line-height: 1.4; }
+.xiaoidi-entry-arrow {
+  width: 28px; height: 28px;
+  background: linear-gradient(90deg, #ff9500, #ffaa33);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+
+.reset-fab {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 56px; height: 56px;
+  background: #333;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 100;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.95);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.loading-overlay.active { display: flex; }
+.loading-spinner {
+  width: 48px; height: 48px;
+  border: 3px solid #E6F7F0;
+  border-top-color: #00B578;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: #666; }
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <div class="demo-title">线上投保套餐 · 高保真原型</div>
+  <div class="demo-hint">点击保险公司 → 选择档位 → 勾选补充险</div>
+  <div class="scheme-tabs">
+    <button class="scheme-tab" data-scheme="A" onclick="setScheme('A')">方案A · 两档</button>
+    <button class="scheme-tab active" data-scheme="B" onclick="setScheme('B')">方案B · 三档</button>
+  </div>
+</div>
+
+<div class="phone-frame">
+  <div class="phone-screen" id="phoneScreen"></div>
+</div>
+
+<div class="reset-fab" onclick="resetDemo()">重置</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+    <div class="modal-title">即将进入投保页面</div>
+    <div class="modal-desc">您将查看保障方案详情并完成支付，是否继续？</div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="hideModal()">取消</button>
+      <button class="modal-btn-confirm" onclick="goToTierPage()">继续</button>
+    </div>
+  </div>
+</div>
+
+<div class="detail-sheet" id="detailSheet">
+  <div class="sheet-header">
+    <div class="sheet-title">保障详情</div>
+    <div class="sheet-close" onclick="closeDetailSheet()">✕</div>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+</div>
+
+<script>
+const COMPANIES = [
+  { id: 'pingan', name: '中国平安', short: '平安', color: '#ff6b35' },
+  { id: 'guoren', name: '国任财险', short: '国任', color: '#1e5aa8' },
+  { id: 'renbao', name: '人保财险', short: '人保', color: '#c41e3a' },
+  { id: 'renshou', name: '中国人寿', short: '人寿', color: '#0d8a56' },
+  { id: 'taiping', name: '太平洋财险', short: '太平', color: '#e6a817' },
+  { id: 'yangguang', name: '阳光财险', short: '阳光', color: '#f7931e' },
+];
+
+const BASE_DETAILS = [
+  { name: '从业人员死亡伤残', amount: '40万/人' },
+  { name: '从业人员医疗费用', amount: '5万/人' },
+  { name: '第三者死亡伤残', amount: '40万/人' },
+  { name: '第三者医疗费用', amount: '5万/人' },
+  { name: '第三者财产损失', amount: '20万/次' },
+  { name: '事故抢险救援费用', amount: '10万/次' },
+  { name: '法律诉讼费用', amount: '5万/次' },
+];
+
+const ADDONS = [
+  { id: 'gcyqx', name: '工程一切险', desc: '保障施工材料、设备损失以及工程本身的损坏', match: 95, amountAdv: '50万', amountVip: '100万', priceAdv: 200, priceVip: 380 },
+  { id: 'gzzr', name: '雇主责任险', desc: '为施工人员提供更高额度的人身伤亡保障', match: 75, amountAdv: '30万/人', amountVip: '60万/人', priceAdv: 150, priceVip: 280 },
+  { id: 'gzzr2', name: '公众责任险', desc: '保障施工期间对第三方更高额度的赔偿责任', match: 60, amountAdv: '30万/次', amountVip: '80万/次', priceAdv: 120, priceVip: 250 },
+  { id: 'tgssx', name: '停工损失险', desc: '恶劣天气或事故导致停工的误工损失补偿', match: 45, amountAdv: '2万', amountVip: '5万', priceAdv: 80, priceVip: 150 },
+  { id: 'zxpzx', name: '装修品质险', desc: '装修后墙面开裂、水管渗漏等质量问题修复', match: 70, amountAdv: '10万', amountVip: '20万', priceAdv: 150, priceVip: 280 },
+  { id: 'gkzyx', name: '高空作业险', desc: '高空坠物、坠落等专项保障', match: 50, amountAdv: '30万', amountVip: '50万', priceAdv: 100, priceVip: 200 },
+  { id: 'jzgctyyw', name: '建筑工程团体意外险', desc: '施工人员意外伤亡的额外保障', match: 55, amountAdv: '30万/人', amountVip: '50万/人', priceAdv: 120, priceVip: 220 },
+  { id: 'sgjjbx', name: '施工机具保险', desc: '施工机械、设备的损坏或被盗', match: 40, amountAdv: '10万', amountVip: '20万', priceAdv: 90, priceVip: 180 },
+];
+
+// 尊享版安责险3档
+const VIP_BASE_TIERS = [
+  { id: 'low', name: '低档', desc: '40万/人起', price: 500 },
+  { id: 'mid', name: '中档', desc: '60万/人起', price: 800, recommend: true },
+  { id: 'high', name: '高档', desc: '100万/人起', price: 1200 },
+];
+
+let state = {
+  page: 'match',
+  selectedCompany: null,
+  currentTier: 'advanced',
+  checkedAddons: new Set(),
+  defaultRecommendId: 'gcyqx',
+  vipBaseTier: 'mid',
+  scheme: 'B',  // A=基础+进阶；B=基础+进阶+尊享
+};
+
+function sortedAddons() {
+  return [...ADDONS].sort((a, b) => b.match - a.match);
+}
+// 进阶版和尊享版都展示全部补充险
+function allAddons() {
+  return sortedAddons();
+}
+
+function statusBar() {
+  return `
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">
+        <div class="signal-icon"><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div><div class="signal-bar"></div></div>
+        <div class="battery-icon"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const screen = document.getElementById('phoneScreen');
+  const renderers = { match: renderMatch, tier: renderTier, loading: renderLoading, success: renderSuccess };
+  screen.innerHTML = renderers[state.page]();
+}
+
+function renderMatch() {
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;">
+      <div style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;">&#8249;</div>
+      <div style="text-align:center;color:#fff;font-size:18px;font-weight:800;">备案申请</div>
+      <div></div>
+    </div>
+    <div style="background:#f1f3f1;display:grid;grid-template-columns:repeat(4,1fr);padding:18px 4px 16px;">
+      <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">基础信息</div>
+      <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">工程信息</div>
+      <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">安全信息</div>
+      <div style="text-align:center;font-size:14px;font-weight:800;color:#1a8f62;padding:8px 0;background:linear-gradient(135deg,#fff,#eef9f3 60%,#f4fcff);border-radius:26px 0 0 0;">匹配保单</div>
+    </div>
+
+    <div style="padding:16px;background:#fff;flex:1;">
+      <div style="background:linear-gradient(180deg,#ecf8f1,#f7fbfd);border:2px solid rgba(34,166,109,0.72);border-radius:18px;overflow:hidden;margin-bottom:16px;">
+        <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);color:#fff;padding:14px 16px;font-size:17px;font-weight:800;">⚠ 安全生产相关政策</div>
+        <div style="padding:14px 16px;">
+          <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">依法投保 保障施工安全</div>
+          <div style="font-size:12px;color:#666;line-height:1.5;">根据《青浦区小型工程管理办法》，除住宅装修和零星作业外，小型工程必须在开工前投保安责险。</div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:14px;padding:16px;border:1px solid #e8e8e8;">
+        <div style="font-size:16px;font-weight:700;color:#333;margin-bottom:12px;">请选择保险公司</div>
+        <div style="font-size:12px;color:#999;margin-bottom:14px;">备案信息将自动同步至所选保险公司</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+          ${COMPANIES.map(c => `
+            <div onclick="selectCompany('${c.id}')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:2px solid ${state.selectedCompany === c.id ? '#00B578' : '#e5e5e5'};border-radius:12px;cursor:pointer;background:${state.selectedCompany === c.id ? '#ebf8f1' : '#fff'};">
+              <div style="width:44px;height:44px;border-radius:50%;background:${c.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;">${c.short}</div>
+              <div style="font-size:12px;color:#333;font-weight:500;">${c.name}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:14px 16px;background:#fff;border-radius:12px;border:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+        <div>
+          <div style="font-size:14px;color:#333;font-weight:500;">关联线下已购保单</div>
+          <div style="font-size:12px;color:#999;margin-top:2px;">已在线下完成投保？可直接上传保单</div>
+        </div>
+        <div style="color:#999;font-size:16px;">&#8250;</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTier() {
+  const company = COMPANIES.find(c => c.id === state.selectedCompany) || COMPANIES[0];
+  const isVip = state.currentTier === 'vip';
+  const isAdvanced = state.currentTier === 'advanced';
+
+  let displayAddons = [];
+  if (isAdvanced || isVip) displayAddons = allAddons();
+
+  // 计算总价
+  let basePrice = 500;
+  if (isVip) {
+    const vipTier = VIP_BASE_TIERS.find(t => t.id === state.vipBaseTier);
+    basePrice = vipTier ? vipTier.price : 800;
+  }
+  let totalPrice = basePrice;
+  state.checkedAddons.forEach(id => {
+    const addon = ADDONS.find(a => a.id === id);
+    if (addon) totalPrice += isVip ? addon.priceVip : addon.priceAdv;
+  });
+
+  return `
+    ${statusBar()}
+    <div class="product-banner">
+      <div class="banner-nav">
+        <div class="banner-back" onclick="state.page='match';render();">&#8249;</div>
+        <div class="banner-actions">
+          <div class="banner-action"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+          <div class="banner-action"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+        </div>
+      </div>
+      <svg class="banner-illustration" viewBox="0 0 180 160">
+        <circle cx="60" cy="40" r="18" fill="#ffd9bf"/>
+        <path d="M50 38 Q60 32 70 38" fill="#333"/>
+        <rect x="44" y="22" width="32" height="14" rx="7" fill="#ffd700"/>
+        <rect x="42" y="56" width="36" height="56" fill="#fff"/>
+        <line x1="60" y1="56" x2="60" y2="112" stroke="#4a90e2" stroke-width="6"/>
+        <circle cx="115" cy="40" r="18" fill="#ffd9bf"/>
+        <path d="M105 38 Q115 32 125 38" fill="#333"/>
+        <rect x="99" y="22" width="32" height="14" rx="7" fill="#ffd700"/>
+        <rect x="97" y="56" width="36" height="56" fill="#fff"/>
+        <line x1="115" y1="56" x2="115" y2="112" stroke="#4a90e2" stroke-width="6"/>
+        <rect x="125" y="55" width="40" height="50" fill="#a8d8ff" transform="rotate(8 145 80)"/>
+      </svg>
+      <div class="product-name-card">
+        <div class="product-name">安全生产责任保险</div>
+      </div>
+      <div class="product-company">
+        <div class="company-logo-small" style="background:${company.color};">${company.short[0]}</div>
+        <span>${company.name}</span>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-item">
+        <div class="feature-item-title">法定强制保障</div>
+        <div class="feature-item-desc">从业人员+第三者+救援费用</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item-title">备案信息复用</div>
+        <div class="feature-item-desc">一键投保，免填资料</div>
+      </div>
+    </div>
+
+    <div class="tier-section">
+      <div class="tier-tabs" style="grid-template-columns:${state.scheme === 'A' ? '1fr 1fr' : '1fr 1fr 1fr'};">
+        <div class="tier-tab ${state.currentTier === 'basic' ? 'active' : ''}" onclick="switchTier('basic')">
+          <div class="tier-name">基础版</div>
+          <div class="tier-desc">满足合规要求</div>
+        </div>
+        <div class="tier-tab ${state.currentTier === 'advanced' ? 'active' : ''}" onclick="switchTier('advanced')">
+          <div class="tier-name">进阶版</div>
+          <div class="tier-desc">智能推荐保障</div>
+        </div>
+        ${state.scheme === 'B' ? `
+          <div class="tier-tab ${state.currentTier === 'vip' ? 'active' : ''}" onclick="switchTier('vip')">
+            <div class="tier-name">尊享版</div>
+            <div class="tier-desc">全面保障升级</div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+
+    <div class="protection-section">
+      <div class="protection-header">
+        <div class="protection-title">保障方案</div>
+        <div class="protection-detail" onclick="showBaseDetail()">详情 &#8250;</div>
+      </div>
+
+      ${isVip ? `
+        <!-- 尊享版：安责险3档可选 -->
+        <div class="vip-base-tier">
+          <div class="vip-base-header">
+            <span class="base-tag">必含</span>
+            <span class="vip-base-tier-title">安全生产责任保险</span>
+            <span class="vip-base-tier-subtitle">3档可选 · 必选其一</span>
+          </div>
+          <div class="vip-tier-options">
+            ${VIP_BASE_TIERS.map(t => `
+              <div class="vip-tier-option ${state.vipBaseTier === t.id ? 'active' : ''}" onclick="selectVipBaseTier('${t.id}')">
+                ${t.recommend ? '<div class="vip-tier-option-recommend">推荐</div>' : ''}
+                <div class="vip-tier-option-name">${t.name}</div>
+                <div class="vip-tier-option-amount">${t.desc}</div>
+                <div class="vip-tier-option-price">¥${t.price}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : `
+        <!-- 基础版/进阶版：安责险固定法定保额 -->
+        <div class="base-insurance">
+          <div class="base-insurance-header">
+            <div class="base-insurance-name">
+              <span class="base-tag">必含</span>
+              <span>安全生产责任保险</span>
+            </div>
+            <div class="base-checked">
+              <svg viewBox="0 0 24 24"><polyline points="4,12 9,17 20,6"/></svg>
+              <span>已选</span>
+            </div>
+          </div>
+          <div class="protection-list">
+            ${BASE_DETAILS.slice(0, 4).map(item => `
+              <div class="protection-item">
+                <span>${item.name}</span>
+                <span class="protection-item-amount">${item.amount}</span>
+              </div>
+            `).join('')}
+            <div style="text-align:center;color:#00B578;font-size:13px;padding:6px 0;cursor:pointer;" onclick="showBaseDetail()">查看全部 ${BASE_DETAILS.length} 项保障 &#8250;</div>
+          </div>
+        </div>
+      `}
+
+      ${(isAdvanced || isVip) ? `
+        <div class="addon-section">
+          <div class="addon-section-title">
+            <span class="addon-section-title-icon"></span>
+            可选补充保障
+            <span class="addon-section-subtitle">${isVip ? '至少选1款 · 共' + ADDONS.length + '款' : '可选 · 共' + ADDONS.length + '款'}</span>
+          </div>
+          ${isVip ? `
+            <div class="vip-required-hint">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+              <span>尊享版需至少勾选 1 款补充险</span>
+            </div>
+          ` : ''}
+          ${displayAddons.map(addon => {
+            const isChecked = state.checkedAddons.has(addon.id);
+            const isRecommend = addon.id === state.defaultRecommendId;
+            const amount = isVip ? addon.amountVip : addon.amountAdv;
+            const price = isVip ? addon.priceVip : addon.priceAdv;
+            return `
+              <div class="addon-card ${isChecked ? 'checked' : ''} ${isRecommend ? 'recommend' : ''}" onclick="toggleAddon('${addon.id}')">
+                ${isRecommend ? '<div class="addon-recommend-badge">最匹配本工程</div>' : ''}
+                <div class="addon-card-header">
+                  <div class="addon-name">${addon.name}</div>
+                  <div class="addon-checkbox">
+                    <svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg>
+                  </div>
+                </div>
+                <div class="addon-desc">${addon.desc}</div>
+                <div class="addon-footer">
+                  <div class="addon-amount">保额 <strong>${amount}</strong></div>
+                  <div class="addon-price">¥${price}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="agreement-section">
+      <div class="agreement-check"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 10,2"/></svg></div>
+      <div>阅读并同意 <span class="agreement-link">《服务协议》</span> | <span class="agreement-link">《客户告知书》</span> | <span class="agreement-link">《投保须知》</span> | <span class="agreement-link">《保险条款》</span></div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="bottom-actions-left">
+        <div class="bottom-action-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        <span>咨询</span>
+      </div>
+      <div class="bottom-price-wrap">
+        <span class="bottom-price-unit">¥</span>
+        <span class="bottom-price">${totalPrice}</span>
+        <span class="bottom-price-label">.00</span>
+      </div>
+      <button class="btn-submit" onclick="goToPayLoading()">我要投保</button>
+    </div>
+
+    <div class="loading-overlay" id="payLoading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">正在跳转支付...</div>
+    </div>
+  `;
+}
+
+function renderLoading() {
+  return `
+    ${statusBar()}
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:#f5f7fa;">
+      <div class="loading-spinner" style="margin-bottom:24px;"></div>
+      <div style="font-size:17px;font-weight:600;color:#333;margin-bottom:8px;">保单数据更新中</div>
+      <div style="font-size:13px;color:#999;">正在同步保单信息，请稍候...</div>
+    </div>
+  `;
+}
+
+function renderSuccess() {
+  const company = COMPANIES.find(c => c.id === state.selectedCompany) || COMPANIES[0];
+  const isVip = state.currentTier === 'vip';
+  const purchasedItems = [{ name: '安全生产责任保险', label: '必含', amount: '40万/人起' }];
+
+  // 尊享版安责险标注档位
+  if (isVip) {
+    const vipTier = VIP_BASE_TIERS.find(t => t.id === state.vipBaseTier);
+    purchasedItems[0].amount = `${vipTier.name} · ${vipTier.desc}`;
+  }
+
+  state.checkedAddons.forEach(id => {
+    const addon = ADDONS.find(a => a.id === id);
+    if (addon) {
+      const amount = isVip ? addon.amountVip : addon.amountAdv;
+      purchasedItems.push({ name: addon.name, label: '补充', amount: '保额 ' + amount });
+    }
+  });
+
+  // 总价
+  let basePrice = 500;
+  if (isVip) {
+    const vipTier = VIP_BASE_TIERS.find(t => t.id === state.vipBaseTier);
+    basePrice = vipTier ? vipTier.price : 800;
+  }
+  let totalPrice = basePrice;
+  state.checkedAddons.forEach(id => {
+    const addon = ADDONS.find(a => a.id === id);
+    if (addon) totalPrice += isVip ? addon.priceVip : addon.priceAdv;
+  });
+  const tierName = state.currentTier === 'basic' ? '基础版' : state.currentTier === 'advanced' ? '进阶版' : '尊享版';
+
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;">
+      <div></div>
+      <div style="text-align:center;color:#fff;font-size:18px;font-weight:800;">投保成功</div>
+      <div></div>
+    </div>
+
+    <div class="success-content">
+      <div class="success-icon-big">
+        <svg viewBox="0 0 24 24"><polyline points="4,12 9,17 20,6"/></svg>
+      </div>
+      <div class="success-page-title">投保成功</div>
+      <div class="success-page-desc">保单已自动关联至您的备案工程</div>
+    </div>
+
+    <div style="padding:0 16px;">
+      <div class="success-policy-card">
+        <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">保单信息</div>
+        <div class="policy-row"><span class="policy-row-label">保险公司</span><span class="policy-row-value">${company.name}</span></div>
+        <div class="policy-row"><span class="policy-row-label">保单号</span><span class="policy-row-value">PA202605220001</span></div>
+        <div class="policy-row"><span class="policy-row-label">保险期限</span><span class="policy-row-value">2026-05-22 至 2026-08-22</span></div>
+        <div class="policy-row"><span class="policy-row-label">套餐档次</span><span class="policy-row-value">${tierName}</span></div>
+        <div class="policy-row"><span class="policy-row-label">保费金额</span><span class="policy-row-value" style="color:#ff6b35;font-size:16px;">¥${totalPrice}.00</span></div>
+      </div>
+
+      <div class="success-policy-card">
+        <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">已购保障（${purchasedItems.length}项）</div>
+        ${purchasedItems.map(item => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="background:${item.label === '必含' ? '#00B578' : '#ff9500'};color:#fff;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">${item.label}</span>
+              <span style="font-size:14px;color:#333;font-weight:500;">${item.name}</span>
+            </div>
+            <span style="font-size:13px;color:#666;">${item.amount}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="xiaoidi-entry" onclick="alert('跳转至铃铛保保险商城\\n（可购买施工补充险、家财险、意外险、宠物险等任意险种）')">
+      <div class="xiaoidi-entry-icon">IDI</div>
+      <div class="xiaoidi-entry-content">
+        <div class="xiaoidi-entry-title">铃铛保 · 保险商城</div>
+        <div class="xiaoidi-entry-desc">${state.checkedAddons.size > 0 ? '保障已升级！商城还有更多险种等您了解' : '更多施工险种、生活意外险，一站式选购'}</div>
+      </div>
+      <div class="xiaoidi-entry-arrow">&#8250;</div>
+    </div>
+
+    <div style="padding:0 16px 24px;">
+      <button style="width:100%;height:50px;background:linear-gradient(90deg,#26a66d,#4fb3d7);color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(34,166,109,0.26);" onclick="alert('提交备案申请')">提交备案申请</button>
+    </div>
+  `;
+}
+
+function selectCompany(id) {
+  state.selectedCompany = id;
+  render();
+  setTimeout(() => showModal(), 150);
+}
+
+function showModal() {
+  document.getElementById('confirmModal').classList.add('active');
+}
+
+function hideModal() {
+  document.getElementById('confirmModal').classList.remove('active');
+}
+
+function goToTierPage() {
+  hideModal();
+  state.page = 'tier';
+  state.currentTier = 'advanced';
+  state.checkedAddons = new Set([state.defaultRecommendId]);
+  render();
+}
+
+function switchTier(tier) {
+  const prevTier = state.currentTier;
+  state.currentTier = tier;
+  if (tier === 'basic') {
+    state.checkedAddons.clear();
+  } else if (tier === 'advanced') {
+    // 进阶版：从基础切过来默认勾选推荐款；从尊享切过来保留所有勾选（因为补充险池一致）
+    if (prevTier === 'basic') {
+      state.checkedAddons = new Set([state.defaultRecommendId]);
+    }
+  } else if (tier === 'vip') {
+    // 尊享版：必须至少有1个补充险，默认中档
+    state.vipBaseTier = 'mid';
+    if (state.checkedAddons.size === 0) {
+      state.checkedAddons = new Set([state.defaultRecommendId]);
+    }
+  }
+  render();
+}
+
+function selectVipBaseTier(tierId) {
+  state.vipBaseTier = tierId;
+  render();
+}
+
+function toggleAddon(id) {
+  // 尊享版：至少保留1个，不允许全部取消
+  if (state.currentTier === 'vip' && state.checkedAddons.has(id) && state.checkedAddons.size === 1) {
+    alert('尊享版需至少选择1款补充险\n您也可以切换至进阶版');
+    return;
+  }
+  if (state.checkedAddons.has(id)) state.checkedAddons.delete(id);
+  else state.checkedAddons.add(id);
+  render();
+}
+
+function goToPayLoading() {
+  document.getElementById('payLoading').classList.add('active');
+  setTimeout(() => {
+    state.page = 'loading';
+    render();
+    setTimeout(() => {
+      state.page = 'success';
+      render();
+    }, 1800);
+  }, 800);
+}
+
+function showBaseDetail() {
+  const body = document.getElementById('sheetBody');
+  body.innerHTML = `
+    <div style="font-size:14px;color:#666;margin-bottom:16px;line-height:1.6;">
+      安全生产责任保险（安责险）是政府强制要求的施工基础保障，三档套餐保额一致，符合《安全生产责任保险实施办法》要求。
+    </div>
+    ${BASE_DETAILS.map(item => `
+      <div class="sheet-row">
+        <span class="sheet-row-label">${item.name}</span>
+        <span class="sheet-row-value">${item.amount}</span>
+      </div>
+    `).join('')}
+  `;
+  document.getElementById('detailSheet').classList.add('active');
+}
+
+function closeDetailSheet() {
+  document.getElementById('detailSheet').classList.remove('active');
+}
+
+function resetDemo() {
+  state = {
+    page: 'match',
+    selectedCompany: null,
+    currentTier: 'advanced',
+    checkedAddons: new Set(),
+    defaultRecommendId: 'gcyqx',
+    vipBaseTier: 'mid',
+    scheme: state.scheme || 'B',
+  };
+  hideModal();
+  closeDetailSheet();
+  render();
+}
+
+function setScheme(s) {
+  state.scheme = s;
+  // 切换方案A时，如果当前在尊享版，自动切到进阶版
+  if (s === 'A' && state.currentTier === 'vip') {
+    state.currentTier = 'advanced';
+  }
+  // 更新按钮状态
+  document.querySelectorAll('.scheme-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.scheme-tab[data-scheme="${s}"]`).classList.add('active');
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>

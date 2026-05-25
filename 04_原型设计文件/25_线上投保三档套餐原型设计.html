@@ -17,20 +17,13 @@ body {
 }
 
 .demo-header {
-  width: 100%;
-  max-width: 1200px;
   background: #fff;
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 8px;
   margin-bottom: 16px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  display: inline-flex;
 }
-.demo-title { font-size: 16px; font-weight: 700; color: #333; flex-shrink: 0; }
-.demo-hint { font-size: 13px; color: #999; flex: 1; }
 
 /* 方案切换 */
 .scheme-tabs {
@@ -65,17 +58,16 @@ body {
   border-radius: 40px;
   box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.08);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   height: 844px;
+  position: relative;
 }
 .phone-screen {
-  display: flex;
-  flex-direction: column;
-  height: 844px;
+  height: 100%;
   background: #f5f7fa;
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 .phone-screen::-webkit-scrollbar { width: 4px; }
 .phone-screen::-webkit-scrollbar-track { background: transparent; }
@@ -498,6 +490,9 @@ body {
   gap: 8px;
   border-top: 1px solid #f0f0f0;
   box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 .bottom-actions-left {
   display: flex;
@@ -722,8 +717,6 @@ body {
 <body>
 
 <div class="demo-header">
-  <div class="demo-title">线上投保套餐 · 高保真原型</div>
-  <div class="demo-hint">点击保险公司 → 选择档位 → 勾选补充险</div>
   <div class="scheme-tabs">
     <button class="scheme-tab" data-scheme="A" onclick="setScheme('A')">方案A · 两档</button>
     <button class="scheme-tab active" data-scheme="B" onclick="setScheme('B')">方案B · 三档</button>
@@ -794,14 +787,93 @@ const VIP_BASE_TIERS = [
   { id: 'high', name: '高档', desc: '100万/人起', price: 1200 },
 ];
 
+// 工程模拟数据
+const MOCK_PROJECTS = [
+  {
+    id: 'p1',
+    name: '测试0521',
+    address: '农副产品永发什货批发行 1212',
+    type: '小型工程',
+    typeCode: 'project',
+    status: '在建',
+    insuranceStatus: 'active',
+    insurances: [
+      { name: '安全生产责任保险', company: '中国平安', amount: '40万/人', price: 500, startDate: '2026-05-01', endDate: '2026-08-01', policyNo: 'PA202605010001' }
+    ]
+  },
+  {
+    id: 'p2',
+    name: '青浦区XX路XX号室内装修',
+    address: '上海市青浦区XX路XX号XX室',
+    type: '住宅装修',
+    typeCode: 'decoration',
+    status: '在建',
+    insuranceStatus: 'active',
+    insurances: [
+      { name: '安全生产责任保险', company: '中国平安', amount: '40万/人', price: 500, startDate: '2026-05-01', endDate: '2026-08-01', policyNo: 'PA202605010002' },
+      { name: '工程一切险', company: '中国平安', amount: '50万', price: 200, startDate: '2026-05-01', endDate: '2026-08-01', policyNo: 'PA202605010003' },
+      { name: '装修品质险', company: '中国平安', amount: '10万', price: 150, startDate: '2026-05-01', endDate: '2026-08-01', policyNo: 'PA202605010004' }
+    ]
+  },
+  {
+    id: 'p3',
+    name: '朱家角XX小区维修',
+    address: '上海市青浦区朱家角镇XX小区',
+    type: '零星作业',
+    typeCode: 'misc',
+    status: '在建',
+    insuranceStatus: 'expiring',
+    insurances: [
+      { name: '安全生产责任保险', company: '人保财险', amount: '40万/人', price: 500, startDate: '2026-01-15', endDate: '2026-05-30', policyNo: 'RB202601150001' }
+    ]
+  },
+  {
+    id: 'p4',
+    name: '夏阳街道外墙清洗',
+    address: '上海市青浦区夏阳街道XX路',
+    type: '零星作业',
+    typeCode: 'misc',
+    status: '在建',
+    insuranceStatus: 'expired',
+    insurances: [
+      { name: '安全生产责任保险', company: '太平洋财险', amount: '40万/人', price: 500, startDate: '2025-12-01', endDate: '2026-03-01', policyNo: 'TP202512010001' }
+    ]
+  },
+  {
+    id: 'p5',
+    name: '盈浦街道商铺改造',
+    address: '上海市青浦区盈浦街道XX路XX号',
+    type: '小型工程',
+    typeCode: 'project',
+    status: '在建',
+    insuranceStatus: 'uninsured',
+    insurances: []
+  }
+];
+
 let state = {
-  page: 'match',
+  // 底部导航当前选中
+  navTab: 'project',  // 'project' | 'service'
+
+  // 当前页面
+  page: 'project',  // 'project' | 'service' | 'insurance' | 'policyDetail' | 'match' | 'tier' | 'pay' | 'loading' | 'success' | 'posterInsurance' | 'posterPolicy'
+
+  // 我的保险页面状态
+  insuranceTab: 'all',  // 'all' | 'active' | 'expiring' | 'expired' | 'uninsured'
+  searchKeyword: '',
+  filterType: 'all',  // 'all' | 'project' | 'decoration' | 'misc'
+  projectStatusTab: 'draft',  // 'draft' | 'pending' | 'rejected' | 'approved'
+
+  // 选中的工程（用于保单详情）
+  selectedProject: null,
+
+  // 原有投保流程状态
   selectedCompany: null,
-  currentTier: 'advanced',
+  currentTier: 'basic',
   checkedAddons: new Set(),
   defaultRecommendId: 'gcyqx',
   vipBaseTier: 'mid',
-  scheme: 'B',  // A=基础+进阶；B=基础+进阶+尊享
+  scheme: 'B',
 };
 
 function sortedAddons() {
@@ -826,56 +898,285 @@ function statusBar() {
 
 function render() {
   const screen = document.getElementById('phoneScreen');
-  const renderers = { match: renderMatch, tier: renderTier, loading: renderLoading, success: renderSuccess };
+  const renderers = {
+    project: renderProject,
+    service: renderService,
+    insurance: renderInsurance,
+    policyDetail: renderPolicyDetail,
+    match: renderMatch,
+    tier: renderTier,
+    pay: renderPay,
+    loading: renderLoading,
+    success: renderSuccess,
+    posterInsurance: renderPosterInsurance,
+    posterPolicy: renderPosterPolicy,
+    claim: renderClaim
+  };
   screen.innerHTML = renderers[state.page]();
 }
 
 function renderMatch() {
+  const isSelected = (id) => state.selectedCompany === id;
   return `
     ${statusBar()}
-    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;">
-      <div style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;">&#8249;</div>
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 88px;align-items:center;">
+      <div onclick="state.page='project';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
       <div style="text-align:center;color:#fff;font-size:18px;font-weight:800;">备案申请</div>
-      <div></div>
+      <div style="width:78px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.22);border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px;margin-left:auto;">
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:1px;height:12px;background:rgba(255,255,255,0.4);"></div>
+        <div style="width:14px;height:14px;border:1.5px solid #fff;border-radius:50%;"></div>
+      </div>
     </div>
-    <div style="background:#f1f3f1;display:grid;grid-template-columns:repeat(4,1fr);padding:18px 4px 16px;">
+
+    <!-- Tab栏 -->
+    <div style="background:#f1f3f1;display:grid;grid-template-columns:repeat(4,1fr);padding:18px 4px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.32);">
       <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">基础信息</div>
       <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">工程信息</div>
       <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">安全信息</div>
-      <div style="text-align:center;font-size:14px;font-weight:800;color:#1a8f62;padding:8px 0;background:linear-gradient(135deg,#fff,#eef9f3 60%,#f4fcff);border-radius:26px 0 0 0;">匹配保单</div>
+      <div style="text-align:center;font-size:14px;font-weight:800;color:#1a8f62;padding:8px 0;background:linear-gradient(135deg,#fff,#eef9f3 60%,#f4fcff);border-radius:26px 0 0 0;box-shadow:-10px 0 20px rgba(83,183,216,0.08);">匹配保单</div>
     </div>
 
-    <div style="padding:16px;background:#fff;flex:1;">
-      <div style="background:linear-gradient(180deg,#ecf8f1,#f7fbfd);border:2px solid rgba(34,166,109,0.72);border-radius:18px;overflow:hidden;margin-bottom:16px;">
-        <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);color:#fff;padding:14px 16px;font-size:17px;font-weight:800;">⚠ 安全生产相关政策</div>
-        <div style="padding:14px 16px;">
-          <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">依法投保 保障施工安全</div>
-          <div style="font-size:12px;color:#666;line-height:1.5;">根据《青浦区小型工程管理办法》，除住宅装修和零星作业外，小型工程必须在开工前投保安责险。</div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px;background:linear-gradient(180deg,#f6fbf8,#fff);">
+      <!-- 轮播图 -->
+      <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
+        <!-- 卡片1：安责险介绍 -->
+        <div onclick="state.page='posterInsurance';render();" style="flex-shrink:0;width:calc(100% - 8px);scroll-snap-align:start;background:linear-gradient(135deg,#ecf8f1,#e6f7f0 50%,#f7fbfd);border-radius:18px;padding:20px;position:relative;overflow:hidden;cursor:pointer;border:1px solid rgba(0,181,120,0.15);">
+          <svg style="position:absolute;right:16px;top:50%;transform:translateY(-50%);opacity:0.35;" width="90" height="90" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1" fill="none">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9,12 12,15 17,10"/>
+          </svg>
+          <div style="position:relative;z-index:1;">
+            <div style="font-size:20px;font-weight:800;color:#1a1a1a;line-height:1.2;margin-bottom:6px;">安全生产责任保险</div>
+            <div style="font-size:13px;color:#666;margin-bottom:14px;">为建设工程保驾护航</div>
+            <button style="background:#1a1a1a;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">了解详情 &#8250;</button>
+          </div>
+          <div style="position:absolute;bottom:12px;right:16px;display:flex;gap:4px;z-index:1;">
+            <div style="width:14px;height:4px;background:#00B578;border-radius:2px;"></div>
+            <div style="width:4px;height:4px;background:rgba(0,181,120,0.3);border-radius:50%;"></div>
+          </div>
+        </div>
+        <!-- 卡片2：政策说明 -->
+        <div onclick="state.page='posterPolicy';render();" style="flex-shrink:0;width:calc(100% - 8px);scroll-snap-align:start;background:linear-gradient(135deg,#fff8f0,#fff0e6);border-radius:18px;padding:20px;position:relative;overflow:hidden;cursor:pointer;border:1px solid rgba(255,149,0,0.15);">
+          <svg style="position:absolute;right:16px;top:50%;transform:translateY(-50%);opacity:0.35;" width="90" height="90" viewBox="0 0 24 24" stroke="#ff9500" stroke-width="1" fill="none">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          <div style="position:relative;z-index:1;">
+            <div style="font-size:20px;font-weight:800;color:#1a1a1a;line-height:1.2;margin-bottom:6px;">安全生产相关政策</div>
+            <div style="font-size:13px;color:#666;margin-bottom:14px;">依法投保 · 保障施工安全</div>
+            <button style="background:#1a1a1a;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">了解详情 &#8250;</button>
+          </div>
+          <div style="position:absolute;bottom:12px;right:16px;display:flex;gap:4px;z-index:1;">
+            <div style="width:4px;height:4px;background:rgba(255,149,0,0.3);border-radius:50%;"></div>
+            <div style="width:14px;height:4px;background:#ff9500;border-radius:2px;"></div>
+          </div>
         </div>
       </div>
 
-      <div style="background:#fff;border-radius:14px;padding:16px;border:1px solid #e8e8e8;">
-        <div style="font-size:16px;font-weight:700;color:#333;margin-bottom:12px;">请选择保险公司</div>
-        <div style="font-size:12px;color:#999;margin-bottom:14px;">备案信息将自动同步至所选保险公司</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-          ${COMPANIES.map(c => `
-            <div onclick="selectCompany('${c.id}')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:2px solid ${state.selectedCompany === c.id ? '#00B578' : '#e5e5e5'};border-radius:12px;cursor:pointer;background:${state.selectedCompany === c.id ? '#ebf8f1' : '#fff'};">
-              <div style="width:44px;height:44px;border-radius:50%;background:${c.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;">${c.short}</div>
-              <div style="font-size:12px;color:#333;font-weight:500;">${c.name}</div>
+      <!-- 投保方式 -->
+      <div style="background:#fff;border-radius:18px;padding:16px;border:1px solid #d7e3db;box-shadow:0 12px 28px rgba(26,41,32,0.05);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:17px;font-weight:700;color:#000;">
+          <div style="width:4px;height:18px;background:linear-gradient(180deg,#35ad73,#58b8d7);border-radius:2px;"></div>
+          投保方式
+        </div>
+
+        <!-- 线上投保卡片 -->
+        <div style="background:linear-gradient(180deg,#ebf8f1,#fff);border:2px solid rgba(34,166,109,0.5);border-radius:14px;padding:14px;position:relative;margin-bottom:12px;">
+          <div style="position:absolute;top:0;right:0;background:linear-gradient(90deg,#ff9500,#ffaa33);color:#fff;padding:4px 14px;border-radius:0 14px 0 12px;font-size:12px;font-weight:700;">推荐</div>
+
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:24px;height:24px;background:#E6F7F0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2.5" fill="none"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/></svg>
             </div>
-          `).join('')}
+            <span style="font-size:16px;font-weight:700;color:#1a8f62;">线上投保</span>
+          </div>
+
+          <!-- 步骤 -->
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;background:#f5faf7;border-radius:20px;padding:8px 12px;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#1a8f62;font-weight:600;">
+              <div style="width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#35ad73,#58b8d7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;">1</div>
+              选保司
+            </div>
+            <span style="color:#ccc;font-size:10px;">&#8250;</span>
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#999;">
+              <div style="width:18px;height:18px;border-radius:50%;background:#e5e5e5;color:#999;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;">2</div>
+              确认信息
+            </div>
+            <span style="color:#ccc;font-size:10px;">&#8250;</span>
+            <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:#999;">
+              <div style="width:18px;height:18px;border-radius:50%;background:#e5e5e5;color:#999;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;">3</div>
+              完成支付
+            </div>
+          </div>
+
+          <!-- 保险公司网格 -->
+          <div style="background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:14px 10px;margin-bottom:14px;">
+            <div style="text-align:center;color:#ff9500;font-size:13px;font-weight:600;margin-bottom:14px;">—— 请选择保险公司 ——</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              ${COMPANIES.map(c => `
+                <div onclick="selectCompany('${c.id}')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border:1.5px solid ${isSelected(c.id) ? '#00B578' : '#f0f0f0'};border-radius:10px;cursor:pointer;background:${isSelected(c.id) ? '#ebf8f1' : '#fff'};">
+                  <div style="width:38px;height:38px;border-radius:8px;background:${c.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;">${c.short}</div>
+                  <div style="font-size:11px;color:#333;font-weight:500;text-align:center;">${c.name}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 卖点 -->
+          <div style="margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:700;color:#1a8f62;margin-bottom:4px;">一键投保，免填资料</div>
+            <div style="font-size:12px;color:#666;margin-bottom:10px;">备案信息自动同步保险公司，无需重复填写</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <div style="display:flex;align-items:center;gap:3px;font-size:11px;color:#444;background:#E6F7F0;padding:3px 8px;border-radius:12px;">
+                <svg width="12" height="12" viewBox="0 0 16 16" stroke="#00B578" stroke-width="2.5" fill="none"><polyline points="2,8 6,12 14,4"/></svg>
+                快捷出单
+              </div>
+              <div style="display:flex;align-items:center;gap:3px;font-size:11px;color:#444;background:#E6F7F0;padding:3px 8px;border-radius:12px;">
+                <svg width="12" height="12" viewBox="0 0 16 16" stroke="#00B578" stroke-width="2.5" fill="none"><polyline points="2,8 6,12 14,4"/></svg>
+                保单免审核
+              </div>
+              <div style="display:flex;align-items:center;gap:3px;font-size:11px;color:#444;background:#E6F7F0;padding:3px 8px;border-radius:12px;">
+                <svg width="12" height="12" viewBox="0 0 16 16" stroke="#00B578" stroke-width="2.5" fill="none"><polyline points="2,8 6,12 14,4"/></svg>
+                信息复用
+              </div>
+              <div style="display:flex;align-items:center;gap:3px;font-size:11px;color:#444;background:#E6F7F0;padding:3px 8px;border-radius:12px;">
+                <svg width="12" height="12" viewBox="0 0 16 16" stroke="#00B578" stroke-width="2.5" fill="none"><polyline points="2,8 6,12 14,4"/></svg>
+                大平台有保障
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 关联线下 -->
+        <div style="background:#f5f5f5;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+          <div>
+            <div style="font-size:14px;color:#999;font-weight:600;margin-bottom:2px;">关联线下已购保单</div>
+            <div style="font-size:12px;color:#bbb;">如您已在线下完成投保，可直接上传保单继续备案</div>
+          </div>
+          <div style="color:#bbb;font-size:16px;">&#8250;</div>
         </div>
       </div>
 
-      <div style="margin-top:16px;padding:14px 16px;background:#fff;border-radius:12px;border:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
-        <div>
-          <div style="font-size:14px;color:#333;font-weight:500;">关联线下已购保单</div>
-          <div style="font-size:12px;color:#999;margin-top:2px;">已在线下完成投保？可直接上传保单</div>
+      <!-- 客服 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(90deg,#f2faf5,#f5fbfe);border:1px solid rgba(34,166,109,0.12);border-radius:20px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#35ad73,#58b8d7);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;">客</div>
+          <div style="font-size:13px;color:#333;line-height:1.4;">系统操作及保单问题，<br>咨询小型工程管理平台</div>
         </div>
-        <div style="color:#999;font-size:16px;">&#8250;</div>
+        <button style="background:#fff;border:1.5px solid #00B578;color:#00B578;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          客服电话
+        </button>
       </div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div style="position:sticky;bottom:0;background:#fff;padding:12px 16px 24px;display:flex;gap:12px;border-top:1px solid #f0f0f0;box-shadow:0 -4px 12px rgba(0,0,0,0.04);z-index:10;">
+      <button style="flex:1;height:50px;border:1.5px solid #00B578;background:#fff;color:#00B578;border-radius:25px;font-size:16px;font-weight:700;cursor:pointer;">临时保存</button>
+      <button style="flex:2;height:50px;background:linear-gradient(90deg,#26a66d,#4fb3d7);color:#fff;border:none;border-radius:25px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(34,166,109,0.26);">提交备案申请</button>
     </div>
   `;
+}
+
+// 支付页（图2收银台样式）
+function renderPay() {
+  const company = COMPANIES.find(c => c.id === state.selectedCompany) || COMPANIES[0];
+  const isVip = state.currentTier === 'vip';
+  let basePrice = 500;
+  if (isVip) {
+    const vipTier = VIP_BASE_TIERS.find(t => t.id === state.vipBaseTier);
+    basePrice = vipTier ? vipTier.price : 800;
+  }
+  let totalPrice = basePrice;
+  state.checkedAddons.forEach(id => {
+    const addon = ADDONS.find(a => a.id === id);
+    if (addon) totalPrice += isVip ? addon.priceVip : addon.priceAdv;
+  });
+
+  return `
+    ${statusBar()}
+    <!-- 收银台头部（绿色背景） -->
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 88px;align-items:center;">
+      <div onclick="state.page='tier';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+      <div style="background:rgba(255,255,255,0.2);color:#fff;text-align:center;font-size:15px;font-weight:600;padding:6px 14px;border-radius:6px;justify-self:center;">${company.name}收银台</div>
+      <div style="width:78px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.22);border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px;margin-left:auto;">
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:1px;height:12px;background:rgba(255,255,255,0.4);"></div>
+        <div style="width:14px;height:14px;border:1.5px solid #fff;border-radius:50%;"></div>
+      </div>
+    </div>
+
+    <!-- 金额 -->
+    <div style="background:#f5f7fa;padding:50px 20px 40px;text-align:center;">
+      <div style="font-size:54px;font-weight:700;color:#ff9500;letter-spacing:-1px;">${totalPrice}.00<span style="font-size:22px;font-weight:500;margin-left:2px;">元</span></div>
+    </div>
+
+    <div style="padding:0 16px 16px;background:#f5f7fa;">
+      <!-- 订单信息 -->
+      <div style="background:#fff;border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:15px;border-bottom:1px solid #f5f5f5;">
+          <span style="color:#666;">保险单号</span>
+          <span style="color:#333;">02134677643437338745</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:15px;border-bottom:1px solid #f5f5f5;">
+          <span style="color:#666;">客户名称</span>
+          <span style="color:#333;">青浦大力建设有限公司</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:15px;">
+          <span style="color:#666;">商品名称</span>
+          <span style="color:#333;">安全生产责任保险${state.checkedAddons.size > 0 ? '+' + state.checkedAddons.size + '项补充' : ''}</span>
+        </div>
+      </div>
+
+      <!-- 支付方式 -->
+      <div style="background:#fff;border-radius:14px;padding:18px 20px;">
+        <div style="font-size:15px;font-weight:600;color:#333;margin-bottom:14px;">选择支付方式</div>
+        <div onclick="selectPayMethod(this, 'weixin')" data-method="weixin" class="pay-method-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f5f5f5;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:28px;border-radius:6px;background:#07c160;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;">微</div>
+            <span style="font-size:15px;color:#333;">微信支付</span>
+          </div>
+          <div class="pay-radio-dot" style="width:18px;height:18px;border:2px solid #00B578;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#00B578;">
+            <div style="width:7px;height:7px;background:#fff;border-radius:50%;"></div>
+          </div>
+        </div>
+        <div onclick="selectPayMethod(this, 'alipay')" data-method="alipay" class="pay-method-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:28px;border-radius:6px;background:#1677ff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;">支</div>
+            <span style="font-size:15px;color:#333;">支付宝支付</span>
+          </div>
+          <div class="pay-radio-dot" style="width:18px;height:18px;border:2px solid #d0d0d0;border-radius:50%;background:#fff;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部支付按钮 -->
+    <div style="position:sticky;bottom:0;background:#f5f7fa;padding:16px 20px 24px;z-index:10;">
+      <button onclick="confirmPay()" style="width:100%;height:50px;background:linear-gradient(90deg,#ff9500,#ffaa33);color:#fff;border:none;border-radius:25px;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(255,149,0,0.3);">确认支付（${totalPrice}元）</button>
+    </div>
+  `;
+}
+
+function selectPayMethod(el, method) {
+  document.querySelectorAll('.pay-method-row').forEach(row => {
+    const dot = row.querySelector('.pay-radio-dot');
+    if (row.dataset.method === method) {
+      dot.style.border = '2px solid #00B578';
+      dot.style.background = '#00B578';
+      dot.innerHTML = '<div style="width:7px;height:7px;background:#fff;border-radius:50%;"></div>';
+    } else {
+      dot.style.border = '2px solid #d0d0d0';
+      dot.style.background = '#fff';
+      dot.innerHTML = '';
+    }
+  });
 }
 
 function renderTier() {
@@ -936,8 +1237,8 @@ function renderTier() {
         <div class="feature-item-desc">从业人员+第三者+救援费用</div>
       </div>
       <div class="feature-item">
-        <div class="feature-item-title">备案信息复用</div>
-        <div class="feature-item-desc">一键投保，免填资料</div>
+        <div class="feature-item-title">投保便捷无忧</div>
+        <div class="feature-item-desc">一键完成免填资料</div>
       </div>
     </div>
 
@@ -972,7 +1273,6 @@ function renderTier() {
           <div class="vip-base-header">
             <span class="base-tag">必含</span>
             <span class="vip-base-tier-title">安全生产责任保险</span>
-            <span class="vip-base-tier-subtitle">3档可选 · 必选其一</span>
           </div>
           <div class="vip-tier-options">
             ${VIP_BASE_TIERS.map(t => `
@@ -1015,14 +1315,7 @@ function renderTier() {
           <div class="addon-section-title">
             <span class="addon-section-title-icon"></span>
             可选补充保障
-            <span class="addon-section-subtitle">${isVip ? '至少选1款 · 共' + ADDONS.length + '款' : '可选 · 共' + ADDONS.length + '款'}</span>
           </div>
-          ${isVip ? `
-            <div class="vip-required-hint">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
-              <span>尊享版需至少勾选 1 款补充险</span>
-            </div>
-          ` : ''}
           ${displayAddons.map(addon => {
             const isChecked = state.checkedAddons.has(addon.id);
             const isRecommend = addon.id === state.defaultRecommendId;
@@ -1088,21 +1381,6 @@ function renderLoading() {
 function renderSuccess() {
   const company = COMPANIES.find(c => c.id === state.selectedCompany) || COMPANIES[0];
   const isVip = state.currentTier === 'vip';
-  const purchasedItems = [{ name: '安全生产责任保险', label: '必含', amount: '40万/人起' }];
-
-  // 尊享版安责险标注档位
-  if (isVip) {
-    const vipTier = VIP_BASE_TIERS.find(t => t.id === state.vipBaseTier);
-    purchasedItems[0].amount = `${vipTier.name} · ${vipTier.desc}`;
-  }
-
-  state.checkedAddons.forEach(id => {
-    const addon = ADDONS.find(a => a.id === id);
-    if (addon) {
-      const amount = isVip ? addon.amountVip : addon.amountAdv;
-      purchasedItems.push({ name: addon.name, label: '补充', amount: '保额 ' + amount });
-    }
-  });
 
   // 总价
   let basePrice = 500;
@@ -1115,67 +1393,187 @@ function renderSuccess() {
     const addon = ADDONS.find(a => a.id === id);
     if (addon) totalPrice += isVip ? addon.priceVip : addon.priceAdv;
   });
-  const tierName = state.currentTier === 'basic' ? '基础版' : state.currentTier === 'advanced' ? '进阶版' : '尊享版';
+
+  // 已购补充险列表
+  const addedItems = [];
+  state.checkedAddons.forEach(id => {
+    const addon = ADDONS.find(a => a.id === id);
+    if (addon) addedItems.push({ name: addon.name });
+  });
 
   return `
     ${statusBar()}
-    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;">
-      <div></div>
-      <div style="text-align:center;color:#fff;font-size:18px;font-weight:800;">投保成功</div>
-      <div></div>
+    <!-- 顶部导航（与匹配保单页一致） -->
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 88px;align-items:center;">
+      <div onclick="state.page='insurance';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+      <div style="text-align:center;color:#fff;font-size:18px;font-weight:800;">备案申请</div>
+      <div style="width:78px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.22);border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px;margin-left:auto;">
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
+        <div style="width:1px;height:12px;background:rgba(255,255,255,0.4);"></div>
+        <div style="width:14px;height:14px;border:1.5px solid #fff;border-radius:50%;"></div>
+      </div>
     </div>
 
-    <div class="success-content">
-      <div class="success-icon-big">
-        <svg viewBox="0 0 24 24"><polyline points="4,12 9,17 20,6"/></svg>
-      </div>
-      <div class="success-page-title">投保成功</div>
-      <div class="success-page-desc">保单已自动关联至您的备案工程</div>
+    <!-- Tab栏 -->
+    <div style="background:#f1f3f1;display:grid;grid-template-columns:repeat(4,1fr);padding:18px 4px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.32);">
+      <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">基础信息</div>
+      <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">工程信息</div>
+      <div style="text-align:center;font-size:14px;font-weight:700;color:#303631;padding:8px 0;">安全信息</div>
+      <div style="text-align:center;font-size:14px;font-weight:800;color:#1a8f62;padding:8px 0;background:linear-gradient(135deg,#fff,#eef9f3 60%,#f4fcff);border-radius:26px 0 0 0;box-shadow:-10px 0 20px rgba(83,183,216,0.08);">匹配保单</div>
     </div>
 
-    <div style="padding:0 16px;">
-      <div class="success-policy-card">
-        <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">保单信息</div>
-        <div class="policy-row"><span class="policy-row-label">保险公司</span><span class="policy-row-value">${company.name}</span></div>
-        <div class="policy-row"><span class="policy-row-label">保单号</span><span class="policy-row-value">PA202605220001</span></div>
-        <div class="policy-row"><span class="policy-row-label">保险期限</span><span class="policy-row-value">2026-05-22 至 2026-08-22</span></div>
-        <div class="policy-row"><span class="policy-row-label">套餐档次</span><span class="policy-row-value">${tierName}</span></div>
-        <div class="policy-row"><span class="policy-row-label">保费金额</span><span class="policy-row-value" style="color:#ff6b35;font-size:16px;">¥${totalPrice}.00</span></div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,#f6fbf8,#fff);">
+      <!-- 政策海报 -->
+      <div style="background:linear-gradient(135deg,#ecf8f1,#e6f7f0 50%,#f7fbfd);border-radius:18px;padding:16px;position:relative;overflow:hidden;cursor:pointer;">
+        <svg style="position:absolute;right:16px;top:50%;transform:translateY(-50%);opacity:0.5;" width="70" height="70" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1" fill="none">
+          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+        <div style="position:relative;z-index:1;">
+          <div style="font-size:18px;font-weight:800;color:#1a1a1a;line-height:1.2;margin-bottom:4px;">安全生产相关政策</div>
+          <div style="font-size:12px;color:#666;margin-bottom:12px;">依法投保 · 保障施工安全</div>
+          <button style="background:#1a1a1a;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">了解详情 &#8250;</button>
+        </div>
+        <div style="position:absolute;bottom:10px;right:14px;display:flex;gap:4px;z-index:1;">
+          <div style="width:14px;height:4px;background:#00B578;border-radius:2px;"></div>
+          <div style="width:4px;height:4px;background:rgba(0,181,120,0.3);border-radius:50%;"></div>
+          <div style="width:4px;height:4px;background:rgba(0,181,120,0.3);border-radius:50%;"></div>
+        </div>
       </div>
 
-      <div class="success-policy-card">
-        <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">已购保障（${purchasedItems.length}项）</div>
-        ${purchasedItems.map(item => `
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="background:${item.label === '必含' ? '#00B578' : '#ff9500'};color:#fff;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">${item.label}</span>
-              <span style="font-size:14px;color:#333;font-weight:500;">${item.name}</span>
+      <!-- 保单已关联卡片 -->
+      <div style="background:linear-gradient(180deg,#ebf8f1,#fff);border:2px solid rgba(34,166,109,0.5);border-radius:18px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed rgba(34,166,109,0.3);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;background:linear-gradient(135deg,#35ad73,#58b8d7);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" stroke="#fff" stroke-width="3" fill="none"><polyline points="4,12 9,17 20,6"/></svg>
             </div>
-            <span style="font-size:13px;color:#666;">${item.amount}</span>
+            <span style="font-size:17px;font-weight:800;color:#1a1a1a;">保单已关联</span>
           </div>
-        `).join('')}
+          <span style="background:linear-gradient(90deg,#35ad73,#58b8d7);color:#fff;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:700;">已投保</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+          <span style="color:#666;">保险公司</span>
+          <span style="color:#333;font-weight:600;">${company.name}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+          <span style="color:#666;">保单号</span>
+          <span style="color:#333;font-weight:600;">PA202604280001</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+          <span style="color:#666;">保险期限</span>
+          <span style="color:#333;font-weight:600;">2026-05-01 至 2026-08-01</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+          <span style="color:#666;">保费金额</span>
+          <span style="color:#ff6b35;font-weight:800;font-size:16px;">¥${totalPrice}.00</span>
+        </div>
+        ${addedItems.length > 0 ? `
+          <div style="margin-top:10px;padding-top:10px;border-top:1px dashed rgba(34,166,109,0.3);">
+            <div style="font-size:13px;color:#666;margin-bottom:8px;">含 ${addedItems.length} 项补充保障</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${addedItems.map(item => `
+                <div style="display:inline-flex;align-items:center;gap:4px;background:rgba(34,166,109,0.08);padding:4px 10px;border-radius:12px;font-size:12px;color:#1a8f62;">
+                  <svg width="10" height="10" viewBox="0 0 16 16" stroke="#1a8f62" stroke-width="2.5" fill="none"><polyline points="2,8 6,12 14,4"/></svg>
+                  ${item.name}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- 保单PDF -->
+      <div style="background:#fff;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;border:1px solid #f0f0f0;cursor:pointer;">
+        <div style="width:44px;height:44px;background:#fff2f0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#ff4d4f;font-size:12px;font-weight:700;flex-shrink:0;">PDF</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;color:#333;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">小散安责险保单-益田村1栋应急评估...</div>
+          <div style="font-size:12px;color:#999;margin-top:2px;">3.35KB</div>
+        </div>
+      </div>
+
+      <!-- 保险商城推荐入口（小IDI） -->
+      <div onclick="alert('跳转至保险商城\\n（可购买施工补充险、家财险、意外险、宠物险等任意险种）')" style="background:linear-gradient(135deg,#fff8f0,#fff0e6);border:1.5px solid rgba(255,149,0,0.4);border-radius:18px;padding:0;overflow:hidden;cursor:pointer;">
+        <!-- 头部 -->
+        <div style="background:linear-gradient(90deg,#ff9500,#ffaa33);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:24px;height:24px;background:rgba(255,255,255,0.25);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">IDI</div>
+            <span style="font-size:15px;font-weight:700;">保险商城</span>
+          </div>
+          <span style="background:rgba(255,255,255,0.25);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">为您推荐</span>
+        </div>
+
+        <!-- 内容 -->
+        <div style="padding:14px 16px;">
+          <div style="font-size:13px;color:#666;line-height:1.5;margin-bottom:12px;">
+            ${state.checkedAddons.size > 0
+              ? '保障已升级！还有更多险种可为您的工程、家庭、生活添份保障'
+              : '为您和工程添份保障，更多险种一站式选购'}
+          </div>
+
+          <!-- 推荐产品横向滚动 -->
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">
+            <div style="flex-shrink:0;width:108px;background:#fff;border-radius:10px;padding:10px;">
+              <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:4px;">工程一切险</div>
+              <div style="font-size:11px;color:#999;margin-bottom:6px;">保工程物质损失</div>
+              <div style="font-size:13px;color:#ff6b35;font-weight:800;">¥200<span style="font-size:10px;color:#999;font-weight:500;">起</span></div>
+            </div>
+            <div style="flex-shrink:0;width:108px;background:#fff;border-radius:10px;padding:10px;">
+              <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:4px;">家财综合险</div>
+              <div style="font-size:11px;color:#999;margin-bottom:6px;">居家财产保障</div>
+              <div style="font-size:13px;color:#ff6b35;font-weight:800;">¥99<span style="font-size:10px;color:#999;font-weight:500;">起</span></div>
+            </div>
+            <div style="flex-shrink:0;width:108px;background:#fff;border-radius:10px;padding:10px;">
+              <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:4px;">意外医疗险</div>
+              <div style="font-size:11px;color:#999;margin-bottom:6px;">百万医疗保障</div>
+              <div style="font-size:13px;color:#ff6b35;font-weight:800;">¥299<span style="font-size:10px;color:#999;font-weight:500;">起</span></div>
+            </div>
+            <div style="flex-shrink:0;width:108px;background:#fff;border-radius:10px;padding:10px;">
+              <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:4px;">宠物医疗险</div>
+              <div style="font-size:11px;color:#999;margin-bottom:6px;">爱宠看病无忧</div>
+              <div style="font-size:13px;color:#ff6b35;font-weight:800;">¥168<span style="font-size:10px;color:#999;font-weight:500;">起</span></div>
+            </div>
+          </div>
+
+          <!-- 入口按钮 -->
+          <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed rgba(255,149,0,0.3);">
+            <span style="font-size:13px;color:#ff6b35;font-weight:600;">进入商城查看全部险种</span>
+            <span style="color:#ff6b35;font-size:18px;font-weight:700;">&#8250;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 客服 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(90deg,#f2faf5,#f5fbfe);border:1px solid rgba(34,166,109,0.12);border-radius:20px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#35ad73,#58b8d7);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;">客</div>
+          <div style="font-size:13px;color:#333;line-height:1.4;">系统操作及保单问题，<br>咨询小型工程管理平台</div>
+        </div>
+        <button style="background:#fff;border:1.5px solid #00B578;color:#00B578;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer;">
+          <svg width="14" height="14" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          客服电话
+        </button>
       </div>
     </div>
 
-    <div class="xiaoidi-entry" onclick="alert('跳转至铃铛保保险商城\\n（可购买施工补充险、家财险、意外险、宠物险等任意险种）')">
-      <div class="xiaoidi-entry-icon">IDI</div>
-      <div class="xiaoidi-entry-content">
-        <div class="xiaoidi-entry-title">铃铛保 · 保险商城</div>
-        <div class="xiaoidi-entry-desc">${state.checkedAddons.size > 0 ? '保障已升级！商城还有更多险种等您了解' : '更多施工险种、生活意外险，一站式选购'}</div>
-      </div>
-      <div class="xiaoidi-entry-arrow">&#8250;</div>
-    </div>
-
-    <div style="padding:0 16px 24px;">
-      <button style="width:100%;height:50px;background:linear-gradient(90deg,#26a66d,#4fb3d7);color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(34,166,109,0.26);" onclick="alert('提交备案申请')">提交备案申请</button>
+    <!-- 底部按钮 -->
+    <div style="position:sticky;bottom:0;background:#fff;padding:12px 16px 24px;display:flex;gap:12px;border-top:1px solid #f0f0f0;box-shadow:0 -4px 12px rgba(0,0,0,0.04);z-index:10;">
+      <button style="flex:1;height:50px;border:1.5px solid #00B578;background:#fff;color:#00B578;border-radius:25px;font-size:16px;font-weight:700;cursor:pointer;">临时保存</button>
+      <button style="flex:2;height:50px;background:linear-gradient(90deg,#26a66d,#4fb3d7);color:#fff;border:none;border-radius:25px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(34,166,109,0.26);" onclick="alert('提交备案申请')">提交备案申请</button>
     </div>
   `;
 }
 
 function selectCompany(id) {
   state.selectedCompany = id;
+  // 直接跳转到三档套餐页（去掉确认弹窗）
+  state.page = 'tier';
+  state.currentTier = 'basic';
+  state.checkedAddons = new Set();
   render();
-  setTimeout(() => showModal(), 150);
 }
 
 function showModal() {
@@ -1231,15 +1629,17 @@ function toggleAddon(id) {
 }
 
 function goToPayLoading() {
-  document.getElementById('payLoading').classList.add('active');
+  state.page = 'pay';
+  render();
+}
+
+function confirmPay() {
+  state.page = 'loading';
+  render();
   setTimeout(() => {
-    state.page = 'loading';
+    state.page = 'success';
     render();
-    setTimeout(() => {
-      state.page = 'success';
-      render();
-    }, 1800);
-  }, 800);
+  }, 1800);
 }
 
 function showBaseDetail() {
@@ -1263,10 +1663,20 @@ function closeDetailSheet() {
 }
 
 function resetDemo() {
+  // 保存导航状态
+  const savedNavTab = state.navTab;
   state = {
-    page: 'match',
+    // 导航状态保留
+    navTab: savedNavTab,
+    page: savedNavTab || 'project',
+    // 我的保险页面状态
+    insuranceTab: 'all',
+    searchKeyword: '',
+    filterType: 'all',
+    selectedProject: null,
+    // 投保流程状态重置
     selectedCompany: null,
-    currentTier: 'advanced',
+    currentTier: 'basic',
     checkedAddons: new Set(),
     defaultRecommendId: 'gcyqx',
     vipBaseTier: 'mid',
@@ -1287,6 +1697,718 @@ function setScheme(s) {
   document.querySelectorAll('.scheme-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.scheme-tab[data-scheme="${s}"]`).classList.add('active');
   render();
+}
+
+// ==================== 新增页面：项目中心 / 更多服务 / 我的保险 ====================
+
+// 底部导航栏
+function bottomNav() {
+  return `
+    <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-around;padding:6px 0 20px;z-index:100;">
+      <div onclick="switchNav('project')" style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0 20px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" stroke="${state.navTab === 'project' ? '#00B578' : '#999'}" stroke-width="1.5" fill="none"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span style="font-size:11px;color:${state.navTab === 'project' ? '#00B578' : '#999'};">项目中心</span>
+      </div>
+      <div onclick="alert('信息登记')" style="display:flex;flex-direction:column;align-items:center;cursor:pointer;margin-top:-20px;">
+        <div style="width:56px;height:56px;background:linear-gradient(135deg,#35ad73,#58b8d7);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(53,173,115,0.3);">
+          <svg width="28" height="28" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <span style="font-size:11px;color:#999;margin-top:2px;">信息登记</span>
+      </div>
+      <div onclick="switchNav('service')" style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:0 20px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" stroke="${state.navTab === 'service' ? '#00B578' : '#999'}" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span style="font-size:11px;color:${state.navTab === 'service' ? '#00B578' : '#999'};">更多服务</span>
+      </div>
+    </div>
+  `;
+}
+
+function switchNav(tab) {
+  state.navTab = tab;
+  state.page = tab;
+  render();
+}
+
+function goToInsurance() {
+  state.page = 'insurance';
+  state.insuranceTab = 'all';
+  render();
+}
+
+function goToPolicyDetail(projectId) {
+  state.selectedProject = MOCK_PROJECTS.find(p => p.id === projectId);
+  state.page = 'policyDetail';
+  render();
+}
+
+function backToInsurance() {
+  state.page = 'insurance';
+  state.selectedProject = null;
+  render();
+}
+
+function switchInsuranceTab(tab) {
+  state.insuranceTab = tab;
+  render();
+}
+
+function setFilterType(type) {
+  state.filterType = type;
+  render();
+}
+
+function switchProjectStatusTab(tab) {
+  state.projectStatusTab = tab;
+  render();
+}
+
+function setSearchKeyword(kw) {
+  state.searchKeyword = kw;
+  render();
+}
+
+// 项目中心页面
+function renderProject() {
+  const typeTabs = [
+    { key: 'project', label: '小型工程', count: 1 },
+    { key: 'decoration', label: '住宅装修', count: 2 },
+    { key: 'misc', label: '零星作业', count: 2 }
+  ];
+
+  const statusTabs = [
+    { key: 'draft', label: '待填报', count: 1 },
+    { key: 'pending', label: '待审核', count: 1 },
+    { key: 'rejected', label: '已驳回', count: 0 },
+    { key: 'approved', label: '已通过', count: 0 }
+  ];
+
+  let filtered = MOCK_PROJECTS;
+
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;">
+      <div style="text-align:center;color:#fff;font-size:18px;font-weight:800;">我的项目</div>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div style="padding:12px 16px;background:#fff;">
+      <div style="display:flex;align-items:center;background:#F2F2F7;border-radius:10px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:4px;padding:8px 12px;border-right:1px solid #e0e0e0;font-size:14px;color:#999;cursor:pointer;white-space:nowrap;">
+          <span>请选择</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" stroke="#999" stroke-width="2" fill="none"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+        <input type="text" placeholder="搜索工程名称或地址" value="${state.searchKeyword}" oninput="setSearchKeyword(this.value)" style="flex:1;border:none;background:transparent;padding:8px 12px;font-size:14px;outline:none;color:#333;">
+        <div style="padding:8px 14px;color:#00B578;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">搜索</div>
+      </div>
+    </div>
+
+    <!-- 工程类型Tab -->
+    <div style="display:flex;justify-content:center;gap:8px;padding:12px 16px;background:#fff;border-bottom:1px solid #f0f0f0;">
+      ${typeTabs.map(t => `
+        <div onclick="setFilterType('${t.key}')" style="padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;${state.filterType === t.key ? 'background:linear-gradient(90deg,#35ad73,#58b8d7);color:#fff;box-shadow:0 2px 8px rgba(53,173,115,0.3);' : 'background:#f5f5f5;color:#666;'}">
+          ${t.label}(${t.count})
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- 备案状态Tab -->
+    <div style="display:flex;background:#fff;padding:0 16px;border-bottom:1px solid #f0f0f0;">
+      ${statusTabs.map(t => `
+        <div onclick="switchProjectStatusTab('${t.key}')" style="flex:1;text-align:center;padding:12px 0;font-size:14px;font-weight:${state.projectStatusTab === t.key ? '700' : '400'};color:${state.projectStatusTab === t.key ? '#00B578' : '#999'};border-bottom:2px solid ${state.projectStatusTab === t.key ? '#00B578' : 'transparent'};cursor:pointer;">
+          ${t.label}${t.count > 0 ? ` (${t.count})` : ''}
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- 工程列表 -->
+    <div style="padding:16px 16px 90px;display:flex;flex-direction:column;gap:12px;background:#f5f7fa;min-height:400px;">
+      ${filtered.map(p => {
+        const isInsured = p.insuranceStatus === 'active' || p.insuranceStatus === 'expiring';
+        return `
+          <div onclick="state.page='match';render();" style="background:#fff;border-radius:12px;padding:14px 16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;">
+            <!-- 盾牌图标 -->
+            <div style="position:absolute;top:14px;right:16px;">
+              ${isInsured
+                ? `<svg width="20" height="20" viewBox="0 0 24 24" title="已投保"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#00B578"/><polyline points="9,12 12,15 17,10" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+                : `<svg width="20" height="20" viewBox="0 0 24 24" title="未投保"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#FF4D4F"/><line x1="9" y1="9" x2="15" y2="15" stroke="#fff" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="9" x2="9" y2="15" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`
+              }
+            </div>
+
+            <div style="font-size:16px;font-weight:700;color:#333;margin-bottom:6px;padding-right:28px;">${p.name}</div>
+            <div style="display:flex;align-items:center;gap:4px;font-size:13px;color:#999;">
+              <svg width="14" height="14" viewBox="0 0 24 24" stroke="#999" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${p.address}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    ${bottomNav()}
+  `;
+}
+
+// 更多服务页面
+function renderService() {
+  // 计算保险概览
+  const activeCount = MOCK_PROJECTS.filter(p => p.insuranceStatus === 'active').length;
+  const expiringCount = MOCK_PROJECTS.filter(p => p.insuranceStatus === 'expiring').length;
+  const uninsuredCount = MOCK_PROJECTS.filter(p => p.insuranceStatus === 'uninsured').length;
+
+  let subtitle = '查看保险相关服务';
+  if (activeCount > 0) {
+    subtitle = `${activeCount}个工程保障中`;
+    if (expiringCount > 0) subtitle += `，${expiringCount}个即将到期`;
+  } else if (uninsuredCount > 0) {
+    subtitle = `${uninsuredCount}个工程未投保`;
+  }
+
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:20px 18px 30px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:56px;height:56px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+          <svg width="32" height="32" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1.5" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div style="color:#fff;">
+          <div style="font-size:18px;font-weight:800;">施工用户_13222222222</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f5f7fa;min-height:500px;padding-top:12px;padding-bottom:90px;">
+      <!-- 帮助中心 -->
+      <div style="margin:0 16px 12px;">
+        <div style="font-size:13px;color:#999;font-weight:600;margin-bottom:8px;padding-left:4px;">帮助中心</div>
+        <div style="background:#fff;border-radius:12px;overflow:hidden;">
+          <!-- 备案指南 -->
+          <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;">
+            <div style="width:36px;height:36px;background:#E6F7F0;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1.5" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:600;color:#333;">备案指南</div>
+              <div style="font-size:12px;color:#999;margin-top:2px;">备案流程与材料</div>
+            </div>
+            <span style="color:#ccc;font-size:16px;">&#8250;</span>
+          </div>
+
+          <!-- 保险服务（新增） -->
+          <div onclick="goToInsurance()" style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;">
+            <div style="width:36px;height:36px;background:#E6F7F0;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1.5" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:600;color:#333;">保险服务</div>
+              <div style="font-size:12px;color:#999;margin-top:2px;">${subtitle}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              ${activeCount > 0 ? `<span style="background:#FF4D4F;color:#fff;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:700;">${activeCount}</span>` : ''}
+              <span style="color:#ccc;font-size:16px;">&#8250;</span>
+            </div>
+          </div>
+
+          <!-- 常见问题 -->
+          <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;">
+            <div style="width:36px;height:36px;background:#E6F7F0;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:600;color:#333;">常见问题</div>
+              <div style="font-size:12px;color:#999;margin-top:2px;">备案常见问题解答</div>
+            </div>
+            <span style="color:#ccc;font-size:16px;">&#8250;</span>
+          </div>
+
+          <!-- 联系客服 -->
+          <div style="display:flex;align-items:center;padding:14px 16px;cursor:pointer;">
+            <div style="width:36px;height:36px;background:#E6F7F0;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1.5" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:600;color:#333;">联系客服</div>
+              <div style="font-size:12px;color:#999;margin-top:2px;">监管部门咨询电话</div>
+            </div>
+            <span style="color:#ccc;font-size:16px;">&#8250;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 关于我们 -->
+      <div style="margin:0 16px;">
+        <div style="font-size:13px;color:#999;font-weight:600;margin-bottom:8px;padding-left:4px;">关于我们</div>
+        <div style="background:#fff;border-radius:12px;overflow:hidden;">
+          <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;">
+            <div style="width:36px;height:36px;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" stroke="#999" stroke-width="1.5" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <div style="flex:1;font-size:15px;font-weight:600;color:#333;">服务协议</div>
+            <span style="color:#ccc;font-size:16px;">&#8250;</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:14px 16px;cursor:pointer;">
+            <div style="width:36px;height:36px;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" stroke="#999" stroke-width="1.5" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div style="flex:1;font-size:15px;font-weight:600;color:#333;">隐私政策</div>
+            <span style="color:#ccc;font-size:16px;">&#8250;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${bottomNav()}
+  `;
+}
+
+// 我的保险页面
+function renderInsurance() {
+  const tabs = [
+    { key: 'all', label: '全部' },
+    { key: 'active', label: '保障中' },
+    { key: 'expiring', label: '即将到期' },
+    { key: 'expired', label: '已过期' },
+    { key: 'uninsured', label: '未投保' }
+  ];
+
+  // 按状态过滤
+  let filtered = MOCK_PROJECTS;
+  if (state.insuranceTab !== 'all') {
+    filtered = MOCK_PROJECTS.filter(p => p.insuranceStatus === state.insuranceTab);
+  }
+
+  // 按搜索词过滤
+  if (state.searchKeyword) {
+    const kw = state.searchKeyword.toLowerCase();
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(kw) ||
+      p.address.toLowerCase().includes(kw)
+    );
+  }
+
+  // 统计
+  const counts = {
+    all: MOCK_PROJECTS.length,
+    active: MOCK_PROJECTS.filter(p => p.insuranceStatus === 'active').length,
+    expiring: MOCK_PROJECTS.filter(p => p.insuranceStatus === 'expiring').length,
+    expired: MOCK_PROJECTS.filter(p => p.insuranceStatus === 'expired').length,
+    uninsured: MOCK_PROJECTS.filter(p => p.insuranceStatus === 'uninsured').length
+  };
+
+  const typeColors = {
+    project: { bg: '#E6F4FF', color: '#1890FF' },
+    decoration: { bg: '#E6F7F0', color: '#00B578' },
+    misc: { bg: '#FFF7E6', color: '#FAAD14' }
+  };
+
+  const statusConfig = {
+    active: { label: '保障中', color: '#00B578', bg: '#E6F7F0', btn: '加购保障' },
+    expiring: { label: '即将到期', color: '#FF9500', bg: '#FFF7E6', btn: '立即续保' },
+    expired: { label: '已过期', color: '#FF4D4F', bg: '#FFF2F0', btn: '重新投保' },
+    uninsured: { label: '未投保', color: '#FF4D4F', bg: '#FFF2F0', btn: '去投保' }
+  };
+
+  const typeLabels = { project: '小型工程', decoration: '住宅装修', misc: '零星作业' };
+
+  // 获取最早到期日期
+  function getEndDate(project) {
+    if (project.insurances.length === 0) return null;
+    return project.insurances[0].endDate;
+  }
+
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:flex;align-items:center;"
+    >
+      <div onclick="state.page='service';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+      <div style="flex:1;text-align:center;color:#fff;font-size:18px;font-weight:800;">我的保险</div>
+      <div style="width:34px;"></div>
+    </div>
+
+    <!-- Tab标签 -->
+    <div style="background:#fff;display:flex;padding:0 16px;border-bottom:1px solid #f0f0f0;overflow-x:auto;">
+      ${tabs.map(t => `
+        <div onclick="switchInsuranceTab('${t.key}')" style="flex-shrink:0;padding:12px 14px;font-size:14px;font-weight:${state.insuranceTab === t.key ? '800' : '600'};color:${state.insuranceTab === t.key ? '#00B578' : '#666'};border-bottom:2px solid ${state.insuranceTab === t.key ? '#00B578' : 'transparent'};cursor:pointer;white-space:nowrap;">
+          ${t.label}${counts[t.key] > 0 ? `(${counts[t.key]})` : ''}
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- 搜索框 -->
+    <div style="padding:12px 16px;background:#fff;border-bottom:1px solid #f0f0f0;">
+      <div style="display:flex;align-items:center;gap:8px;background:#F2F2F7;border-radius:10px;padding:8px 12px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" stroke="#999" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="搜索工程名称或地址" value="${state.searchKeyword}" oninput="setSearchKeyword(this.value)" style="flex:1;border:none;background:transparent;font-size:14px;outline:none;color:#333;">
+        ${state.searchKeyword ? `<span onclick="setSearchKeyword('')" style="color:#999;cursor:pointer;font-size:12px;">✕</span>` : ''}
+      </div>
+    </div>
+
+    <!-- 工程卡片列表 -->
+    <div style="padding:16px;display:flex;flex-direction:column;gap:12px;background:#f5f7fa;min-height:300px;">
+      ${filtered.length === 0 ? `
+        <div style="text-align:center;padding:60px 20px;color:#999;">
+          <div style="font-size:15px;margin-bottom:8px;">${state.insuranceTab === 'uninsured' ? '暂无未投保工程' : '暂无工程保险记录'}</div>
+        </div>
+      ` : filtered.map(p => {
+        const tc = typeColors[p.typeCode];
+        const sc = statusConfig[p.insuranceStatus];
+        const endDate = getEndDate(p);
+        const typeLabel = typeLabels[p.typeCode];
+        const isMandatory = p.typeCode === 'project';
+
+        let actionBtn = '';
+        if (p.insuranceStatus === 'active') {
+          actionBtn = `<button onclick="event.stopPropagation();alert('跳转到保险商城')" style="background:linear-gradient(90deg,#27a66d,#4fb3d7);color:#fff;border:none;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;">加购保障</button>`;
+        } else if (p.insuranceStatus === 'expiring') {
+          actionBtn = `<button onclick="event.stopPropagation();state.page='match';render();" style="background:#FF9500;color:#fff;border:none;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;">立即续保</button>`;
+        } else if (p.insuranceStatus === 'expired') {
+          actionBtn = `<button onclick="event.stopPropagation();state.page='match';render();" style="background:#FF4D4F;color:#fff;border:none;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;">重新投保</button>`;
+        } else {
+          actionBtn = `<button onclick="event.stopPropagation();state.page='match';render();" style="background:#FF4D4F;color:#fff;border:none;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;">去投保</button>`;
+        }
+
+        return `
+          <div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="background:${tc.bg};color:${tc.color};padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">${typeLabel}</span>
+                <span style="background:${sc.bg};color:${sc.color};padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">${sc.label}</span>
+              </div>
+              ${actionBtn}
+            </div>
+
+            <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:4px;">${p.name}</div>
+            <div style="font-size:12px;color:#999;margin-bottom:10px;">${p.address}</div>
+
+            ${p.insurances.length > 0 ? `
+              <div style="margin-bottom:8px;">
+                ${p.insurances.map(ins => `
+                  <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#666;margin-bottom:4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none"><polyline points="4,12 9,17 20,6"/></svg>
+                    ${ins.name}
+                  </div>
+                `).join('')}
+              </div>
+            ` : `
+              <div style="font-size:12px;color:${isMandatory ? '#FF4D4F' : '#999'};margin-bottom:8px;">
+                ${isMandatory ? '必须投保安责险后才能施工' : '建议投保安责险，提升工程保障'}
+              </div>
+            `}
+
+            ${endDate ? `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px dashed #f0f0f0;">
+                <span style="font-size:12px;color:#999;">保障期限：${p.insurances[0].startDate} 至 ${endDate}</span>
+                <span onclick="event.stopPropagation();goToPolicyDetail('${p.id}')" style="color:#00B578;font-size:12px;font-weight:600;cursor:pointer;">查看详情 &#8250;</span>
+              </div>
+            ` : `
+              <div style="display:flex;justify-content:flex-end;padding-top:10px;border-top:1px dashed #f0f0f0;">
+                <span onclick="event.stopPropagation();goToPolicyDetail('${p.id}')" style="color:#00B578;font-size:12px;font-weight:600;cursor:pointer;">查看详情 &#8250;</span>
+              </div>
+            `}
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- 推荐保障区 -->
+    ${filtered.some(p => p.insuranceStatus === 'active') ? `
+      <div style="margin:16px;background:linear-gradient(180deg,#ebf8f1,#fff);border-radius:16px;padding:16px;border:1.5px solid rgba(34,166,109,0.3);">
+        <div style="font-size:16px;font-weight:700;color:#333;margin-bottom:4px;">推荐保障</div>
+        <div style="font-size:13px;color:#666;margin-bottom:12px;">根据您的工程推荐</div>
+
+        <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;">
+          <div style="flex-shrink:0;width:140px;background:#fff;border-radius:10px;padding:12px;border:1px solid #f0f0f0;">
+            <div style="font-size:14px;font-weight:700;color:#333;margin-bottom:4px;">工程一切险</div>
+            <div style="font-size:11px;color:#999;margin-bottom:8px;">保障施工材料设备损失</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;color:#ff6b35;font-weight:800;">¥200</span>
+              <button style="background:#00B578;color:#fff;border:none;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">去了解</button>
+            </div>
+          </div>
+          <div style="flex-shrink:0;width:140px;background:#fff;border-radius:10px;padding:12px;border:1px solid #f0f0f0;">
+            <div style="font-size:14px;font-weight:700;color:#333;margin-bottom:4px;">装修品质险</div>
+            <div style="font-size:11px;color:#999;margin-bottom:8px;">墙面开裂水管渗漏保障</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;color:#ff6b35;font-weight:800;">¥150</span>
+              <button style="background:#00B578;color:#fff;border:none;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">去了解</button>
+            </div>
+          </div>
+        </div>
+
+        <div onclick="alert('跳转至保险商城')" style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px dashed rgba(34,166,109,0.3);cursor:pointer;">
+          <span style="font-size:13px;color:#00B578;font-weight:600;">进入保险商城 &#8250;</span>
+        </div>
+      </div>
+    ` : ''}
+
+    <!-- 底部功能区 -->
+    <div style="margin:0 16px 16px;display:flex;gap:12px;">
+      <div onclick="alert('理赔服务页面')" style="flex:1;background:#fff;border-radius:12px;padding:14px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <svg width="24" height="24" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1.5" fill="none" style="margin:0 auto 6px;display:block;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div style="font-size:13px;font-weight:600;color:#333;">理赔服务</div>
+      </div>
+      <div onclick="alert('常见问题页面')" style="flex:1;background:#fff;border-radius:12px;padding:14px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <svg width="24" height="24" viewBox="0 0 24 24" stroke="#00B578" stroke-width="1.5" fill="none" style="margin:0 auto 6px;display:block;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div style="font-size:13px;font-weight:600;color:#333;">常见问题</div>
+      </div>
+    </div>
+  `;
+}
+
+// 保单详情页面
+function renderPolicyDetail() {
+  const p = state.selectedProject || MOCK_PROJECTS[0];
+  const tc = {
+    project: { bg: '#E6F4FF', color: '#1890FF', label: '小型工程' },
+    decoration: { bg: '#E6F7F0', color: '#00B578', label: '住宅装修' },
+    misc: { bg: '#FFF7E6', color: '#FAAD14', label: '零星作业' }
+  }[p.typeCode];
+
+  const sc = {
+    active: { label: '保障中', color: '#00B578' },
+    expiring: { label: '即将到期', color: '#FF9500' },
+    expired: { label: '已过期', color: '#FF4D4F' },
+    uninsured: { label: '未投保', color: '#FF4D4F' }
+  }[p.insuranceStatus];
+
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:flex;align-items:center;">
+      <div onclick="backToInsurance()" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+      <div style="flex:1;text-align:center;color:#fff;font-size:18px;font-weight:800;">保单详情</div>
+      <div style="width:34px;"></div>
+    </div>
+
+    <div style="padding:16px;background:#f5f7fa;min-height:600px;">
+      <!-- 工程信息卡片 -->
+      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span style="background:${tc.bg};color:${tc.color};padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">${tc.label}</span>
+          <span style="background:${sc.color}15;color:${sc.color};padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">${sc.label}</span>
+        </div>
+        <div style="font-size:16px;font-weight:700;color:#333;margin-bottom:4px;">${p.name}</div>
+        <div style="font-size:13px;color:#666;margin-bottom:4px;">${p.address}</div>
+        <div style="font-size:12px;color:#999;">施工状态：${p.status}</div>
+      </div>
+
+      <!-- 保单列表 -->
+      ${p.insurances.length > 0 ? `
+        <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:12px;padding-left:4px;">已购保单</div>
+        ${p.insurances.map((ins, idx) => `
+          <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f5f5f5;">
+              <div style="width:36px;height:36px;background:linear-gradient(135deg,#35ad73,#58b8d7);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div>
+                <div style="font-size:15px;font-weight:700;color:#333;">${ins.name}</div>
+                <div style="font-size:12px;color:#999;">${ins.company}</div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+              <span style="color:#666;">保单号</span>
+              <span style="color:#333;font-weight:600;">${ins.policyNo}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+              <span style="color:#666;">保额</span>
+              <span style="color:#333;font-weight:600;">${ins.amount}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+              <span style="color:#666;">保费</span>
+              <span style="color:#ff6b35;font-weight:800;">¥${ins.price}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+              <span style="color:#666;">保障期限</span>
+              <span style="color:#333;font-weight:600;">${ins.startDate} 至 ${ins.endDate}</span>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button onclick="alert('下载电子保单：${ins.policyNo}')" style="flex:1;height:40px;border:1px solid #00B578;background:#fff;color:#00B578;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                下载保单
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      ` : `
+        <div style="background:#fff;border-radius:12px;padding:40px 20px;text-align:center;">
+          <svg width="48" height="48" viewBox="0 0 24 24" stroke="#ccc" stroke-width="1.5" fill="none" style="margin:0 auto 12px;display:block;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div style="font-size:15px;color:#999;margin-bottom:16px;">该工程暂无保单</div>
+          <button onclick="state.page='match';render();" style="background:linear-gradient(90deg,#27a66d,#4fb3d7);color:#fff;border:none;padding:10px 28px;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;">去投保</button>
+        </div>
+      `}
+
+      <!-- 操作按钮 -->
+      ${p.insurances.length > 0 ? `
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+          <button onclick="alert('申请理赔')" style="width:100%;height:48px;background:#fff;border:1.5px solid #00B578;color:#00B578;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">申请理赔</button>
+          <button onclick="alert('跳转到保险商城')" style="width:100%;height:48px;background:linear-gradient(90deg,#27a66d,#4fb3d7);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">加购补充险</button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+// 政策详情海报页
+function renderPosterPolicy() {
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:flex;align-items:center;">
+      <div onclick="state.page='match';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+      <div style="flex:1;text-align:center;color:#fff;font-size:18px;font-weight:800;">安全生产相关政策</div>
+      <div style="width:34px;"></div>
+    </div>
+
+    <div style="padding:16px;background:#f5f7fa;min-height:600px;">
+      <!-- 主视觉区 -->
+      <div style="background:linear-gradient(135deg,#00B578,#00A86B 50%,#58b8d7);border-radius:22px;padding:32px 24px;color:#fff;text-align:center;margin-bottom:20px;">
+        <div style="font-size:22px;font-weight:800;margin-bottom:8px;">安全生产相关政策</div>
+        <div style="font-size:14px;opacity:0.9;">依法投保 保障施工安全</div>
+      </div>
+
+      <!-- 青浦区小型工程管理办法 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          青浦区小型工程管理办法
+        </div>
+        <div style="font-size:14px;color:#666;line-height:1.8;">
+          <p style="margin-bottom:12px;"><strong style="color:#FF4D4F;">第八条</strong> 对本办法第三条所列的按规定可以不申请办理施工许可证的建设工程，其施工单位<strong style="color:#FF4D4F;">必须投保安全生产责任保险</strong>（以下简称"安责险"），并在工程开工前完成投保手续，保单应当覆盖完整工程施工周期。</p>
+          <p>鼓励住宅室内装修、零星施工作业的施工单位主动投保安责险，以分散和转移施工作业活动中的安全风险。</p>
+        </div>
+      </div>
+
+      <!-- 政策要点 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          政策要点
+        </div>
+        <div style="background:linear-gradient(135deg,#E6F7F0,#f6fbf8);border:1px solid rgba(0,181,120,0.2);border-radius:14px;padding:16px;margin-bottom:10px;">
+          <div style="font-size:15px;font-weight:700;color:#00B578;margin-bottom:8px;">强制投保范围</div>
+          <div style="font-size:13px;color:#666;line-height:1.8;">对按规定可以不申请办理施工许可证的建设工程，其施工单位必须投保安全生产责任保险。</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#E6F7F0,#f6fbf8);border:1px solid rgba(0,181,120,0.2);border-radius:14px;padding:16px;margin-bottom:10px;">
+          <div style="font-size:15px;font-weight:700;color:#00B578;margin-bottom:8px;">投保时限</div>
+          <div style="font-size:13px;color:#666;line-height:1.8;">在工程开工前完成投保手续，保单应当覆盖完整工程施工周期。</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#E6F7F0,#f6fbf8);border:1px solid rgba(0,181,120,0.2);border-radius:14px;padding:16px;">
+          <div style="font-size:15px;font-weight:700;color:#00B578;margin-bottom:8px;">鼓励投保</div>
+          <div style="font-size:13px;color:#666;line-height:1.8;">住宅室内装修、零星施工作业的施工单位主动投保安责险，分散和转移施工作业安全风险。</div>
+        </div>
+      </div>
+
+      <!-- 法律依据 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          法律依据
+        </div>
+        <div style="font-size:14px;color:#666;line-height:1.8;">
+          <p style="margin-bottom:12px;">根据《安全生产责任保险实施办法》规定，建设工程领域属于应当投保安全生产责任保险的行业领域。</p>
+          <p>安责险是指保险机构对投保的生产经营单位发生的生产安全事故造成的人员伤亡和有关经济损失等予以赔偿，并且为投保的生产经营单位提供生产安全事故预防服务的商业保险。</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 安责险详情海报页
+function renderPosterInsurance() {
+  return `
+    ${statusBar()}
+    <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:flex;align-items:center;">
+      <div onclick="state.page='match';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+      <div style="flex:1;text-align:center;color:#fff;font-size:18px;font-weight:800;">安责险保障详情</div>
+      <div style="width:34px;"></div>
+    </div>
+
+    <div style="padding:16px;background:linear-gradient(180deg,#f6fbf8,#fff);min-height:600px;">
+      <!-- 主视觉区 -->
+      <div style="background:linear-gradient(135deg,#00B578,#00A86B 50%,#58b8d7);border-radius:22px;padding:32px 24px;color:#fff;text-align:center;margin-bottom:20px;">
+        <div style="font-size:22px;font-weight:800;margin-bottom:8px;">安全生产责任保险</div>
+        <div style="font-size:14px;opacity:0.9;">为建设工程保驾护航</div>
+      </div>
+
+      <!-- 什么是安责险 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          什么是安全生产责任保险
+        </div>
+        <div style="font-size:14px;color:#666;line-height:1.8;">
+          安全生产责任保险（简称"安责险"）是指保险机构对投保的生产经营单位发生的生产安全事故造成的人员伤亡和有关经济损失等予以赔偿，并且为投保的生产经营单位提供生产安全事故预防服务的商业保险。
+        </div>
+      </div>
+
+      <!-- 保障内容 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          保障内容
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:linear-gradient(135deg,#f6fbf8,#fff);border:1px solid #e8f5ee;border-radius:12px;padding:16px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#00B578;margin-bottom:4px;">40万</div>
+            <div style="font-size:12px;color:#666;">人员死亡伤残/人</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#f6fbf8,#fff);border:1px solid #e8f5ee;border-radius:12px;padding:16px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#00B578;margin-bottom:4px;">5万</div>
+            <div style="font-size:12px;color:#666;">医疗费用/人</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#f6fbf8,#fff);border:1px solid #e8f5ee;border-radius:12px;padding:16px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#00B578;margin-bottom:4px;">20万</div>
+            <div style="font-size:12px;color:#666;">第三者财产损失/次</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#f6fbf8,#fff);border:1px solid #e8f5ee;border-radius:12px;padding:16px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#00B578;margin-bottom:4px;">10万</div>
+            <div style="font-size:12px;color:#666;">事故救援费用/次</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 保障对象 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          保障对象
+        </div>
+        <div style="font-size:14px;color:#666;line-height:1.8;">
+          保障对象包括施工单位从业人员（含劳务分包人员）和第三者。从业人员在工程施工过程中发生生产安全事故造成人身伤亡，以及第三者因生产安全事故遭受人身伤亡或财产损失，均由保险公司按合同约定赔偿。
+        </div>
+      </div>
+
+      <!-- 保费与保额 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          保费与保额
+        </div>
+        <div style="font-size:14px;color:#666;line-height:1.8;">
+          <p style="margin-bottom:12px;"><strong style="color:#333;">保费：</strong>根据工程类型、工程总额、施工周期等因素综合计算。当前平台统一提供多档保费，由系统根据工程造价自动判定。</p>
+          <p><strong style="color:#333;">保额：</strong>具体保额以保险公司条款为准，一般包含人员死亡伤残、医疗费用、第三者损失、救援费用等多项保障。</p>
+        </div>
+      </div>
+
+      <!-- 投保流程 -->
+      <div style="background:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid #f0f0f0;">
+        <div style="font-size:17px;font-weight:700;color:#333;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="#00B578" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          投保流程
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 0;">
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#35ad73,#58b8d7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">1</div>
+          <span style="font-size:14px;color:#333;">选择保险公司</span>
+          <span style="color:#ccc;">&#8250;</span>
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#35ad73,#58b8d7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">2</div>
+          <span style="font-size:14px;color:#333;">确认保障方案</span>
+          <span style="color:#ccc;">&#8250;</span>
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#35ad73,#58b8d7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;">3</div>
+          <span style="font-size:14px;color:#333;">完成支付</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 render();

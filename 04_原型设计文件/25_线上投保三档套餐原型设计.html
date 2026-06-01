@@ -732,11 +732,11 @@ body {
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box">
     <div class="modal-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><path d="M9 12l2 2 4-4"/></svg></div>
-    <div class="modal-title">即将进入投保页面</div>
-    <div class="modal-desc">您将查看保障方案详情并完成支付，是否继续？</div>
+    <div class="modal-title">即将查看保障内容</div>
+    <div class="modal-desc">您将先查看保障内容，再进入支付页面，是否继续？</div>
     <div class="modal-actions">
       <button class="modal-btn-cancel" onclick="hideModal()">取消</button>
-      <button class="modal-btn-confirm" onclick="goToTierPage()">继续</button>
+      <button class="modal-btn-confirm" onclick="goToTierPage()">查看保障内容</button>
     </div>
   </div>
 </div>
@@ -759,14 +759,37 @@ const COMPANIES = [
   { id: 'yangguang', name: '阳光财险', short: '阳光', color: '#f7931e' },
 ];
 
-const BASE_DETAILS = [
-  { name: '从业人员死亡伤残', amount: '40万/人' },
-  { name: '从业人员医疗费用', amount: '5万/人' },
-  { name: '第三者死亡伤残', amount: '40万/人' },
-  { name: '第三者医疗费用', amount: '5万/人' },
-  { name: '第三者财产损失', amount: '20万/次' },
-  { name: '事故抢险救援费用', amount: '10万/次' },
-  { name: '法律诉讼费用', amount: '5万/次' },
+const COVERAGE_SECTIONS = [
+  {
+    title: '从业人员保障',
+    items: [
+      { name: '死亡伤残赔偿/人', amount: '100万' },
+      { name: '医疗费用赔偿/人', amount: '8万' },
+      { name: '猝死赔偿/人', amount: '20万' },
+    ]
+  },
+  {
+    title: '第三者保障',
+    items: [
+      { name: '人身伤亡赔偿/人', amount: '100万' },
+      { name: '医疗费用赔偿/人', amount: '8万' },
+      { name: '财产损失赔偿/次', amount: '80万' },
+    ]
+  },
+  {
+    title: '其他费用',
+    items: [
+      { name: '事故救援费用/次', amount: '10万' },
+      { name: '其他费用/次', amount: '10万' },
+    ]
+  }
+];
+
+const BASE_DETAILS = COVERAGE_SECTIONS.flatMap(section => section.items);
+
+const COVERAGE_LIMIT_SUMMARY = [
+  { name: '每次事故赔偿限额', amount: '200万' },
+  { name: '保单累计赔偿限额', amount: '400万' },
 ];
 
 const ADDONS = [
@@ -856,7 +879,7 @@ let state = {
   navTab: 'project',  // 'project' | 'service'
 
   // 当前页面
-  page: 'project',  // 'project' | 'service' | 'insurance' | 'policyDetail' | 'match' | 'tier' | 'pay' | 'loading' | 'success' | 'posterInsurance' | 'posterPolicy'
+  page: 'project',  // 'project' | 'service' | 'insurance' | 'policyDetail' | 'match' | 'coverage' | 'tier' | 'pay' | 'loading' | 'success' | 'posterInsurance' | 'posterPolicy'
 
   // 我的保险页面状态
   insuranceTab: 'all',  // 'all' | 'active' | 'expiring' | 'expired' | 'uninsured'
@@ -873,6 +896,7 @@ let state = {
   checkedAddons: new Set(),
   defaultRecommendId: 'gcyqx',
   vipBaseTier: 'mid',
+  coverageConsent: false,
   scheme: 'B',
 };
 
@@ -882,6 +906,28 @@ function sortedAddons() {
 // 进阶版和尊享版都展示全部补充险
 function allAddons() {
   return sortedAddons();
+}
+
+function getCoverageProject() {
+  return state.selectedProject || MOCK_PROJECTS.find(p => p.insuranceStatus === 'uninsured') || MOCK_PROJECTS[0];
+}
+
+function getCurrentBasePrice() {
+  if (state.currentTier === 'vip') {
+    const vipTier = VIP_BASE_TIERS.find(t => t.id === state.vipBaseTier);
+    return vipTier ? vipTier.price : 800;
+  }
+  return 500;
+}
+
+function getCurrentTotalPrice() {
+  const isVip = state.currentTier === 'vip';
+  let totalPrice = getCurrentBasePrice();
+  state.checkedAddons.forEach(id => {
+    const addon = ADDONS.find(a => a.id === id);
+    if (addon) totalPrice += isVip ? addon.priceVip : addon.priceAdv;
+  });
+  return totalPrice;
 }
 
 function statusBar() {
@@ -904,6 +950,7 @@ function render() {
     insurance: renderInsurance,
     policyDetail: renderPolicyDetail,
     match: renderMatch,
+    coverage: renderCoverage,
     tier: renderTier,
     pay: renderPay,
     loading: renderLoading,
@@ -1086,23 +1133,13 @@ function renderMatch() {
 // 支付页（图2收银台样式）
 function renderPay() {
   const company = COMPANIES.find(c => c.id === state.selectedCompany) || COMPANIES[0];
-  const isVip = state.currentTier === 'vip';
-  let basePrice = 500;
-  if (isVip) {
-    const vipTier = VIP_BASE_TIERS.find(t => t.id === state.vipBaseTier);
-    basePrice = vipTier ? vipTier.price : 800;
-  }
-  let totalPrice = basePrice;
-  state.checkedAddons.forEach(id => {
-    const addon = ADDONS.find(a => a.id === id);
-    if (addon) totalPrice += isVip ? addon.priceVip : addon.priceAdv;
-  });
+  const totalPrice = getCurrentTotalPrice();
 
   return `
     ${statusBar()}
     <!-- 收银台头部（绿色背景） -->
     <div style="background:linear-gradient(90deg,#35ad73,#58b8d7);padding:10px 18px 14px;display:grid;grid-template-columns:44px 1fr 88px;align-items:center;">
-      <div onclick="state.page='tier';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+      <div onclick="state.page='coverage';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
       <div style="background:rgba(255,255,255,0.2);color:#fff;text-align:center;font-size:15px;font-weight:600;padding:6px 14px;border-radius:6px;justify-self:center;">${company.name}收银台</div>
       <div style="width:78px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.22);border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px;margin-left:auto;">
         <div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div>
@@ -1367,6 +1404,170 @@ function renderTier() {
   `;
 }
 
+function renderCoverage() {
+  const company = COMPANIES.find(c => c.id === state.selectedCompany) || COMPANIES[0];
+  const project = getCoverageProject();
+  const totalPrice = getCurrentTotalPrice();
+  const addonCount = state.checkedAddons.size;
+  const confirmBtnStyle = state.coverageConsent
+    ? 'background:linear-gradient(90deg,#ff9d2f,#ffb347);color:#fff;box-shadow:0 12px 24px rgba(255,157,47,0.28);cursor:pointer;'
+    : 'background:#d9d9d9;color:#fff;box-shadow:none;cursor:not-allowed;';
+
+  return `
+    ${statusBar()}
+    <div style="background:radial-gradient(circle at top,#e7eefb 0%,#f5f7fa 36%,#ffffff 100%);min-height:calc(100vh - 34px);display:flex;flex-direction:column;">
+      <div style="background:linear-gradient(180deg,#1f4d95 0%,#2f68b3 100%);padding:12px 18px 82px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-48px;right:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
+        <div style="position:absolute;top:58px;right:26px;width:84px;height:84px;border-radius:26px;background:rgba(255,255,255,0.06);transform:rotate(18deg);"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;">
+          <div onclick="state.page='match';render();" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:300;cursor:pointer;">&#8249;</div>
+          <div style="flex:1;text-align:center;color:#fff;font-size:18px;font-weight:800;">${company.name}</div>
+          <div style="width:34px;"></div>
+        </div>
+        <div style="position:relative;z-index:1;margin-top:18px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.18);color:#e9f3ff;font-size:12px;font-weight:700;margin-bottom:14px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#7fe3ae;"></span>
+            投保前确认
+          </div>
+          <div style="font-size:28px;line-height:1.18;font-weight:800;color:#fff;margin-bottom:8px;">安全生产责任保险</div>
+          <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,0.84);max-width:290px;">请先核对保障范围、承保主体和适用项目。确认无误后，进入 ${company.name} 收银台完成支付。</div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 18px;flex:1;overflow-y:auto;margin-top:-56px;">
+        <div style="background:#fff;border-radius:20px;padding:16px;box-shadow:0 18px 34px rgba(26,52,105,0.16);border:1px solid rgba(226,232,240,0.9);margin-bottom:14px;position:relative;z-index:2;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;">
+            <div>
+              <div style="font-size:13px;color:#7a8699;margin-bottom:6px;">本次投保项目</div>
+              <div style="font-size:18px;font-weight:800;color:#14213d;line-height:1.4;">${project.name}</div>
+              <div style="font-size:12px;color:#6b7280;line-height:1.7;margin-top:4px;">${project.type} · ${project.address}</div>
+            </div>
+            <div style="padding:6px 10px;border-radius:999px;background:#eef7ff;color:#1f5da8;font-size:12px;font-weight:700;white-space:nowrap;">安责险投保</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <div style="background:linear-gradient(180deg,#f8fbff 0%,#f1f7ff 100%);border-radius:14px;padding:12px 10px;">
+              <div style="font-size:11px;color:#7a8699;margin-bottom:6px;">基础保费</div>
+              <div style="font-size:20px;color:#1d4ed8;font-weight:800;">¥${totalPrice}</div>
+            </div>
+            <div style="background:linear-gradient(180deg,#f9fcf7 0%,#eef8f0 100%);border-radius:14px;padding:12px 10px;">
+              <div style="font-size:11px;color:#7a8699;margin-bottom:6px;">核心保额</div>
+              <div style="font-size:18px;color:#0f766e;font-weight:800;">40万/人</div>
+            </div>
+            <div style="background:linear-gradient(180deg,#fffaf3 0%,#fff3e2 100%);border-radius:14px;padding:12px 10px;">
+              <div style="font-size:11px;color:#7a8699;margin-bottom:6px;">保障周期</div>
+              <div style="font-size:16px;color:#b45309;font-weight:800;">施工全周期</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:18px;padding:16px;border:1px solid #e9eef5;box-shadow:0 10px 24px rgba(15,23,42,0.05);margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div>
+              <div style="font-size:17px;font-weight:800;color:#172033;">保障内容</div>
+              <div style="font-size:12px;color:#7a8699;margin-top:3px;">以下限额与海报页保持一致</div>
+            </div>
+            <div style="padding:5px 10px;border-radius:999px;background:#eef6ff;color:#225ea8;font-size:11px;font-weight:700;">固定方案</div>
+          </div>
+          ${COVERAGE_SECTIONS.map(section => `
+            <div style="margin-bottom:14px;">
+              <div style="font-size:14px;font-weight:800;color:#172033;margin-bottom:10px;padding-left:4px;">${section.title}</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                ${section.items.map(item => `
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 12px;background:#f8fafc;border-radius:12px;">
+                    <span style="font-size:13px;color:#334155;">${item.name}</span>
+                    <span style="font-size:15px;color:#00B578;font-weight:800;">${item.amount}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+          <div style="background:linear-gradient(135deg,#E6F7F0,#f6fbf8);border:1px solid rgba(0,181,120,0.2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+            ${COVERAGE_LIMIT_SUMMARY.map(item => `
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:13px;color:#334155;font-weight:700;">${item.name}</span>
+                <span style="font-size:16px;font-weight:800;color:#00B578;">${item.amount}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:14px;background:linear-gradient(90deg,#f8fbff 0%,#ffffff 100%);border:1px solid #e6eef8;">
+            <div>
+              <div style="font-size:13px;color:#14213d;font-weight:700;">已包含 ${BASE_DETAILS.length} 项基础责任</div>
+              <div style="font-size:12px;color:#7a8699;line-height:1.6;margin-top:3px;">${addonCount > 0 ? `另含 ${addonCount} 项补充保障，可在支付页继续核对` : '本次为法定固定保障方案，无需额外填写资料'}</div>
+            </div>
+            <button onclick="showBaseDetail()" style="height:38px;padding:0 14px;border:none;background:#1f5da8;color:#fff;border-radius:19px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">查看清单</button>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:18px;padding:16px;border:1px solid #e9eef5;box-shadow:0 10px 24px rgba(15,23,42,0.05);margin-bottom:14px;">
+          <div style="font-size:17px;font-weight:800;color:#172033;margin-bottom:14px;">承保与出单说明</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
+              <span style="font-size:13px;color:#7a8699;">承保机构</span>
+              <span style="font-size:14px;color:#111827;font-weight:700;text-align:right;">${company.name}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
+              <span style="font-size:13px;color:#7a8699;">保障对象</span>
+              <span style="font-size:14px;color:#111827;font-weight:700;text-align:right;">施工单位从业人员与第三者</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">
+              <span style="font-size:13px;color:#7a8699;">投保资料</span>
+              <span style="font-size:14px;color:#111827;font-weight:700;text-align:right;">复用备案信息，免重复填写</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:16px;">
+              <span style="font-size:13px;color:#7a8699;">保单生效</span>
+              <span style="font-size:14px;color:#111827;font-weight:700;text-align:right;">支付成功后同步出单</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(180deg,#fffaf1 0%,#fff 100%);border-radius:18px;padding:16px;border:1px solid rgba(245,158,11,0.18);box-shadow:0 10px 24px rgba(180,83,9,0.05);margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:#fff1d6;display:flex;align-items:center;justify-content:center;">
+              <svg width="14" height="14" viewBox="0 0 24 24" stroke="#d97706" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            </div>
+            <div style="font-size:16px;font-weight:800;color:#172033;">确认前请留意</div>
+          </div>
+          <div style="font-size:13px;color:#6b7280;line-height:1.85;">
+            请核对保障责任与施工需求是否匹配，并确认承保机构、限额和保费无误。点击下方主按钮后，将进入支付页面，后续操作轨迹会被记录并加密保存。
+          </div>
+        </div>
+      </div>
+
+      <div style="position:sticky;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(18px);border-top:1px solid rgba(226,232,240,0.95);padding:12px 16px 20px;z-index:10;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div>
+            <div style="font-size:12px;color:#7a8699;margin-bottom:4px;">确认后进入 ${company.name} 收银台</div>
+            <div style="display:flex;align-items:flex-end;gap:4px;">
+              <span style="font-size:14px;color:#ff8a00;font-weight:700;">¥</span>
+              <span style="font-size:28px;color:#ff8a00;font-weight:800;line-height:1;">${totalPrice}</span>
+              <span style="font-size:12px;color:#ff8a00;margin-bottom:2px;">元</span>
+            </div>
+          </div>
+          <div style="padding:8px 10px;border-radius:12px;background:#f8fafc;text-align:right;">
+            <div style="font-size:11px;color:#94a3b8;">当前方案</div>
+            <div style="font-size:13px;color:#172033;font-weight:700;">基础保障${addonCount > 0 ? ` + ${addonCount}项补充` : ''}</div>
+          </div>
+        </div>
+        <div onclick="toggleCoverageConsent()" style="display:flex;align-items:flex-start;gap:10px;padding:12px 0 14px;cursor:pointer;">
+          <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid ${state.coverageConsent ? '#00B578' : '#cbd5e1'};background:${state.coverageConsent ? '#00B578' : '#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+            ${state.coverageConsent ? '<svg width="11" height="11" viewBox="0 0 12 10" stroke="#fff" stroke-width="2.5" fill="none"><polyline points="1,5 4,8 10,2"/></svg>' : ''}
+          </div>
+          <div style="font-size:12px;color:#6b7280;line-height:1.8;">
+            我已阅读并确认本页保障内容，同意进入支付。
+            <span style="color:#1f5da8;font-weight:700;">《投保须知》</span>
+            <span style="color:#1f5da8;font-weight:700;">《免责说明》</span>
+            <span style="color:#1f5da8;font-weight:700;">《保险条款》</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="state.page='match';render();" style="flex:1;height:48px;background:#eef2f7;color:#475569;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;">返回重选</button>
+          <button onclick="goToPayPage()" style="flex:1.4;height:48px;border:none;border-radius:14px;font-size:15px;font-weight:800;${confirmBtnStyle}">确认保障并支付</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderLoading() {
   return `
     ${statusBar()}
@@ -1569,10 +1770,11 @@ function renderSuccess() {
 
 function selectCompany(id) {
   state.selectedCompany = id;
-  // 直接跳转到三档套餐页（去掉确认弹窗）
-  state.page = 'tier';
+  // 先进入保障内容页，再进入支付页
+  state.page = 'coverage';
   state.currentTier = 'basic';
   state.checkedAddons = new Set();
+  state.coverageConsent = false;
   render();
 }
 
@@ -1586,9 +1788,10 @@ function hideModal() {
 
 function goToTierPage() {
   hideModal();
-  state.page = 'tier';
+  state.page = 'coverage';
   state.currentTier = 'advanced';
   state.checkedAddons = new Set([state.defaultRecommendId]);
+  state.coverageConsent = false;
   render();
 }
 
@@ -1633,6 +1836,17 @@ function goToPayLoading() {
   render();
 }
 
+function toggleCoverageConsent() {
+  state.coverageConsent = !state.coverageConsent;
+  render();
+}
+
+function goToPayPage() {
+  if (!state.coverageConsent) return;
+  state.page = 'pay';
+  render();
+}
+
 function confirmPay() {
   state.page = 'loading';
   render();
@@ -1648,10 +1862,21 @@ function showBaseDetail() {
     <div style="font-size:14px;color:#666;margin-bottom:16px;line-height:1.6;">
       安全生产责任保险（安责险）是政府强制要求的施工基础保障，三档套餐保额一致，符合《安全生产责任保险实施办法》要求。
     </div>
-    ${BASE_DETAILS.map(item => `
+    ${COVERAGE_SECTIONS.map(section => `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:700;color:#333;margin:0 0 10px 2px;">${section.title}</div>
+        ${section.items.map(item => `
+          <div class="sheet-row">
+            <span class="sheet-row-label">${item.name}</span>
+            <span class="sheet-row-value">${item.amount}</span>
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+    ${COVERAGE_LIMIT_SUMMARY.map(item => `
       <div class="sheet-row">
-        <span class="sheet-row-label">${item.name}</span>
-        <span class="sheet-row-value">${item.amount}</span>
+        <span class="sheet-row-label" style="font-weight:700;color:#333;">${item.name}</span>
+        <span class="sheet-row-value" style="color:#00B578;">${item.amount}</span>
       </div>
     `).join('')}
   `;
@@ -1680,6 +1905,7 @@ function resetDemo() {
     checkedAddons: new Set(),
     defaultRecommendId: 'gcyqx',
     vipBaseTier: 'mid',
+    coverageConsent: false,
     scheme: state.scheme || 'B',
   };
   hideModal();

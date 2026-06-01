@@ -1,0 +1,929 @@
+<!--
+================================================================================
+原型对照清单核对结果（移动端风格，基于现有页面改造）
+================================================================================
+| 编号 | 方案内容                     | 验收标准                              | 状态   |
+|------|-----------------------------|---------------------------------------|--------|
+| R01  | 审核通过后生成两份材料       | 材料总览页同时显示回执和告示牌卡片    | ✅ 已实现 |
+| R02  | 备案回执是凭证，不要求张贴   | 预览页提示"仅作备案凭证，无需张贴"    | ✅ 已实现（修正原截图文案） |
+| R03  | 施工告示牌用于现场张贴       | 预览页提示"张贴用材料"                | ✅ 已实现 |
+| R04  | 页面默认展示图片             | 预览页首屏为图片预览区                | ✅ 已实现 |
+| R05  | 保留PDF原件下载              | 备案回执预览页有"下载PDF"按钮         | ✅ 已实现 |
+| R06  | 支持单独预览和下载           | 两个预览页各有独立操作按钮            | ✅ 已实现 |
+| R07  | 支持一键下载全部材料         | 材料总览页底部有"一键下载全部"按钮    | ✅ 已实现 |
+| R08  | 审批记录展示两份材料缩略图   | 已完成备案节点内有两张缩略图          | ✅ 已实现 |
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>备案回执与施工告示牌双材料原型设计</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #e8e8e8;
+    color: #1a1a1a;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  /* ===== 整体布局：多页面并排 + 标注在右 ===== */
+  .prototype-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+  }
+  .phone-with-annotation {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  /* ===== 手机框 ===== */
+  .phone-frame {
+    width: 375px;
+    background: #000;
+    border-radius: 40px;
+    padding: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+  .phone-screen {
+    background: #f5f5f5;
+    border-radius: 28px;
+    overflow: hidden;
+    min-height: 667px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* ===== 状态栏 ===== */
+  .status-bar {
+    height: 44px;
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    position: relative;
+  }
+  .status-time {
+    position: absolute;
+    left: 28px;
+    bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* ===== 头部导航栏 ===== */
+  .nav-header {
+    height: 48px;
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    color: #fff;
+    position: relative;
+  }
+  .nav-back {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+    padding-right: 32px;
+  }
+  .nav-right {
+    width: 32px;
+    text-align: right;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* ===== 页面内容区 ===== */
+  .page-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ===== 提示卡片 ===== */
+  .tip-card {
+    background: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #389e0d;
+    line-height: 1.6;
+  }
+  .tip-card.blue {
+    background: #e6f7ff;
+    border-color: #91d5ff;
+    color: #096dd9;
+  }
+  .tip-card.orange {
+    background: #fff7e6;
+    border-color: #ffd591;
+    color: #d46b08;
+  }
+  .tip-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #52c41a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .tip-card.blue .tip-icon { background: #1890ff; }
+  .tip-card.orange .tip-icon { background: #fa8c16; }
+
+  /* ===== 材料卡片 ===== */
+  .material-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .material-card:active { transform: scale(0.98); }
+  .card-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .card-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-green { background: #f6ffed; color: #52c41a; }
+  .badge-orange { background: #fff7e6; color: #fa8c16; }
+  .card-title { font-size: 16px; font-weight: 600; }
+  .card-desc {
+    font-size: 13px;
+    color: #8c8c8c;
+    margin-bottom: 12px;
+  }
+  .card-preview {
+    width: 100%;
+    aspect-ratio: 3/4;
+    max-height: 280px;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px dashed #d9d9d9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .card-preview svg { margin-bottom: 8px; }
+  .card-preview-label {
+    font-size: 13px;
+    color: #bfbfbf;
+  }
+  .card-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-sm {
+    flex: 1;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #d9d9d9;
+    background: #fff;
+    color: #595959;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .btn-sm:active { background: #f5f5f5; }
+
+  /* ===== 大图预览区 ===== */
+  .preview-large {
+    width: 100%;
+    aspect-ratio: 3/4;
+    max-height: 420px;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px dashed #d9d9d9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .preview-large.notice-style {
+    border: 2px solid #ff4d4f;
+    background: #fff1f0;
+  }
+  .preview-large svg { margin-bottom: 12px; }
+  .preview-large .preview-label {
+    font-size: 14px;
+    color: #8c8c8c;
+  }
+
+  /* ===== 底部按钮区 ===== */
+  .bottom-actions {
+    padding: 16px;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    gap: 12px;
+  }
+  .btn-primary {
+    flex: 1;
+    height: 48px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .btn-primary:active { opacity: 0.9; }
+  .btn-outline {
+    flex: 1;
+    height: 48px;
+    border-radius: 10px;
+    border: 1px solid #52c41a;
+    background: #fff;
+    color: #52c41a;
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  /* ===== 审批记录弹层 ===== */
+  .modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .modal-sheet {
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    max-height: 75%;
+    display: flex;
+    flex-direction: column;
+  }
+  .sheet-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sheet-header h3 { font-size: 17px; font-weight: 600; }
+  .sheet-close {
+    width: 28px; height: 28px;
+    border: none;
+    background: #f5f5f5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #8c8c8c;
+  }
+  .sheet-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* ===== 时间线 ===== */
+  .timeline-item {
+    display: flex;
+    padding-bottom: 24px;
+    position: relative;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 28px;
+    bottom: 0;
+    width: 2px;
+    background: #e8e8e8;
+  }
+  .timeline-item:last-child::before { display: none; }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .dot-done {
+    background: #f6ffed;
+    color: #52c41a;
+  }
+  .dot-gray {
+    background: #f0f0f0;
+    color: #8c8c8c;
+  }
+  .timeline-content {
+    flex: 1;
+  }
+  .timeline-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .timeline-time {
+    font-size: 12px;
+    color: #8c8c8c;
+    margin-bottom: 8px;
+  }
+  .timeline-desc {
+    font-size: 13px;
+    color: #595959;
+    margin-bottom: 10px;
+  }
+  .timeline-thumbs {
+    display: flex;
+    gap: 10px;
+  }
+  .t-thumb {
+    width: 80px;
+    cursor: pointer;
+  }
+  .t-thumb-box {
+    width: 80px;
+    height: 60px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    border: 1px dashed #d9d9d9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .t-thumb-label {
+    font-size: 11px;
+    color: #8c8c8c;
+    text-align: center;
+  }
+
+  /* ===== 标注面板 ===== */
+  .annotation-panel {
+    width: 260px;
+    flex-shrink: 0;
+  }
+  .anno-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #262626;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #1677ff;
+  }
+  .anno-item {
+    background: #FFFBE6;
+    border: 1px dashed #FFC53D;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .anno-tag {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+  .tag-rule { background: #e6f4ff; color: #1677ff; }
+  .tag-biz { background: #fff2e8; color: #fa8c16; }
+  .tag-data { background: #f6ffed; color: #52c41a; }
+  .anno-item p { color: #595959; margin-top: 4px; }
+
+  /* ===== 页面标签 ===== */
+  .page-label {
+    text-align: center;
+    font-size: 13px;
+    color: #595959;
+    font-weight: 600;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  /* ===== 项目详情页背景（用于弹层展示） ===== */
+  .project-bg {
+    flex: 1;
+    background: #f5f5f5;
+    padding: 16px;
+  }
+  .project-tabs {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e8e8e8;
+    padding-bottom: 12px;
+  }
+  .project-tab {
+    font-size: 14px;
+    color: #8c8c8c;
+  }
+  .project-tab.active {
+    color: #52c41a;
+    font-weight: 600;
+  }
+  .info-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .info-label {
+    width: 90px;
+    color: #8c8c8c;
+    font-size: 14px;
+  }
+  .info-value {
+    flex: 1;
+    font-size: 14px;
+    color: #262626;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 1400px) {
+    .phone-with-annotation { flex-direction: column; }
+    .annotation-panel { width: 375px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="prototype-wrapper">
+
+  <!-- ==================== 手机1：材料总览页 ==================== -->
+  <div class="phone-with-annotation">
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <!-- 状态栏 -->
+          <div class="status-bar">
+            <span class="status-time">09:41</span>
+            备案材料
+          </div>
+          <!-- 内容 -->
+          <div class="page-body">
+            <!-- 提示 -->
+            <div class="tip-card">
+              <span class="tip-icon">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span>备案审核已通过，以下两份材料已自动生成</span>
+            </div>
+            <!-- 备案回执卡片 -->
+            <div class="material-card">
+              <div class="card-header-row">
+                <span class="card-badge badge-green">备案凭证</span>
+                <span class="card-title">备案回执</span>
+              </div>
+              <div class="card-desc">备案审核通过凭证，用于保存归档，无需张贴</div>
+              <div class="card-preview">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <span class="card-preview-label">备案回执预览图</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  下载图片
+                </button>
+                <button class="btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                  下载PDF
+                </button>
+              </div>
+            </div>
+            <!-- 施工告示牌卡片 -->
+            <div class="material-card">
+              <div class="card-header-row">
+                <span class="card-badge badge-orange">张贴材料</span>
+                <span class="card-title">施工告示牌</span>
+              </div>
+              <div class="card-desc">施工现场公示材料，用于现场张贴</div>
+              <div class="card-preview">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                  <rect x="7" y="7" width="10" height="6" rx="1"></rect>
+                  <line x1="7" y1="17" x2="17" y2="17"></line>
+                  <line x1="10" y1="20" x2="14" y2="20"></line>
+                </svg>
+                <span class="card-preview-label">施工告示牌预览图</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  下载图片
+                </button>
+                <button class="btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                  </svg>
+                  打印
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- 底部操作 -->
+          <div class="bottom-actions">
+            <button class="btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              一键下载全部
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="page-label">① 材料总览页</div>
+    </div>
+    <!-- 标注 -->
+    <div class="annotation-panel">
+      <div class="anno-title">需求标注</div>
+      <div class="anno-item">
+        <span class="anno-tag tag-rule">规则</span>
+        <strong>R01</strong> 审核通过后同时展示两份材料
+        <p>材料总览页中两个卡片分别展示备案回执和施工告示牌。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-rule">规则</span>
+        <strong>R07</strong> 一键下载全部
+        <p>底部固定"一键下载全部"按钮，将两份材料打包下载。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-biz">业务</span>
+        用途区分
+        <p>备案回执标注"备案凭证"绿色标签；施工告示牌标注"张贴材料"橙色标签，文案明确各自用途。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-rule">规则</span>
+        材料卡片操作
+        <p>回执支持下载图片+PDF；告示牌支持下载图片+打印。每张卡片独立操作。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 手机2：备案回执预览 ==================== -->
+  <div class="phone-with-annotation">
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="nav-header">
+            <div class="nav-back">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </div>
+            <div class="nav-title">备案回执</div>
+          </div>
+          <div class="page-body">
+            <div class="tip-card blue">
+              <span class="tip-icon">i</span>
+              <span>仅作备案凭证使用，无需张贴</span>
+            </div>
+            <div class="preview-large">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <span class="preview-label">备案回执图片预览</span>
+            </div>
+          </div>
+          <div class="bottom-actions">
+            <button class="btn-outline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              下载图片
+            </button>
+            <button class="btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              下载PDF
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="page-label">② 备案回执预览</div>
+    </div>
+    <!-- 标注 -->
+    <div class="annotation-panel">
+      <div class="anno-title">需求标注</div>
+      <div class="anno-item">
+        <span class="anno-tag tag-biz">业务</span>
+        <strong>R02</strong> 备案回执定位
+        <p>提示文案明确"仅作备案凭证使用，无需张贴"，与施工告示牌用途严格区分。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-data">数据</span>
+        <strong>R04/R05</strong> 展示形态与PDF下载
+        <p>首屏默认展示图片预览；保留PDF原件下载入口（"下载PDF"按钮）。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-rule">规则</span>
+        <strong>R06</strong> 独立操作
+        <p>预览页提供独立的"下载图片"和"下载PDF"按钮。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 手机3：施工告示牌预览 ==================== -->
+  <div class="phone-with-annotation">
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="nav-header">
+            <div class="nav-back">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </div>
+            <div class="nav-title">施工告示牌</div>
+          </div>
+          <div class="page-body">
+            <div class="tip-card orange">
+              <span class="tip-icon">i</span>
+              <span>张贴用材料，请打印后张贴于施工现场醒目位置</span>
+            </div>
+            <div class="preview-large notice-style">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff4d4f" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <rect x="7" y="7" width="10" height="6" rx="1"></rect>
+                <line x1="7" y1="17" x2="17" y2="17"></line>
+                <line x1="10" y1="20" x2="14" y2="20"></line>
+              </svg>
+              <span class="preview-label">施工告示牌图片预览</span>
+            </div>
+          </div>
+          <div class="bottom-actions">
+            <button class="btn-outline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              下载图片
+            </button>
+            <button class="btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              打印
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="page-label">③ 施工告示牌预览</div>
+    </div>
+    <!-- 标注 -->
+    <div class="annotation-panel">
+      <div class="anno-title">需求标注</div>
+      <div class="anno-item">
+        <span class="anno-tag tag-biz">业务</span>
+        <strong>R03</strong> 施工告示牌定位
+        <p>提示文案明确"张贴用材料"，强调现场张贴用途，与备案回执的凭证属性区分。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-data">数据</span>
+        <strong>R04</strong> 默认图片展示
+        <p>预览区以红色边框区分告示牌样式，首屏为图片预览。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-rule">规则</span>
+        <strong>R06</strong> 独立操作
+        <p>提供"下载图片"和"打印"按钮，支持现场打印张贴。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 手机4：审批记录弹层 ==================== -->
+  <div class="phone-with-annotation">
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <!-- 项目详情背景 -->
+          <div class="nav-header">
+            <div class="nav-back">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </div>
+            <div class="nav-title">项目详情</div>
+            <div class="nav-right" style="font-size:12px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:4px;">审批记录</div>
+          </div>
+          <div class="project-bg">
+            <div class="project-tabs">
+              <span class="project-tab active">基础信息</span>
+              <span class="project-tab">工程信息</span>
+              <span class="project-tab">安全信息</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">作业名称</span>
+              <span class="info-value">测试0430</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">作业类型</span>
+              <span class="info-value">空调、太阳能、雨棚等安装维护</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">建设单位</span>
+              <span class="info-value">深圳市禾颖装饰工程有限公司</span>
+            </div>
+          </div>
+          <!-- 审批记录弹层 -->
+          <div class="modal-overlay" style="display:flex;">
+            <div style="flex:1;" onclick="alert('点击背景关闭弹层')"></div>
+            <div class="modal-sheet">
+              <div class="sheet-header">
+                <h3>审批记录</h3>
+                <button class="sheet-close">&times;</button>
+              </div>
+              <div class="sheet-body">
+                <!-- 已完成备案 -->
+                <div class="timeline-item">
+                  <div class="timeline-dot dot-done">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">已完成备案</div>
+                    <div class="timeline-time">04-30 11:44</div>
+                    <div class="timeline-desc">备案审核通过，已生成回执和告示牌</div>
+                    <div class="timeline-thumbs">
+                      <div class="t-thumb">
+                        <div class="t-thumb-box">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" stroke-width="1.5">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                          </svg>
+                        </div>
+                        <div class="t-thumb-label">备案回执</div>
+                      </div>
+                      <div class="t-thumb">
+                        <div class="t-thumb-box">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#bfbfbf" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                            <rect x="7" y="7" width="10" height="6" rx="1"></rect>
+                          </svg>
+                        </div>
+                        <div class="t-thumb-label">施工告示牌</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 提交备案申请 -->
+                <div class="timeline-item">
+                  <div class="timeline-dot dot-gray">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                      <line x1="12" y1="8" x2="12" y2="16"></line>
+                      <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">提交备案申请</div>
+                    <div class="timeline-time">04-30 11:35</div>
+                    <div class="timeline-desc">2222EW | 132****222</div>
+                  </div>
+                </div>
+                <!-- 发起备案 -->
+                <div class="timeline-item">
+                  <div class="timeline-dot dot-gray">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-title">发起备案</div>
+                    <div class="timeline-time">04-30 11:30</div>
+                    <div class="timeline-desc">2222EW | 132****222</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page-label">④ 审批记录弹层</div>
+    </div>
+    <!-- 标注 -->
+    <div class="annotation-panel">
+      <div class="anno-title">需求标注</div>
+      <div class="anno-item">
+        <span class="anno-tag tag-rule">规则</span>
+        <strong>R08</strong> 审批记录缩略图
+        <p>仅在"已完成备案"节点内展示两份材料缩略图，分别对应回执和告示牌，不合并显示。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-biz">业务</span>
+        节点展示范围
+        <p>其他节点（提交申请、发起备案）不展示材料缩略图，只展示时间线信息。</p>
+      </div>
+      <div class="anno-item">
+        <span class="anno-tag tag-rule">规则</span>
+        只读属性
+        <p>审批记录仅查看和下载，不允许编辑。点击缩略图可进入大图预览。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧大屏备案报表导出 - 原型设计</title>
+  <style>
+    :root {
+      --bg-deep: #0a1628;
+      --bg-panel: rgba(13, 30, 56, 0.92);
+      --bg-card: rgba(16, 38, 68, 0.88);
+      --border-glow: rgba(0, 212, 255, 0.25);
+      --border-subtle: rgba(126, 185, 255, 0.15);
+      --text-main: #e8f0ff;
+      --text-weak: #9cb2d8;
+      --text-mute: #6f87ae;
+      --primary: #409eff;
+      --primary-glow: rgba(64, 158, 255, 0.3);
+      --cyan: #00d4ff;
+      --cyan-glow: rgba(0, 212, 255, 0.25);
+      --success: #52c41a;
+      --warn: #faad14;
+      --danger: #ff7875;
+      --paper: #ffffff;
+      --paper-bg: #f5f7fa;
+      --annotation-bg: #fffbe6;
+      --annotation-border: #ffc53d;
+      --shadow-deep: 0 24px 72px rgba(0, 0, 0, 0.5);
+      --shadow-panel: 0 16px 48px rgba(0, 0, 0, 0.35);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #0d1b2a;
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* 可编辑 */
+    [contenteditable="true"] {
+      outline: none;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    [contenteditable="true"]:hover {
+      background: rgba(64, 158, 255, 0.08);
+    }
+    [contenteditable="true"]:focus {
+      background: rgba(64, 158, 255, 0.15);
+      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.3);
+    }
+
+    /* 主布局 */
+    .main-wrap {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      min-height: 100vh;
+    }
+
+    /* 左侧原型区 */
+    .prototype-area {
+      flex: 1;
+      min-width: 1200px;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(0, 212, 255, 0.06), transparent 40%),
+        radial-gradient(circle at 80% 100%, rgba(64, 158, 255, 0.05), transparent 40%),
+        linear-gradient(180deg, #0a1628 0%, #0d1f35 100%);
+    }
+
+    /* 右侧标注区 */
+    .annotation-drawer {
+      width: 420px;
+      flex-shrink: 0;
+      background: var(--annotation-bg);
+      border-left: 2px dashed var(--annotation-border);
+      transition: width 0.3s ease;
+      overflow: hidden;
+      position: relative;
+    }
+    .annotation-drawer.collapsed {
+      width: 48px;
+    }
+    .annotation-drawer.collapsed .annotation-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .annotation-toggle {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 80px;
+      background: var(--annotation-border);
+      border-radius: 0 8px 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: left 0.3s;
+    }
+    .annotation-drawer.collapsed .annotation-toggle {
+      left: 0;
+    }
+    .annotation-toggle svg {
+      transition: transform 0.3s;
+    }
+    .annotation-drawer.collapsed .annotation-toggle svg {
+      transform: rotate(180deg);
+    }
+    .annotation-content {
+      padding: 20px 16px 20px 56px;
+      height: 100vh;
+      overflow-y: auto;
+      transition: opacity 0.2s;
+    }
+    .annotation-content h3 {
+      font-size: 15px;
+      color: #5f4b17;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--annotation-border);
+    }
+    .annotation-content h4 {
+      font-size: 13px;
+      color: #7a5f1e;
+      margin: 14px 0 6px;
+    }
+    .annotation-content p,
+    .annotation-content li {
+      font-size: 12px;
+      color: #5f4b17;
+      line-height: 1.7;
+    }
+    .annotation-content ul {
+      padding-left: 16px;
+      margin: 6px 0;
+    }
+    .annotation-content .rule-block {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin: 8px 0;
+      border-left: 3px solid var(--annotation-border);
+    }
+    .annotation-page {
+      display: none;
+    }
+    .annotation-page.active {
+      display: block;
+    }
+
+    /* 大屏页面容器 */
+    .screen-page {
+      display: none;
+      min-height: 720px;
+    }
+    .screen-page.active {
+      display: block;
+    }
+
+    /* 大屏头部 */
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      margin-bottom: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(12, 32, 58, 0.9), rgba(7, 20, 36, 0.92));
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-deep);
+    }
+    .dashboard-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, var(--cyan), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .dashboard-subtitle {
+      margin-top: 6px;
+      color: var(--text-weak);
+      font-size: 13px;
+    }
+    .dashboard-meta {
+      display: flex;
+      gap: 16px;
+    }
+    .meta-item {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+    }
+    .meta-item small {
+      display: block;
+      color: var(--text-weak);
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+    .meta-item span {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* 筛选栏 */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 14px 20px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+    }
+    .filter-left {
+      display: flex;
+      gap: 10px;
+    }
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .filter-pill svg {
+      color: var(--primary);
+    }
+
+    /* 统揽卡片网格 */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .overview-card {
+      position: relative;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(17, 40, 70, 0.9), rgba(9, 26, 47, 0.88));
+      border: 1px solid rgba(118, 170, 232, 0.15);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+    .overview-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), transparent 40%, transparent 60%, rgba(64, 158, 255, 0.05));
+      pointer-events: none;
+    }
+    .overview-card.filing {
+      border-color: rgba(64, 158, 255, 0.4);
+      box-shadow: 0 18px 44px rgba(13, 40, 70, 0.4);
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .card-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-weak);
+    }
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      position: relative;
+    }
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      border-color: var(--primary-glow);
+      background: rgba(64, 158, 255, 0.12);
+    }
+    .icon-btn.export {
+      border-color: rgba(64, 158, 255, 0.35);
+      background: rgba(64, 158, 255, 0.15);
+    }
+    .icon-btn.export:hover {
+      border-color: rgba(64, 158, 255, 0.6);
+      background: rgba(64, 158, 255, 0.25);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(64, 158, 255, 0.2);
+    }
+    .icon-btn.export.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Tooltip */
+    .tooltip-wrap {
+      position: relative;
+    }
+    .tooltip-text {
+      position: absolute;
+      top: 42px;
+      right: 0;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 100;
+    }
+    .tooltip-wrap:hover .tooltip-text {
+      opacity: 1;
+    }
+
+    /* 指标数据 */
+    .metric-row {
+      display: flex;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .metric-box {
+      flex: 1;
+    }
+    .metric-box small {
+      display: block;
+      color: var(--text-weak);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .metric-box strong {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .metric-box em {
+      font-style: normal;
+      font-size: 11px;
+      color: var(--text-mute);
+    }
+    .metric-box .change {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .change.up { color: var(--success); }
+    .change.down { color: var(--danger); }
+
+    /* 状态演示 */
+    .state-demo-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(64, 158, 255, 0.06));
+    }
+    .state-demo-bar .demo-label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .state-demo-bar .demo-label span {
+      color: var(--text-weak);
+      font-weight: 400;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    .state-chips {
+      display: flex;
+      gap: 8px;
+    }
+    .state-chip {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-weak);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .state-chip:hover {
+      border-color: var(--primary-glow);
+      background: rgba(64, 158, 255, 0.1);
+    }
+    .state-chip.active {
+      color: #fff;
+      border-color: rgba(111, 196, 255, 0.5);
+      background: linear-gradient(90deg, rgba(64, 158, 255, 0.28), rgba(0, 212, 255, 0.18));
+    }
+
+    /* 蒙层弹窗 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      width: 620px;
+      max-height: 88vh;
+      overflow-y: auto;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(16, 40, 72, 0.98), rgba(10, 28, 52, 0.98));
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-deep);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-close:hover {
+      background: rgba(255, 120, 117, 0.15);
+      border-color: rgba(255, 120, 117, 0.3);
+    }
+    .modal-body {
+      padding: 20px 24px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* 表单控件 */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-mute);
+      margin-left: 6px;
+      font-weight: 400;
+    }
+
+    /* 单选组 */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .radio-item:hover {
+      border-color: var(--primary-glow);
+      background: rgba(64, 158, 255, 0.06);
+    }
+    .radio-item.active {
+      border-color: rgba(111, 196, 255, 0.5);
+      background: linear-gradient(90deg, rgba(64, 158, 255, 0.15), rgba(0, 212, 255, 0.1));
+    }
+    .radio-item.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .radio-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--text-mute);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .radio-item.active .radio-circle {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+    .radio-circle::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      opacity: 0;
+    }
+    .radio-item.active .radio-circle::after {
+      opacity: 1;
+    }
+    .radio-text {
+      flex: 1;
+      font-size: 13px;
+    }
+    .radio-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(64, 158, 255, 0.12);
+      color: var(--primary);
+    }
+
+    /* 时间选择 */
+    .time-options {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .time-chip {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-weak);
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .time-chip:hover {
+      border-color: var(--primary-glow);
+    }
+    .time-chip.active {
+      color: #fff;
+      border-color: rgba(111, 196, 255, 0.5);
+      background: linear-gradient(90deg, rgba(64, 158, 255, 0.25), rgba(0, 212, 255, 0.15));
+    }
+    .custom-date {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .date-input {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      font-size: 13px;
+      width: 140px;
+    }
+    .date-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* 多选组 */
+    .check-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .check-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-weak);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .check-item:hover {
+      border-color: var(--primary-glow);
+    }
+    .check-item.active {
+      color: #fff;
+      border-color: rgba(111, 196, 255, 0.5);
+      background: linear-gradient(90deg, rgba(64, 158, 255, 0.2), rgba(0, 212, 255, 0.12));
+    }
+    .check-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 2px solid var(--text-mute);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .check-item.active .check-box {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+    .check-box svg {
+      opacity: 0;
+    }
+    .check-item.active .check-box svg {
+      opacity: 1;
+    }
+
+    /* 格式选择 */
+    .format-group {
+      display: flex;
+      gap: 10px;
+    }
+    .format-option {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .format-option:hover {
+      border-color: var(--primary-glow);
+    }
+    .format-option.active {
+      border-color: rgba(111, 196, 255, 0.5);
+      background: linear-gradient(180deg, rgba(64, 158, 255, 0.12), rgba(0, 212, 255, 0.08));
+    }
+    .format-option.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .format-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(64, 158, 255, 0.1);
+    }
+    .format-option.active .format-icon {
+      background: rgba(64, 158, 255, 0.2);
+    }
+    .format-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .format-desc {
+      font-size: 11px;
+      color: var(--text-mute);
+    }
+
+    /* 预估条数 */
+    .estimate-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--border-subtle);
+      margin-bottom: 18px;
+    }
+    .estimate-bar .est-label {
+      font-size: 12px;
+      color: var(--text-weak);
+    }
+    .estimate-bar .est-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+    .estimate-bar .est-value.warn {
+      color: var(--warn);
+    }
+    .estimate-bar .est-value.danger {
+      color: var(--danger);
+    }
+
+    /* 按钮 */
+    .btn {
+      height: 40px;
+      padding: 0 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #2f8cff, #55b7ff);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(64, 158, 255, 0.25);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 10px 28px rgba(64, 158, 255, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+    .btn-ghost:hover {
+      border-color: var(--primary-glow);
+      background: rgba(64, 158, 255, 0.08);
+    }
+
+    /* Toast 提示 */
+    .toast-overlay {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      display: none;
+    }
+    .toast-overlay.active {
+      display: block;
+      animation: toastIn 0.3s ease;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    .toast-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, rgba(16, 40, 72, 0.98), rgba(10, 28, 52, 0.98));
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-deep);
+      font-size: 14px;
+    }
+    .toast-box .spin {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border-subtle);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* PDF 报表预览 */
+    .pdf-preview {
+      background: var(--paper-bg);
+      border-radius: 16px;
+      padding: 32px;
+      color: #333;
+      box-shadow: var(--shadow-deep);
+    }
+    .pdf-header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #1a2b4a;
+      margin-bottom: 24px;
+    }
+    .pdf-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a2b4a;
+      margin-bottom: 12px;
+    }
+    .pdf-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-size: 13px;
+      color: #666;
+    }
+    .pdf-section {
+      margin-bottom: 24px;
+    }
+    .pdf-section h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a2b4a;
+      margin-bottom: 12px;
+      padding-left: 10px;
+      border-left: 3px solid #409eff;
+    }
+    .pdf-metrics {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .pdf-metric-card {
+      padding: 14px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f2faf5, #f5fbfe);
+      border: 1px solid rgba(34, 166, 109, 0.15);
+      text-align: center;
+    }
+    .pdf-metric-card small {
+      display: block;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .pdf-metric-card strong {
+      display: block;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a2b4a;
+    }
+    .pdf-metric-card em {
+      font-style: normal;
+      font-size: 11px;
+      color: #999;
+    }
+
+    /* 表格 */
+    .pdf-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .pdf-table th {
+      background: #f5f7fa;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #303133;
+      border-bottom: 1px solid #ebeef5;
+    }
+    .pdf-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #ebeef5;
+      color: #606266;
+    }
+    .pdf-table tr:hover td {
+      background: #f5f7fa;
+    }
+    .pdf-table .num {
+      text-align: right;
+    }
+
+    /* Excel 预览 */
+    .excel-preview {
+      background: var(--paper);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-deep);
+    }
+    .excel-tabs {
+      display: flex;
+      background: #f5f7fa;
+      border-bottom: 1px solid #ebeef5;
+    }
+    .excel-tab {
+      padding: 10px 18px;
+      font-size: 12px;
+      color: #606266;
+      cursor: pointer;
+      border-right: 1px solid #ebeef5;
+      background: #f5f7fa;
+    }
+    .excel-tab.active {
+      background: #fff;
+      color: #409eff;
+      font-weight: 600;
+      border-bottom: 2px solid #409eff;
+    }
+    .excel-body {
+      padding: 16px;
+      color: #333;
+    }
+    .excel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .excel-table th {
+      background: #f5f7fa;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 600;
+      color: #303133;
+      border: 1px solid #ebeef5;
+      position: sticky;
+      top: 0;
+    }
+    .excel-table td {
+      padding: 8px 10px;
+      border: 1px solid #ebeef5;
+      color: #606266;
+    }
+    .excel-table tr:nth-child(even) {
+      background: #fafafa;
+    }
+    .excel-info {
+      padding: 12px 16px;
+      background: #f5f7fa;
+      border-top: 1px solid #ebeef5;
+      font-size: 11px;
+      color: #909399;
+    }
+
+    /* 浮动导航 */
+    .float-nav {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 150;
+      display: none;
+      background: rgba(10, 22, 40, 0.95);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 12px 20px;
+      box-shadow: var(--shadow-deep);
+    }
+    .float-nav.active {
+      display: flex;
+    }
+    .float-nav .nav-label {
+      font-size: 12px;
+      color: var(--text-weak);
+      margin-right: 12px;
+      padding-right: 12px;
+      border-right: 1px solid var(--border-subtle);
+    }
+    .nav-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-weak);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      color: #fff;
+      border-color: var(--primary-glow);
+      background: rgba(64, 158, 255, 0.15);
+    }
+
+    /* 页面指示器 */
+    .page-indicator {
+      position: fixed;
+      top: 20px;
+      right: 460px;
+      z-index: 150;
+      padding: 8px 16px;
+      border-radius: 10px;
+      background: rgba(10, 22, 40, 0.9);
+      border: 1px solid var(--border-subtle);
+      font-size: 13px;
+      color: var(--text-weak);
+    }
+    .page-indicator strong {
+      color: var(--primary);
+    }
+
+    /* 街镇锁定提示 */
+    .lock-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(250, 173, 20, 0.08);
+      border: 1px solid rgba(250, 173, 20, 0.2);
+      color: var(--warn);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    /* 状态标签 */
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .status-tag.success { background: #e6f7f0; color: #52c41a; }
+    .status-tag.warn { background: #fff7e6; color: #faad14; }
+    .status-tag.danger { background: #fff2f0; color: #ff7875; }
+    .status-tag.info { background: #e6f4ff; color: #1890ff; }
+
+    /* 进度条 */
+    .progress-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--cyan));
+      transition: width 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 页面指示器 -->
+<div class="page-indicator" id="pageIndicator">
+  当前页面：<strong id="currentPageName">首页导出入口</strong>
+</div>
+
+<!-- Toast 提示 -->
+<div class="toast-overlay" id="toastOverlay">
+  <div class="toast-box" id="toastBox">
+    <div class="spin"></div>
+    <span id="toastText">正在生成报表，请稍候...</span>
+  </div>
+</div>
+
+<!-- 导出配置弹窗 -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>导出报表配置</h2>
+      <button class="modal-close" onclick="closeModal()" aria-label="关闭">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 报表类型 -->
+      <div class="form-group">
+        <label class="form-label">报表类型</label>
+        <div class="radio-group" id="reportTypeGroup">
+          <div class="radio-item active" data-type="comprehensive" data-pdf="true">
+            <span class="radio-circle"></span>
+            <span class="radio-text">综合统计报表</span>
+            <span class="radio-tag">PDF + Excel</span>
+          </div>
+          <div class="radio-item" data-type="comparison" data-pdf="true">
+            <span class="radio-circle"></span>
+            <span class="radio-text">区域对比报表</span>
+            <span class="radio-tag">PDF + Excel</span>
+          </div>
+          <div class="radio-item" data-type="detail" data-pdf="false">
+            <span class="radio-circle"></span>
+            <span class="radio-text">备案明细清单</span>
+            <span class="radio-tag">仅 Excel</span>
+          </div>
+          <div class="radio-item" data-type="reject" data-pdf="false">
+            <span class="radio-circle"></span>
+            <span class="radio-text">驳回分析报表</span>
+            <span class="radio-tag">仅 Excel</span>
+          </div>
+          <div class="radio-item" data-type="trend" data-pdf="true">
+            <span class="radio-circle"></span>
+            <span class="radio-text">趋势分析报表</span>
+            <span class="radio-tag">PDF + Excel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 时间范围 -->
+      <div class="form-group">
+        <label class="form-label">时间范围 <span class="form-hint">（默认：本周）</span></label>
+        <div class="time-options" id="timeOptions">
+          <button class="time-chip" data-time="today">今日</button>
+          <button class="time-chip active" data-time="week">本周</button>
+          <button class="time-chip" data-time="7days">近七日</button>
+          <button class="time-chip" data-time="month">本月</button>
+          <button class="time-chip" data-time="year">本年</button>
+        </div>
+        <div class="custom-date">
+          <input type="date" class="date-input" value="2026-05-26">
+          <span style="color:var(--text-mute)">至</span>
+          <input type="date" class="date-input" value="2026-06-01">
+          <span style="color:var(--text-mute);font-size:12px">最大跨度 365 天</span>
+        </div>
+      </div>
+
+      <!-- 街道筛选 -->
+      <div class="form-group">
+        <label class="form-label">街道筛选 <span class="form-hint">（区级可多选，街镇自动锁定）</span></label>
+        <div class="check-group" id="streetGroup">
+          <div class="check-item active" data-street="all">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>全部街道</span>
+          </div>
+          <div class="check-item" data-street="xiayang">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>夏阳街道</span>
+          </div>
+          <div class="check-item" data-street="yingpu">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>盈浦街道</span>
+          </div>
+          <div class="check-item" data-street="xianghuaqiao">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>香花桥街道</span>
+          </div>
+          <div class="check-item" data-street="zhujiajiao">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>朱家角镇</span>
+          </div>
+        </div>
+        <div class="lock-hint" id="streetLockHint" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          <span>仅可导出管辖区域数据（夏阳街道）</span>
+        </div>
+      </div>
+
+      <!-- 工程类型 -->
+      <div class="form-group">
+        <label class="form-label">工程类型</label>
+        <div class="check-group" id="projectTypeGroup">
+          <div class="check-item active" data-ptype="all">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>全部</span>
+          </div>
+          <div class="check-item active" data-ptype="small">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>小型工程</span>
+          </div>
+          <div class="check-item active" data-ptype="decoration">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>住宅装修</span>
+          </div>
+          <div class="check-item active" data-ptype="sporadic">
+            <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <span>零星作业</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 导出格式 -->
+      <div class="form-group">
+        <label class="form-label">导出格式</label>
+        <div class="format-group" id="formatGroup">
+          <div class="format-option active" data-format="pdf">
+            <div class="format-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#409eff" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <span class="format-name">PDF</span>
+            <span class="format-desc">适合汇报展示</span>
+          </div>
+          <div class="format-option" data-format="excel">
+            <div class="format-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#52c41a" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <span class="format-name">Excel</span>
+            <span class="format-desc">适合二次分析</span>
+          </div>
+          <div class="format-option" data-format="both">
+            <div class="format-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#faad14" stroke-width="1.5"><path d="M12 2v20M2 12h20M7 7l10 10M7 17L17 7"/></svg>
+            </div>
+            <span class="format-name">同时导出</span>
+            <span class="format-desc">两种格式</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 预估数据量 -->
+      <div class="estimate-bar">
+        <span class="est-label">预计导出数据量</span>
+        <span class="est-value" id="estimateValue">约 1,234 条</span>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="confirmExportBtn" onclick="confirmExport()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
+        确认导出
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 主布局 -->
+<div class="main-wrap">
+
+  <!-- 左侧原型区 -->
+  <div class="prototype-area">
+
+    <!-- ======== 页面1：首页导出入口 ======== -->
+    <div class="screen-page active" id="page-home" data-page-name="首页导出入口">
+
+      <!-- 大屏头部 -->
+      <div class="dashboard-header">
+        <div>
+          <div class="dashboard-title">青浦区小型工程与零星作业智慧监管平台</div>
+          <div class="dashboard-subtitle">数据更新时间：2026-06-01 10:28:36 | 当前筛选：工程类型 = 全部工程，街道 = 全部街道</div>
+        </div>
+        <div class="dashboard-meta">
+          <div class="meta-item">
+            <small>当前用户</small>
+            <span>区级管理员</span>
+          </div>
+          <div class="meta-item">
+            <small>数据权限</small>
+            <span>全区</span>
+          </div>
+          <div class="meta-item">
+            <small>刷新频率</small>
+            <span>实时 / 5分钟</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 状态演示切换 -->
+      <div class="state-demo-bar">
+        <div class="demo-label">
+          导出入口状态演示
+          <span>切换四种状态检查交互反馈</span>
+        </div>
+        <div class="state-chips" id="homeStateChips">
+          <button class="state-chip active" data-state="default">默认态</button>
+          <button class="state-chip" data-state="hover">悬浮态</button>
+          <button class="state-chip" data-state="loading">加载中</button>
+          <button class="state-chip" data-state="forbidden">无权限</button>
+        </div>
+      </div>
+
+      <!-- 筛选栏 -->
+      <div class="filter-bar">
+        <div class="filter-left">
+          <div class="filter-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            工程类型：全部工程
+          </div>
+          <div class="filter-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            街道：全部街道
+          </div>
+        </div>
+        <div class="filter-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          统计周期：本周（2026-05-26 至 2026-06-01）
+        </div>
+      </div>
+
+      <!-- 四大统揽卡片 -->
+      <div class="overview-grid">
+
+        <!-- 实时统揽 -->
+        <article class="overview-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-title">实时统揽</div>
+              <div class="card-desc">全区全量态势快照</div>
+            </div>
+            <div class="card-actions">
+              <button class="icon-btn" aria-label="刷新">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9cb2d8" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v6h-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-box">
+              <small>总备案数量</small>
+              <strong contenteditable="true">463</strong>
+              <em>历史累计有效备案</em>
+            </div>
+            <div class="metric-box">
+              <small>总巡查次数</small>
+              <strong style="color:var(--text-mute)">0</strong>
+              <em>巡查模块待上线</em>
+            </div>
+          </div>
+        </article>
+
+        <!-- 备案统揽 - 唯一有导出入口的卡片 -->
+        <article class="overview-card filing">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-title" contenteditable="true">备案统揽</div>
+              <div class="card-desc" contenteditable="true">本周新增与审核状态</div>
+            </div>
+            <div class="card-actions">
+              <button class="icon-btn" aria-label="刷新">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9cb2d8" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v6h-6"/></svg>
+              </button>
+              <!-- 导出入口 -->
+              <div class="tooltip-wrap">
+                <button class="icon-btn export" id="exportTrigger" onclick="openExportModal()" aria-label="导出备案报表">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#409eff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 4v10"/><path d="m8 11 4 4 4-4"/><path d="M5 19h14"/>
+                  </svg>
+                </button>
+                <div class="tooltip-text" id="exportTooltip">导出备案报表</div>
+              </div>
+            </div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-box">
+              <small>本周新增备案</small>
+              <strong contenteditable="true">8</strong>
+              <div class="change up">较上周增长 33.33%</div>
+            </div>
+            <div class="metric-box">
+              <small>待审核备案</small>
+              <strong contenteditable="true">30</strong>
+              <em>实时更新</em>
+            </div>
+          </div>
+        </article>
+
+        <!-- 巡查统揽 -->
+        <article class="overview-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-title">巡查统揽</div>
+              <div class="card-desc">巡查覆盖率与隐患整改</div>
+            </div>
+            <div class="card-actions">
+              <button class="icon-btn" aria-label="刷新">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9cb2d8" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v6h-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-box">
+              <small>本周巡查覆盖率</small>
+              <strong style="color:var(--text-mute)">0%</strong>
+              <em>巡查模块待上线</em>
+            </div>
+            <div class="metric-box">
+              <small>本周隐患整改率</small>
+              <strong style="color:var(--text-mute)">0%</strong>
+              <em>巡查模块待上线</em>
+            </div>
+          </div>
+        </article>
+
+        <!-- 组织统揽 -->
+        <article class="overview-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-title">组织统揽</div>
+              <div class="card-desc">施工单位与人员统计</div>
+            </div>
+            <div class="card-actions">
+              <button class="icon-btn" aria-label="刷新">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9cb2d8" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v6h-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-box">
+              <small>施工单位</small>
+              <strong contenteditable="true">28</strong>
+              <em>已备案施工单位</em>
+            </div>
+            <div class="metric-box">
+              <small>施工人数</small>
+              <strong contenteditable="true">0</strong>
+              <em>待上线</em>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- 说明文字 -->
+      <div style="margin-top:24px;padding:16px 20px;border-radius:12px;background:rgba(64,158,255,0.06);border:1px dashed rgba(64,158,255,0.2);">
+        <p style="font-size:13px;color:var(--text-weak);line-height:1.8;">
+          <strong style="color:var(--primary)">设计说明：</strong>
+          仅"备案统揽"卡片提供【导出】入口，其他三张卡片（实时统揽、巡查统揽、组织统揽）不显示导出按钮。
+          原因：当前仅备案模块已上线并有实际数据，巡查模块待8月上线，暂无数据可导出。
+          点击导出图标后弹出"导出配置弹窗"，支持选择报表类型、时间范围、街道、工程类型和导出格式。
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ======== 页面2：PDF报表预览 ======== -->
+    <div class="screen-page" id="page-pdf" data-page-name="PDF报表预览">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div style="font-size:22px;font-weight:700;">PDF 报表预览</div>
+          <div style="font-size:13px;color:var(--text-weak);margin-top:6px;">综合统计报表 - 正式公文格式</div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost" onclick="goPage('home')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            返回首页
+          </button>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
+            下载 PDF
+          </button>
+        </div>
+      </div>
+
+      <div class="pdf-preview">
+        <!-- 报表头 -->
+        <div class="pdf-header">
+          <h1 contenteditable="true">青浦区小型工程备案统计报表</h1>
+          <div class="pdf-meta">
+            <span>统计周期：2026年5月26日 - 2026年6月1日</span>
+            <span>制表单位：青浦区建设和管理委员会</span>
+            <span>制表日期：2026年06月01日</span>
+          </div>
+        </div>
+
+        <!-- 核心指标 -->
+        <div class="pdf-section">
+          <h3>核心指标概览</h3>
+          <div class="pdf-metrics">
+            <div class="pdf-metric-card">
+              <small>总备案数量</small>
+              <strong>463</strong>
+              <em>历史累计</em>
+            </div>
+            <div class="pdf-metric-card">
+              <small>本周新增备案</small>
+              <strong>8</strong>
+              <em>较上周 ↑33.33%</em>
+            </div>
+            <div class="pdf-metric-card">
+              <small>待审核备案</small>
+              <strong>30</strong>
+              <em>实时更新</em>
+            </div>
+            <div class="pdf-metric-card">
+              <small>已驳回备案</small>
+              <strong>59</strong>
+              <em>当前在库</em>
+            </div>
+            <div class="pdf-metric-card">
+              <small>已通过备案</small>
+              <strong>124</strong>
+              <em>历史累计</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- 状态分布 -->
+        <div class="pdf-section">
+          <h3>备案状态分布</h3>
+          <table class="pdf-table">
+            <thead>
+              <tr>
+                <th>状态</th>
+                <th>数量</th>
+                <th>占比</th>
+                <th>说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>待填报</td><td class="num">56</td><td class="num">31.46%</td><td>已创建草稿但未提交</td></tr>
+              <tr><td>待审核</td><td class="num">30</td><td class="num">16.85%</td><td>已提交审核中</td></tr>
+              <tr><td>待确认</td><td class="num">0</td><td class="num">0.00%</td><td>待确认状态</td></tr>
+              <tr><td>已驳回</td><td class="num">59</td><td class="num">33.15%</td><td>审核不通过被退回</td></tr>
+              <tr><td>已通过</td><td class="num">124</td><td class="num">-</td><td>审核通过已出回执</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 街镇排名 -->
+        <div class="pdf-section">
+          <h3>各街镇备案数量排名</h3>
+          <table class="pdf-table">
+            <thead>
+              <tr>
+                <th>排名</th>
+                <th>街镇</th>
+                <th>历史备案总数</th>
+                <th>本期新增</th>
+                <th>已通过</th>
+                <th>已驳回</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>朱家角镇</td><td class="num">68</td><td class="num">2</td><td class="num">52</td><td class="num">16</td></tr>
+              <tr><td>2</td><td>重固镇</td><td class="num">55</td><td class="num">1</td><td class="num">42</td><td class="num">13</td></tr>
+              <tr><td>3</td><td>赵巷镇</td><td class="num">52</td><td class="num">3</td><td class="num">40</td><td class="num">12</td></tr>
+              <tr><td>4</td><td>徐泾镇</td><td class="num">48</td><td class="num">1</td><td class="num">37</td><td class="num">11</td></tr>
+              <tr><td>5</td><td>华新镇</td><td class="num">45</td><td class="num">0</td><td class="num">34</td><td class="num">11</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 工程类型 -->
+        <div class="pdf-section">
+          <h3>工程类型分布</h3>
+          <table class="pdf-table">
+            <thead>
+              <tr>
+                <th>工程类型</th>
+                <th>数量</th>
+                <th>占比</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>小型工程</td><td class="num">207</td><td class="num">44.71%</td></tr>
+              <tr><td>零星作业</td><td class="num">160</td><td class="num">34.56%</td></tr>
+              <tr><td>住宅装修</td><td class="num">96</td><td class="num">20.73%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 页脚说明 -->
+        <div style="margin-top:32px;padding-top:16px;border-top:1px solid #ebeef5;font-size:11px;color:#999;text-align:center;">
+          数据来源：智慧大屏备案模块 | 统计口径：按最新有效备案去重 | 本报表仅供内部管理使用
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== 页面3：Excel报表预览 ======== -->
+    <div class="screen-page" id="page-excel" data-page-name="Excel报表预览">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div style="font-size:22px;font-weight:700;">Excel 报表预览</div>
+          <div style="font-size:13px;color:var(--text-weak);margin-top:6px;">备案明细清单 - 可二次筛选分析</div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost" onclick="goPage('home')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            返回首页
+          </button>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
+            下载 Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="excel-preview">
+        <!-- Sheet 标签 -->
+        <div class="excel-tabs">
+          <div class="excel-tab active">备案明细</div>
+          <div class="excel-tab">筛选条件</div>
+          <div class="excel-tab">数据说明</div>
+        </div>
+
+        <!-- 表格内容 -->
+        <div class="excel-body">
+          <table class="excel-table">
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>工程名称</th>
+                <th>工程类型</th>
+                <th>工程地址</th>
+                <th>所属街道</th>
+                <th>备案状态</th>
+                <th>风险等级</th>
+                <th>备案人姓名</th>
+                <th>备案人手机号</th>
+                <th>备案人身份证</th>
+                <th>施工单位</th>
+                <th>填报时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>测试#住宅#金泽#0409#002</td>
+                <td>住宅装修</td>
+                <td>杜鹃山合10000009</td>
+                <td>金泽镇</td>
+                <td>已通过</td>
+                <td>一般风险</td>
+                <td>何**</td>
+                <td>185****743</td>
+                <td>450***********020</td>
+                <td>某某装饰公司</td>
+                <td>2026-04-09 10:22:14</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>赵巷镇小区外墙修缮</td>
+                <td>小型工程</td>
+                <td>赵巷镇崧文路188号</td>
+                <td>赵巷镇</td>
+                <td>待审核</td>
+                <td>高风险</td>
+                <td>张**</td>
+                <td>138****567</td>
+                <td>310***********156</td>
+                <td>某某建筑公司</td>
+                <td>2026-05-28 14:35:22</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>徐泾镇商铺装修</td>
+                <td>住宅装修</td>
+                <td>徐泾镇盈港东路2000号</td>
+                <td>徐泾镇</td>
+                <td>已驳回</td>
+                <td>一般风险</td>
+                <td>李**</td>
+                <td>156****890</td>
+                <td>320***********789</td>
+                <td>某某装修公司</td>
+                <td>2026-05-30 09:15:08</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>华新镇厂房空调安装</td>
+                <td>零星作业</td>
+                <td>华新镇华志路500号</td>
+                <td>华新镇</td>
+                <td>已通过</td>
+                <td>一般风险</td>
+                <td>王**</td>
+                <td>177****234</td>
+                <td>340***********456</td>
+                <td>某某机电公司</td>
+                <td>2026-05-29 16:42:33</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>夏阳街道办公室翻新</td>
+                <td>小型工程</td>
+                <td>夏阳街道公园路100号</td>
+                <td>夏阳街道</td>
+                <td>待填报</td>
+                <td>一般风险</td>
+                <td>陈**</td>
+                <td>189****678</td>
+                <td>350***********123</td>
+                <td>某某工程公司</td>
+                <td>2026-05-31 11:08:55</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="excel-info">
+          导出时间：2026-06-01 10:28:36 | 操作人：区级管理员 | 筛选条件：时间范围 2026-05-26 至 2026-06-01，街道=全部，工程类型=全部 | 共 1,234 条记录
+        </div>
+      </div>
+
+      <!-- 脱敏说明 -->
+      <div style="margin-top:20px;padding:14px 18px;border-radius:12px;background:rgba(250,173,20,0.06);border:1px dashed rgba(250,173,20,0.2);">
+        <p style="font-size:12px;color:var(--text-weak);line-height:1.8;">
+          <strong style="color:var(--warn)">脱敏说明：</strong>
+          本报表已按系统脱敏规则处理敏感字段——姓名保留姓、名替换为**；手机号保留前3位和后3位，中间替换为****；身份证号保留前3位和后3位，中间脱敏。
+          脱敏规则生效范围与列表展示规则一致。
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 右侧标注区 -->
+  <div class="annotation-drawer collapsed" id="annotationDrawer">
+    <div class="annotation-toggle" onclick="toggleAnnotation()" title="展开/收起标注">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5f4b17" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+    <div class="annotation-content">
+
+      <!-- 首页标注 -->
+      <div class="annotation-page active" id="anno-home">
+        <h3>页面1：首页导出入口 — 需求说明</h3>
+
+        <h4>页面状态规则</h4>
+        <div class="rule-block">
+          <p><strong>默认态：</strong>导出图标正常显示，边框为 rgba(64,158,255,0.35)，背景为 rgba(64,158,255,0.15)，颜色为 #409eff。</p>
+          <p><strong>悬浮态：</strong>边框加深至 rgba(64,158,255,0.58)，背景加深至 rgba(64,158,255,0.26)，向上位移1px，添加阴影。</p>
+          <p><strong>加载态：</strong>图标颜色变浅，pointer-events: none，显示loading动画（旋转）。</p>
+          <p><strong>禁用态（无权限）：</strong>opacity: 0.4，cursor: not-allowed，边框和背景恢复为默认灰色。</p>
+        </div>
+
+        <h4>数据规则</h4>
+        <div class="rule-block">
+          <p><strong>入口可见性：</strong>仅"备案统揽"卡片显示导出图标，其他三张卡片（实时统揽、巡查统揽、组织统揽）不显示。</p>
+          <p><strong>原因：</strong>当前仅备案模块已上线并有实际数据，巡查模块待8月上线，暂无数据可导出。</p>
+          <p><strong>权限控制：</strong>区级管理人员可见且可用；街镇管理人员可见但导出范围受限；无权限用户图标不显示。</p>
+        </div>
+
+        <h4>字段规则</h4>
+        <div class="rule-block">
+          <p><strong>图标规格：</strong>SVG下载图标，宽20px高20px，描边宽度1.8px，stroke-linecap和stroke-linejoin为round。</p>
+          <p><strong>Tooltip：</strong>悬浮2秒后显示"导出备案报表"，白色文字，深色背景，圆角8px。</p>
+        </div>
+
+        <h4>交互分支规则</h4>
+        <div class="rule-block">
+          <p><strong>点击导出图标 →</strong> 弹出"导出配置弹窗"，弹窗默认继承首页当前筛选条件（工程类型、街道）。</p>
+          <p><strong>数据加载中点击 →</strong> 无效，防抖处理。</p>
+          <p><strong>无权限用户 →</strong> 图标不显示，或显示为禁用态并提示"无导出权限"。</p>
+        </div>
+
+        <h4>边界情况</h4>
+        <div class="rule-block">
+          <p>备案数据为空时：弹窗内【确认导出】置灰，提示"当前筛选条件下暂无备案数据"。</p>
+          <p>同时多次点击：防抖处理，2秒内重复点击无效。</p>
+        </div>
+      </div>
+
+      <!-- 导出配置弹窗标注 -->
+      <div class="annotation-page" id="anno-modal">
+        <h3>页面2：导出配置弹窗 — 需求说明</h3>
+
+        <h4>页面状态规则</h4>
+        <div class="rule-block">
+          <p><strong>弹窗尺寸：</strong>宽度620px，最大高度88vh，超出可滚动，屏幕居中，蒙层遮罩 rgba(0,0,0,0.65)。</p>
+          <p><strong>格式联动：</strong>选择"备案明细清单"或"驳回分析报表"时，PDF选项自动禁用（opacity: 0.35，cursor: not-allowed）。</p>
+          <p><strong>预估数据量联动：</strong>0条时确认按钮置灰；&gt;5000条显示警告；&gt;10000条提示过大但仍允许导出。</p>
+        </div>
+
+        <h4>数据规则</h4>
+        <div class="rule-block">
+          <p><strong>报表类型：</strong>5种互斥单选——综合统计、区域对比、明细清单、驳回分析、趋势分析。</p>
+          <p><strong>时间范围：</strong>快速选项（今日/本周/近七日/本月/本年）或自定义日期范围，最大跨度365天。</p>
+          <p><strong>街道筛选：</strong>区级下拉多选框，默认"全部街道"；街镇锁定为管辖街道，不可修改。</p>
+          <p><strong>工程类型：</strong>复选框组，全部选中时子项全选，取消子项时"全部"自动取消。</p>
+        </div>
+
+        <h4>字段规则</h4>
+        <div class="rule-block">
+          <p><strong>校验规则：</strong>结束日期 ≥ 开始日期；自定义日期跨度 &gt; 365天提示超限；街道和工程类型至少各选一项。</p>
+          <p><strong>预估条数：</strong>弹窗底部实时显示"预计导出约 N 条数据"，根据筛选条件COUNT查询。</p>
+        </div>
+
+        <h4>交互分支规则</h4>
+        <div class="rule-block">
+          <p><strong>【取消】→</strong> 关闭弹窗，不记录任何操作。</p>
+          <p><strong>【确认导出】→</strong> 校验参数 → 判断同步/异步 → 关闭弹窗 → 显示反馈。</p>
+          <p><strong>快速切换报表类型 →</strong> 保留其他配置项，仅重置格式选项的可用状态。</p>
+        </div>
+
+        <h4>边界情况</h4>
+        <div class="rule-block">
+          <p>弹窗打开时首页正在加载数据：配置项默认值显示"加载中..."，数据加载完成后自动填充。</p>
+          <p>网络异常导致导出失败：提示"导出失败，请检查网络后重试"，记录失败日志。</p>
+        </div>
+      </div>
+
+      <!-- PDF预览标注 -->
+      <div class="annotation-page" id="anno-pdf">
+        <h3>页面3：PDF报表预览 — 需求说明</h3>
+
+        <h4>页面状态规则</h4>
+        <div class="rule-block">
+          <p><strong>页面规格：</strong>A4纵向，页边距上下2.5cm左右2cm，页眉左侧系统名称+右侧页码，页脚数据来源+制表日期。</p>
+          <p><strong>颜色规范：</strong>报表标题18px字重700颜色#1a2b4a；表头背景#f5f7fa文字#303133；斑马纹偶数行#fafafa。</p>
+        </div>
+
+        <h4>数据规则</h4>
+        <div class="rule-block">
+          <p><strong>报表结构：</strong>报表头 → 核心指标卡片（5个）→ 状态分布表格 → 街镇排名表格 → 工程类型分布表格 → 数据说明页脚。</p>
+          <p><strong>核心指标口径：</strong>总备案数=历史累计已通过审核数（去重）；本周新增=本周首次提交审核数；待审核/已驳回=当前在库数量。</p>
+          <p><strong>排序规则：</strong>街镇按备案数倒序；工程类型按类型编码正序。</p>
+        </div>
+
+        <h4>字段规则</h4>
+        <div class="rule-block">
+          <p><strong>报表命名：</strong>青浦区小型工程备案报表_{报表类型}_{时间范围}_{导出日期}.pdf</p>
+          <p><strong>示例：</strong>青浦区小型工程备案报表_综合统计_20260526-20260601_20260601.pdf</p>
+        </div>
+
+        <h4>交互分支规则</h4>
+        <div class="rule-block">
+          <p><strong>【下载PDF】→</strong> 浏览器自动下载，文件进入浏览器下载列表。</p>
+          <p><strong>【返回首页】→</strong> 回到首页导出入口页面。</p>
+        </div>
+
+        <h4>边界情况</h4>
+        <div class="rule-block">
+          <p>某街道无备案数据：表格中显示0，仍保留在列表中。</p>
+          <p>某风险类型无数据：不显示该行（避免报表冗长）。</p>
+        </div>
+      </div>
+
+      <!-- Excel预览标注 -->
+      <div class="annotation-page" id="anno-excel">
+        <h3>页面4：Excel报表预览 — 需求说明</h3>
+
+        <h4>页面状态规则</h4>
+        <div class="rule-block">
+          <p><strong>Sheet结构：</strong>备案明细（主数据）+ 筛选条件（导出信息记录）+ 数据说明（字段说明）。</p>
+          <p><strong>冻结首行：</strong>表头固定，滚动时始终可见（position: sticky; top: 0）。</p>
+          <p><strong>样式规范：</strong>表头背景#f5f7fa文字#303133；数据区斑马纹偶数行#fafafa；自动列宽。</p>
+        </div>
+
+        <h4>数据规则</h4>
+        <div class="rule-block">
+          <p><strong>导出字段：</strong>序号、工程名称、工程类型、工程地址、所属街道、备案状态、风险等级、备案人姓名（脱敏）、备案人手机号（脱敏）、备案人身份证（脱敏）、施工单位、填报时间等共12个字段。</p>
+          <p><strong>排序规则：</strong>默认按填报时间倒序排列。</p>
+          <p><strong>数据量限制：</strong>单次导出最大50000条，超过时提示缩小筛选条件。</p>
+        </div>
+
+        <h4>字段规则</h4>
+        <div class="rule-block">
+          <p><strong>脱敏规则：</strong>姓名保留姓、名替换为**；手机号保留前3后3、中间****；身份证号保留前3后3、中间脱敏。</p>
+          <p><strong>日期格式：</strong>YYYY-MM-DD HH:mm:ss。</p>
+          <p><strong>空值处理：</strong>显示为空单元格，不显示"--"或"null"。</p>
+        </div>
+
+        <h4>交互分支规则</h4>
+        <div class="rule-block">
+          <p><strong>【下载Excel】→</strong> 浏览器自动下载.xlsx文件。</p>
+          <p><strong>【返回首页】→</strong> 回到首页导出入口页面。</p>
+        </div>
+
+        <h4>边界情况</h4>
+        <div class="rule-block">
+          <p>已驳回工程无审核通过时间：审核时间列留空。</p>
+          <p>工程类型为"全部"：Excel中保留工程类型字段，按实际类型填充。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- 浮动导航 -->
+<div class="float-nav" id="floatNav">
+  <span class="nav-label">页面导航</span>
+  <div class="nav-btns">
+    <button class="nav-btn active" onclick="goPage('home')">首页</button>
+    <button class="nav-btn" onclick="goPage('pdf')">PDF预览</button>
+    <button class="nav-btn" onclick="goPage('excel')">Excel预览</button>
+  </div>
+</div>
+
+<script>
+  // ======== 页面导航 ========
+  function goPage(page) {
+    document.querySelectorAll('.screen-page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.annotation-page').forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('anno-' + page).classList.add('active');
+
+    // 更新导航按钮状态
+    const navMap = { home: 0, pdf: 1, excel: 2 };
+    const navBtns = document.querySelectorAll('.nav-btn');
+    if (navBtns[navMap[page]]) navBtns[navMap[page]].classList.add('active');
+
+    // 更新页面指示器
+    const pageName = document.getElementById('page-' + page).dataset.pageName;
+    document.getElementById('currentPageName').textContent = pageName;
+  }
+
+  // ======== 标注抽屉切换 ========
+  function toggleAnnotation() {
+    document.getElementById('annotationDrawer').classList.toggle('collapsed');
+  }
+
+  // ======== 浮动导航 F8 ========
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F8') {
+      e.preventDefault();
+      document.getElementById('floatNav').classList.toggle('active');
+    }
+  });
+
+  // ======== 导出弹窗 ========
+  function openExportModal() {
+    document.getElementById('exportModal').classList.add('active');
+  }
+  function closeModal() {
+    document.getElementById('exportModal').classList.remove('active');
+  }
+
+  // 点击蒙层关闭
+  document.getElementById('exportModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ======== 报表类型选择 ========
+  document.querySelectorAll('#reportTypeGroup .radio-item').forEach(item => {
+    item.addEventListener('click', function() {
+      if (this.classList.contains('disabled')) return;
+      document.querySelectorAll('#reportTypeGroup .radio-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+      updateFormatOptions(this.dataset.pdf === 'true');
+      updateEstimate();
+    });
+  });
+
+  // 更新格式选项可用性
+  function updateFormatOptions(supportsPdf) {
+    const formatOptions = document.querySelectorAll('#formatGroup .format-option');
+    formatOptions.forEach(opt => {
+      const fmt = opt.dataset.format;
+      if (!supportsPdf && (fmt === 'pdf' || fmt === 'both')) {
+        opt.classList.add('disabled');
+        opt.classList.remove('active');
+      } else {
+        opt.classList.remove('disabled');
+      }
+    });
+    // 如果当前选中的被禁用，自动切换到excel
+    const activeFormat = document.querySelector('#formatGroup .format-option.active');
+    if (activeFormat && activeFormat.classList.contains('disabled')) {
+      activeFormat.classList.remove('active');
+      document.querySelector('[data-format="excel"]').classList.add('active');
+    }
+    // 如果没有选中的，默认选中excel
+    if (!document.querySelector('#formatGroup .format-option.active:not(.disabled)')) {
+      document.querySelector('[data-format="excel"]').classList.add('active');
+    }
+  }
+
+  // ======== 格式选择 ========
+  document.querySelectorAll('#formatGroup .format-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+      if (this.classList.contains('disabled')) return;
+      document.querySelectorAll('#formatGroup .format-option').forEach(o => o.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // ======== 时间选择 ========
+  document.querySelectorAll('#timeOptions .time-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('#timeOptions .time-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      updateEstimate();
+    });
+  });
+
+  // ======== 工程类型多选联动 ========
+  document.querySelectorAll('#projectTypeGroup .check-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const isAll = this.dataset.ptype === 'all';
+      if (isAll) {
+        const newActive = !this.classList.contains('active');
+        document.querySelectorAll('#projectTypeGroup .check-item').forEach(i => {
+          i.classList.toggle('active', newActive);
+        });
+      } else {
+        this.classList.toggle('active');
+        const allItems = document.querySelectorAll('#projectTypeGroup .check-item:not([data-ptype="all"])');
+        const allActive = Array.from(allItems).every(i => i.classList.contains('active'));
+        document.querySelector('#projectTypeGroup [data-ptype="all"]').classList.toggle('active', allActive);
+      }
+      updateEstimate();
+    });
+  });
+
+  // ======== 街道多选 ========
+  document.querySelectorAll('#streetGroup .check-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const isAll = this.dataset.street === 'all';
+      if (isAll) {
+        const newActive = !this.classList.contains('active');
+        document.querySelectorAll('#streetGroup .check-item').forEach(i => {
+          i.classList.toggle('active', newActive);
+        });
+      } else {
+        this.classList.toggle('active');
+        const allItems = document.querySelectorAll('#streetGroup .check-item:not([data-street="all"])');
+        const allActive = Array.from(allItems).every(i => i.classList.contains('active'));
+        document.querySelector('#streetGroup [data-street="all"]').classList.toggle('active', allActive);
+      }
+      updateEstimate();
+    });
+  });
+
+  // ======== 预估数据量更新 ========
+  function updateEstimate() {
+    const activeType = document.querySelector('#reportTypeGroup .radio-item.active');
+    const type = activeType ? activeType.dataset.type : 'comprehensive';
+
+    const estimates = {
+      comprehensive: { count: '约 1,234 条', warn: false },
+      comparison: { count: '约 11 条', warn: false },
+      detail: { count: '约 1,234 条', warn: false },
+      reject: { count: '约 59 条', warn: false },
+      trend: { count: '约 365 条', warn: false }
+    };
+
+    const est = estimates[type] || estimates.comprehensive;
+    const el = document.getElementById('estimateValue');
+    el.textContent = est.count;
+    el.className = 'est-value' + (est.warn ? ' warn' : '');
+  }
+
+  // ======== 确认导出 ========
+  function confirmExport() {
+    closeModal();
+    const activeFormat = document.querySelector('#formatGroup .format-option.active');
+    const fmt = activeFormat ? activeFormat.dataset.format : 'pdf';
+
+    showToast('正在生成报表，请稍候...', true);
+
+    setTimeout(() => {
+      hideToast();
+      if (fmt === 'pdf' || fmt === 'both') {
+        goPage('pdf');
+      } else {
+        goPage('excel');
+      }
+    }, 1500);
+  }
+
+  // ======== Toast ========
+  function showToast(text, withSpin) {
+    const box = document.getElementById('toastBox');
+    document.getElementById('toastText').textContent = text;
+    if (!withSpin) {
+      box.querySelector('.spin').style.display = 'none';
+    } else {
+      box.querySelector('.spin').style.display = 'block';
+    }
+    document.getElementById('toastOverlay').classList.add('active');
+  }
+  function hideToast() {
+    document.getElementById('toastOverlay').classList.remove('active');
+  }
+
+  // ======== 首页状态切换演示 ========
+  document.querySelectorAll('#homeStateChips .state-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('#homeStateChips .state-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+
+      const state = this.dataset.state;
+      const trigger = document.getElementById('exportTrigger');
+      const tooltip = document.getElementById('exportTooltip');
+
+      trigger.classList.remove('hover', 'loading', 'disabled');
+
+      switch(state) {
+        case 'default':
+          tooltip.textContent = '导出备案报表';
+          break;
+        case 'hover':
+          trigger.classList.add('hover');
+          tooltip.textContent = '导出备案报表';
+          break;
+        case 'loading':
+          trigger.classList.add('loading');
+          tooltip.textContent = '数据加载中...';
+          break;
+        case 'forbidden':
+          trigger.classList.add('disabled');
+          tooltip.textContent = '无导出权限';
+          break;
+      }
+    });
+  });
+
+  // 初始化
+  updateEstimate();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1404 @@
+<!--
+================================================================================
+原型对照清单核对结果（移动端风格，外部保司对接线上投保）
+================================================================================
+| 编号 | 方案内容                         | 验收标准                                                   | 状态       |
+|------|----------------------------------|------------------------------------------------------------|------------|
+| P01  | 平台展示线上投保保险公司入口     | 匹配保单页展示太保/平安/国任等保险公司入口                 | 已实现     |
+| P02  | 用户选定保司后由保司发送短信     | 页面存在短信下发提示页，说明短信发送对象、订单号和后续动作 | 已实现     |
+| P03  | 平台内不承载交易支付             | 保司投保页明确标注为浏览器/保司页面，支付不在备案平台内    | 已实现     |
+| P04  | 平台传参，保司页允许客户修改     | 投保确认页展示来源于平台的基础字段，并注明可修改规则       | 已实现     |
+| P05  | 支付完成后保司回传保单结果       | 平台展示保单关联成功结果，含保司、保单号、电子保单等       | 已实现     |
+| P06  | 每页提供开发规则标注             | 每个页面右侧均有状态规则/数据规则/字段规则/分支/边界说明   | 已实现     |
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27_码上保线上投保系统对接原型设计</title>
+  <style>
+    :root {
+      --brand: #00b578;
+      --brand-dark: #00a86b;
+      --brand-deep: #1a8f62;
+      --header-start: #35ad73;
+      --header-end: #58b8d7;
+      --page-bg: #e9ecef;
+      --screen-bg: #f6fbf8;
+      --card: #ffffff;
+      --line: #d7e3db;
+      --text: #1f1f1f;
+      --subtext: #666666;
+      --muted: #999999;
+      --warn: #ff9500;
+      --warn-bg: #fff7e6;
+      --info: #1890ff;
+      --info-bg: #e6f4ff;
+      --success-bg: #f6ffed;
+      --danger: #ff4d4f;
+      --danger-bg: #fff2f0;
+      --annotation-bg: #fffbe6;
+      --annotation-line: #ffc53d;
+      --shadow-phone: 0 14px 36px rgba(0, 0, 0, 0.16);
+      --shadow-card: 0 12px 28px rgba(26, 41, 32, 0.06);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      padding: 28px 24px 40px;
+      line-height: 1.6;
+    }
+
+    .board-header {
+      max-width: 1180px;
+      margin: 0 auto 24px;
+      padding: 20px 24px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #eef8f2 0%, #f8fbfd 100%);
+      border: 1px solid rgba(34, 166, 109, 0.16);
+      box-shadow: var(--shadow-card);
+    }
+
+    .board-header h1 {
+      font-size: 28px;
+      line-height: 1.3;
+      color: #153a2e;
+      margin-bottom: 8px;
+    }
+
+    .board-header p {
+      font-size: 14px;
+      color: #4b5f56;
+    }
+
+    .board-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .board-tag {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid rgba(34, 166, 109, 0.16);
+      color: var(--brand-deep);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .page-block {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .prototype-area {
+      width: 399px;
+      flex-shrink: 0;
+    }
+
+    .annotation-area {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .phone-frame {
+      width: 375px;
+      padding: 12px;
+      border-radius: 40px;
+      background: #000000;
+      box-shadow: var(--shadow-phone);
+    }
+
+    .phone-screen {
+      min-height: 760px;
+      border-radius: 28px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(89, 183, 216, 0.04) 0%, transparent 180px), linear-gradient(180deg, var(--screen-bg) 0%, #ffffff 100%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .status-bar {
+      height: 34px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, var(--header-start), var(--header-end));
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-header {
+      padding: 10px 18px 14px;
+      background: linear-gradient(90deg, var(--header-start), var(--header-end));
+      display: grid;
+      grid-template-columns: 34px 1fr 92px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-back,
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-back {
+      width: 34px;
+      height: 34px;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      text-align: center;
+      letter-spacing: 0.2px;
+    }
+
+    .nav-pill {
+      justify-self: end;
+      min-width: 84px;
+      height: 34px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0 12px;
+    }
+
+    .page-body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 4px;
+      border-radius: 18px 18px 0 0;
+      background: #f1f3f1;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .tab-item {
+      padding: 10px 0;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #303631;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .tab-item.active {
+      background: linear-gradient(135deg, #ffffff 0%, #eef9f3 60%, #f4fcff 100%);
+      color: var(--brand-deep);
+      box-shadow: -10px 0 20px rgba(83, 183, 216, 0.08);
+    }
+
+    .policy-card,
+    .content-card,
+    .company-card,
+    .step-card,
+    .result-card,
+    .message-card,
+    .field-card {
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-card);
+    }
+
+    .policy-card {
+      padding: 16px;
+      background: linear-gradient(180deg, #ecf8f1 0%, #f7fbfd 100%);
+      border: 2px solid rgba(34, 166, 109, 0.24);
+    }
+
+    .policy-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #17392f;
+      margin-bottom: 6px;
+    }
+
+    .policy-desc {
+      font-size: 12px;
+      color: #4d5d56;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+      margin-bottom: -2px;
+    }
+
+    .section-title strong {
+      font-size: 16px;
+      color: #20352c;
+    }
+
+    .section-badge {
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #eef7f2;
+      color: var(--brand-deep);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .company-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .company-card {
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .company-card.selected {
+      border: 2px solid rgba(34, 166, 109, 0.48);
+      background: linear-gradient(180deg, #f4fcf8 0%, #ffffff 100%);
+    }
+
+    .logo-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .logo-taibao { background: linear-gradient(135deg, #0b7fda, #00b8ff); }
+    .logo-pingan { background: linear-gradient(135deg, #ff6b00, #ff9500); }
+    .logo-guoren { background: linear-gradient(135deg, #00a86b, #35ad73); }
+
+    .company-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .company-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1f1f1f;
+      margin-bottom: 3px;
+    }
+
+    .company-desc {
+      font-size: 12px;
+      color: var(--subtext);
+      line-height: 1.5;
+    }
+
+    .company-action {
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(34, 166, 109, 0.1);
+      color: var(--brand-deep);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .content-card,
+    .step-card,
+    .result-card,
+    .message-card,
+    .field-card {
+      padding: 14px 16px;
+    }
+
+    .helper-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--subtext);
+      font-size: 12px;
+    }
+
+    .helper-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .option-card {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #f9fbfa;
+      border: 1px dashed rgba(34, 166, 109, 0.4);
+    }
+
+    .option-card strong {
+      display: block;
+      font-size: 14px;
+      color: #20352c;
+      margin-bottom: 4px;
+    }
+
+    .option-card p {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+
+    .step-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .step-index {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, var(--header-start), var(--header-end));
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-content strong {
+      display: block;
+      font-size: 14px;
+      color: #1f1f1f;
+      margin-bottom: 3px;
+    }
+
+    .step-content p {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+
+    .order-info {
+      display: grid;
+      gap: 10px;
+    }
+
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .kv-label {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .kv-value {
+      color: #1f1f1f;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .tips-box {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--info-bg);
+      border: 1px solid #91d5ff;
+      color: #0b63c6;
+      font-size: 12px;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .message-header strong {
+      font-size: 16px;
+      color: #21382f;
+    }
+
+    .sms-bubble {
+      border-radius: 18px 18px 18px 8px;
+      background: #f5f6f7;
+      border: 1px solid #e5e7eb;
+      padding: 14px;
+      font-size: 13px;
+      color: #1f1f1f;
+      line-height: 1.75;
+    }
+
+    .sms-time {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .link-chip {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e6f7ff;
+      color: #1677ff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .browser-banner {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fff7e6 0%, #fffaf1 100%);
+      border: 1px solid #ffd591;
+      color: #ad5d00;
+      font-size: 12px;
+    }
+
+    .field-card h3,
+    .result-card h3 {
+      font-size: 16px;
+      color: #1f1f1f;
+      margin-bottom: 12px;
+    }
+
+    .field-list,
+    .result-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field-row,
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf0ee;
+      font-size: 13px;
+    }
+
+    .field-row:last-child,
+    .result-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .field-name,
+    .result-name {
+      color: var(--muted);
+    }
+
+    .field-value,
+    .result-value {
+      text-align: right;
+      color: #1f1f1f;
+      font-weight: 700;
+    }
+
+    .mail-required {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--danger-bg);
+      border: 1px solid #ffccc7;
+      color: #c4413b;
+      font-size: 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 4px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      flex: 1;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .btn-primary {
+      color: #ffffff;
+      background: linear-gradient(90deg, #27a66d, #4fb3d7);
+      box-shadow: 0 12px 26px rgba(34, 166, 109, 0.24);
+    }
+
+    .btn-secondary {
+      color: var(--brand-deep);
+      background: #ffffff;
+      border: 1px solid rgba(34, 166, 109, 0.24);
+    }
+
+    .result-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .status-main strong {
+      display: block;
+      font-size: 18px;
+      color: #153a2e;
+      margin-bottom: 3px;
+    }
+
+    .status-main span {
+      font-size: 12px;
+      color: var(--subtext);
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--header-start), var(--header-end));
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .annotation-panel {
+      min-height: 760px;
+      background: var(--annotation-bg);
+      border: 2px dashed var(--annotation-line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(255, 197, 61, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .anno-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #8c5a00;
+      line-height: 1.4;
+    }
+
+    .anno-subtitle {
+      font-size: 12px;
+      color: #ad6a00;
+      margin-top: -4px;
+    }
+
+    .anno-item {
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(255, 197, 61, 0.45);
+    }
+
+    .anno-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .anno-tag {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .tag-state { background: #f6ffed; color: #389e0d; }
+    .tag-data { background: #e6f4ff; color: #096dd9; }
+    .tag-field { background: #f9f0ff; color: #722ed1; }
+    .tag-branch { background: #fff7e6; color: #d46b08; }
+    .tag-edge { background: #fff1f0; color: #cf1322; }
+
+    .anno-item p {
+      font-size: 13px;
+      color: #5f4a12;
+      line-height: 1.72;
+    }
+
+    .page-label {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666666;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1100px) {
+      .page-block {
+        flex-direction: column;
+      }
+
+      .annotation-area,
+      .annotation-panel {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="board-header">
+    <h1>27_码上保线上投保系统对接原型设计</h1>
+    <p>适用口径：青浦区小型工程安全生产责任保险外部对接场景。当前按“备案平台选保司 → 保司发短信 → 浏览器完成支付 → 保单回传备案平台”的标准流程绘制，供开发、产品与保司联调用。</p>
+    <div class="board-tags">
+      <span class="board-tag">平台内不承载支付</span>
+      <span class="board-tag">短信外链为主路径</span>
+      <span class="board-tag">用户可修改保司页参数</span>
+      <span class="board-tag">支付后自动回传保单</span>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <section class="page-block" data-page="1">
+      <div class="prototype-area">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>09:41</span>
+              <div class="status-icons">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="1" y="10" width="2.4" height="6" rx="1.2" fill="white"></rect>
+                  <rect x="5" y="8" width="2.4" height="8" rx="1.2" fill="white"></rect>
+                  <rect x="9" y="5" width="2.4" height="11" rx="1.2" fill="white"></rect>
+                  <rect x="13" y="2" width="2.4" height="14" rx="1.2" fill="white"></rect>
+                </svg>
+                <svg width="24" height="12" viewBox="0 0 24 12" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1.4"></rect>
+                  <rect x="3.2" y="3.2" width="14" height="5.6" rx="2.2" fill="white"></rect>
+                  <rect x="22" y="4" width="2" height="4" rx="1" fill="white"></rect>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-header">
+              <div class="nav-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+              </div>
+              <div class="nav-title">匹配保单</div>
+              <div class="nav-pill">第 4 / 4 步</div>
+            </div>
+            <div class="page-body">
+              <div class="tabs">
+                <div class="tab-item">基础信息</div>
+                <div class="tab-item">工程信息</div>
+                <div class="tab-item">安全信息</div>
+                <div class="tab-item active">匹配保单</div>
+              </div>
+
+              <div class="policy-card">
+                <div class="policy-title">依法投保 · 保障施工安全</div>
+                <div class="policy-desc">当前按备案资料自动带参到保险公司，用户无需在备案平台内重复录入核心信息，支付动作在保司页面完成。</div>
+              </div>
+
+              <div class="section-title">
+                <strong>推荐线上投保</strong>
+                <span class="section-badge">优先路径</span>
+              </div>
+
+              <div class="company-grid">
+                <div class="company-card selected">
+                  <div class="logo-box logo-taibao">太</div>
+                  <div class="company-main">
+                    <div class="company-name">太保安责险</div>
+                    <div class="company-desc">首轮试点保司，按备案资料自动生成订单并向备案人发送投保短信。</div>
+                  </div>
+                  <div class="company-action">已选中</div>
+                </div>
+
+                <div class="company-card">
+                  <div class="logo-box logo-pingan">平</div>
+                  <div class="company-main">
+                    <div class="company-name">平安安责险</div>
+                    <div class="company-desc">后续按统一接口规范接入，字段映射与短信模板单独配置。</div>
+                  </div>
+                  <div class="company-action">选择</div>
+                </div>
+
+                <div class="company-card">
+                  <div class="logo-box logo-guoren">国</div>
+                  <div class="company-main">
+                    <div class="company-name">国任安责险</div>
+                    <div class="company-desc">后续按统一接口规范接入，支付限制与附件规则独立配置。</div>
+                  </div>
+                  <div class="company-action">选择</div>
+                </div>
+              </div>
+
+              <div class="content-card">
+                <div class="helper-row">
+                  <span class="helper-dot"></span>
+                  <span>当前将向保司传递备案人、工程信息、附件资料等标准字段，默认用于生成投保订单。</span>
+                </div>
+              </div>
+
+              <div class="option-card">
+                <strong>已有线下保单？</strong>
+                <p>保留“上传保单”兜底入口，但本期对外联调主路径为线上投保回传。</p>
+              </div>
+
+              <div class="btn-row">
+                <div class="btn-secondary">上传已有保单</div>
+                <div class="btn-primary">获取投保短信</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="page-label">页面1：备案平台 - 选择保险公司</div>
+      </div>
+
+      <aside class="annotation-area">
+        <div class="annotation-panel">
+          <div class="anno-title">页面1：备案平台 - 选择保险公司 — 需求说明</div>
+          <div class="anno-subtitle">主入口在“匹配保单”页，先选保司，再由保司向用户下发订单短信和投保链接。</div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-state">页面状态规则</span>
+              <strong>线上为主、线下保留</strong>
+            </div>
+            <p>页面默认突出线上投保，保险公司卡片为主展示区；上传保单仅作为补充路径保留，不允许覆盖线上主路径的视觉权重。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-data">数据规则</span>
+              <strong>带参生成投保订单</strong>
+            </div>
+            <p>点击“获取投保短信”后，平台按标准字段清单向已选保司传递备案信息，作为投保订单初始化参数来源，不要求字段名与保司接口一一同名。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-field">字段规则</span>
+              <strong>保险公司列表由配置驱动</strong>
+            </div>
+            <p>保险公司名称、logo、是否可选、活动代码、产品代码、支付方式限制等均按后台配置下发；本页只消费配置结果，不在前端写死保司规则。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-branch">交互分支规则</span>
+              <strong>选择保司后才允许发起短信</strong>
+            </div>
+            <p>未选择保险公司时，主按钮不可进入短信下发；用户切换保司后，后续订单与短信模板均按当前选中保司重新计算，不复用上一家保司上下文。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-edge">边界情况规则</span>
+              <strong>未开通/暂不可投保</strong>
+            </div>
+            <p>如某保司未开通、接口异常或当前端口支付受限，该保司卡片需展示不可用态与原因说明；不得让用户点入后才发现无法继续。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-block" data-page="2">
+      <div class="prototype-area">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>09:41</span>
+              <div class="status-icons">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="1" y="10" width="2.4" height="6" rx="1.2" fill="white"></rect>
+                  <rect x="5" y="8" width="2.4" height="8" rx="1.2" fill="white"></rect>
+                  <rect x="9" y="5" width="2.4" height="11" rx="1.2" fill="white"></rect>
+                  <rect x="13" y="2" width="2.4" height="14" rx="1.2" fill="white"></rect>
+                </svg>
+                <svg width="24" height="12" viewBox="0 0 24 12" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1.4"></rect>
+                  <rect x="3.2" y="3.2" width="14" height="5.6" rx="2.2" fill="white"></rect>
+                  <rect x="22" y="4" width="2" height="4" rx="1" fill="white"></rect>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-header">
+              <div class="nav-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+              </div>
+              <div class="nav-title">投保短信已发起</div>
+              <div class="nav-pill">等待用户处理</div>
+            </div>
+            <div class="page-body">
+              <div class="policy-card">
+                <div class="policy-title">保司正在向备案人发送投保短信</div>
+                <div class="policy-desc">短信内将包含订单编号、项目摘要与投保链接。用户需跳转浏览器完成支付，备案平台不直接承载交易行为。</div>
+              </div>
+
+              <div class="step-card">
+                <div class="section-title">
+                  <strong>当前订单</strong>
+                  <span class="section-badge">太保</span>
+                </div>
+                <div class="order-info" style="margin-top:12px;">
+                  <div class="kv-row"><span class="kv-label">订单编号</span><span class="kv-value">TB202606030001</span></div>
+                  <div class="kv-row"><span class="kv-label">备案人手机</span><span class="kv-value">138****1026</span></div>
+                  <div class="kv-row"><span class="kv-label">工程名称</span><span class="kv-value">青浦区赵巷镇沿街店招维修</span></div>
+                  <div class="kv-row"><span class="kv-label">发送状态</span><span class="kv-value">短信待查收</span></div>
+                </div>
+              </div>
+
+              <div class="content-card">
+                <div class="section-title">
+                  <strong>后续步骤</strong>
+                  <span class="section-badge">3 步完成</span>
+                </div>
+                <div class="step-list" style="margin-top:12px;">
+                  <div class="step-item">
+                    <div class="step-index">1</div>
+                    <div class="step-content">
+                      <strong>保司生成订单并发送短信</strong>
+                      <p>以当前备案数据生成投保订单，短信内容由保险公司模板控制。</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-index">2</div>
+                    <div class="step-content">
+                      <strong>用户点短信链接去浏览器投保</strong>
+                      <p>离开备案平台，在保司页面确认信息、填写邮箱并完成支付。</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-index">3</div>
+                    <div class="step-content">
+                      <strong>保司回传保单结果到备案平台</strong>
+                      <p>支付成功后回传保单号、电子保单 URL 等结果，平台自动关联当前备案。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tips-box">
+                若用户未收到短信，可按保司规则重发。短信重发不改变当前备案记录，只更新同一笔订单的触达状态。
+              </div>
+
+              <div class="btn-row">
+                <div class="btn-secondary">查看短信示意</div>
+                <div class="btn-primary">等待保单回传</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="page-label">页面2：备案平台 - 短信发送提示</div>
+      </div>
+
+      <aside class="annotation-area">
+        <div class="annotation-panel">
+          <div class="anno-title">页面2：备案平台 - 短信发送提示 — 需求说明</div>
+          <div class="anno-subtitle">该页不是支付页，而是平台侧的“已发起、待用户跳转处理”提示状态。</div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-state">页面状态规则</span>
+              <strong>平台进入等待回传态</strong>
+            </div>
+            <p>短信发起成功后，当前备案记录进入“待用户投保/待保司回传”状态。平台此时只做状态承接，不应展示任何平台内支付动作。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-data">数据规则</span>
+              <strong>订单号与备案记录绑定</strong>
+            </div>
+            <p>订单编号需与备案记录、保司编码、发起时间建立唯一对应关系，后续短信重发、回传重试、回传成功均围绕同一订单主键闭环处理。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-field">字段规则</span>
+              <strong>仅展示平台可确认字段</strong>
+            </div>
+            <p>本页展示的订单编号、备案人手机号、工程名称、发送状态均来源于平台侧已有数据或保司同步回执；不得提前展示保单号等支付成功后才会生成的结果字段。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-branch">交互分支规则</span>
+              <strong>重发短信与改选保司分支</strong>
+            </div>
+            <p>若短信发送失败，可触发同保司重发；若用户要改选其他保司，应回到上一页重新发起，不允许在当前订单基础上直接切换保司。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-edge">边界情况规则</span>
+              <strong>短信未达或长时间未支付</strong>
+            </div>
+            <p>如短信长时间未送达或用户长时间未支付，平台应保留订单待处理状态，并支持重新触达；不应自动视作投保成功，也不应提前生成保单关联结果。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-block" data-page="3">
+      <div class="prototype-area">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>09:42</span>
+              <div class="status-icons">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="1" y="10" width="2.4" height="6" rx="1.2" fill="white"></rect>
+                  <rect x="5" y="8" width="2.4" height="8" rx="1.2" fill="white"></rect>
+                  <rect x="9" y="5" width="2.4" height="11" rx="1.2" fill="white"></rect>
+                  <rect x="13" y="2" width="2.4" height="14" rx="1.2" fill="white"></rect>
+                </svg>
+                <svg width="24" height="12" viewBox="0 0 24 12" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1.4"></rect>
+                  <rect x="3.2" y="3.2" width="14" height="5.6" rx="2.2" fill="white"></rect>
+                  <rect x="22" y="4" width="2" height="4" rx="1" fill="white"></rect>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-header">
+              <div class="nav-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+              </div>
+              <div class="nav-title">短信通知示意</div>
+              <div class="nav-pill">保险公司短信</div>
+            </div>
+            <div class="page-body">
+              <div class="message-card">
+                <div class="message-header">
+                  <strong>太平洋保险</strong>
+                  <span class="section-badge">订单通知</span>
+                </div>
+                <div class="sms-bubble">
+                  【太平洋保险】您提交的“青浦区赵巷镇沿街店招维修”投保订单已生成。订单号：TB202606030001。请点击下方链接完成投保确认与支付。支付成功后，电子保单将同步回传备案平台并发送至预留邮箱。
+                  <div class="link-chip">https://m.cpic.com/tb202606030001</div>
+                  <div class="sms-time">今天 09:42</div>
+                </div>
+              </div>
+
+              <div class="content-card">
+                <div class="section-title">
+                  <strong>短信内容关键点</strong>
+                  <span class="section-badge">开发需对齐</span>
+                </div>
+                <div class="step-list" style="margin-top:12px;">
+                  <div class="step-item">
+                    <div class="step-index">1</div>
+                    <div class="step-content">
+                      <strong>必须携带订单编号</strong>
+                      <p>便于平台、保司、用户三方对齐同一笔投保记录。</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-index">2</div>
+                    <div class="step-content">
+                      <strong>必须说明跳转后的动作</strong>
+                      <p>用户知道链接打开的是保司投保页，而不是备案平台页。</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-index">3</div>
+                    <div class="step-content">
+                      <strong>必须说明支付后回传</strong>
+                      <p>减少用户误以为支付后还要手动回平台上传保单。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tips-box">
+                本页为短信示意图，用于开发理解短信字段与用户心智，不代表最终短信文案定稿。
+              </div>
+
+              <div class="btn-row">
+                <div class="btn-secondary">返回平台</div>
+                <div class="btn-primary">点击短信链接投保</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="page-label">页面3：用户收到保司短信</div>
+      </div>
+
+      <aside class="annotation-area">
+        <div class="annotation-panel">
+          <div class="anno-title">页面3：用户收到保司短信 — 需求说明</div>
+          <div class="anno-subtitle">本页是短信内容示意，用来明确短信中最少要承载哪些信息，不是备案平台原生页面。</div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-state">页面状态规则</span>
+              <strong>短信为外部触达载体</strong>
+            </div>
+            <p>短信由保险公司发送，属于平台外触达节点；平台只保存发送结果与订单关联关系，不托管短信正文展示页。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-data">数据规则</span>
+              <strong>短信至少覆盖订单与链接</strong>
+            </div>
+            <p>短信最小信息集应包含保险公司名称、订单编号、项目摘要、投保链接和支付后结果回传提示；避免用户收到链接后无法判断对应哪笔备案。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-field">字段规则</span>
+              <strong>订单号与链接必须可定位</strong>
+            </div>
+            <p>订单号用于保司与平台查单；链接用于直接打开保司投保页。短信中若增加失效时间、客服热线、支付方式说明，应作为保司扩展字段配置。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-branch">交互分支规则</span>
+              <strong>短信点击进入浏览器</strong>
+            </div>
+            <p>点击短信链接后直接进入保司页面，不再回到平台内做中间确认；若链接失效，用户需通过平台重新发起或由保司重发短信。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-edge">边界情况规则</span>
+              <strong>短信文案不承诺平台内支付</strong>
+            </div>
+            <p>短信不得误导用户在备案平台内完成支付，也不应承诺平台已生成保单；只有支付成功并收到保司回传后，平台才可展示保单关联成功结果。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-block" data-page="4">
+      <div class="prototype-area">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>09:44</span>
+              <div class="status-icons">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="1" y="10" width="2.4" height="6" rx="1.2" fill="white"></rect>
+                  <rect x="5" y="8" width="2.4" height="8" rx="1.2" fill="white"></rect>
+                  <rect x="9" y="5" width="2.4" height="11" rx="1.2" fill="white"></rect>
+                  <rect x="13" y="2" width="2.4" height="14" rx="1.2" fill="white"></rect>
+                </svg>
+                <svg width="24" height="12" viewBox="0 0 24 12" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1.4"></rect>
+                  <rect x="3.2" y="3.2" width="14" height="5.6" rx="2.2" fill="white"></rect>
+                  <rect x="22" y="4" width="2" height="4" rx="1" fill="white"></rect>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-header">
+              <div class="nav-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+              </div>
+              <div class="nav-title">太保投保确认</div>
+              <div class="nav-pill">浏览器页</div>
+            </div>
+            <div class="page-body">
+              <div class="browser-banner">当前页面为保险公司投保页面，备案平台仅负责带参拉起。本页内可修改投保信息，实际支付也发生在本页。</div>
+
+              <div class="field-card">
+                <h3>平台带入的投保信息</h3>
+                <div class="field-list">
+                  <div class="field-row"><span class="field-name">投/被保险人</span><span class="field-value">上海某施工有限公司</span></div>
+                  <div class="field-row"><span class="field-name">统一社会信用代码</span><span class="field-value">91310118XXXX1026</span></div>
+                  <div class="field-row"><span class="field-name">备案人</span><span class="field-value">张三 / 138****1026</span></div>
+                  <div class="field-row"><span class="field-name">工程名称</span><span class="field-value">赵巷镇沿街店招维修</span></div>
+                  <div class="field-row"><span class="field-name">施工负责人</span><span class="field-value">李四 / 139****8821</span></div>
+                  <div class="field-row"><span class="field-name">工程工期</span><span class="field-value">2026-06-03 至 2026-06-30</span></div>
+                </div>
+              </div>
+
+              <div class="field-card">
+                <h3>投保确认项</h3>
+                <div class="field-list">
+                  <div class="field-row"><span class="field-name">电子保单邮箱</span><span class="field-value">zhangsan@example.com</span></div>
+                  <div class="field-row"><span class="field-name">电子发票邮箱</span><span class="field-value">zhangsan@example.com</span></div>
+                  <div class="field-row"><span class="field-name">支付方式</span><span class="field-value">微信支付</span></div>
+                  <div class="field-row"><span class="field-name">投保保费</span><span class="field-value">¥ 128.00</span></div>
+                </div>
+                <div class="mail-required">邮箱为必填项，用于投保成功后自动发送电子保单与电子发票。</div>
+              </div>
+
+              <div class="btn-row">
+                <div class="btn-secondary">返回修改</div>
+                <div class="btn-primary">确认并支付</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="page-label">页面4：保险公司 H5 - 投保确认与支付</div>
+      </div>
+
+      <aside class="annotation-area">
+        <div class="annotation-panel">
+          <div class="anno-title">页面4：保险公司 H5 - 投保确认与支付 — 需求说明</div>
+          <div class="anno-subtitle">该页属于保司侧浏览器页面。备案平台只提供带参入口，不控制页面内表单和支付交互。</div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-state">页面状态规则</span>
+              <strong>平台外支付页</strong>
+            </div>
+            <p>此页在浏览器中打开，页面归属保险公司。平台不在此页嵌入自己的交易控件，也不在平台内模拟支付流程。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-data">数据规则</span>
+              <strong>平台只负责带参初始化</strong>
+            </div>
+            <p>平台传入的备案资料只作为保司页初始值，客户可按保司规则修改。最终投保成功所用数据，以保司支付提交时的实际值为准。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-field">字段规则</span>
+              <strong>邮箱字段强制必填</strong>
+            </div>
+            <p>电子保单邮箱、电子发票邮箱必须为必填字段；投保成功后由保司自动推送电子保单与发票邮件，平台不承担邮件发送职责。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-branch">交互分支规则</span>
+              <strong>支付方式按端口限制</strong>
+            </div>
+            <p>不同入口端口可配置支付方式限制。例如随申办 App、微信小程序、支付宝小程序对应的可用支付方式可不同，由保司根据传入端口识别控制。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-edge">边界情况规则</span>
+              <strong>支付失败或用户中断</strong>
+            </div>
+            <p>若支付失败、用户退出或订单超时，平台不应自动关联保单。只有保司明确回传成功结果后，备案平台才进入“保单已关联”状态。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-block" data-page="5">
+      <div class="prototype-area">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>09:47</span>
+              <div class="status-icons">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="1" y="10" width="2.4" height="6" rx="1.2" fill="white"></rect>
+                  <rect x="5" y="8" width="2.4" height="8" rx="1.2" fill="white"></rect>
+                  <rect x="9" y="5" width="2.4" height="11" rx="1.2" fill="white"></rect>
+                  <rect x="13" y="2" width="2.4" height="14" rx="1.2" fill="white"></rect>
+                </svg>
+                <svg width="24" height="12" viewBox="0 0 24 12" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1.4"></rect>
+                  <rect x="3.2" y="3.2" width="14" height="5.6" rx="2.2" fill="white"></rect>
+                  <rect x="22" y="4" width="2" height="4" rx="1" fill="white"></rect>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-header">
+              <div class="nav-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+              </div>
+              <div class="nav-title">保单已关联</div>
+              <div class="nav-pill">备案平台</div>
+            </div>
+            <div class="page-body">
+              <div class="result-card">
+                <div class="result-status">
+                  <div class="status-main">
+                    <strong>线上投保成功</strong>
+                    <span>保司已回传保单结果，当前备案记录已完成保单关联</span>
+                  </div>
+                  <div class="status-badge">已投保</div>
+                </div>
+                <div class="result-list">
+                  <div class="result-row"><span class="result-name">保险公司</span><span class="result-value">太保安责险</span></div>
+                  <div class="result-row"><span class="result-name">交易流水号</span><span class="result-value">TB202606030001</span></div>
+                  <div class="result-row"><span class="result-name">保单号</span><span class="result-value">CPIC-20260603-88021</span></div>
+                  <div class="result-row"><span class="result-name">电子保单</span><span class="result-value">可查看 / 可下载</span></div>
+                  <div class="result-row"><span class="result-name">电子发票</span><span class="result-value">已发送至邮箱</span></div>
+                </div>
+              </div>
+
+              <div class="content-card">
+                <div class="section-title">
+                  <strong>回传结果承接</strong>
+                  <span class="section-badge">平台状态</span>
+                </div>
+                <div class="step-list" style="margin-top:12px;">
+                  <div class="step-item">
+                    <div class="step-index">1</div>
+                    <div class="step-content">
+                      <strong>按交易流水号匹配备案记录</strong>
+                      <p>平台依据保司回传流水号定位当前备案订单，而非依赖用户手动上传保单。</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-index">2</div>
+                    <div class="step-content">
+                      <strong>写入保单结果字段</strong>
+                      <p>记录保单号、投保状态、电子保单 URL 等最小回传字段集。</p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-index">3</div>
+                    <div class="step-content">
+                      <strong>允许继续提交备案</strong>
+                      <p>当前备案已满足保单匹配要求，可继续后续备案提交流程。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <div class="btn-secondary">查看电子保单</div>
+                <div class="btn-primary">继续提交备案</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="page-label">页面5：备案平台 - 保单关联成功</div>
+      </div>
+
+      <aside class="annotation-area">
+        <div class="annotation-panel">
+          <div class="anno-title">页面5：备案平台 - 保单关联成功 — 需求说明</div>
+          <div class="anno-subtitle">支付成功后，由保司回传结果，平台自动承接并展示“已投保”状态，不要求用户手工补录。</div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-state">页面状态规则</span>
+              <strong>仅回传成功才进入已关联态</strong>
+            </div>
+            <p>页面出现“已投保/保单已关联”前提是平台已经收到保司成功回传并校验通过；不以短信发送成功、用户点击链接或页面支付完成按钮作为最终成功依据。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-data">数据规则</span>
+              <strong>回传字段最小集落库</strong>
+            </div>
+            <p>平台至少接收并保存交易流水号、保单号、投保状态、电子保单 URL 四项核心结果字段；其余保费、起保止保时间等字段按保司扩展能力补充。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-field">字段规则</span>
+              <strong>电子保单与发票状态可见</strong>
+            </div>
+            <p>平台需要展示电子保单可查看状态及电子发票邮件发送结果，便于备案人与审核方确认线上投保闭环已经完成。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-branch">交互分支规则</span>
+              <strong>成功后放行备案提交</strong>
+            </div>
+            <p>当前备案若策略为强制保单匹配，收到保司成功回传后才允许继续提交备案；若仍处于待回传状态，则保持等待或提示稍后刷新。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-edge">边界情况规则</span>
+              <strong>回传失败重试</strong>
+            </div>
+            <p>保司回传失败时可最多重试 3 次且无时间限制；平台需返回明确成功/失败结果，避免保司误判。未成功落库前，不应展示最终成功页。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </div>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get("page");
+      if (!page) return;
+
+      const boardHeader = document.querySelector(".board-header");
+      const pageBlocks = document.querySelectorAll(".page-block");
+
+      if (boardHeader) {
+        boardHeader.style.display = "none";
+      }
+
+      document.body.style.padding = "24px";
+
+      pageBlocks.forEach((block) => {
+        block.style.display = block.getAttribute("data-page") === page ? "flex" : "none";
+      });
+    })();
+  </script>
+</body>
+</html>

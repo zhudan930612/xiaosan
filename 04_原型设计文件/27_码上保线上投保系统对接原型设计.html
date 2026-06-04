@@ -4,12 +4,13 @@
 ================================================================================
 | 编号 | 方案内容                         | 验收标准                                                   | 状态       |
 |------|----------------------------------|------------------------------------------------------------|------------|
-| P01  | 平台展示线上投保保险公司入口     | 匹配保单页展示太保/平安/国任等保险公司入口                 | 已实现     |
-| P02  | 用户选定保司后由保司发送短信     | 页面存在短信下发提示页，说明短信发送对象、订单号和后续动作 | 已实现     |
-| P03  | 平台内不承载交易支付             | 保司投保页明确标注为浏览器/保司页面，支付不在备案平台内    | 已实现     |
-| P04  | 平台传参，保司页允许客户修改     | 投保确认页展示来源于平台的基础字段，并注明可修改规则       | 已实现     |
-| P05  | 支付完成后保司回传保单结果       | 平台展示保单关联成功结果，含保司、保单号、电子保单等       | 已实现     |
-| P06  | 每页提供开发规则标注             | 每个页面右侧均有状态规则/数据规则/字段规则/分支/边界说明   | 已实现     |
+| P01  | 投保入口前增加客户授权确认       | 存在独立授权确认页，明确客户同意投保行为与短信通知         | 已实现     |
+| P02  | 平台展示线上投保保险公司入口     | 匹配保单页展示太保/平安/国任等保险公司入口                 | 已实现     |
+| P03  | 用户选定保司后由保司发送短信     | 页面存在短信下发提示页，说明短信发送对象、订单号和后续动作 | 已实现     |
+| P04  | 平台内不承载交易支付             | 保司投保页明确标注为浏览器/保司页面，支付不在备案平台内    | 已实现     |
+| P05  | 平台传参，保司页允许客户修改     | 投保确认页展示来源于平台的基础字段，并注明可修改规则       | 已实现     |
+| P06  | 支付完成后保司回传保单结果       | 平台展示保单关联成功结果，含保司、保单号、电子保单等       | 已实现     |
+| P07  | 每页提供开发规则标注             | 每个页面右侧均有状态规则/数据规则/字段规则/分支/边界说明   | 已实现     |
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -137,6 +138,7 @@
       background: linear-gradient(180deg, rgba(89, 183, 216, 0.04) 0%, transparent 180px), linear-gradient(180deg, var(--screen-bg) 0%, #ffffff 100%);
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .status-bar {
@@ -460,6 +462,201 @@
       font-size: 12px;
     }
 
+    .sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.32);
+      display: flex;
+      align-items: flex-end;
+      justify-content: stretch;
+    }
+
+    .sheet-dialog {
+      width: 100%;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -16px 36px rgba(15, 23, 42, 0.16);
+      padding: 14px 16px 18px;
+    }
+
+    .sheet-handle {
+      width: 42px;
+      height: 5px;
+      border-radius: 999px;
+      background: #d8dee3;
+      margin: 0 auto 14px;
+    }
+
+    .sheet-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1f1f1f;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .sheet-desc {
+      font-size: 15px;
+      color: #6b7280;
+      line-height: 1.85;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .confirm-info-card {
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: #f7faf8;
+      border: 1px solid #e6eeea;
+      margin-bottom: 14px;
+    }
+
+    .confirm-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #5f6b66;
+    }
+
+    .confirm-info-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e8f7ef;
+      color: var(--brand-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .confirm-info-main {
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .confirm-info-main strong {
+      display: inline-block;
+      font-size: 14px;
+      color: #1f1f1f;
+      margin-right: 4px;
+    }
+
+    .notice-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .notice-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e8eeeb;
+    }
+
+    .notice-bullet {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #e8f7ef;
+      color: var(--brand-deep);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .notice-item p {
+      font-size: 12px;
+      color: #5f6b66;
+      line-height: 1.65;
+    }
+
+    .notice-item strong {
+      color: #1f1f1f;
+      font-weight: 700;
+    }
+
+    .agree-box {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 2px 4px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+
+    .agree-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.8px solid #cdd8d2;
+      background: #ffffff;
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .agree-circle svg {
+      opacity: 0;
+      transform: scale(0.7);
+      transition: all 0.2s ease;
+    }
+
+    .agree-box.checked .agree-circle {
+      background: linear-gradient(90deg, #27a66d, #4fb3d7);
+      border-color: transparent;
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(34, 166, 109, 0.16);
+    }
+
+    .agree-box.checked .agree-circle svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .agree-content {
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.8;
+    }
+
+    .agree-content strong {
+      color: #1f1f1f;
+      font-weight: 700;
+    }
+
+    .text-link {
+      color: #1677ff;
+      font-weight: 700;
+      margin: 0 2px;
+    }
+
+    .agree-box.shake {
+      animation: agreeShake 0.36s ease-in-out 1;
+    }
+
+    @keyframes agreeShake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(3px); }
+      100% { transform: translateX(0); }
+    }
+
     .message-header {
       display: flex;
       justify-content: space-between;
@@ -717,6 +914,198 @@
         <div class="phone-frame">
           <div class="phone-screen">
             <div class="status-bar">
+              <span>09:40</span>
+              <div class="status-icons">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="1" y="10" width="2.4" height="6" rx="1.2" fill="white"></rect>
+                  <rect x="5" y="8" width="2.4" height="8" rx="1.2" fill="white"></rect>
+                  <rect x="9" y="5" width="2.4" height="11" rx="1.2" fill="white"></rect>
+                  <rect x="13" y="2" width="2.4" height="14" rx="1.2" fill="white"></rect>
+                </svg>
+                <svg width="24" height="12" viewBox="0 0 24 12" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="20" height="10" rx="3" stroke="white" stroke-width="1.4"></rect>
+                  <rect x="3.2" y="3.2" width="14" height="5.6" rx="2.2" fill="white"></rect>
+                  <rect x="22" y="4" width="2" height="4" rx="1" fill="white"></rect>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-header">
+              <div class="nav-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+              </div>
+              <div class="nav-title">匹配保单</div>
+              <div class="nav-pill">第 4 / 4 步</div>
+            </div>
+            <div class="page-body">
+              <div class="policy-card">
+                <div class="policy-title">依法投保 · 保障施工安全</div>
+                <div class="policy-desc">您可选择线上投保或上传已有保单。线上投保将根据备案资料为您快捷生成订单。</div>
+              </div>
+
+              <div class="section-title">
+                <strong>推荐线上投保</strong>
+                <span class="section-badge">优先路径</span>
+              </div>
+
+              <div class="company-grid" style="opacity:0.4; filter: blur(0.2px);">
+                <div class="company-card selected">
+                  <div class="logo-box logo-taibao">太</div>
+                  <div class="company-main">
+                    <div class="company-name">太保安责险</div>
+                    <div class="company-desc">首轮试点保司，按备案资料自动生成订单并向备案人发送投保短信。</div>
+                  </div>
+                  <div class="company-action">已选中</div>
+                </div>
+
+                <div class="company-card">
+                  <div class="logo-box logo-pingan">平</div>
+                  <div class="company-main">
+                    <div class="company-name">平安安责险</div>
+                    <div class="company-desc">后续按统一接口规范接入，字段映射与短信模板单独配置。</div>
+                  </div>
+                  <div class="company-action">选择</div>
+                </div>
+
+                <div class="company-card">
+                  <div class="logo-box logo-guoren">国</div>
+                  <div class="company-main">
+                    <div class="company-name">国任安责险</div>
+                    <div class="company-desc">后续按统一接口规范接入，支付限制与附件规则独立配置。</div>
+                  </div>
+                  <div class="company-action">选择</div>
+                </div>
+              </div>
+
+              <div class="option-card" style="opacity:0.45;">
+                <strong>已有线下保单？</strong>
+                <p>保留“上传保单”兜底入口，但本期对外联调主路径为线上投保回传。</p>
+              </div>
+
+              <div class="btn-row">
+                <div class="btn-secondary" style="opacity:0.45;">上传已有保单</div>
+                <div class="btn-primary" style="opacity:0.45;">获取投保短信</div>
+              </div>
+            </div>
+
+            <div class="sheet-backdrop">
+              <div class="sheet-dialog">
+                <div class="sheet-handle"></div>
+                <div class="sheet-title">确定进行线上快捷投保？</div>
+                <div class="sheet-desc">稍后系统会发送短信至备案人员的手机上，<br>请按短信指引进行快捷办理。</div>
+
+                <div class="confirm-info-card">
+                  <div class="confirm-info-row">
+                    <div class="confirm-info-icon">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92V19a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 3.18 2 2 0 0 1 4.11 1h2.09a2 2 0 0 1 2 1.72c.12.9.32 1.78.59 2.63a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 8 8l1.45-1.25a2 2 0 0 1 2.11-.45c.85.27 1.73.47 2.63.59A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                    </div>
+                    <div class="confirm-info-main">
+                      <strong>短信将发送至</strong> 张三 13812341026
+                    </div>
+                  </div>
+                </div>
+
+                <div class="notice-list">
+                  <div class="notice-item">
+                    <div class="notice-bullet">1</div>
+                    <p><strong>本次办理由您主动发起。</strong> 点击确定后，保险公司才会向备案人员发送后续投保短信。</p>
+                  </div>
+                  <div class="notice-item">
+                    <div class="notice-bullet">2</div>
+                    <p><strong>短信将引导您进入保险公司页面。</strong> 平台不直接收款，您需自行确认信息并完成支付。</p>
+                  </div>
+                  <div class="notice-item">
+                    <div class="notice-bullet">3</div>
+                    <p><strong>如未及时完成支付，</strong> 可能需要重新发起线上投保流程。</p>
+                  </div>
+                </div>
+
+                <div class="agree-box" id="agreeBox">
+                  <div class="agree-circle"></div>
+                  <div class="agree-content">
+                    我已逐条阅读并同意
+                    <span class="text-link">《投保须知》</span>
+                    、
+                    <span class="text-link">《免责说明》</span>
+                    ，并确认由我主动发起本次线上快捷办理。
+                  </div>
+                </div>
+
+                <div class="btn-row">
+                  <div class="btn-secondary">取消</div>
+                  <div class="btn-primary" id="confirmInsuranceBtn">确认投保</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="page-label">页面1：投保入口 - 底部上拉授权确认</div>
+      </div>
+
+      <aside class="annotation-area">
+        <div class="annotation-panel">
+          <div class="anno-title">页面1：投保入口 - 客户授权确认 — 需求说明</div>
+          <div class="anno-subtitle">确认层以底部上拉弹窗承接用户操作，不单独跳新页；既满足合规要求，也尽量不打断用户投保节奏。</div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-state">页面状态规则</span>
+              <strong>授权确认前不得进入投保入口</strong>
+            </div>
+            <p>客户未完成授权确认前，不允许继续进入保险公司选择或触发短信发送流程；该页是线上投保入口的前置必经节点。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-data">数据规则</span>
+              <strong>记录客户明示同意结果</strong>
+            </div>
+            <p>平台应记录本次客户确认时间、确认对象、确认手机号及确认动作结果，作为后续保司短信触达和流程追溯的基础凭证。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-field">字段规则</span>
+              <strong>短信接收手机号必须显式告知</strong>
+            </div>
+            <p>页面需明确展示“短信将发送至备案人员手机”，避免客户误解短信将发送给其他联系人；如备案人员手机号为空或异常，不允许进入下一步。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-branch">交互分支规则</span>
+              <strong>勾选同意后才能确定</strong>
+            </div>
+            <p>客户需阅读弹窗中的告知项，并勾选“已阅读并同意《投保须知》《免责说明》”后，才可点击“确定”；如取消，则退出线上投保路径。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-edge">边界情况规则</span>
+              <strong>未勾选时抖动提醒</strong>
+            </div>
+            <p>如用户未勾选“已阅读并同意《投保须知》《免责说明》”就点击“确认投保”，则该行内容需抖动一次，提示用户先完成勾选确认。</p>
+          </div>
+
+          <div class="anno-item">
+            <div class="anno-head">
+              <span class="anno-tag tag-edge">边界情况规则</span>
+              <strong>合规告知不可省略</strong>
+            </div>
+            <p>后续即便走快捷办理、默认保司或历史选择保司，也不能跳过本次授权确认；短信触达前必须完成当前客户的明示同意步骤。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-block" data-page="2">
+      <div class="prototype-area">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="status-bar">
               <span>09:41</span>
               <div class="status-icons">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -807,13 +1196,13 @@
             </div>
           </div>
         </div>
-        <div class="page-label">页面1：备案平台 - 选择保险公司</div>
+        <div class="page-label">页面2：备案平台 - 选择保险公司</div>
       </div>
 
       <aside class="annotation-area">
         <div class="annotation-panel">
-          <div class="anno-title">页面1：备案平台 - 选择保险公司 — 需求说明</div>
-          <div class="anno-subtitle">主入口在“匹配保单”页，先选保司，再由保司向用户下发订单短信和投保链接。</div>
+          <div class="anno-title">页面2：备案平台 - 选择保险公司 — 需求说明</div>
+          <div class="anno-subtitle">客户完成授权确认后，进入该页选择保司，再由保司向用户下发订单短信和投保链接。</div>
 
           <div class="anno-item">
             <div class="anno-head">
@@ -858,7 +1247,7 @@
       </aside>
     </section>
 
-    <section class="page-block" data-page="2">
+    <section class="page-block" data-page="3">
       <div class="prototype-area">
         <div class="phone-frame">
           <div class="phone-screen">
@@ -947,12 +1336,12 @@
             </div>
           </div>
         </div>
-        <div class="page-label">页面2：备案平台 - 短信发送提示</div>
+        <div class="page-label">页面3：备案平台 - 短信发送提示</div>
       </div>
 
       <aside class="annotation-area">
         <div class="annotation-panel">
-          <div class="anno-title">页面2：备案平台 - 短信发送提示 — 需求说明</div>
+          <div class="anno-title">页面3：备案平台 - 短信发送提示 — 需求说明</div>
           <div class="anno-subtitle">该页不是支付页，而是平台侧的“已发起、待用户跳转处理”提示状态。</div>
 
           <div class="anno-item">
@@ -998,7 +1387,7 @@
       </aside>
     </section>
 
-    <section class="page-block" data-page="3">
+    <section class="page-block" data-page="4">
       <div class="prototype-area">
         <div class="phone-frame">
           <div class="phone-screen">
@@ -1081,12 +1470,12 @@
             </div>
           </div>
         </div>
-        <div class="page-label">页面3：用户收到保司短信</div>
+        <div class="page-label">页面4：用户收到保司短信</div>
       </div>
 
       <aside class="annotation-area">
         <div class="annotation-panel">
-          <div class="anno-title">页面3：用户收到保司短信 — 需求说明</div>
+          <div class="anno-title">页面4：用户收到保司短信 — 需求说明</div>
           <div class="anno-subtitle">本页是短信内容示意，用来明确短信中最少要承载哪些信息，不是备案平台原生页面。</div>
 
           <div class="anno-item">
@@ -1132,7 +1521,7 @@
       </aside>
     </section>
 
-    <section class="page-block" data-page="4">
+    <section class="page-block" data-page="5">
       <div class="prototype-area">
         <div class="phone-frame">
           <div class="phone-screen">
@@ -1194,12 +1583,12 @@
             </div>
           </div>
         </div>
-        <div class="page-label">页面4：保险公司 H5 - 投保确认与支付</div>
+        <div class="page-label">页面5：保险公司 H5 - 投保确认与支付</div>
       </div>
 
       <aside class="annotation-area">
         <div class="annotation-panel">
-          <div class="anno-title">页面4：保险公司 H5 - 投保确认与支付 — 需求说明</div>
+          <div class="anno-title">页面5：保险公司 H5 - 投保确认与支付 — 需求说明</div>
           <div class="anno-subtitle">该页属于保司侧浏览器页面。备案平台只提供带参入口，不控制页面内表单和支付交互。</div>
 
           <div class="anno-item">
@@ -1245,7 +1634,7 @@
       </aside>
     </section>
 
-    <section class="page-block" data-page="5">
+    <section class="page-block" data-page="6">
       <div class="prototype-area">
         <div class="phone-frame">
           <div class="phone-screen">
@@ -1329,12 +1718,12 @@
             </div>
           </div>
         </div>
-        <div class="page-label">页面5：备案平台 - 保单关联成功</div>
+        <div class="page-label">页面6：备案平台 - 保单关联成功</div>
       </div>
 
       <aside class="annotation-area">
         <div class="annotation-panel">
-          <div class="anno-title">页面5：备案平台 - 保单关联成功 — 需求说明</div>
+          <div class="anno-title">页面6：备案平台 - 保单关联成功 — 需求说明</div>
           <div class="anno-subtitle">支付成功后，由保司回传结果，平台自动承接并展示“已投保”状态，不要求用户手工补录。</div>
 
           <div class="anno-item">
@@ -1398,6 +1787,37 @@
       pageBlocks.forEach((block) => {
         block.style.display = block.getAttribute("data-page") === page ? "flex" : "none";
       });
+    })();
+
+    (function () {
+      const agreeBox = document.getElementById("agreeBox");
+      const confirmBtn = document.getElementById("confirmInsuranceBtn");
+      if (!agreeBox || !confirmBtn) return;
+
+      let agreed = false;
+
+      const renderAgree = () => {
+        agreeBox.classList.toggle("checked", agreed);
+        const circle = agreeBox.querySelector(".agree-circle");
+        if (!circle) return;
+        circle.innerHTML = agreed
+          ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+          : '';
+      };
+
+      agreeBox.addEventListener("click", () => {
+        agreed = !agreed;
+        renderAgree();
+      });
+
+      confirmBtn.addEventListener("click", () => {
+        if (agreed) return;
+        agreeBox.classList.remove("shake");
+        void agreeBox.offsetWidth;
+        agreeBox.classList.add("shake");
+      });
+
+      renderAgree();
     })();
   </script>
 </body>

@@ -1,0 +1,2151 @@
+<!--
+================================================================================
+原型类型：不可编辑，有交互且有标注（依据项目 AGENTS 默认原型要求推定）
+来源依据：
+1. 03_需求设计文件/27_码上保线上投保系统对接需求.md
+2. 03_需求设计文件/26_施工端保险服务功能设计.md
+3. 用户提供的小程序状态截图与 PC 保单页参考图
+
+原型对照清单核对结果（本次未在对应设计文档中找到现成《原型对照清单》，以下为依据文档与截图补提）
+| 编号 | 方案内容 | 来源 | 原型必须体现的位置 | 验收标准 | 原型中已实现 |
+|------|----------|------|--------------------|----------|-------------|
+| R01 | PC 端以备案信息弹窗承接保单信息 | 用户参考图2 | 主内容区弹窗 | 页面包含后台底板 + 居中备案信息弹窗 | 已实现 |
+| R02 | 保单信息页需覆盖未投保、选择不投保、线上投保成功、线下投保四种状态 | 用户截图 + 对接需求 | 顶部状态切换 | 四种状态可切换，内容区明显变化 | 已实现 |
+| R03 | 平台不承载交易，仅承接投保结果 | 27_码上保线上投保系统对接需求.md | 未投保/线上投保成功说明与标注 | 文案中体现线上投保跳转保司、平台接收结果 | 已实现 |
+| R04 | 线上投保成功后展示保单关联结果 | 27_码上保线上投保系统对接需求.md | 线上投保成功状态 | 展示保司、保单号、期限、金额、电子保单 | 已实现 |
+| R05 | 线下投保需录入保司/保单号/保单名称/金额/期限并上传材料 | 用户截图 | 线下投保状态 | 展示完整字段与上传区 | 已实现 |
+| R06 | 住宅装修/零星作业选择不投保后需区分待审核与已通过 | 用户截图 + 26_施工端保险服务功能设计.md | 选择不投保状态 | 支持二级状态切换，按钮与文案不同 | 已实现 |
+| R07 | 标注需覆盖页面状态、数据、字段、交互分支、边界情况五类规则 | 04_原型设计文件/AGENTS.md | 右侧标注抽屉 | 每个状态均有五类规则说明 | 已实现 |
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>27_码上保线上投保系统对接PC原型设计</title>
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --panel: #ffffff;
+      --panel-soft: #f7fafc;
+      --line: #e5ebf3;
+      --text: #1f2d3d;
+      --text-sub: #5c6b7c;
+      --text-muted: #8b96a6;
+      --brand: #36a96f;
+      --brand-deep: #1d8f62;
+      --brand-cyan: #57b8d7;
+      --brand-soft: #edf8f2;
+      --nav-dark: #153c42;
+      --nav-deeper: #0f2d4b;
+      --blue: #409eff;
+      --blue-soft: #eaf3ff;
+      --warn: #faad14;
+      --warn-soft: #fff7e8;
+      --danger: #f56c6c;
+      --danger-soft: #fff1f0;
+      --success: #52c41a;
+      --success-soft: #f6ffed;
+      --shadow-lg: 0 24px 60px rgba(17, 35, 58, 0.16);
+      --shadow-md: 0 12px 30px rgba(17, 35, 58, 0.08);
+      --shadow-sm: 0 6px 18px rgba(17, 35, 58, 0.06);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --annotation-bg: #fffbe6;
+      --annotation-line: #ffc53d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(87, 184, 215, 0.22), transparent 28%),
+        linear-gradient(180deg, #eef4f8 0%, #f6f9fb 100%);
+      overflow: hidden;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .web-wrapper {
+      display: flex;
+      min-height: 100vh;
+      min-width: 1440px;
+    }
+
+    .sidebar {
+      width: 252px;
+      background: linear-gradient(180deg, rgba(21, 60, 66, 0.96) 0%, rgba(15, 45, 75, 0.98) 100%);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px 24px;
+      box-shadow: 6px 0 20px rgba(14, 34, 58, 0.16);
+      z-index: 2;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 10px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .brand h1 {
+      font-size: 16px;
+      line-height: 1.5;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-group {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.56);
+      padding: 0 12px;
+      margin-bottom: 4px;
+      letter-spacing: 0.8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: rgba(255, 255, 255, 0.74);
+      transition: 0.2s ease;
+    }
+
+    .menu-item.active {
+      color: #ffffff;
+      background: linear-gradient(90deg, rgba(54, 169, 111, 0.36), rgba(87, 184, 215, 0.24));
+      box-shadow: inset 4px 0 0 #57b8d7;
+    }
+
+    .menu-item svg {
+      flex-shrink: 0;
+    }
+
+    .sidebar-note {
+      margin-top: auto;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .content-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 72px;
+      background: linear-gradient(90deg, rgba(21, 60, 66, 0.96), rgba(15, 45, 75, 0.96));
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      box-shadow: 0 2px 16px rgba(17, 35, 58, 0.12);
+      z-index: 1;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .topbar-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 13px;
+    }
+
+    .platform-tag {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 600;
+    }
+
+    .main-content {
+      flex: 1;
+      overflow: auto;
+      padding: 24px 28px 40px;
+      position: relative;
+    }
+
+    .filter-panel {
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+    }
+
+    .field-chip {
+      min-width: 220px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .field-chip strong {
+      color: var(--text-sub);
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    .btn {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    .btn.primary {
+      color: #ffffff;
+      background: linear-gradient(90deg, var(--brand), var(--brand-cyan));
+      box-shadow: 0 10px 22px rgba(54, 169, 111, 0.24);
+    }
+
+    .btn.secondary {
+      color: var(--text-sub);
+      background: #ffffff;
+      border-color: #dce4ee;
+    }
+
+    .btn.ghost {
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-color: rgba(64, 158, 255, 0.24);
+    }
+
+    .status-overview {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 16px;
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    .status-card {
+      background: rgba(255, 255, 255, 0.86);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      padding: 20px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status-card .meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: var(--text-sub);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status-card .value {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .page-nav {
+      margin-top: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .page-nav-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-sub);
+      margin-right: 4px;
+    }
+
+    .page-nav button,
+    .substatus-toggle button,
+    .content-tabs button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .scenario-tab {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--line);
+      color: var(--text-sub);
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+      transition: 0.2s ease;
+    }
+
+    .scenario-tab.active {
+      color: #ffffff;
+      background: linear-gradient(90deg, var(--brand), var(--brand-cyan));
+      border-color: transparent;
+      box-shadow: 0 12px 26px rgba(54, 169, 111, 0.26);
+    }
+
+    .prototype-stage {
+      margin-top: 22px;
+      padding: 22px;
+      border-radius: 32px;
+      background: rgba(12, 22, 40, 0.08);
+      min-height: 780px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.46);
+    }
+
+    .prototype-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 180px),
+        radial-gradient(circle at 12% 100%, rgba(54, 169, 111, 0.15), transparent 28%),
+        radial-gradient(circle at 100% 10%, rgba(87, 184, 215, 0.18), transparent 26%);
+      pointer-events: none;
+    }
+
+    .prototype-window {
+      position: relative;
+      z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 22px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-cyan));
+      color: #ffffff;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .modal-header .entry-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .modal-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      justify-self: end;
+    }
+
+    .modal-body {
+      padding: 0;
+      background: #ffffff;
+    }
+
+    .content-tabs-wrap {
+      border-bottom: 1px solid var(--line);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: #ffffff;
+    }
+
+    .content-tabs {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      min-height: 58px;
+    }
+
+    .content-tab {
+      position: relative;
+      color: var(--text-sub);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 18px 0 16px;
+      transition: 0.2s ease;
+    }
+
+    .content-tab.active {
+      color: var(--text);
+    }
+
+    .content-tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-cyan));
+    }
+
+    .record-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--brand-deep);
+      background: var(--brand-soft);
+      border: 1px solid rgba(54, 169, 111, 0.22);
+      white-space: nowrap;
+    }
+
+    .modal-content {
+      padding: 22px 28px 28px;
+      display: grid;
+      gap: 18px;
+      min-height: 560px;
+    }
+
+    .placeholder-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .placeholder-card {
+      background: linear-gradient(180deg, #fcfdff 0%, #f7fafc 100%);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .placeholder-card h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .placeholder-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .info-line {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .info-line strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .policy-section,
+    .tab-panel {
+      display: none;
+    }
+
+    .policy-section.active,
+    .tab-panel.active {
+      display: grid;
+      gap: 18px;
+    }
+
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.7;
+      border: 1px solid transparent;
+    }
+
+    .alert.warn {
+      color: #9a6700;
+      background: var(--warn-soft);
+      border-color: rgba(250, 173, 20, 0.26);
+    }
+
+    .alert.danger {
+      color: #c45656;
+      background: var(--danger-soft);
+      border-color: rgba(245, 108, 108, 0.24);
+    }
+
+    .alert.success {
+      color: #3d7a16;
+      background: var(--success-soft);
+      border-color: rgba(82, 196, 26, 0.22);
+    }
+
+    .panel-card {
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(229, 235, 243, 0.9);
+      background: linear-gradient(180deg, rgba(243, 248, 252, 0.96) 0%, rgba(255, 255, 255, 0.96) 100%);
+    }
+
+    .banner-carousel {
+      position: relative;
+      min-height: 228px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1f9a68 0%, #57b8d7 100%);
+      color: #ffffff;
+    }
+
+    .banner-track {
+      position: relative;
+      min-height: 228px;
+    }
+
+    .banner-slide {
+      display: none;
+      min-height: 228px;
+      padding: 28px 26px 26px;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 24px;
+      align-items: stretch;
+      background:
+        radial-gradient(circle at 90% 16%, rgba(255, 255, 255, 0.24), transparent 22%),
+        radial-gradient(circle at 72% 84%, rgba(255, 255, 255, 0.14), transparent 24%),
+        linear-gradient(135deg, rgba(12, 71, 52, 0.12), rgba(255, 255, 255, 0));
+    }
+
+    .banner-slide.active {
+      display: grid;
+    }
+
+    .banner-main {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .banner-kicker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .banner-main h3 {
+      font-size: 30px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .banner-main p {
+      font-size: 14px;
+      line-height: 1.9;
+      color: rgba(255, 255, 255, 0.92);
+      max-width: 520px;
+    }
+
+    .banner-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .banner-point {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .banner-aside {
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .banner-aside-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .banner-aside-head strong {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .banner-stat {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .banner-stat-card {
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .banner-stat-card span {
+      display: block;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.78);
+      margin-bottom: 6px;
+    }
+
+    .banner-stat-card strong {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .banner-mini-note {
+      font-size: 12px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .banner-footer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 26px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      pointer-events: none;
+    }
+
+    .banner-dots,
+    .banner-nav {
+      pointer-events: auto;
+    }
+
+    .banner-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .banner-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: transparent;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .banner-dot.active {
+      width: 28px;
+      border-radius: 999px;
+      background: #ffffff;
+      border-color: #ffffff;
+    }
+
+    .banner-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .banner-arrow {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .panel-head h3 {
+      font-size: 20px;
+      line-height: 1.4;
+    }
+
+    .panel-head p {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    .policy-body {
+      padding: 20px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .insurance-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .insurer-card {
+      border-radius: 18px;
+      border: 1px solid rgba(54, 169, 111, 0.2);
+      background: linear-gradient(180deg, #f9fffc 0%, #ffffff 100%);
+      padding: 18px 16px;
+      min-height: 128px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      position: relative;
+      box-shadow: 0 8px 16px rgba(54, 169, 111, 0.06);
+    }
+
+    .insurer-card.recommend {
+      border-color: rgba(250, 173, 20, 0.5);
+      box-shadow: 0 12px 24px rgba(250, 173, 20, 0.12);
+    }
+
+    .insurer-card h4 {
+      font-size: 18px;
+    }
+
+    .insurer-card p {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    .recommend-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #ff8f1f;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .progress-steps {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #f5fbf7, #f7fbff);
+      border: 1px solid rgba(54, 169, 111, 0.12);
+    }
+
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+    }
+
+    .step-pill.active {
+      color: var(--brand-deep);
+      border-color: rgba(54, 169, 111, 0.24);
+      background: var(--brand-soft);
+    }
+
+    .offline-entry {
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: linear-gradient(90deg, #f7fbfd, #ffffff);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .offline-entry h4 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .offline-entry p {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    .substatus-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .substatus-toggle {
+      display: inline-flex;
+      gap: 6px;
+      padding: 4px;
+      border-radius: 999px;
+      background: #f4f7fa;
+      border: 1px solid var(--line);
+    }
+
+    .substatus-toggle button {
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .substatus-toggle button.active {
+      color: #ffffff;
+      background: linear-gradient(90deg, var(--brand), var(--brand-cyan));
+      box-shadow: 0 8px 18px rgba(54, 169, 111, 0.2);
+    }
+
+    .decision-card {
+      border-radius: 20px;
+      border: 1px dashed rgba(245, 108, 108, 0.38);
+      background: linear-gradient(180deg, #fff7f7 0%, #ffffff 100%);
+      padding: 28px 24px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      min-height: 260px;
+      gap: 16px;
+    }
+
+    .decision-card svg {
+      width: 56px;
+      height: 56px;
+    }
+
+    .decision-card p {
+      max-width: 640px;
+      color: var(--danger);
+      font-size: 18px;
+      line-height: 1.9;
+    }
+
+    .review-note {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      border-radius: 16px;
+      padding: 16px 18px;
+      background: #f8fbff;
+      border: 1px solid #e7eef8;
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.8;
+    }
+
+    .success-card {
+      border-radius: 22px;
+      border: 1px solid rgba(54, 169, 111, 0.34);
+      background: linear-gradient(180deg, #f3fff7 0%, #ffffff 100%);
+      padding: 22px 24px;
+      box-shadow: 0 12px 26px rgba(54, 169, 111, 0.08);
+    }
+
+    .success-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .success-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--brand-deep);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.success {
+      background: var(--success-soft);
+      color: #389e0d;
+    }
+
+    .tag.warn {
+      background: var(--warn-soft);
+      color: #d48806;
+    }
+
+    .tag.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .success-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 20px;
+    }
+
+    .success-row {
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid rgba(54, 169, 111, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--text-sub);
+    }
+
+    .success-row strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .file-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .file-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ff6a5b, #ff4d4f);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .file-meta h4 {
+      font-size: 18px;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
+    .file-meta p {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .offline-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 18px;
+    }
+
+    .form-item {
+      display: grid;
+      gap: 8px;
+    }
+
+    .form-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .label {
+      font-size: 14px;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .required {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .read-field {
+      min-height: 44px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .read-field.muted {
+      color: var(--text-muted);
+    }
+
+    .upload-grid {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .upload-card {
+      width: 180px;
+      min-height: 140px;
+      border-radius: 18px;
+      border: 1px dashed rgba(54, 169, 111, 0.4);
+      background: linear-gradient(180deg, #f7fcf8 0%, #ffffff 100%);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      text-align: center;
+      color: var(--brand-deep);
+      gap: 8px;
+    }
+
+    .upload-card p {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-sub);
+    }
+
+    .state-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-top: 6px;
+    }
+
+    .footer-text {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .footer-actions .btn {
+      min-width: 132px;
+      height: 44px;
+      border-radius: 14px;
+      padding: 0 20px;
+    }
+
+    .drawer-toggle {
+      position: absolute;
+      right: 18px;
+      top: 132px;
+      z-index: 5;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: none;
+      color: #ffffff;
+      background: linear-gradient(90deg, var(--brand), var(--brand-cyan));
+      box-shadow: 0 12px 24px rgba(54, 169, 111, 0.24);
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .annotation-drawer {
+      position: absolute;
+      top: 100px;
+      right: 18px;
+      bottom: 18px;
+      width: 380px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+      transform: translateX(calc(100% + 24px));
+      transition: transform 0.25s ease;
+      z-index: 4;
+    }
+
+    .annotation-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-head {
+      padding: 20px 22px 16px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .drawer-head h2 {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .drawer-head p {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow: auto;
+      padding: 18px 18px 24px;
+      display: grid;
+      gap: 14px;
+      background: linear-gradient(180deg, #fffdf3 0%, #ffffff 100%);
+    }
+
+    .annotation-card {
+      background: var(--annotation-bg);
+      border: 1px dashed var(--annotation-line);
+      border-radius: 16px;
+      padding: 14px 14px 14px 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .annotation-card h3 {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .annotation-card ul {
+      padding-left: 18px;
+      color: #6d5d16;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .annotation-card li + li {
+      margin-top: 4px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="web-wrapper">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3L19 7V12C19 16.5 16.3 20.49 12 21C7.7 20.49 5 16.5 5 12V7L12 3Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9.5 11.8L11.1 13.5L14.8 9.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1>青浦区小型工程综合管理平台</h1>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-label">业务模块</div>
+        <div class="menu-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 10L12 4L20 10V20H4V10Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 20V13H15V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>小型工程</span>
+        </div>
+        <div class="menu-item active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M3 12H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M6 12V7L12 3L18 7V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 12V19H19V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>住宅装修</span>
+        </div>
+        <div class="menu-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="7.5" cy="7.5" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="16.5" cy="7.5" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M4.5 18C5.4 15.8 7.1 14.5 9.3 14.5C11.5 14.5 13.2 15.8 14.1 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M13.7 18C14.4 16.3 15.7 15.2 17.4 15.2C19.2 15.2 20.4 16.3 21 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>零星作业</span>
+        </div>
+        <div class="menu-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6H15L20 11V18C20 19.1 19.1 20 18 20H6C4.9 20 4 19.1 4 18V6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 6V12H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 15H16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>备案回收站</span>
+        </div>
+      </div>
+
+      <div class="sidebar-note">
+        本页用于演示“保单信息”在 PC 端中的呈现方式。页面底板保留后台管理页氛围，核心操作集中在居中备案信息弹窗内。
+      </div>
+    </aside>
+
+    <div class="content-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-title">政务平台</div>
+          <div class="platform-tag">PC 保单信息原型</div>
+        </div>
+        <div class="topbar-meta">
+          <span>2026/06/05 13:25:07</span>
+          <span>测试用户</span>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="filter-panel">
+          <div class="field-chip"><strong>工程名称：</strong>青浦区赵巷镇住宅装修备案</div>
+          <div class="field-chip"><strong>工程地址：</strong>赵华路 188 弄 12 号</div>
+          <div class="field-chip"><strong>所属街道社区：</strong>赵巷镇 / 社区一</div>
+          <div class="top-actions">
+            <button class="btn primary" type="button">查询</button>
+            <button class="btn secondary" type="button">重置</button>
+          </div>
+        </div>
+
+        <section class="status-overview" aria-hidden="true">
+          <div class="status-card">
+            <div class="meta"><span>待填报</span><span>备案状态</span></div>
+            <div class="value">1</div>
+          </div>
+          <div class="status-card">
+            <div class="meta"><span>已驳回</span><span>备案状态</span></div>
+            <div class="value" style="color:#d63b3b;">2</div>
+          </div>
+          <div class="status-card">
+            <div class="meta"><span>待审核</span><span>备案状态</span></div>
+            <div class="value" style="color:#d48806;">1</div>
+          </div>
+          <div class="status-card">
+            <div class="meta"><span>已通过</span><span>备案状态</span></div>
+            <div class="value" style="color:#2f9e44;">6</div>
+          </div>
+        </section>
+
+        <div class="page-nav">
+          <span class="page-nav-label">状态切换</span>
+          <button class="scenario-tab active" data-scenario="uninsured">未投保</button>
+          <button class="scenario-tab" data-scenario="optout">选择不投保</button>
+          <button class="scenario-tab" data-scenario="online-success">线上投保成功</button>
+          <button class="scenario-tab" data-scenario="offline">线下投保</button>
+        </div>
+
+        <section class="prototype-stage">
+          <button id="drawerToggle" class="drawer-toggle" type="button">展开标注</button>
+
+          <div class="prototype-window">
+            <div class="modal-header">
+              <div class="entry-pill">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M8 7H16" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M8 12H16" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M8 17H13" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M6 3H18C19.1 3 20 3.9 20 5V19C20 20.1 19.1 21 18 21H6C4.9 21 4 20.1 4 19V5C4 3.9 4.9 3 6 3Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>待填报</span>
+              </div>
+              <div class="modal-title">备案信息</div>
+              <div class="modal-close" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 6L18 18" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M18 6L6 18" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="modal-body">
+              <div class="content-tabs-wrap">
+                <div class="content-tabs">
+                  <button class="content-tab" data-tab="basic">基础信息</button>
+                  <button class="content-tab" data-tab="engineering">工程信息</button>
+                  <button class="content-tab" data-tab="safety">安全信息</button>
+                  <button class="content-tab active" data-tab="policy">保单信息</button>
+                </div>
+                <div class="record-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M7 12L10.2 15L17 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21Z" stroke="currentColor" stroke-width="1.8"/>
+                  </svg>
+                  已审批记录
+                </div>
+              </div>
+
+              <div class="modal-content">
+                <section class="tab-panel" data-panel="basic">
+                  <div class="placeholder-stack">
+                    <div class="placeholder-card">
+                      <h3>基础信息</h3>
+                      <div class="placeholder-grid">
+                        <div class="info-line"><span>备案编号</span><strong>QP202606050001</strong></div>
+                        <div class="info-line"><span>备案状态</span><strong>待填报</strong></div>
+                        <div class="info-line"><span>备案人</span><strong>张三</strong></div>
+                        <div class="info-line"><span>联系电话</span><strong>13812341026</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="tab-panel" data-panel="engineering">
+                  <div class="placeholder-stack">
+                    <div class="placeholder-card">
+                      <h3>工程信息</h3>
+                      <div class="placeholder-grid">
+                        <div class="info-line"><span>工程名称</span><strong>赵巷镇住宅装修备案</strong></div>
+                        <div class="info-line"><span>工程类型</span><strong>住宅装修</strong></div>
+                        <div class="info-line"><span>工程地址</span><strong>赵华路 188 弄 12 号</strong></div>
+                        <div class="info-line"><span>工程造价</span><strong>¥500,000</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="tab-panel" data-panel="safety">
+                  <div class="placeholder-stack">
+                    <div class="placeholder-card">
+                      <h3>安全信息</h3>
+                      <div class="placeholder-grid">
+                        <div class="info-line"><span>施工内容</span><strong>室内拆改、水电改造</strong></div>
+                        <div class="info-line"><span>施工负责人</span><strong>李四</strong></div>
+                        <div class="info-line"><span>施工周期</span><strong>2026-05-01 至 2026-08-01</strong></div>
+                        <div class="info-line"><span>风险提示</span><strong>涉及拆改与临时用电</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="tab-panel active" data-panel="policy">
+                  <section class="policy-section active" data-state="uninsured">
+                    <div class="alert warn">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 8V13" stroke="#D48806" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M12 17H12.01" stroke="#D48806" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M10.29 3.86L1.82 18C1.64 18.31 1.55 18.65 1.55 19C1.55 20.1 2.45 21 3.55 21H20.45C21.55 21 22.45 20.1 22.45 19C22.45 18.65 22.36 18.31 22.18 18L13.71 3.86C13.53 3.54 13.26 3.28 12.95 3.09C12.01 2.55 10.79 2.92 10.29 3.86Z" stroke="#D48806" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <div>当前备案记录尚未关联任何保单。平台仅承接入口与结果，不在平台内完成支付；施工单位可选择线上投保或补录线下投保信息。</div>
+                    </div>
+
+                    <div class="panel-card">
+                      <div class="banner-carousel" aria-label="线上投保轮播海报">
+                        <div class="banner-track">
+                          <section class="banner-slide active" data-banner-slide="0">
+                            <div class="banner-main">
+                              <span class="banner-kicker">线上投保入口</span>
+                              <h3>依法投保，保障施工安全</h3>
+                              <p>当前页展示的是线上投保承接入口。施工单位选择保险公司后，由保司发送投保短信，并在外部浏览器完成支付，平台仅接收最终保单结果。</p>
+                              <div class="banner-points">
+                                <span class="banner-point">平台不承载支付</span>
+                                <span class="banner-point">保司短信下发链接</span>
+                                <span class="banner-point">支付成功后自动回传</span>
+                              </div>
+                            </div>
+                            <div class="banner-aside">
+                              <div class="banner-aside-head">
+                                <strong>未投保状态</strong>
+                                <span class="tag warn">当前状态</span>
+                              </div>
+                              <div class="banner-stat">
+                                <div class="banner-stat-card">
+                                  <span>可选保司</span>
+                                  <strong>3 家</strong>
+                                </div>
+                                <div class="banner-stat-card">
+                                  <span>投保步骤</span>
+                                  <strong>3 步</strong>
+                                </div>
+                              </div>
+                              <div class="banner-mini-note">适用于备案记录尚未关联保单时的默认展示。支持改走线下补录或不投保审核分支。</div>
+                            </div>
+                          </section>
+
+                          <section class="banner-slide" data-banner-slide="1">
+                            <div class="banner-main">
+                              <span class="banner-kicker">平台对接说明</span>
+                              <h3>平台展示入口，保司承接交易</h3>
+                              <p>平台统一传递工程和投保基础资料，保险公司在自身页面完成产品展示、信息确认、支付与保单生成，符合当前平台边界约束。</p>
+                              <div class="banner-points">
+                                <span class="banner-point">字段标准化输出</span>
+                                <span class="banner-point">浏览器完成支付</span>
+                                <span class="banner-point">电子保单回传平台</span>
+                              </div>
+                            </div>
+                            <div class="banner-aside">
+                              <div class="banner-aside-head">
+                                <strong>本期策略</strong>
+                                <span class="tag success">标准对接</span>
+                              </div>
+                              <div class="banner-stat">
+                                <div class="banner-stat-card">
+                                  <span>平台职责</span>
+                                  <strong>入口+结果</strong>
+                                </div>
+                                <div class="banner-stat-card">
+                                  <span>保司职责</span>
+                                  <strong>交易+回传</strong>
+                                </div>
+                              </div>
+                              <div class="banner-mini-note">该海报用于帮助施工单位和审批人快速理解线上投保路径，不替代下方保司选择区。</div>
+                            </div>
+                          </section>
+
+                          <section class="banner-slide" data-banner-slide="2">
+                            <div class="banner-main">
+                              <span class="banner-kicker">结果承接</span>
+                              <h3>投保成功后，保单自动关联备案</h3>
+                              <p>完成支付后，保险公司向平台回传保单号、投保状态和电子保单 URL。备案页展示的“已投保”结果由回传数据生成，不需要施工单位再次手工录入。</p>
+                              <div class="banner-points">
+                                <span class="banner-point">回传保单号</span>
+                                <span class="banner-point">回传投保状态</span>
+                                <span class="banner-point">回传电子保单</span>
+                              </div>
+                            </div>
+                            <div class="banner-aside">
+                              <div class="banner-aside-head">
+                                <strong>结果闭环</strong>
+                                <span class="tag success">自动关联</span>
+                              </div>
+                              <div class="banner-stat">
+                                <div class="banner-stat-card">
+                                  <span>最小回传字段</span>
+                                  <strong>4 项</strong>
+                                </div>
+                                <div class="banner-stat-card">
+                                  <span>回传重试</span>
+                                  <strong>最多 3 次</strong>
+                                </div>
+                              </div>
+                              <div class="banner-mini-note">如果线上回传失败，则不应直接显示成功页，而应进入异常补偿或人工核验流程。</div>
+                            </div>
+                          </section>
+                        </div>
+
+                        <div class="banner-footer">
+                          <div class="banner-dots" aria-label="轮播页签">
+                            <button class="banner-dot active" type="button" data-banner-dot="0" aria-label="第 1 张"></button>
+                            <button class="banner-dot" type="button" data-banner-dot="1" aria-label="第 2 张"></button>
+                            <button class="banner-dot" type="button" data-banner-dot="2" aria-label="第 3 张"></button>
+                          </div>
+                          <div class="banner-nav">
+                            <button class="banner-arrow" type="button" id="bannerPrev" aria-label="上一张">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            </button>
+                            <button class="banner-arrow" type="button" id="bannerNext" aria-label="下一张">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="policy-body">
+                        <div class="progress-steps">
+                          <span class="step-pill active">1 选择保司</span>
+                          <span class="step-pill">2 确认信息</span>
+                          <span class="step-pill">3 完成支付</span>
+                        </div>
+
+                        <div class="insurance-grid">
+                          <div class="insurer-card recommend">
+                            <span class="recommend-badge">推荐</span>
+                            <div>
+                              <h4>中国平安</h4>
+                              <p>支持线上快捷投保，完成支付后自动回传电子保单。</p>
+                            </div>
+                            <button class="btn ghost" type="button">选择该保司</button>
+                          </div>
+                          <div class="insurer-card">
+                            <div>
+                              <h4>国任保险</h4>
+                              <p>复用平台标准字段，短信下发投保链接，保司页面承接支付。</p>
+                            </div>
+                            <button class="btn ghost" type="button">选择该保司</button>
+                          </div>
+                          <div class="insurer-card">
+                            <div>
+                              <h4>中国人保</h4>
+                              <p>支持平台基础信息预填，投保成功后回传保单号与电子保单链接。</p>
+                            </div>
+                            <button class="btn ghost" type="button">选择该保司</button>
+                          </div>
+                        </div>
+
+                        <div class="offline-entry">
+                          <div>
+                            <h4>关联线下已购保单</h4>
+                            <p>如果已在线下完成投保，可直接在本页补录保司、保单号、保障金额、保单附件等信息，用于完成备案材料闭环。</p>
+                          </div>
+                          <button class="btn secondary" type="button" id="jumpOffline">去补录线下保单</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="state-footer">
+                      <div class="footer-text">说明：住宅装修和零星作业允许进入“不投保待审核”分支；小型工程仍以投保安责险为主路径。</div>
+                      <div class="footer-actions">
+                        <button class="btn secondary" type="button" id="jumpOptout">暂不投保</button>
+                        <button class="btn primary" type="button">待施工单位填报</button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="policy-section" data-state="optout">
+                    <div class="substatus-bar">
+                      <div class="alert danger" style="flex:1;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <circle cx="12" cy="12" r="9" stroke="#F56C6C" stroke-width="1.8"/>
+                          <path d="M12 7V12" stroke="#F56C6C" stroke-width="1.8" stroke-linecap="round"/>
+                          <path d="M12 16H12.01" stroke="#F56C6C" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <div>适用于住宅装修 / 零星作业选择不投保场景，需由平台审核后决定是否通过备案。</div>
+                      </div>
+                      <div class="substatus-toggle" aria-label="审核状态切换">
+                        <button class="active" type="button" data-optout-sub="pending">待审核</button>
+                        <button type="button" data-optout-sub="approved">已通过</button>
+                      </div>
+                    </div>
+
+                    <div class="decision-card">
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                        <circle cx="32" cy="32" r="30" fill="#FFF1F0"/>
+                        <path d="M32 18V34" stroke="#F56C6C" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M32 45H32.2" stroke="#F56C6C" stroke-width="5" stroke-linecap="round"/>
+                      </svg>
+                      <p id="optoutMessage">该施工单位目前尚未投保安全生产责任险，可能存在潜在安全风险，建议在备案审核与日常巡查中予以重点关注。</p>
+                    </div>
+
+                    <div class="review-note">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21Z" stroke="#409EFF" stroke-width="1.8"/>
+                        <path d="M12 8V12L14.5 14" stroke="#409EFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <div id="optoutReviewText">当前为待审核视角：审批人需结合工程类型、施工内容和区域监管要求，决定是驳回退回施工单位补充投保，还是允许按“不投保”路径继续推进。</div>
+                    </div>
+
+                    <div class="state-footer">
+                      <div class="footer-text">选择不投保并不等于保单信息为空即可通过，需保留审核结论和后续监管关注提醒。</div>
+                      <div class="footer-actions">
+                        <button class="btn secondary" type="button" id="optoutSecondary">驳回</button>
+                        <button class="btn primary" type="button" id="optoutPrimary">通过</button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="policy-section" data-state="online-success">
+                    <div class="alert success">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M7 12L10.2 15L17 8.5" stroke="#389E0D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21Z" stroke="#389E0D" stroke-width="1.8"/>
+                      </svg>
+                      <div>保司已回传投保结果并完成保单关联。当前页面仅展示回传结果与电子保单，不再承接支付动作。</div>
+                    </div>
+
+                    <div class="success-card">
+                      <div class="success-head">
+                        <div class="success-title">
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M7 12L10.2 15L17 8.5" stroke="#1D8F62" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21Z" stroke="#1D8F62" stroke-width="1.8"/>
+                          </svg>
+                          <span>保单已关联</span>
+                        </div>
+                        <span class="tag success">已投保</span>
+                      </div>
+
+                      <div class="success-grid">
+                        <div class="success-row"><span>保险公司</span><strong>平安保险</strong></div>
+                        <div class="success-row"><span>保单号</span><strong>PA202604280001</strong></div>
+                        <div class="success-row"><span>保险期限</span><strong>2026-05-01 至 2026-08-01</strong></div>
+                        <div class="success-row"><span>保费金额</span><strong>¥500.00</strong></div>
+                      </div>
+                    </div>
+
+                    <div class="file-card">
+                      <div class="file-icon">PDF</div>
+                      <div class="file-meta">
+                        <h4>小散安责险保单 - 赵巷镇住宅装修备案</h4>
+                        <p>3.35KB · 回传字段包含电子保单 URL、投保状态、保单号</p>
+                      </div>
+                      <button class="btn secondary" type="button">查看电子保单</button>
+                    </div>
+
+                    <div class="state-footer">
+                      <div class="footer-text">说明：投保成功页用于确认“保单结果已回传平台”，后续可继续提交备案，不在本页追加交易性行为。</div>
+                      <div class="footer-actions">
+                        <button class="btn secondary" type="button">返回列表</button>
+                        <button class="btn primary" type="button">待施工单位填报</button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="policy-section" data-state="offline">
+                    <div class="panel-card">
+                      <div class="panel-head">
+                        <div>
+                          <h3>线下已购保单补录</h3>
+                          <p>用于承接线下投保结果，平台仅记录保单信息与附件材料，形成备案闭环。</p>
+                        </div>
+                        <button class="btn ghost" type="button" id="jumpOnline">改为线上投保</button>
+                      </div>
+
+                      <div class="policy-body">
+                        <div class="review-note">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21Z" stroke="#FAAD14" stroke-width="1.8"/>
+                            <path d="M12 8V13" stroke="#FAAD14" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="M12 17H12.01" stroke="#FAAD14" stroke-width="1.8" stroke-linecap="round"/>
+                          </svg>
+                          <div>若施工单位已在线下完成投保，可在本页登记保司、保单号、金额、期限并上传保单原件与支付凭证；如需改走线上路径，可切回线上投保。</div>
+                        </div>
+
+                        <div class="offline-form">
+                          <div class="form-item">
+                            <div class="label"><span class="required">*</span><span>保险公司名称</span></div>
+                            <div class="read-field muted"><span>请选择</span><span>▾</span></div>
+                          </div>
+                          <div class="form-item">
+                            <div class="label"><span class="required">*</span><span>保单号</span></div>
+                            <div class="read-field muted"><span>请输入</span></div>
+                          </div>
+                          <div class="form-item">
+                            <div class="label"><span class="required">*</span><span>险种名称</span></div>
+                            <div class="read-field muted"><span>请输入</span></div>
+                          </div>
+                          <div class="form-item">
+                            <div class="label"><span class="required">*</span><span>保费金额</span></div>
+                            <div class="read-field muted"><span>请输入</span></div>
+                          </div>
+                          <div class="form-item full">
+                            <div class="label"><span class="required">*</span><span>保险期限</span></div>
+                            <div class="read-field muted"><span>选择开始时间 - 选择结束时间</span><span>📅</span></div>
+                          </div>
+                          <div class="form-item full">
+                            <div class="label"><span class="required">*</span><span>保单原件</span></div>
+                            <div class="upload-grid">
+                              <div class="upload-card">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                  <path d="M12 16V6" stroke="#1D8F62" stroke-width="1.8" stroke-linecap="round"/>
+                                  <path d="M8 10L12 6L16 10" stroke="#1D8F62" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M5 18H19" stroke="#1D8F62" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                                <strong>点击上传</strong>
+                                <p>支持 JPG / PNG / PDF</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-item full">
+                            <div class="label"><span class="required">*</span><span>提交支付凭证</span></div>
+                            <div class="upload-grid">
+                              <div class="upload-card">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                  <path d="M12 16V6" stroke="#1D8F62" stroke-width="1.8" stroke-linecap="round"/>
+                                  <path d="M8 10L12 6L16 10" stroke="#1D8F62" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M5 18H19" stroke="#1D8F62" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                                <strong>点击上传</strong>
+                                <p>用于审核支付真实性</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="state-footer">
+                      <div class="footer-text">线下保单补录通过后，平台仍需形成可追溯的保司、金额、期限和附件记录，不展示线上支付链路。</div>
+                      <div class="footer-actions">
+                        <button class="btn secondary" type="button">保存草稿</button>
+                        <button class="btn primary" type="button">待施工单位填报</button>
+                      </div>
+                    </div>
+                  </section>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <aside id="annotationDrawer" class="annotation-drawer">
+            <div class="drawer-head">
+              <h2 id="annotationTitle">未投保 — 需求说明</h2>
+              <p id="annotationDesc">右侧标注仅描述规则口径，不描述显而易见的点击动作；用于帮助产品和开发核对页面状态、字段与分支约束。</p>
+            </div>
+            <div class="drawer-body" id="annotationBody"></div>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const scenarioTabs = Array.from(document.querySelectorAll(".scenario-tab"));
+    const sections = Array.from(document.querySelectorAll(".policy-section"));
+    const contentTabs = Array.from(document.querySelectorAll(".content-tab"));
+    const panels = Array.from(document.querySelectorAll(".tab-panel"));
+    const optoutToggleButtons = Array.from(document.querySelectorAll("[data-optout-sub]"));
+    const annotationDrawer = document.getElementById("annotationDrawer");
+    const drawerToggle = document.getElementById("drawerToggle");
+    const annotationTitle = document.getElementById("annotationTitle");
+    const annotationDesc = document.getElementById("annotationDesc");
+    const annotationBody = document.getElementById("annotationBody");
+    const optoutMessage = document.getElementById("optoutMessage");
+    const optoutReviewText = document.getElementById("optoutReviewText");
+    const optoutPrimary = document.getElementById("optoutPrimary");
+    const optoutSecondary = document.getElementById("optoutSecondary");
+    const bannerSlides = Array.from(document.querySelectorAll("[data-banner-slide]"));
+    const bannerDots = Array.from(document.querySelectorAll("[data-banner-dot]"));
+    const bannerPrev = document.getElementById("bannerPrev");
+    const bannerNext = document.getElementById("bannerNext");
+    let bannerIndex = 0;
+    let bannerTimer = null;
+
+    const annotationMap = {
+      uninsured: {
+        title: "未投保 — 需求说明",
+        desc: "对应移动端“待填报 / 已驳回”未投保页，PC 端改为在备案信息弹窗内承接投保入口与线下补录分流。",
+        groups: [
+          {
+            title: "页面状态规则",
+            items: [
+              "默认展示“未投保”风险提示，提醒当前备案记录尚未关联任何保单。",
+              "保司入口展示属于投保前状态，仅显示可选保司与步骤提示，不出现支付结果字段。",
+              "若工程类型为住宅装修或零星作业，可允许进入“不投保待审核”分支；小型工程主路径仍应优先引导投保。"
+            ]
+          },
+          {
+            title: "数据规则",
+            items: [
+              "保司列表由平台配置提供，原则上优先复用标准对接保司：太保、平安、国任等。",
+              "每家保司展示的仅为入口级信息，不在平台内展示交易性保费试算和支付页。",
+              "线下补录入口与线上投保入口并列存在，但线下补录仅承接“已在线下完成投保”的结果。"
+            ]
+          },
+          {
+            title: "字段规则",
+            items: [
+              "未投保状态下不展示保单号、保费金额、起止日期等结果字段。",
+              "保司选择属于入口信息，不要求先填写保单字段；实际投保字段由平台向保司传递基础资料。",
+              "线下补录入口不直接写入保单数据，需跳转到线下补录状态再录入。"
+            ]
+          },
+          {
+            title: "交互分支规则",
+            items: [
+              "点击保司入口后，进入线上投保路径，由保司短信下发链接并在浏览器完成支付。",
+              "点击“暂不投保”后，仅住宅装修 / 零星作业允许进入不投保审核视角。",
+              "点击“去补录线下保单”后，切换至线下投保状态页，保留备案上下文。"
+            ]
+          },
+          {
+            title: "边界情况规则",
+            items: [
+              "若保司入口暂未配置，应保留该保司卡位但展示不可用说明，避免用户误判为平台故障。",
+              "若已被驳回再次进入本页，应继续展示未投保状态并保留驳回后重新填报语义。",
+              "若施工单位先走线上又转线下，最终只保留一个有效保单承接结果。"
+            ]
+          }
+        ]
+      },
+      optout: {
+        title: "选择不投保 — 需求说明",
+        desc: "对应移动端“待审核 / 已通过”零星或住宅选择不投保页，PC 端突出审核结论与监管提醒。",
+        groups: [
+          {
+            title: "页面状态规则",
+            items: [
+              "仅适用于住宅装修、零星作业等允许不投保的场景，不作为小型工程默认页面。",
+              "待审核与已通过属于同一页面的两种状态，主提示文案一致，但底部按钮和审核说明不同。",
+              "已通过后不再展示“驳回 / 通过”双按钮，改为结果查看类动作。"
+            ]
+          },
+          {
+            title: "数据规则",
+            items: [
+              "该状态本质上是“无保单结果 + 有审核结论”的备案状态，不应写入保单号或保费金额。",
+              "审核结论需与备案状态关联，后续可用于巡查和风险关注口径。",
+              "风险提示信息应可追溯，用于后续监管与审批记录查询。"
+            ]
+          },
+          {
+            title: "字段规则",
+            items: [
+              "不投保场景不展示保单字段录入区域，避免误导为“待补充某个保单字段”。",
+              "需保留审核状态字段：待审核 / 已通过；如后续扩展，可增加驳回原因字段。",
+              "页面上的风险提示文案应统一，不因审批人不同而随意变体。"
+            ]
+          },
+          {
+            title: "交互分支规则",
+            items: [
+              "待审核状态支持“驳回”和“通过”两个审批分支。",
+              "已通过状态应允许查看回执或继续流转，但不再要求补投保单。",
+              "若审批人认为工程存在较高风险，可退回重新走投保路径。"
+            ]
+          },
+          {
+            title: "边界情况规则",
+            items: [
+              "若工程类型并非住宅装修或零星作业，不应进入此状态，应回退到投保路径。",
+              "若审批通过后监管口径调整，需要支持重新发起审查而非直接补写保单。",
+              "该场景下的风险提示应长期保留，避免后续巡查看不到历史决策。"
+            ]
+          }
+        ]
+      },
+      "online-success": {
+        title: "线上投保成功 — 需求说明",
+        desc: "对应移动端线上投保成功页，PC 端重点展示回传结果、保单关联状态和电子保单附件。",
+        groups: [
+          {
+            title: "页面状态规则",
+            items: [
+              "页面进入条件是保司已回传投保成功结果并完成平台关联。",
+              "状态标签应为“已投保”或等价成功态，不再展示保司选择或支付步骤入口。",
+              "页面以结果确认和材料留痕为主，不承载二次购买动作。"
+            ]
+          },
+          {
+            title: "数据规则",
+            items: [
+              "最小回传字段集至少包含交易流水号、保单号、投保状态、电子保单 URL。",
+              "当前页面展示的保司、保单号、保险期限、金额属于保司回传结果，不由人工录入。",
+              "电子保单文件可由电子保单 URL 生成查看入口，也可落地为附件卡片。"
+            ]
+          },
+          {
+            title: "字段规则",
+            items: [
+              "保险公司、保单号、保险期限、保费金额均为只读字段。",
+              "若回传字段扩展包含起保止保时间、投保单号等，可在结果区继续扩展只读项。",
+              "电子保单附件名称可按工程名称 + 保司名称进行统一命名，便于后续检索。"
+            ]
+          },
+          {
+            title: "交互分支规则",
+            items: [
+              "保司支付成功后先回传平台，平台收到成功结果才进入此状态。",
+              "若回传失败但保司已投保成功，不应直接展示成功页，应进入回传异常补偿流程。",
+              "用户可在此状态继续提交备案或查看电子保单，但不能修改回传结果。"
+            ]
+          },
+          {
+            title: "边界情况规则",
+            items: [
+              "若电子保单 URL 失效，应保留“保单已关联”状态并提供补拉取机制，而非回退成未投保。",
+              "若保司重复回传，应以交易流水号幂等处理，避免出现重复保单卡片。",
+              "若保险期限为空或格式异常，应提示对接数据异常并保留人工核验入口。"
+            ]
+          }
+        ]
+      },
+      offline: {
+        title: "线下投保 — 需求说明",
+        desc: "对应移动端线下投保补录页，PC 端采用标准后台表单布局，承接保单信息与附件材料录入。",
+        groups: [
+          {
+            title: "页面状态规则",
+            items: [
+              "线下投保状态表示施工单位已在线下完成投保，但平台尚未形成标准电子回传结果。",
+              "页面既要展示“可改为线上投保”的回流入口，也要保留线下补录主路径。",
+              "当前页面完成的是备案材料闭环，不等同于平台内完成交易。"
+            ]
+          },
+          {
+            title: "数据规则",
+            items: [
+              "核心录入字段包括保司、保单号、险种名称、保费金额、保险期限。",
+              "附件材料至少包括保单原件与支付凭证，用于支撑审核真实性。",
+              "线下补录结果需与备案记录绑定，后续用于查看、复核和监管追溯。"
+            ]
+          },
+          {
+            title: "字段规则",
+            items: [
+              "保司、保单号、险种名称、金额、期限、附件均为必填。",
+              "保险期限应为起止时间对，避免只录入起期或止期造成无效保单判定。",
+              "上传区需支持图片/PDF 等材料格式，后续真实系统需受保司与平台约束控制。"
+            ]
+          },
+          {
+            title: "交互分支规则",
+            items: [
+              "点击“改为线上投保”后回到线上入口，不清除当前备案上下文。",
+              "线下补录可先保存草稿，再由施工单位或审批人继续完善。",
+              "线下补录完成后进入备案后续流转，不自动生成线上回传字段。"
+            ]
+          },
+          {
+            title: "边界情况规则",
+            items: [
+              "若保单原件已上传但支付凭证缺失，不应视为线下投保补录完成。",
+              "若线下保单时间与工程施工期明显冲突，应在审批环节触发人工核验。",
+              "若后续又收到保司线上回传结果，需明确以哪个结果作为最终有效保单。"
+            ]
+          }
+        ]
+      }
+    };
+
+    function renderAnnotations(key) {
+      const data = annotationMap[key];
+      annotationTitle.textContent = data.title;
+      annotationDesc.textContent = data.desc;
+      annotationBody.innerHTML = data.groups.map(group => `
+        <section class="annotation-card">
+          <h3>${group.title}</h3>
+          <ul>${group.items.map(item => `<li>${item}</li>`).join("")}</ul>
+        </section>
+      `).join("");
+    }
+
+    function setScenario(key) {
+      scenarioTabs.forEach(tab => tab.classList.toggle("active", tab.dataset.scenario === key));
+      sections.forEach(section => section.classList.toggle("active", section.dataset.state === key));
+      renderAnnotations(key);
+    }
+
+    function setTab(key) {
+      contentTabs.forEach(tab => tab.classList.toggle("active", tab.dataset.tab === key));
+      panels.forEach(panel => panel.classList.toggle("active", panel.dataset.panel === key));
+    }
+
+    function setOptoutSub(key) {
+      optoutToggleButtons.forEach(button => button.classList.toggle("active", button.dataset.optoutSub === key));
+      if (key === "pending") {
+        optoutMessage.textContent = "该施工单位目前尚未投保安全生产责任险，可能存在潜在安全风险，建议在备案审核与日常巡查中予以重点关注。";
+        optoutReviewText.textContent = "当前为待审核视角：审批人需结合工程类型、施工内容和区域监管要求，决定是驳回退回施工单位补充投保，还是允许按“不投保”路径继续推进。";
+        optoutSecondary.textContent = "驳回";
+        optoutPrimary.textContent = "通过";
+      } else {
+        optoutMessage.textContent = "该施工单位选择不投保的申请已审核通过，后续仍建议在日常巡查中持续关注其施工安全情况。";
+        optoutReviewText.textContent = "当前为已通过视角：备案可继续流转，但页面仍需保留“不投保”结论和风险提示，供后续查看回执与监管追溯。";
+        optoutSecondary.textContent = "返回列表";
+        optoutPrimary.textContent = "查看回执";
+      }
+    }
+
+    function setBanner(index) {
+      if (!bannerSlides.length) return;
+      bannerIndex = (index + bannerSlides.length) % bannerSlides.length;
+      bannerSlides.forEach((slide, idx) => slide.classList.toggle("active", idx === bannerIndex));
+      bannerDots.forEach((dot, idx) => dot.classList.toggle("active", idx === bannerIndex));
+    }
+
+    function restartBannerTimer() {
+      if (bannerTimer) {
+        clearInterval(bannerTimer);
+      }
+      bannerTimer = window.setInterval(() => {
+        setBanner(bannerIndex + 1);
+      }, 4500);
+    }
+
+    scenarioTabs.forEach(tab => {
+      tab.addEventListener("click", () => setScenario(tab.dataset.scenario));
+    });
+
+    contentTabs.forEach(tab => {
+      tab.addEventListener("click", () => setTab(tab.dataset.tab));
+    });
+
+    optoutToggleButtons.forEach(button => {
+      button.addEventListener("click", () => setOptoutSub(button.dataset.optoutSub));
+    });
+
+    bannerDots.forEach(dot => {
+      dot.addEventListener("click", () => {
+        setBanner(Number(dot.dataset.bannerDot));
+        restartBannerTimer();
+      });
+    });
+
+    if (bannerPrev && bannerNext) {
+      bannerPrev.addEventListener("click", () => {
+        setBanner(bannerIndex - 1);
+        restartBannerTimer();
+      });
+      bannerNext.addEventListener("click", () => {
+        setBanner(bannerIndex + 1);
+        restartBannerTimer();
+      });
+    }
+
+    drawerToggle.addEventListener("click", () => {
+      annotationDrawer.classList.toggle("open");
+      drawerToggle.textContent = annotationDrawer.classList.contains("open") ? "收起标注" : "展开标注";
+    });
+
+    document.getElementById("jumpOffline").addEventListener("click", () => setScenario("offline"));
+    document.getElementById("jumpOnline").addEventListener("click", () => setScenario("uninsured"));
+    document.getElementById("jumpOptout").addEventListener("click", () => setScenario("optout"));
+
+    setScenario("uninsured");
+    setTab("policy");
+    setOptoutSub("pending");
+    setBanner(0);
+    restartBannerTimer();
+  </script>
+</body>
+</html>

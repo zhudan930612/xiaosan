@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保险公司配置 - 原型设计</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: #f0f2f5; overflow-x: hidden; }
+
+/* ===== 顶部导航栏 ===== */
+.top-header {
+  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  background: #304156; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+}
+.top-header .logo-area {
+  display: flex; align-items: center; gap: 12px;
+  color: #fff; font-size: 18px; font-weight: 600;
+}
+.top-header .logo-icon {
+  width: 32px; height: 32px; background: #409EFF; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold;
+}
+.top-header .nav-menu { display: flex; gap: 0; }
+.top-header .nav-menu a {
+  color: rgba(255,255,255,0.65); text-decoration: none; font-size: 14px;
+  padding: 0 20px; height: 56px; display: flex; align-items: center;
+  border-bottom: 2px solid transparent; transition: all 0.2s;
+}
+.top-header .nav-menu a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.top-header .nav-menu a.active { color: #fff; border-bottom-color: #409EFF; background: rgba(255,255,255,0.05); }
+.top-header .user-area { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 14px; }
+.top-header .user-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: #909399;
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+}
+
+/* ===== 左侧侧边栏 ===== */
+.sidebar {
+  position: fixed; top: 56px; left: 0; bottom: 0; width: 210px;
+  background: #304156; z-index: 999; overflow-y: auto;
+}
+.sidebar-menu-item {
+  height: 50px; padding: 0 20px; display: flex; align-items: center; gap: 10px;
+  color: #bfcbd9; font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.sidebar-menu-item:hover { color: #fff; background: #263445; }
+.sidebar-menu-item.active {
+  color: #fff; background: #263445;
+  border-left: 3px solid #409EFF; padding-left: 17px;
+}
+.sidebar-menu-item .icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; opacity: 0.8; }
+.sidebar-menu-item.active .icon { opacity: 1; }
+
+/* ===== 内容区域 ===== */
+.main-content {
+  margin-left: 210px; margin-top: 56px; min-height: calc(100vh - 56px);
+  background: #f0f2f5; width: calc(100% - 210px);
+}
+.content-wrapper { padding: 0 20px 20px; }
+
+/* ===== 面包屑 ===== */
+.breadcrumb { height: 40px; display: flex; align-items: center; gap: 6px; font-size: 14px; color: #606266; }
+.breadcrumb a { color: #606266; text-decoration: none; }
+.breadcrumb a:hover { color: #409EFF; }
+.breadcrumb .sep { color: #c0c4cc; margin: 0 4px; }
+
+/* ===== 搜索区域 ===== */
+.search-area {
+  background: #fff; padding: 16px 20px; margin-bottom: 16px;
+  border-radius: 0 0 4px 4px;
+}
+.search-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.search-item { display: flex; align-items: center; gap: 8px; }
+.search-item .label { font-size: 14px; color: #606266; white-space: nowrap; }
+.search-item input, .search-item select {
+  height: 32px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 12px;
+  font-size: 14px; color: #606266; background: #fff;
+}
+.search-item input { min-width: 160px; }
+.search-item input:focus, .search-item select:focus { outline: none; border-color: #409EFF; }
+.btn {
+  height: 32px; padding: 0 16px; border-radius: 4px; font-size: 14px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px; border: none; transition: all 0.2s;
+}
+.btn-primary { background: #409EFF; color: #fff; }
+.btn-primary:hover { background: #66b1ff; }
+.btn-secondary { background: #fff; color: #606266; border: 1px solid #dcdfe6; }
+.btn-secondary:hover { color: #409EFF; border-color: #409EFF; }
+.btn-danger { background: #f56c6c; color: #fff; }
+.btn-sm { height: 28px; padding: 0 12px; font-size: 13px; }
+
+/* ===== 表格区域 ===== */
+.table-section { background: #fff; border-radius: 4px; padding: 16px 20px; }
+.table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.table-title { font-size: 16px; font-weight: 600; color: #303133; }
+.table-actions { display: flex; gap: 8px; }
+
+.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.data-table th {
+  background: #f5f7fa; color: #909399; font-size: 13px; font-weight: 600;
+  text-align: left; padding: 8px 6px; border-bottom: 1px solid #ebeef5;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 8px 6px; font-size: 13px; color: #606266; border-bottom: 1px solid #ebeef5;
+  vertical-align: middle;
+}
+.data-table td:nth-child(4) { word-break: break-all; }
+.data-table tr:hover { background: #f5f7fa; }
+.data-table tr.dragging { opacity: 0.5; background: #ecf5ff; }
+.data-table tr.drag-over { border-top: 2px solid #409EFF; }
+
+/* 拖拽手柄 */
+.drag-handle {
+  width: 24px; height: 24px; cursor: grab;
+  display: flex; align-items: center; justify-content: center;
+  color: #c0c4cc; font-size: 16px; user-select: none;
+}
+.drag-handle:hover { color: #909399; }
+.drag-handle:active { cursor: grabbing; }
+
+/* Logo缩略图 */
+.logo-thumb {
+  width: 40px; height: 40px; border-radius: 4px; object-fit: contain;
+  border: 1px solid #e4e7ed; background: #f5f7fa;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #909399;
+}
+
+/* 类型标签 */
+.type-tag {
+  display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 12px; margin-right: 4px;
+}
+.type-tag:last-child { margin-right: 0; }
+.type-tag-online { background: #e6f7f0; color: #00B578; }
+.type-tag-offline { background: #f5f7fa; color: #606266; border: 1px solid #e4e7ed; }
+
+/* 开关组件 */
+.switch { position: relative; display: inline-block; width: 40px; height: 22px; cursor: pointer; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-slider {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: #dcdfe6; border-radius: 22px; transition: 0.3s;
+}
+.switch-slider::before {
+  content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px;
+  background: #fff; border-radius: 50%; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.switch input:checked + .switch-slider { background: #409EFF; }
+.switch input:checked + .switch-slider::before { transform: translateX(18px); }
+
+/* 操作链接 */
+.action-link { color: #409EFF; font-size: 13px; cursor: pointer; text-decoration: none; }
+.action-link:hover { text-decoration: underline; }
+.action-sep { color: #dcdfe6; margin: 0 4px; }
+
+/* 分页 */
+.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 16px; }
+.pagination .page-info { font-size: 13px; color: #606266; }
+.pagination .page-btn {
+  min-width: 28px; height: 28px; padding: 0 6px; border: 1px solid #dcdfe6;
+  background: #fff; color: #606266; font-size: 13px; border-radius: 2px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.pagination .page-btn:hover { color: #409EFF; border-color: #409EFF; }
+.pagination .page-btn.active { background: #409EFF; color: #fff; border-color: #409EFF; }
+.pagination .page-btn:disabled { color: #c0c4cc; border-color: #e4e7ed; cursor: not-allowed; }
+.pagination select { height: 28px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 6px; font-size: 13px; }
+
+/* ===== 弹窗 ===== */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 3000; display: none;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: #fff; border-radius: 8px; width: 520px; box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+.modal-header { padding: 16px 24px; border-bottom: 1px solid #e4e7ed; display: flex; justify-content: space-between; align-items: center; }
+.modal-header .title { font-size: 16px; font-weight: 600; color: #303133; }
+.modal-header .close-btn { font-size: 20px; color: #909399; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+.modal-header .close-btn:hover { background: #f5f7fa; color: #606266; }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 12px 24px; border-top: 1px solid #e4e7ed; display: flex; justify-content: flex-end; gap: 12px; }
+
+/* 表单 */
+.form-item { margin-bottom: 20px; }
+.form-item:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 14px; color: #606266; margin-bottom: 8px; }
+.form-label .required { color: #f56c6c; margin-right: 4px; }
+.form-input {
+  width: 100%; height: 36px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 12px;
+  font-size: 14px; color: #606266;
+}
+.form-input:focus { outline: none; border-color: #409EFF; }
+.form-input::placeholder { color: #c0c4cc; }
+.form-hint { font-size: 12px; color: #909399; margin-top: 4px; }
+
+/* 复选组 */
+.checkbox-group { display: flex; gap: 24px; }
+.checkbox-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: #606266; }
+.checkbox-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #409EFF; cursor: pointer; }
+
+/* 上传区域 */
+.upload-area {
+  width: 120px; height: 120px; border: 1px dashed #dcdfe6; border-radius: 4px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; background: #fafafa;
+}
+.upload-area:hover { border-color: #409EFF; }
+.upload-area .upload-icon { font-size: 24px; color: #c0c4cc; margin-bottom: 8px; }
+.upload-area .upload-text { font-size: 12px; color: #909399; }
+.upload-preview {
+  width: 120px; height: 120px; border-radius: 4px; border: 1px solid #e4e7ed;
+  display: flex; align-items: center; justify-content: center; background: #f5f7fa;
+  position: relative;
+}
+.upload-preview img { max-width: 100px; max-height: 100px; object-fit: contain; }
+.upload-preview .remove-btn {
+  position: absolute; top: -8px; right: -8px; width: 20px; height: 20px;
+  background: #f56c6c; color: #fff; border-radius: 50%; font-size: 12px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+
+/* 排序输入 */
+.sort-input { width: 100px; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航栏 ===== -->
+<div class="top-header">
+  <div class="logo-area">
+    <div class="logo-icon">安</div>
+    小型工程综合管理平台
+  </div>
+  <div class="nav-menu">
+    <a href="#">企业中心</a>
+    <a href="#" class="active">运营管理</a>
+    <a href="#">系统管理</a>
+  </div>
+  <div class="user-area">
+    <div class="user-avatar"></div>
+    <span>超级管理员</span>
+    <span style="font-size:10px;">▼</span>
+  </div>
+</div>
+
+<!-- ===== 左侧侧边栏 ===== -->
+<div class="sidebar">
+  <div class="sidebar-menu-item">
+    <span class="icon">👤</span> 用户权限配置
+  </div>
+  <div class="sidebar-menu-item">
+    <span class="icon">📱</span> 小程序配置
+  </div>
+  <div class="sidebar-menu-item">
+    <span class="icon">🤖</span> AI审核流程配置
+  </div>
+  <div class="sidebar-menu-item">
+    <span class="icon">📨</span> 短信通知配置
+  </div>
+  <div class="sidebar-menu-item active">
+    <span class="icon">🛡️</span> 保险公司配置
+  </div>
+</div>
+
+<!-- ===== 内容区域 ===== -->
+<div class="main-content">
+  <div class="content-wrapper">
+
+    <!-- 面包屑 -->
+    <div class="breadcrumb">
+      <a href="#">运营管理</a>
+      <span class="sep">&gt;</span>
+      <span>保险公司配置</span>
+    </div>
+
+    <!-- 搜索区域 -->
+    <div class="search-area">
+      <div class="search-row">
+        <div class="search-item">
+          <span class="label">保险公司名称</span>
+          <input type="text" placeholder="请输入保险公司名称" style="width:180px;">
+        </div>
+        <div class="search-item">
+          <span class="label">类型</span>
+          <select style="width:140px;">
+            <option>全部</option>
+            <option>仅线上</option>
+            <option>仅线下</option>
+            <option>线上+线下</option>
+          </select>
+        </div>
+        <div class="search-item">
+          <span class="label">状态</span>
+          <select style="width:120px;">
+            <option>全部</option>
+            <option>上架</option>
+            <option>下架</option>
+          </select>
+        </div>
+        <div class="search-item">
+          <button class="btn btn-primary">查询</button>
+          <button class="btn btn-secondary">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 表格区域 -->
+    <div class="table-section">
+      <div class="table-header">
+        <div class="table-title">保险公司配置列表（拖拽可调整排序）</div>
+        <div class="table-actions">
+          <button class="btn btn-primary" onclick="showAddModal()">+ 新增</button>
+        </div>
+      </div>
+
+      <table class="data-table" id="sortTable">
+        <thead>
+          <tr>
+            <th style="width:32px;"></th>
+            <th style="width:42px;">排序</th>
+            <th style="width:48px;">Logo</th>
+            <th style="width:32%;">保险公司名称</th>
+            <th style="width:80px;">类型</th>
+            <th style="width:60px;">状态</th>
+            <th style="width:100px;">创建时间</th>
+            <th style="width:100px;">更新时间</th>
+            <th style="width:80px;">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>1</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>中国人民财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-online">线上</span><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-01-15</td>
+            <td>2025-06-01</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>2</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>中国平安财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-online">线上</span><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-02-08</td>
+            <td>2025-06-01</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>3</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>中国太平洋财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-online">线上</span><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-02-20</td>
+            <td>2025-05-28</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>4</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>中国人寿财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-03-05</td>
+            <td>2025-05-28</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>5</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>中华联合财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-03-18</td>
+            <td>2025-05-20</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>6</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>大地财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox">
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-04-02</td>
+            <td>2025-05-20</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>7</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>阳光财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox">
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-04-12</td>
+            <td>2025-05-15</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>8</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>太平财产保险有限公司</td>
+            <td><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-04-25</td>
+            <td>2025-05-15</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>9</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>华泰财产保险有限公司</td>
+            <td><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-05-08</td>
+            <td>2025-05-10</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+          <tr draggable="true">
+            <td><div class="drag-handle">⋮⋮</div></td>
+            <td>10</td>
+            <td><div class="logo-thumb">LOGO</div></td>
+            <td>永安财产保险股份有限公司</td>
+            <td><span class="type-tag type-tag-offline">线下</span></td>
+            <td>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
+            <td>2025-05-20</td>
+            <td>2025-05-10</td>
+            <td>
+              <a class="action-link" onclick="showEditModal()">编辑</a>
+              <span class="action-sep">|</span>
+              <a class="action-link" style="color:#f56c6c;" onclick="showDeleteModal()">删除</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <span class="page-info">共 86 条</span>
+        <select><option>10条/页</option><option>20条/页</option><option>50条/页</option></select>
+        <button class="page-btn" disabled>&lt;</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">4</button>
+        <button class="page-btn">5</button>
+        <button class="page-btn">&gt;</button>
+        <span class="page-info">前往 <input type="text" style="width:36px;height:26px;border:1px solid #dcdfe6;border-radius:2px;text-align:center;font-size:13px;"> 页</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 新增/编辑弹窗 ===== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="title" id="modalTitle">新增保险公司</div>
+      <div class="close-btn" onclick="hideEditModal()">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-item">
+        <label class="form-label"><span class="required">*</span>保险公司名称</label>
+        <input type="text" class="form-input" placeholder="请输入保险公司名称" id="companyName">
+      </div>
+      <div class="form-item">
+        <label class="form-label"><span class="required">*</span>保险公司Logo</label>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <span class="upload-icon">+</span>
+            <span class="upload-text">点击上传</span>
+          </div>
+          <div class="upload-preview hidden" id="uploadPreview">
+            <img src="" alt="预览" id="previewImg">
+            <div class="remove-btn" onclick="event.stopPropagation();removePreview()">✕</div>
+          </div>
+        </div>
+        <input type="file" id="fileInput" style="display:none;" accept="image/jpeg,image/png,image/gif">
+        <div class="form-hint">支持jpg/png/gif格式，不超过2MB，建议尺寸200x200px</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label"><span class="required">*</span>类型</label>
+        <div class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="checkbox" name="companyType" value="online" checked>
+            <span>线上</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" name="companyType" value="offline" checked>
+            <span>线下</span>
+          </label>
+        </div>
+        <div class="form-hint">可同时勾选</div>
+      </div>
+      <div class="form-item">
+        <label class="form-label">状态</label>
+        <label class="switch">
+          <input type="checkbox" checked id="statusSwitch">
+          <span class="switch-slider"></span>
+        </label>
+        <span style="font-size:13px;color:#606266;margin-left:12px;" id="statusText">上架</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="hideEditModal()">取消</button>
+      <button class="btn btn-primary" onclick="hideEditModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 删除确认弹窗 ===== -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="width:400px;">
+    <div class="modal-header">
+      <div class="title">确认删除</div>
+      <div class="close-btn" onclick="hideDeleteModal()">✕</div>
+    </div>
+    <div class="modal-body">
+      确定删除保险公司「<strong id="deleteCompanyName">中国人民财产保险股份有限公司</strong>」吗？<br><br>
+      <span style="color:#f56c6c;font-size:13px;">删除后该保险公司将从列表中移除，但已产生的投保记录不受影响。</span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="hideDeleteModal()">取消</button>
+      <button class="btn btn-danger" onclick="hideDeleteModal()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showAddModal() {
+  document.getElementById('modalTitle').textContent = '新增保险公司';
+  document.getElementById('editModal').classList.add('show');
+}
+
+function showEditModal() {
+  document.getElementById('modalTitle').textContent = '编辑保险公司';
+  document.getElementById('editModal').classList.add('show');
+}
+
+function hideEditModal() {
+  document.getElementById('editModal').classList.remove('show');
+}
+
+function showDeleteModal() {
+  document.getElementById('deleteModal').classList.add('show');
+}
+
+function hideDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('show');
+}
+
+// 状态开关文字联动
+document.getElementById('statusSwitch').addEventListener('change', function() {
+  document.getElementById('statusText').textContent = this.checked ? '上架' : '下架';
+});
+
+// 文件上传预览（模拟）
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  if (e.target.files && e.target.files[0]) {
+    document.getElementById('uploadArea').classList.add('hidden');
+    document.getElementById('uploadPreview').classList.remove('hidden');
+  }
+});
+
+function removePreview() {
+  document.getElementById('uploadArea').classList.remove('hidden');
+  document.getElementById('uploadPreview').classList.add('hidden');
+  document.getElementById('fileInput').value = '';
+}
+
+// ===== 拖拽排序 =====
+(function() {
+  const table = document.getElementById('sortTable');
+  const tbody = table.querySelector('tbody');
+  let draggedRow = null;
+
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.addEventListener('dragstart', function(e) {
+      draggedRow = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    row.addEventListener('dragend', function() {
+      this.classList.remove('dragging');
+      tbody.querySelectorAll('tr').forEach(r => r.classList.remove('drag-over'));
+      draggedRow = null;
+      // 重新计算排序值
+      updateSortOrder();
+    });
+
+    row.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (this !== draggedRow) {
+        this.classList.add('drag-over');
+      }
+    });
+
+    row.addEventListener('dragleave', function() {
+      this.classList.remove('drag-over');
+    });
+
+    row.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      if (this !== draggedRow && draggedRow) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const draggedIndex = rows.indexOf(draggedRow);
+        const targetIndex = rows.indexOf(this);
+        if (draggedIndex < targetIndex) {
+          this.after(draggedRow);
+        } else {
+          this.before(draggedRow);
+        }
+      }
+    });
+  });
+
+  function updateSortOrder() {
+    tbody.querySelectorAll('tr').forEach((row, index) => {
+      const sortCell = row.querySelector('td:nth-child(2)');
+      if (sortCell) {
+        sortCell.textContent = index + 1;
+      }
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -8,10 +8,10 @@
       .title { font: 700 30px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #17324d; }
       .subtitle { font: 400 16px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #4d647c; }
       .laneTitle { font: 700 22px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #17324d; }
-      .stepTitle { font: 700 19px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #17324d; }
-      .text { font: 500 15px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #24384a; }
-      .small { font: 400 13px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #577089; }
-      .noteTitle { font: 700 18px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #17324d; }
+      .stepTitle { font: 700 18px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #17324d; }
+      .text { font: 500 13px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #24384a; }
+      .small { font: 400 12px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #577089; }
+      .noteTitle { font: 700 22px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #d93025; }
       .noteText { font: 500 14px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #314a63; }
       .warnTitle { font: 700 17px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #7a4b00; }
       .warnText { font: 500 14px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #75541b; }
@@ -30,7 +30,7 @@
 
   <rect width="1500" height="1180" class="bg"/>
 
-  <text x="750" y="56" text-anchor="middle" class="title">青浦区小型工程安全生产责任保险完整对接流程图</text>
+  <text x="750" y="56" text-anchor="middle" class="title">完整业务流程图</text>
 
   <rect x="50" y="126" width="1400" height="720" class="lane"/>
   <line x1="470" y1="126" x2="470" y2="846" class="divider"/>
@@ -41,65 +41,74 @@
   <text x="1200" y="172" text-anchor="middle" class="laneTitle">保险公司</text>
 
   <rect x="540" y="205" width="340" height="82" class="box boxPlatform"/>
-  <text x="710" y="236" text-anchor="middle" class="stepTitle">1. 展示可选线上投保保险公司</text>
-  <text x="710" y="262" text-anchor="middle" class="text">平台在备案流程中展示太保、平安、国任等保司入口</text>
+  <text x="710" y="235" text-anchor="middle" class="stepTitle">1. 展示可选线上投保保险公司</text>
+  <text x="710" y="258" text-anchor="middle" class="text">
+    <tspan x="710" dy="0">备案平台在备案流程中展示太保、平安、</tspan>
+    <tspan x="710" dy="16">国任等保司入口</tspan>
+  </text>
 
   <path d="M540 246 L260 246 L260 315" class="arrow"/>
 
   <rect x="90" y="315" width="340" height="82" class="box boxUser"/>
   <text x="260" y="346" text-anchor="middle" class="stepTitle">2. 选择某一家保险公司</text>
-  <text x="260" y="372" text-anchor="middle" class="text">用户在备案流程中点击“线上投保”</text>
+  <text x="260" y="370" text-anchor="middle" class="text">用户在备案流程中点击“线上投保”</text>
 
   <path d="M430 356 L455 356 L455 473 L540 473" class="arrow"/>
 
   <rect x="540" y="425" width="340" height="96" class="box boxPlatform"/>
-  <text x="710" y="456" text-anchor="middle" class="stepTitle">3. 组织基础投保参数</text>
-  <text x="710" y="482" text-anchor="middle" class="text">平台按当前备案信息整理投保所需字段</text>
-  <text x="710" y="506" text-anchor="middle" class="small">此阶段只传数据，不在平台内承载交易行为</text>
+  <text x="710" y="454" text-anchor="middle" class="stepTitle">3. 组织基础投保参数</text>
+  <text x="710" y="478" text-anchor="middle" class="text">备案平台按当前备案信息整理投保所需字段</text>
+  <text x="710" y="500" text-anchor="middle" class="small">此阶段只传数据，不在备案平台内承载交易行为</text>
 
   <path d="M880 473 L1020 473" class="arrow"/>
 
   <rect x="1030" y="425" width="340" height="96" class="box boxInsurance"/>
-  <text x="1200" y="456" text-anchor="middle" class="stepTitle">4. 生成订单并发送投保短信</text>
-  <text x="1200" y="482" text-anchor="middle" class="text">保险公司生成订单后向用户发送短信</text>
-  <text x="1200" y="506" text-anchor="middle" class="small">短信包含订单号、基础信息和投保链接</text>
+  <text x="1200" y="454" text-anchor="middle" class="stepTitle">4. 生成订单并发送投保短信</text>
+  <text x="1200" y="478" text-anchor="middle" class="text">保险公司生成订单后向用户发送短信</text>
+  <text x="1200" y="500" text-anchor="middle" class="small">短信包含订单号、基础信息和投保链接</text>
 
   <path d="M1200 521 L1200 540 L260 540 L260 548" class="arrow"/>
 
   <rect x="90" y="548" width="340" height="108" class="box boxUser"/>
-  <text x="260" y="579" text-anchor="middle" class="stepTitle">5. 点击短信链接并完成支付</text>
-  <text x="260" y="605" text-anchor="middle" class="text">用户收到短信后点击链接，跳转浏览器打开保司投保页</text>
-  <text x="260" y="629" text-anchor="middle" class="text">在保险公司页面确认信息、浏览产品并完成支付</text>
+  <text x="260" y="576" text-anchor="middle" class="stepTitle">5. 点击短信链接并完成支付</text>
+  <text x="260" y="598" text-anchor="middle" class="text">
+    <tspan x="260" dy="0">用户收到短信后点击链接，跳转浏览器</tspan>
+    <tspan x="260" dy="16">打开保司投保页</tspan>
+  </text>
+  <text x="260" y="630" text-anchor="middle" class="text">在保险公司页面确认信息、浏览产品并完成支付</text>
 
   <path d="M260 656 L260 700 L1200 700 L1200 668" class="arrow"/>
 
   <rect x="1030" y="668" width="340" height="108" class="box boxInsurance"/>
-  <text x="1200" y="699" text-anchor="middle" class="stepTitle">6. 支付成功后回传保单结果</text>
-  <text x="1200" y="725" text-anchor="middle" class="text">保险公司向备案平台回传电子保单等结果信息</text>
-  <text x="1200" y="749" text-anchor="middle" class="small">包括保单号、状态、电子保单 URL 等</text>
+  <text x="1200" y="696" text-anchor="middle" class="stepTitle">6. 支付成功后回传保单结果</text>
+  <text x="1200" y="718" text-anchor="middle" class="text">
+    <tspan x="1200" dy="0">保险公司向备案平台回传电子保单等</tspan>
+    <tspan x="1200" dy="16">结果信息</tspan>
+  </text>
+  <text x="1200" y="748" text-anchor="middle" class="small">包括保单号、状态、电子保单 URL 等</text>
 
   <path d="M1030 722 L980 722 L980 801 L880 801" class="arrow"/>
 
   <rect x="540" y="756" width="340" height="90" class="box boxPlatform"/>
-  <text x="710" y="787" text-anchor="middle" class="stepTitle">7. 平台接收保单并关联备案</text>
-  <text x="710" y="813" text-anchor="middle" class="text">平台将回传保单信息写回当前备案业务</text>
+  <text x="710" y="784" text-anchor="middle" class="stepTitle">7. 备案平台接收保单并关联备案</text>
+  <text x="710" y="808" text-anchor="middle" class="text">备案平台将回传保单信息写回当前备案业务</text>
 
   <rect x="505" y="560" width="410" height="112" class="warnBox"/>
   <text x="710" y="592" text-anchor="middle" class="warnTitle">关键约束</text>
   <text x="710" y="620" text-anchor="middle" class="warnText">备案平台不支持直接嵌入交易性行为</text>
-  <text x="710" y="644" text-anchor="middle" class="warnText">因此平台仅承接“保司选择”和“结果回传”</text>
+  <text x="710" y="644" text-anchor="middle" class="warnText">因此备案平台仅承接“保司选择”和“结果回传”</text>
 
   <rect x="80" y="900" width="640" height="210" class="noteBox"/>
-  <text x="400" y="940" text-anchor="middle" class="noteTitle">平台传保司的数据备注</text>
+  <text x="400" y="940" text-anchor="middle" class="noteTitle">备案平台传保司的数据备注</text>
   <text x="120" y="984" class="noteText">• 投/被保险人信息：投/被保险人名称、统一社会信用代码号、备案人姓名、备案人手机号码</text>
   <text x="120" y="1016" class="noteText">• 工程信息：工程名称、工程类型、工程地址、所属街镇、主要施工内容</text>
   <text x="120" y="1048" class="noteText">• 施工信息：施工负责人、施工负责人手机号码、工程造价、工程起期、工程止期</text>
   <text x="120" y="1080" class="noteText">• 附件资料：施工单位营业执照、承发包合同</text>
 
   <rect x="780" y="900" width="640" height="210" class="noteBox"/>
-  <text x="1100" y="940" text-anchor="middle" class="noteTitle">保司回传平台结果备注</text>
+  <text x="1100" y="940" text-anchor="middle" class="noteTitle">保司回传备案平台结果备注</text>
   <text x="820" y="984" class="noteText">• 最小回传字段：交易流水号、保单号、投保状态、电子保单 URL</text>
   <text x="820" y="1016" class="noteText">• 可扩展回传字段：保费、起保止保时间、投保单号等</text>
   <text x="820" y="1048" class="noteText">• 回传时机：用户支付成功后回传</text>
-  <text x="820" y="1080" class="noteText">• 回传目的：平台接收结果后，将保单信息关联到当前备案业务</text>
+  <text x="820" y="1080" class="noteText">• 回传目的：备案平台接收结果后，将保单信息关联到当前备案业务</text>
 </svg>

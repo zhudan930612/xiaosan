@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$TemplatePath = "E:\个人资料\ppt模板.pptx",
     [string]$OutputPath = "E:\AI知识库\小型工程管理系统\06_附件资料\备案巡检资料\安责险对接沟通PPT_20260604.pptx"
 )
@@ -72,12 +72,13 @@ function Set-CellText($table, [int]$row, [int]$col, [string]$text, [double]$font
     }
 }
 
-function Add-Box($slide, [double]$left, [double]$top, [double]$width, [double]$height, [string]$text, [string]$fillHex, [string]$fontHex = "FFFFFF", [double]$fontSize = 14) {
+function Add-Box($slide, [double]$left, [double]$top, [double]$width, [double]$height, [string]$text, [string]$fillHex, [string]$fontHex = "FFFFFF", [double]$fontSize = 14, [string]$lineHex = "D9E6E1") {
     $shape = $slide.Shapes.AddShape(5, $left, $top, $width, $height)
     $shape.Fill.ForeColor.RGB = To-OleColor $fillHex
-    $shape.Line.ForeColor.RGB = To-OleColor "D9E6E1"
+    $shape.Line.ForeColor.RGB = To-OleColor $lineHex
     $shape.Line.Weight = 1.2
     $shape.TextFrame.TextRange.Text = $text
+    $shape.TextFrame.TextRange.Font.Name = "Microsoft YaHei"
     $shape.TextFrame.TextRange.Font.Size = $fontSize
     $shape.TextFrame.TextRange.Font.Bold = -1
     $shape.TextFrame.TextRange.Font.Color.RGB = To-OleColor $fontHex
@@ -90,11 +91,44 @@ function Add-Box($slide, [double]$left, [double]$top, [double]$width, [double]$h
     return $shape
 }
 
-function Add-Arrow($slide, [double]$left, [double]$top, [double]$width, [double]$height) {
+function Add-Arrow($slide, [double]$left, [double]$top, [double]$width, [double]$height, [string]$fillHex = "27A66D") {
     $arrow = $slide.Shapes.AddShape(52, $left, $top, $width, $height)
-    $arrow.Fill.ForeColor.RGB = To-OleColor "27A66D"
+    $arrow.Fill.ForeColor.RGB = To-OleColor $fillHex
     $arrow.Line.Visible = 0
     return $arrow
+}
+
+function Add-InfoCard(
+    $slide,
+    [double]$left,
+    [double]$top,
+    [double]$width,
+    [double]$height,
+    [string]$title,
+    [string]$body,
+    [string]$fillHex,
+    [string]$lineHex,
+    [string]$titleHex = "17324D",
+    [string]$bodyHex = "314A63"
+) {
+    $shape = $slide.Shapes.AddShape(5, $left, $top, $width, $height)
+    $shape.Fill.ForeColor.RGB = To-OleColor $fillHex
+    $shape.Line.ForeColor.RGB = To-OleColor $lineHex
+    $shape.Line.Weight = 1.1
+    $shape.TextFrame.TextRange.Text = "$title`n$body"
+    $shape.TextFrame.TextRange.Font.Name = "Microsoft YaHei"
+    $shape.TextFrame.TextRange.Font.Size = 10.5
+    $shape.TextFrame.TextRange.Font.Color.RGB = To-OleColor $bodyHex
+    $shape.TextFrame.MarginLeft = 14
+    $shape.TextFrame.MarginRight = 14
+    $shape.TextFrame.MarginTop = 12
+    $shape.TextFrame.MarginBottom = 12
+    $shape.TextFrame.TextRange.ParagraphFormat.Alignment = 1
+    $shape.TextFrame.VerticalAnchor = 1
+    $shape.TextFrame.TextRange.Paragraphs(1).Font.Bold = -1
+    $shape.TextFrame.TextRange.Paragraphs(1).Font.Size = 13
+    $shape.TextFrame.TextRange.Paragraphs(1).Font.Color.RGB = To-OleColor $titleHex
+    return $shape
 }
 
 function Add-NoteBox($slide, [double]$left, [double]$top, [double]$width, [double]$height, [string]$title, [string]$body, [string]$fillHex = "F3FAF6") {
@@ -158,15 +192,28 @@ try {
     Set-ShapeText $slide1 10 "2026年06月04日" 22 | Out-Null
 
     $slide2 = $presentation.Slides.Item(2)
-    Set-ShapeText $slide2 70 "投保流程图及流程说明" 24 | Out-Null
+    $slide2Title = Set-ShapeText $slide2 70 "投保流程图及流程说明" 32
+    $slide2Title.Left = Cm 2.95
+    $slide2Title.Top = Cm 1.2
+    $slide2Title.Width = Cm 10.8
+    $slide2Title.Height = Cm 2.3
+    $slide2Title.TextFrame.TextRange.Font.Name = "Microsoft YaHei"
+    $slide2Title.TextFrame.TextRange.Font.Bold = -1
 
-    $stepTop = Cm 4.2
-    $stepLeft = Cm 2.3
-    $stepWidth = Cm 4.1
-    $stepHeight = Cm 2.3
-    $gap = Cm 0.6
-    $arrowWidth = Cm 0.8
-    $fillColors = @("27A66D", "35AD73", "4FB3D7", "27A66D", "35AD73", "4FB3D7")
+    $processPanel = $slide2.Shapes.AddShape(5, (Cm 2.0), (Cm 3.5), (Cm 29.8), (Cm 6.9))
+    $processPanel.Fill.ForeColor.RGB = To-OleColor "FFFFFF"
+    $processPanel.Fill.Transparency = 0.15
+    $processPanel.Line.ForeColor.RGB = To-OleColor "D7E6F4"
+    $processPanel.Line.Weight = 1
+    $processPanel.ZOrder(1) | Out-Null
+
+    $cardWidth = Cm 8.15
+    $cardHeight = Cm 1.95
+    $topRow = Cm 4.35
+    $bottomRow = Cm 7.25
+    $cardXs = @((Cm 2.55), (Cm 12.0), (Cm 21.45))
+    $fillColors = @("EFF8F2", "EEF9F3", "EEF7FD", "EFF8F2", "EEF9F3", "EEF7FD")
+    $lineColors = @("8CCCB0", "8CCCB0", "8EC8E8", "8CCCB0", "8CCCB0", "8EC8E8")
     $stepTexts = @(
         "1 平台展示`n保司入口",
         "2 用户授权`n并选择保司",
@@ -177,18 +224,28 @@ try {
     )
 
     for ($i = 0; $i -lt $stepTexts.Count; $i++) {
-        $left = $stepLeft + $i * ($stepWidth + $gap + $arrowWidth)
-        Add-Box $slide2 $left $stepTop $stepWidth $stepHeight $stepTexts[$i] $fillColors[$i] | Out-Null
-        if ($i -lt $stepTexts.Count - 1) {
-            $arrowLeft = $left + $stepWidth + (Cm 0.15)
-            Add-Arrow $slide2 $arrowLeft ($stepTop + (Cm 0.55)) $arrowWidth (Cm 1.2) | Out-Null
+        if ($i -lt 3) {
+            $left = $cardXs[$i]
+            $top = $topRow
+        } else {
+            $left = $cardXs[5 - $i]
+            $top = $bottomRow
         }
+
+        Add-Box $slide2 $left $top $cardWidth $cardHeight $stepTexts[$i] $fillColors[$i] "17324D" 15 $lineColors[$i] | Out-Null
     }
 
-    Add-NoteBox $slide2 (Cm 2.4) (Cm 8.0) (Cm 9.2) (Cm 3.0) "平台侧边界" "平台只承接入口、带参与结果关联，不在平台内承载交易支付页面。" | Out-Null
-    Add-NoteBox $slide2 (Cm 12.1) (Cm 8.0) (Cm 9.2) (Cm 3.0) "回传最小字段集" "交易流水号、保单号、投保状态、拒保原因、电子保单 URL。" | Out-Null
-    Add-NoteBox $slide2 (Cm 21.8) (Cm 8.0) (Cm 9.2) (Cm 3.0) "异常处理口径" "支付失败、超时未支付或短信未触达时，不自动关联保单，由平台保留待处理状态。" | Out-Null
-    Add-NoteBox $slide2 (Cm 2.4) (Cm 11.5) (Cm 28.5) (Cm 2.2) "当前建议方案" "优先按 (授权确认 -> 选保司 -> 保司短信 -> 保司 H5 支付 -> 回传平台) 的闭环推进，便于快速对接首家保险公司。" "EEF6FF" | Out-Null
+    Add-Arrow $slide2 (Cm 10.95) (Cm 4.82) (Cm 0.7) (Cm 1.0) "2AA66E" | Out-Null
+    Add-Arrow $slide2 (Cm 20.4) (Cm 4.82) (Cm 0.7) (Cm 1.0) "2AA66E" | Out-Null
+    $downArrow = Add-Arrow $slide2 (Cm 25.1) (Cm 6.6) (Cm 0.7) (Cm 1.15) "4FB3D7"
+    $downArrow.Rotation = 90
+    Add-Arrow $slide2 (Cm 20.4) (Cm 7.72) (Cm 0.7) (Cm 1.0) "2AA66E" | Out-Null
+    Add-Arrow $slide2 (Cm 10.95) (Cm 7.72) (Cm 0.7) (Cm 1.0) "2AA66E" | Out-Null
+
+    Add-InfoCard $slide2 (Cm 2.4) (Cm 11.15) (Cm 9.2) (Cm 2.65) "平台侧边界" "平台只承接入口、带参与结果关联，不在平台内承载交易支付页面。" "F5FBF7" "C7E3D3" | Out-Null
+    Add-InfoCard $slide2 (Cm 12.1) (Cm 11.15) (Cm 9.2) (Cm 2.65) "回传最小字段集" "交易流水号、保单号、投保状态、拒保原因、电子保单 URL。" "F5FAFF" "C9DDF2" | Out-Null
+    Add-InfoCard $slide2 (Cm 21.8) (Cm 11.15) (Cm 9.2) (Cm 2.65) "异常处理口径" "支付失败、超时未支付或短信未触达时，不自动关联保单，由平台保留待处理状态。" "FFF9F1" "EDD9AE" | Out-Null
+    Add-InfoCard $slide2 (Cm 2.4) (Cm 14.25) (Cm 28.6) (Cm 1.9) "当前建议方案" "优先按 (授权确认 -> 选保司 -> 保司短信 -> 保司 H5 支付 -> 回传平台) 的闭环推进，便于快速对接首家保险公司。" "EEF6FF" "C9DDF2" "17324D" "314A63" | Out-Null
 
     $slide3 = $presentation.Slides.Item(3)
     Set-ShapeText $slide3 70 "平台与保险公司互传清单" 24 | Out-Null

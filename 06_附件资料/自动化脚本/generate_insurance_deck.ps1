@@ -284,7 +284,7 @@ try {
     Set-CellText $table4 1 1 "事项" 16 $true $true
     Set-CellText $table4 1 2 "需保司回复" 16 $true $true
     Set-CellText $table4 2 1 "授权弹窗方案" 15 $true $true
-    Set-CellText $table4 2 2 "请确认采用哪种口径：`nA. 独立授权确认页；`nB. 底部上拉授权确认。`n当前建议保留勾选《投保须知》《免责说明》后再进入投保。" 13 $false $false
+    Set-CellText $table4 2 2 "请确认采用哪种口径：`nA. 独立授权确认页；`nB. 底部上拉授权确认。`n当前建议保留勾选《投保须知》《免责声明》后再进入投保。" 13 $false $false
     Set-CellText $table4 3 1 "投保须知与免责声明" 15 $true $true
     Set-CellText $table4 3 2 "请保司提供正式版《投保须知》《免责声明》文案、落款主体和展示要求，用于平台授权弹窗、短信说明页及保司 H5 统一展示。" 13 $false $false
     Set-CellText $table4 4 1 "联调补充资料" 15 $true $true

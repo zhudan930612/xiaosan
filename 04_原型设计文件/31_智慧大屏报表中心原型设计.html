@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧大屏报表中心原型设计</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+    .web-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    .main-area {
+      flex: 1;
+      min-width: 1180px;
+      padding: 24px;
+      background: linear-gradient(180deg, #f6f8fb 0%, #eef2f7 100%);
+    }
+    .top-bar {
+      height: 72px;
+      background: #1a2b4a;
+      border-radius: 18px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .top-title strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+    .top-title span {
+      display: block;
+      font-size: 12px;
+      color: #bfcbd9;
+      margin-top: 4px;
+    }
+    .top-meta {
+      display: flex;
+      gap: 12px;
+    }
+    .meta-chip {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-size: 12px;
+      color: #d8e3f3;
+    }
+    .page-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 10px;
+      border: 1px solid #dcdfe6;
+      background: #fff;
+      color: #666;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .page-btn:hover,
+    .page-btn.active {
+      background: #409eff;
+      border-color: #409eff;
+      color: #fff;
+    }
+    .screen-page { display: none; }
+    .screen-page.active { display: block; }
+    .panel {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(31, 45, 61, 0.08);
+      border: 1px solid #ebeef5;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .panel-title h2 {
+      font-size: 18px;
+      color: #1a2b4a;
+    }
+    .panel-title p {
+      font-size: 12px;
+      color: #909399;
+      margin-top: 4px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .tag-blue { background: #ecf5ff; color: #409eff; }
+    .tag-green { background: #f0f9eb; color: #67c23a; }
+    .tag-orange { background: #fdf6ec; color: #e6a23c; }
+    .tag-red { background: #fef0f0; color: #f56c6c; }
+    .tag-gray { background: #f4f4f5; color: #909399; }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .card {
+      border-radius: 14px;
+      border: 1px solid #ebeef5;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      padding: 18px;
+      min-height: 138px;
+    }
+    .card h3 {
+      font-size: 16px;
+      color: #1a2b4a;
+      margin-bottom: 6px;
+    }
+    .card p {
+      font-size: 12px;
+      color: #909399;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .kpi {
+      font-size: 28px;
+      color: #409eff;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .kpi-sub {
+      font-size: 12px;
+      color: #666;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid #dcdfe6;
+      background: #fff;
+      color: #606266;
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px;
+    }
+    .btn {
+      height: 40px;
+      border-radius: 10px;
+      padding: 0 18px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #409eff;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #66b1ff; }
+    .btn-secondary {
+      background: #fff;
+      border-color: #dcdfe6;
+      color: #606266;
+    }
+    .btn-secondary:hover {
+      border-color: #409eff;
+      color: #409eff;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .table th {
+      text-align: left;
+      padding: 12px 10px;
+      background: #f5f7fa;
+      color: #606266;
+      border-bottom: 1px solid #ebeef5;
+    }
+    .table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #f0f2f5;
+      color: #303133;
+      vertical-align: top;
+    }
+    .table tr:nth-child(even) td { background: #fcfcfd; }
+    .status-line {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .status-box {
+      flex: 1;
+      min-width: 180px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px dashed #dcdfe6;
+      background: #fafcff;
+    }
+    .status-box strong {
+      display: block;
+      font-size: 14px;
+      color: #1a2b4a;
+      margin-bottom: 8px;
+    }
+    .status-box span {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.7;
+    }
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 18px;
+    }
+    .template-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .template-card {
+      border: 1px solid #ebeef5;
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff;
+      min-height: 180px;
+    }
+    .template-card h4 {
+      font-size: 15px;
+      color: #1a2b4a;
+      margin-bottom: 8px;
+    }
+    .template-card p {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+    .template-card ul {
+      padding-left: 16px;
+      color: #666;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    .preview-paper {
+      min-height: 520px;
+      background: #fff;
+      border: 1px solid #dcdfe6;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: inset 0 0 0 1px #f5f7fa;
+    }
+    .paper-title {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #1a2b4a;
+    }
+    .paper-title h3 {
+      font-size: 22px;
+      color: #1a2b4a;
+      margin-bottom: 6px;
+    }
+    .paper-title p {
+      font-size: 12px;
+      color: #666;
+    }
+    .paper-block {
+      margin-bottom: 18px;
+    }
+    .paper-block strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #1a2b4a;
+    }
+    .paper-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .paper-kpi {
+      background: #f5f7fa;
+      border-left: 4px solid #409eff;
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 82px;
+    }
+    .paper-kpi small {
+      display: block;
+      color: #909399;
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+    .paper-kpi span {
+      display: block;
+      font-size: 22px;
+      color: #1a2b4a;
+      font-weight: 700;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .history-item {
+      border: 1px solid #ebeef5;
+      border-radius: 12px;
+      padding: 16px;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .history-main h4 {
+      font-size: 15px;
+      color: #1a2b4a;
+      margin-bottom: 6px;
+    }
+    .history-main p {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.8;
+    }
+    .history-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+      justify-content: center;
+      min-width: 130px;
+    }
+    .ai-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .ai-card {
+      border: 1px solid #ebeef5;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+      padding: 18px;
+      min-height: 210px;
+    }
+    .ai-card h4 {
+      font-size: 16px;
+      color: #1a2b4a;
+      margin-bottom: 8px;
+    }
+    .ai-card p, .ai-card li {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.8;
+    }
+    .ai-card ul {
+      padding-left: 16px;
+      margin-top: 8px;
+    }
+    .phase-note {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fff7e6;
+      color: #8c6d1f;
+      font-size: 12px;
+      line-height: 1.7;
+      border: 1px dashed #e6a23c;
+    }
+    .annotation-drawer {
+      width: 400px;
+      flex-shrink: 0;
+      background: #fffbe6;
+      border-left: 2px dashed #ffc53d;
+      position: relative;
+      transition: width 0.3s ease;
+      overflow: hidden;
+    }
+    .annotation-drawer.collapsed { width: 48px; }
+    .annotation-toggle {
+      width: 48px;
+      height: 84px;
+      background: #ffc53d;
+      color: #7a5417;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 0 10px 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: 700;
+      z-index: 2;
+    }
+    .annotation-content {
+      padding: 20px 16px 20px 60px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .annotation-drawer.collapsed .annotation-content { display: none; }
+    .annotation-page { display: none; }
+    .annotation-page.active { display: block; }
+    .annotation-content h3 {
+      font-size: 16px;
+      color: #5f4b17;
+      margin-bottom: 12px;
+    }
+    .annotation-content h4 {
+      font-size: 13px;
+      color: #7a5f1e;
+      margin: 14px 0 8px;
+    }
+    .annotation-content p,
+    .annotation-content li {
+      font-size: 12px;
+      color: #5f4b17;
+      line-height: 1.8;
+    }
+    .annotation-content ul { padding-left: 18px; }
+    .rule-block {
+      background: rgba(255,255,255,0.6);
+      border-left: 3px solid #ffc53d;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="web-wrapper">
+    <div class="main-area">
+      <div class="top-bar">
+        <div class="top-title">
+          <strong>智慧大屏报表中心</strong>
+          <span>一期正式报表底座 / 二期 AI 报表助手预留</span>
+        </div>
+        <div class="top-meta">
+          <div class="meta-chip">一期目标：Excel 优先 + A4 简约模板</div>
+          <div class="meta-chip">二期目标：AI 选报表 / 写摘要 / 专题分析</div>
+        </div>
+      </div>
+
+      <div class="page-nav">
+        <button class="page-btn active" onclick="switchPage('page-home', 'anno-home', this)">报表中心首页</button>
+        <button class="page-btn" onclick="switchPage('page-export', 'anno-export', this)">导出配置</button>
+        <button class="page-btn" onclick="switchPage('page-a4', 'anno-a4', this)">A4 模板预览</button>
+        <button class="page-btn" onclick="switchPage('page-history', 'anno-history', this)">历史与审计</button>
+        <button class="page-btn" onclick="switchPage('page-ai', 'anno-ai', this)">二期 AI 入口</button>
+      </div>
+
+      <div class="screen-page active" id="page-home">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>一期正式能力总览</h2>
+              <p>统一报表中心入口，统一口径、模板、权限、留痕规则。</p>
+            </div>
+            <span class="tag tag-blue">一期正式范围</span>
+          </div>
+          <div class="overview-grid">
+            <div class="card">
+              <h3>Excel 明细报表</h3>
+              <p>承接备案记录、巡查记录、隐患整改、审核清单等列表型数据。</p>
+              <div class="kpi">12</div>
+              <div class="kpi-sub">已规划字段域，支持筛选、排序、透视分析</div>
+            </div>
+            <div class="card">
+              <h3>Excel 汇总报表</h3>
+              <p>承接核心指标、街镇排名、趋势分析、状态分布等管理型数据。</p>
+              <div class="kpi">9</div>
+              <div class="kpi-sub">主指标进入口径台账后才能进入正式模板</div>
+            </div>
+            <div class="card">
+              <h3>A4 汇报报表</h3>
+              <p>适合打印、适合会议汇报、结构稳定，不依赖 AI 生成结论。</p>
+              <div class="kpi">3</div>
+              <div class="kpi-sub">一期仅落地 3 套模板族，不直接实装 8 套候选模板</div>
+            </div>
+            <div class="card">
+              <h3>口径冻结台账</h3>
+              <p>解决大屏页面、Excel 导出、A4 打印三处口径不一致问题。</p>
+              <div class="kpi">待冻结</div>
+              <div class="kpi-sub">未冻结指标禁止进入正式报表</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>口径状态区</h2>
+              <p>通过状态区向业务方展示“能不能进正式模板”，而不是直接争论文档版本。</p>
+            </div>
+            <span class="tag tag-orange">第 0 步先完成</span>
+          </div>
+          <div class="status-line">
+            <div class="status-box">
+              <strong>已冻结指标</strong>
+              <span>总备案数量、本周新增备案、待审核备案</span>
+            </div>
+            <div class="status-box">
+              <strong>待冻结指标</strong>
+              <span>本周巡查覆盖率、本周隐患整改率、本月巡查次数、待整改隐患数</span>
+            </div>
+            <div class="status-box">
+              <strong>需复核指标</strong>
+              <span>工程状态分布、隐患类别 TOP5、整改率相关统计</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>入口矩阵</h2>
+              <p>入口可以分散，底层能力必须统一。</p>
+            </div>
+            <button class="btn btn-primary" onclick="switchPage('page-export', 'anno-export')">查看导出配置</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>入口位置</th>
+                <th>用户场景</th>
+                <th>默认带入条件</th>
+                <th>一期可用输出</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>智慧大屏首页</td>
+                <td>领导汇报、全区态势查看</td>
+                <td>当前工程类型、街道筛选</td>
+                <td>Excel 汇总、A4 汇报</td>
+                <td>聚焦正式指标</td>
+              </tr>
+              <tr>
+                <td>备案 / 巡查统揽页</td>
+                <td>专题汇总与下钻分析</td>
+                <td>当前周期、街道、状态</td>
+                <td>Excel 汇总、A4 汇报</td>
+                <td>后续可接 AI 摘要</td>
+              </tr>
+              <tr>
+                <td>记录列表页</td>
+                <td>核数、工作清单导出</td>
+                <td>当前筛选结果</td>
+                <td>Excel 明细</td>
+                <td>保留排序与筛选上下文</td>
+              </tr>
+              <tr>
+                <td>详情页</td>
+                <td>单条留档、沟通传阅</td>
+                <td>当前工程或记录</td>
+                <td>A4 单页 / PDF</td>
+                <td>单页模板为扩展能力</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="screen-page" id="page-export">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>导出配置中心</h2>
+              <p>一期统一收敛到同一套参数、同一套任务状态。</p>
+            </div>
+            <span class="tag tag-green">Excel 优先</span>
+          </div>
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <span class="filter-pill">周期：本周</span>
+              <span class="filter-pill">街道：全部街道</span>
+              <span class="filter-pill">工程类型：全部工程</span>
+              <span class="filter-pill">状态：全部</span>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-secondary">重置条件</button>
+              <button class="btn btn-primary">生成报表</button>
+            </div>
+          </div>
+          <div class="split-grid">
+            <div class="panel" style="margin-bottom:0;">
+              <div class="panel-title">
+                <div>
+                  <h2 style="font-size:16px;">报表类型</h2>
+                  <p>一期固定三类，不允许从入口侧自由拼装。</p>
+                </div>
+              </div>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>报表类型</th>
+                    <th>用途</th>
+                    <th>内容特征</th>
+                    <th>默认格式</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Excel 明细报表</td>
+                    <td>核数、再加工、工作清单</td>
+                    <td>按记录输出，字段完整，支持脱敏</td>
+                    <td>`.xlsx`</td>
+                  </tr>
+                  <tr>
+                    <td>Excel 汇总报表</td>
+                    <td>汇总、对比、趋势复盘</td>
+                    <td>按指标、排名、趋势输出</td>
+                    <td>`.xlsx`</td>
+                  </tr>
+                  <tr>
+                    <td>A4 汇报报表</td>
+                    <td>打印汇报、留档、会议材料</td>
+                    <td>结构稳定、适合打印、无 AI 结论</td>
+                    <td>`.pdf`</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="panel" style="margin-bottom:0;">
+              <div class="panel-title">
+                <div>
+                  <h2 style="font-size:16px;">任务状态</h2>
+                  <p>统一处理大文件和失败重试。</p>
+                </div>
+              </div>
+              <div class="status-line">
+                <div class="status-box">
+                  <strong>同步生成</strong>
+                  <span>小数据量直接返回下载结果</span>
+                </div>
+                <div class="status-box">
+                  <strong>异步生成</strong>
+                  <span>大文件进入队列，完成后进入历史记录</span>
+                </div>
+                <div class="status-box">
+                  <strong>失败重试</strong>
+                  <span>显示失败原因，并保留“重新生成”入口</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen-page" id="page-a4">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>A4 模板收敛策略</h2>
+              <p>一期只做 3 套模板族，现有 8 套原型作为候选池保留。</p>
+            </div>
+            <span class="tag tag-blue">适合打印的简约版</span>
+          </div>
+          <div class="template-list">
+            <div class="template-card">
+              <h4>区级周 / 月汇总</h4>
+              <p>面向区级领导与主管部门，突出总量、排名、风险与重点街镇。</p>
+              <ul>
+                <li>核心指标仪表盘</li>
+                <li>街镇排名与趋势</li>
+                <li>重点风险事项</li>
+              </ul>
+            </div>
+            <div class="template-card">
+              <h4>街镇周 / 月执行</h4>
+              <p>面向街镇负责人，突出本辖区执行情况、问题、下阶段安排。</p>
+              <ul>
+                <li>本周 / 本月完成情况</li>
+                <li>待整改与未覆盖工程</li>
+                <li>下阶段工作建议</li>
+              </ul>
+            </div>
+            <div class="template-card">
+              <h4>专项简报</h4>
+              <p>面向重点主题场景，用于隐患、整改、风险等专题汇报。</p>
+              <ul>
+                <li>专题背景</li>
+                <li>问题聚焦</li>
+                <li>对应措施与建议</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>A4 预览示意</h2>
+              <p>固定结构、轻分析、可核对数据，不依赖 AI 自动出结论。</p>
+            </div>
+            <button class="btn btn-secondary" onclick="switchPage('page-history', 'anno-history')">查看导出历史</button>
+          </div>
+          <div class="preview-paper">
+            <div class="paper-title">
+              <h3>青浦区小型工程安全监管月报</h3>
+              <p>统计周期：2026-05-01 至 2026-05-31 | 生成时间：2026-06-01 09:00</p>
+            </div>
+            <div class="paper-block">
+              <strong>一、核心指标摘要</strong>
+              <div class="paper-grid">
+                <div class="paper-kpi"><small>总备案数量</small><span>463</span></div>
+                <div class="paper-kpi"><small>本周新增备案</small><span>32</span></div>
+                <div class="paper-kpi"><small>本周巡查覆盖率</small><span>86.5%</span></div>
+                <div class="paper-kpi"><small>待整改隐患数</small><span>43</span></div>
+              </div>
+            </div>
+            <div class="paper-block">
+              <strong>二、重点事项</strong>
+              <p style="font-size:13px; line-height:1.9; color:#606266;">
+                1. 白鹤镇待整改隐患数较高，需在本周完成集中复核。<br>
+                2. 重固镇巡查覆盖率低于全区均值，建议优先补齐未巡查工程。<br>
+                3. 备案审核效率整体稳定，驳回原因仍以材料不完整为主。
+              </p>
+            </div>
+            <div class="paper-block">
+              <strong>三、街镇排名摘要</strong>
+              <table class="table" style="font-size:12px;">
+                <thead>
+                  <tr>
+                    <th>街镇</th>
+                    <th>备案量</th>
+                    <th>巡查覆盖率</th>
+                    <th>整改率</th>
+                    <th>备注</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>夏阳街道</td><td>285</td><td>94.7%</td><td>93.3%</td><td>表现稳定</td></tr>
+                  <tr><td>盈浦街道</td><td>198</td><td>92.3%</td><td>90.8%</td><td>持续跟进</td></tr>
+                  <tr><td>白鹤镇</td><td>104</td><td>81.4%</td><td>84.1%</td><td>需重点关注</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen-page" id="page-history">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>导出历史与操作审计</h2>
+              <p>任务长期留痕，文件短期有效；过期后可重新生成。</p>
+            </div>
+            <span class="tag tag-orange">一期必须具备</span>
+          </div>
+          <div class="history-list">
+            <div class="history-item">
+              <div class="history-main">
+                <h4>青浦区月报_区级周/月汇总_20260601.pdf</h4>
+                <p>导出人：区级管理员 | 入口：智慧大屏首页 | 条件：全部街道 / 本月 / 全部工程</p>
+                <p>生成时间：2026-06-01 09:12 | 文件有效期：2026-06-08 09:12 | 结果：生成成功</p>
+              </div>
+              <div class="history-actions">
+                <span class="tag tag-green">生成成功</span>
+                <button class="btn btn-secondary">再次下载</button>
+              </div>
+            </div>
+            <div class="history-item">
+              <div class="history-main">
+                <h4>巡查明细报表_白鹤镇_20260526-20260601.xlsx</h4>
+                <p>导出人：白鹤镇监管人员 | 入口：巡查统揽页 | 条件：白鹤镇 / 本周 / 巡查记录</p>
+                <p>生成时间：2026-06-01 10:03 | 文件有效期：2026-06-08 10:03 | 结果：生成中</p>
+              </div>
+              <div class="history-actions">
+                <span class="tag tag-blue">生成中</span>
+                <button class="btn btn-secondary">刷新状态</button>
+              </div>
+            </div>
+            <div class="history-item">
+              <div class="history-main">
+                <h4>隐患专项简报_重固镇_202605.xlsx</h4>
+                <p>导出人：区级管理员 | 入口：报表中心 | 条件：重固镇 / 本月 / 专项简报</p>
+                <p>生成时间：2026-05-20 18:12 | 文件有效期：已过期 | 结果：文件过期但任务保留</p>
+              </div>
+              <div class="history-actions">
+                <span class="tag tag-red">文件过期</span>
+                <button class="btn btn-primary">重新生成</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen-page" id="page-ai">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>二期 AI 报表助手预留</h2>
+              <p>AI 只消费一期已生成报表，不直接绕开模板拉底层散数据。</p>
+            </div>
+            <span class="tag tag-gray">二期能力，非一期交付</span>
+          </div>
+          <div class="ai-grid">
+            <div class="ai-card">
+              <h4>智能选报表</h4>
+              <p>用户说“生成本周夏阳街道周报”，系统自动匹配模板、范围、周期和格式。</p>
+              <ul>
+                <li>自然语言转报表任务参数</li>
+                <li>回填后仍需用户确认</li>
+                <li>仅可选一期已存在模板</li>
+              </ul>
+              <div class="phase-note">说明：该能力本质是参数填充，不是跳过报表中心直接取数。</div>
+            </div>
+            <div class="ai-card">
+              <h4>智能写摘要</h4>
+              <p>基于既有报表生成一句话总结、风险提示和下阶段建议。</p>
+              <ul>
+                <li>引用报表中的现有指标</li>
+                <li>不能生成不存在的数字</li>
+                <li>数据不足时显示“仅供参考”</li>
+              </ul>
+              <div class="phase-note">说明：摘要卡与正式报表分离，是否入正文待后续确认。</div>
+            </div>
+            <div class="ai-card">
+              <h4>智能专题分析</h4>
+              <p>按异常事件、隐患类别、街镇对比等主题输出专题简报。</p>
+              <ul>
+                <li>输入专题类型与周期</li>
+                <li>复用一期固定模板</li>
+                <li>输出专题摘要和附加页</li>
+              </ul>
+              <div class="phase-note">说明：口径未冻结的指标禁止进入 AI 专题分析。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-drawer" id="annotationDrawer">
+      <div class="annotation-toggle" onclick="toggleAnnotation()">‹</div>
+      <div class="annotation-content">
+        <div class="annotation-page active" id="anno-home">
+          <h3>页面1：报表中心首页 — 需求说明</h3>
+          <h4>页面状态规则</h4>
+          <div class="rule-block">
+            <p>首页默认展示一期正式能力，不直接展示二期 AI 结果页。若某指标未冻结，仅显示在“口径状态区”，不进入正式模板卡片。</p>
+          </div>
+          <h4>数据规则</h4>
+          <div class="rule-block">
+            <p>三类正式报表固定为 Excel 明细、Excel 汇总、A4 汇报。禁止由入口页面自由新增第四类正式报表。</p>
+          </div>
+          <h4>业务规则</h4>
+          <div class="rule-block">
+            <p>入口可以来自大屏首页、统揽页、列表页、详情页，但进入后都落到同一报表中心能力，不允许复制一套分散导出逻辑。</p>
+          </div>
+        </div>
+
+        <div class="annotation-page" id="anno-export">
+          <h3>页面2：导出配置 — 需求说明</h3>
+          <h4>页面状态规则</h4>
+          <div class="rule-block">
+            <p>大数据量任务必须进入“生成中”态，不能阻塞当前页面。失败任务必须可重试。</p>
+          </div>
+          <h4>字段规则</h4>
+          <div class="rule-block">
+            <p>一期统一参数至少包含：周期、街道、工程类型、状态、报表类型、输出格式。入口页面已有筛选时默认继承，不重新发明筛选维度。</p>
+          </div>
+          <h4>业务规则</h4>
+          <div class="rule-block">
+            <p>Excel 明细面向记录型数据；Excel 汇总面向指标型数据；A4 汇报面向打印和会议材料。不同类型共享同一套权限、脱敏和留痕规则。</p>
+          </div>
+        </div>
+
+        <div class="annotation-page" id="anno-a4">
+          <h3>页面3：A4 模板预览 — 需求说明</h3>
+          <h4>页面状态规则</h4>
+          <div class="rule-block">
+            <p>一期只允许 3 套模板族进入“正式模板”状态，其余模板保持为候选池，不得在页面中表达成已全部进入开发。</p>
+          </div>
+          <h4>数据规则</h4>
+          <div class="rule-block">
+            <p>A4 页面只允许使用已冻结指标；无数据场景显示“本期无数据”而不是直接删掉整块内容导致版式跳动。</p>
+          </div>
+          <h4>样式规则</h4>
+          <div class="rule-block">
+            <p>模板风格要求简约、可打印、可核对。允许固定标题和说明性文字，但不允许一期内嵌 AI 自由分析段落。</p>
+          </div>
+        </div>
+
+        <div class="annotation-page" id="anno-history">
+          <h3>页面4：历史与审计 — 需求说明</h3>
+          <h4>页面状态规则</h4>
+          <div class="rule-block">
+            <p>历史记录长期保留，文件实体短期保留。状态至少包含：生成中、生成成功、生成失败、文件过期。</p>
+          </div>
+          <h4>字段规则</h4>
+          <div class="rule-block">
+            <p>每条记录必须包含：导出人、入口、筛选条件、生成时间、有效期、结果状态。不能只保存文件名而不保存参数。</p>
+          </div>
+          <h4>业务规则</h4>
+          <div class="rule-block">
+            <p>文件过期后下载按钮失效，但允许“重新生成”。重新生成应产生一条新任务，不覆盖旧审计记录。</p>
+          </div>
+        </div>
+
+        <div class="annotation-page" id="anno-ai">
+          <h3>页面5：二期 AI 入口 — 需求说明</h3>
+          <h4>阶段边界规则</h4>
+          <div class="rule-block">
+            <p>本页所有能力均为二期预留，不属于一期正式交付。页面上必须明确写出“二期能力，非一期交付”。</p>
+          </div>
+          <h4>业务规则</h4>
+          <div class="rule-block">
+            <p>AI 只能读取一期已生成报表或已冻结指标，不能绕开报表中心直接拼装一份未经确认的新报表。</p>
+          </div>
+          <h4>风险提示</h4>
+          <div class="rule-block">
+            <p>AI 输出必须允许“仅供参考”提示。若数据不足或口径未冻结，专题分析必须被拦截而不是硬生成结论。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchPage(pageId, annoId, btn) {
+      document.querySelectorAll('.screen-page').forEach(function(page) {
+        page.classList.remove('active');
+      });
+      document.querySelectorAll('.annotation-page').forEach(function(page) {
+        page.classList.remove('active');
+      });
+      document.querySelectorAll('.page-btn').forEach(function(button) {
+        button.classList.remove('active');
+      });
+
+      document.getElementById(pageId).classList.add('active');
+      document.getElementById(annoId).classList.add('active');
+
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var match = Array.from(document.querySelectorAll('.page-btn')).find(function(button) {
+          return button.getAttribute('onclick').indexOf(pageId) !== -1;
+        });
+        if (match) {
+          match.classList.add('active');
+        }
+      }
+    }
+
+    function toggleAnnotation() {
+      var drawer = document.getElementById('annotationDrawer');
+      drawer.classList.toggle('collapsed');
+      drawer.querySelector('.annotation-toggle').textContent = drawer.classList.contains('collapsed') ? '›' : '‹';
+    }
+  </script>
+</body>
+</html>

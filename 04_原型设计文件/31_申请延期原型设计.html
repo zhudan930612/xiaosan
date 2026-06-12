@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>31_申请延期原型设计</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:linear-gradient(180deg,#edf5f0 0%,#ffffff 100%);
+  color:#303631;
+  overflow-x:auto;
+}
+button{font:inherit;border:none;background:none}
+.page-shell{min-width:fit-content;margin:0 auto;padding:24px 24px 92px}
+.title-group{max-width:1660px;margin:0 auto 18px}
+.title-group h1{font-size:26px;line-height:1.2;color:#1f2b24;margin-bottom:8px}
+.title-group p{font-size:13px;line-height:1.7;color:#66736d}
+.main-wrap{display:flex;gap:24px;align-items:flex-start;justify-content:center;min-width:fit-content}
+.prototype-area{width:1220px;flex-shrink:0}
+.annotation-area{width:430px;min-width:400px;max-width:580px;position:sticky;top:18px;flex-shrink:0}
+.group-title{font-size:14px;font-weight:700;color:#52635c;margin:24px 0 14px;padding-left:12px;border-left:4px solid #4fb3d7}
+.group-title:first-child{margin-top:0}
+.screens{display:flex;flex-wrap:wrap;gap:28px 22px;align-items:flex-start}
+.phone-wrap{width:392px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.phone-label{font-size:12px;font-weight:700;color:#44544e}
+.phone-sub{font-size:11px;line-height:1.5;color:#7a8780;text-align:center}
+.phone{
+  width:336px;padding:0;border-radius:0;
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  transition:transform .2s ease;
+}
+.phone-wrap.active .phone{
+  transform:translateY(-4px);
+}
+.notch{height:18px;background:transparent;display:flex;justify-content:center;align-items:center}
+.notch::after{content:"";width:72px;height:8px;border-radius:999px;background:rgba(115,128,121,.22)}
+.screen{
+  min-height:706px;border-radius:0;overflow:hidden;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(89,183,216,.04) 0%,transparent 160px),linear-gradient(180deg,#f6fbf8 0%,#fff 100%)
+}
+.status-bar{
+  height:34px;padding:0 16px;display:flex;justify-content:space-between;align-items:center;
+  color:#fff;font-size:12px;font-weight:600;background:linear-gradient(90deg,#35ad73,#58b8d7)
+}
+.status-icons{display:flex;gap:6px;align-items:center}
+.status-line,.status-dot,.status-battery{display:inline-block;background:rgba(255,255,255,.96)}
+.status-line{width:3px;border-radius:999px}.status-line.l1{height:5px;opacity:.65}.status-line.l2{height:7px;opacity:.75}.status-line.l3{height:9px;opacity:.85}.status-line.l4{height:11px}
+.status-dot{width:4px;height:4px;border-radius:50%}
+.status-battery{width:16px;height:8px;border-radius:2px;position:relative}
+.status-battery::after{content:"";width:2px;height:4px;border-radius:1px;background:rgba(255,255,255,.96);position:absolute;right:-3px;top:2px}
+.header{padding:12px 18px 14px;background:linear-gradient(90deg,#35ad73,#58b8d7);color:#fff}
+.header-row{display:grid;grid-template-columns:44px 1fr 72px;align-items:center}
+.back-btn,.header-menu{
+  border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center
+}
+.back-btn{width:34px;height:34px}
+.header-menu{width:54px;height:34px;justify-self:end}
+.back-btn svg,.header-menu svg,.module-icon svg,.service-icon svg,.nav-icon svg,.meta-icon svg{
+  width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round
+}
+.header-title{text-align:center;font-size:17px;font-weight:700}
+.body-area{flex:1;padding:18px 16px 84px}
+.hero-card,.card,.list-card,.summary-card{
+  border-radius:12px;background:#fff;border:1px solid #d7e3db;box-shadow:0 12px 28px rgba(26,41,32,.05)
+}
+.hero-card{padding:18px;background:linear-gradient(180deg,#ebf8f1 0%,#fff 100%);border-color:rgba(34,166,109,.48);margin-bottom:16px}
+.hero-title{font-size:16px;font-weight:700;line-height:1.5;color:#20332b}
+.hero-sub{font-size:12px;line-height:1.7;color:#607169;margin-top:8px}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.tag{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.tag-green{background:#e8f7ef;color:#1a8f62}.tag-orange{background:#fff4e6;color:#fa8c16}.tag-blue{background:#eaf4ff;color:#1677ff}.tag-red{background:#fff1f0;color:#ff4d4f}.tag-gray{background:#f2f4f5;color:#61706b}
+.section-label{font-size:13px;font-weight:700;color:#566761;margin:18px 2px 10px}
+.tab-shell{margin-top:-8px;padding:10px 4px 4px;border-radius:30px 30px 0 0;background:#f1f3f1;box-shadow:inset 0 1px 0 rgba(255,255,255,.32)}
+.primary-tabs,.secondary-tabs,.detail-tabs{display:grid;gap:8px}
+.primary-tabs{grid-template-columns:repeat(3,1fr)}.secondary-tabs,.detail-tabs{grid-template-columns:repeat(4,1fr)}
+.secondary-tabs{margin-top:10px}
+.tab-pill{
+  min-height:42px;padding:8px 6px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.4);color:#50605a;font-size:12px;font-weight:600;text-align:center
+}
+.tab-pill.active{color:#1a8f62;background:linear-gradient(135deg,#fff 0%,#eef9f3 60%,#f4fcff 100%);box-shadow:-8px 0 20px rgba(83,183,216,.08)}
+.search-box{border-radius:12px;padding:12px 14px;background:#fff;border:1px solid #d7e3db;color:#8b9791;font-size:12px;margin:14px 0 12px}
+.section-note{margin:10px 2px 12px;font-size:12px;line-height:1.7;color:#70807a}
+.status-pane{display:none}.status-pane.active{display:block}
+.list-stack,.record-line,.detail-records{display:flex;flex-direction:column;gap:12px}
+.list-card,.card{padding:16px}
+.list-head,.card-head,.list-footer{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.list-title,.card-head strong{font-size:14px;font-weight:700;line-height:1.5;color:#1f2f28}
+.list-meta,.record-sub{font-size:12px;line-height:1.7;color:#697670;margin-top:8px}
+.list-footer{margin-top:12px;padding-top:12px;border-top:1px solid #edf2ee;align-items:center}
+.status-text{font-size:12px;font-weight:600}.status-pending{color:#fa8c16}.status-approved{color:#1a8f62}.status-rejected{color:#ff4d4f}
+.card-link{font-size:12px;color:#1677ff;cursor:pointer}
+.field-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f1f4f2}
+.field-row:last-child{border-bottom:none;padding-bottom:0}
+.field-label{width:108px;flex-shrink:0;font-size:12px;color:#8a9690}
+.field-value{flex:1;text-align:right;font-size:12px;line-height:1.6;color:#2f3c36}
+.field-value.emph{color:#1a8f62;font-weight:700}.field-value.danger{color:#ff4d4f;font-weight:700}
+.input-group{margin-bottom:14px}.input-group:last-child{margin-bottom:0}
+.input-label{font-size:12px;font-weight:700;color:#52635c;margin-bottom:8px}.input-label.required::after{content:" *";color:#ff4d4f}
+.input-box,.select-box,.textarea-box,.upload-box{
+  width:100%;padding:12px 14px;border-radius:10px;border:1px solid #d7e3db;background:#fff;font-size:12px;color:#2f3c36
+}
+.textarea-box{min-height:84px;line-height:1.7}.upload-box{border-style:dashed;background:linear-gradient(180deg,#f7fbfd 0%,#fff 100%);color:#6a7972;line-height:1.7}
+.radio-row{display:flex;gap:10px}
+.radio-chip{flex:1;min-height:42px;border-radius:10px;border:1px solid #d7e3db;display:flex;align-items:center;justify-content:center;background:#fff;color:#607169;font-size:12px;font-weight:700}
+.radio-chip.active{border-color:rgba(34,166,109,.5);background:#eef9f3;color:#1a8f62}
+.tip-card{border-radius:12px;padding:14px 16px;margin-bottom:14px;border:1px solid rgba(255,149,0,.2);background:#fff8ef;color:#8a5a14;font-size:12px;line-height:1.7}
+.tip-card.blue{background:#eef6ff;border-color:rgba(24,144,255,.2);color:#245b9b}
+.bottom-actions{display:flex;gap:10px;margin-top:10px}
+.ghost-btn,.primary-btn,.warn-btn{min-height:42px;padding:0 16px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer}
+.bottom-actions .ghost-btn,.bottom-actions .primary-btn,.bottom-actions .warn-btn{flex:1}
+.ghost-btn{border:1px solid #d7e3db;background:#fff;color:#4f5d57}.primary-btn{background:linear-gradient(90deg,#27a66d,#4fb3d7);color:#fff}.warn-btn{background:#fff4e6;color:#fa8c16}
+.map-box{height:152px;border-radius:12px;background:linear-gradient(135deg,#dff2ea 0%,#eaf5ff 100%);border:1px solid rgba(34,166,109,.18);position:relative;overflow:hidden;margin-bottom:14px}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);background-size:30px 30px}
+.map-road{position:absolute;border-radius:999px;background:rgba(255,255,255,.92)}.map-road.r1{width:250px;height:18px;top:46px;left:34px;transform:rotate(10deg)}.map-road.r2{width:180px;height:16px;top:98px;left:96px;transform:rotate(-12deg)}
+.map-pin{position:absolute;top:58px;left:146px;width:28px;height:28px;border-radius:14px 14px 14px 0;transform:rotate(-45deg);background:linear-gradient(135deg,#27a66d,#4fb3d7);box-shadow:0 10px 20px rgba(39,166,109,.24)}
+.map-pin::after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;top:9px;left:9px}
+.record-item{display:grid;grid-template-columns:18px 1fr;gap:10px}.record-dot{width:12px;height:12px;border-radius:50%;margin-top:5px}
+.record-content{border-radius:12px;border:1px solid #e7eeea;background:#fff;padding:12px 14px}.record-title{font-size:13px;font-weight:700;color:#24342c}
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.summary-card{padding:14px 12px;text-align:center}
+.summary-num{font-size:20px;font-weight:700;color:#1a8f62}.summary-text{margin-top:6px;font-size:11px;color:#7a8780}
+.home-indicator{height:18px;display:flex;justify-content:center;align-items:center;background:#fff}.home-indicator::after{content:"";width:84px;height:4px;border-radius:999px;background:#1f1f1f}
+.annotation-panel{padding:22px 20px 20px;border-radius:20px;background:#fff;border:1px solid #dfe7e2;box-shadow:0 16px 34px rgba(26,41,32,.08)}
+.annotation-title{font-size:18px;font-weight:700;color:#213029;margin-bottom:12px}
+.annotation-guide{margin-bottom:16px;padding:12px 14px;border-radius:14px;background:#f7faf8;color:#607169;font-size:13px;line-height:1.7}
+.annotation-section{display:none}.annotation-section.active{display:block}
+.annotation-page-title{font-size:14px;font-weight:700;color:#40514a;margin-bottom:12px}
+.annotation-block{margin-bottom:14px;padding:14px;border-radius:12px;background:#fffbe6;border:1px dashed #ffc53d}
+.annotation-block h3{font-size:14px;color:#8c6d1f;margin-bottom:8px}.annotation-block ul{padding-left:18px}.annotation-block li{font-size:13px;line-height:1.7;color:#5f562e}
+.floating-nav{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:10px}
+.nav-toggle{padding:10px 16px;border-radius:999px;background:rgba(26,43,36,.9);color:#fff;font-size:12px;font-weight:700;box-shadow:0 10px 24px rgba(26,41,32,.2);cursor:pointer}
+.floating-nav-panel{display:none;padding:12px;border-radius:12px;background:rgba(255,255,255,.94);border:1px solid #d7e3db;box-shadow:0 16px 34px rgba(26,41,32,.12);backdrop-filter:blur(14px)}
+.floating-nav.show .floating-nav-panel{display:grid;grid-template-columns:repeat(5,auto);gap:8px}
+.page-pill{padding:8px 12px;border-radius:999px;border:1px solid #d7e3db;background:rgba(255,255,255,.88);color:#50605a;font-size:12px;cursor:pointer}
+.page-pill.active{background:linear-gradient(90deg,#35ad73,#58b8d7);color:#fff;border-color:transparent;box-shadow:0 10px 20px rgba(53,173,115,.18)}
+
+.home-top{
+  position:relative;padding:18px 20px 18px;background:linear-gradient(180deg,#4dad82 0%,#93d1be 100%);overflow:hidden
+}
+.home-top::before{
+  content:"";position:absolute;right:-10px;top:10px;width:168px;height:138px;opacity:.18;
+  background:radial-gradient(circle at 72% 28%,rgba(255,255,255,.6) 0 16px,transparent 17px),radial-gradient(circle at 34% 34%,rgba(255,255,255,.4) 0 18px,transparent 19px),linear-gradient(135deg,rgba(255,255,255,.5),rgba(255,255,255,.08));
+  clip-path:polygon(18% 72%,34% 24%,70% 14%,92% 44%,84% 76%,58% 88%)
+}
+.home-greet{position:relative;z-index:1}
+.home-greet-title{display:inline-block;padding:8px 16px;background:rgba(36,153,93,.34);color:#fff;font-size:18px;font-weight:700}
+.home-greet-sub{margin-top:12px;color:#fff;font-size:13px;line-height:1.8}
+.home-body{flex:1;background:#f1f3f7;display:flex;flex-direction:column}
+.home-service-shell{padding:14px 0 0;background:linear-gradient(180deg,rgba(255,255,255,.24) 0%,rgba(255,255,255,.08) 100%);border-radius:24px 24px 0 0}
+.home-service-panel{
+  margin:0 14px;padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.56);
+  background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.16));box-shadow:inset 0 1px 0 rgba(255,255,255,.28)
+}
+.home-service-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.service-card{
+  position:relative;border-radius:12px;border:1px solid rgba(255,255,255,.72);background:rgba(255,255,255,.16);backdrop-filter:blur(12px)
+}
+.service-card{min-height:116px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.service-icon{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff}
+.service-icon.green{background:linear-gradient(135deg,#64d991,#dff7e7)}.service-icon.pink{background:linear-gradient(135deg,#ff7299,#ffd8e4)}.service-icon.blue{background:linear-gradient(135deg,#5e94ff,#dbe8ff)}.service-icon.orange{background:linear-gradient(135deg,#ff8b33,#ffe1c1)}.service-icon.teal{background:linear-gradient(135deg,#37b67a,#79c8e2)}
+.service-text{font-size:12px;line-height:1.4;color:#1b1f1d;font-weight:500}
+.service-badge{
+  position:absolute;top:-8px;right:-4px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;
+  background:#ff5b5b;color:#fff;font-size:11px;font-weight:700;box-shadow:0 8px 18px rgba(255,91,91,.24)
+}
+.service-card.delay-card{cursor:pointer}
+.home-content{flex:1;padding:14px 14px 0}
+.home-search-row{display:grid;grid-template-columns:1.35fr .85fr;gap:10px}
+.home-search-box,.home-filter-box{
+  min-height:48px;padding:0 16px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:space-between;color:#b0b2b7;font-size:12px;box-shadow:0 6px 20px rgba(31,48,41,.04)
+}
+.home-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.home-tab{
+  min-height:50px;border-radius:10px;background:linear-gradient(180deg,#f0f1f5 0%,#e6e7ec 100%);color:#000;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 8px;text-align:center
+}
+.home-tab.active{color:#fff;background:linear-gradient(90deg,#39b268,#4aa9cf);position:relative}
+.home-tab.active::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:20px;height:10px;background:#49abc7;clip-path:polygon(50% 100%,0 0,100% 0)}
+.project-list{margin-top:24px}
+.project-card{padding:14px;border-radius:12px;background:#fff;box-shadow:0 10px 28px rgba(31,48,41,.05)}
+.project-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.project-title{font-size:14px;font-weight:700;color:#000}.project-status{padding:6px 12px;border-radius:999px;background:#f4f4f4;color:#b5b5b5;font-size:11px;font-weight:600}
+.meta-row{display:flex;align-items:center;gap:6px;margin-top:10px;color:#8d8f95;font-size:12px;line-height:1.6}
+.bottom-nav{
+  margin-top:auto;min-height:72px;padding:10px 22px 8px;background:linear-gradient(180deg,#dff8f2 0%,#ffffff 26%);
+  display:grid;grid-template-columns:repeat(2,1fr);border-top:1px solid rgba(201,233,223,.75)
+}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#2c2f2d;font-size:12px}
+.nav-item.active{color:#39b268;font-weight:700}
+.nav-icon,.meta-icon{width:16px;height:16px;display:flex;align-items:center;justify-content:center;color:currentColor}
+</style>
+</head>
+<body>
+<div class="page-shell">
+  <div class="title-group">
+    <h1>申请延期原型设计</h1>
+    <p>施工端首页按现有首页样式重建，只在原业务区补“申请延期”入口；巡检端继续保留延期审核主流程。页面导航改为底部浮动式，默认收起，按 `F8` 展开。</p>
+  </div>
+
+  <div class="main-wrap">
+    <div class="prototype-area">
+      <div class="group-title">一、施工端 / 业主端（小程序）</div>
+      <div class="screens">
+        <div class="phone-wrap active" data-page="p1">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="screen">
+              <div class="status-bar">
+                <span>9:41</span>
+                <div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div>
+              </div>
+              <div class="home-top">
+                <div class="home-greet">
+                  <div class="home-greet-title">您好，2222EW！</div>
+                  <div class="home-greet-sub">先备案，再开工，安全施工有始终。</div>
+                </div>
+              </div>
+              <div class="home-body">
+                <div class="home-service-shell">
+                  <div class="home-service-panel">
+                    <div class="home-service-grid">
+                      <div class="service-card">
+                        <span class="service-badge">1</span>
+                        <div class="service-icon green"><svg viewBox="0 0 24 24"><path d="M6 4h8l4 4v12H6z"/><path d="M14 4v4h4"/><path d="M8 12h8M8 16h5"/></svg></div>
+                        <div class="service-text">工程备案</div>
+                      </div>
+                      <div class="service-card">
+                        <div class="service-icon pink"><svg viewBox="0 0 24 24"><path d="M12 4l8 14H4z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+                        <div class="service-text">隐患整改</div>
+                      </div>
+                      <div class="service-card">
+                        <div class="service-icon blue"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+                        <div class="service-text">完工核销</div>
+                      </div>
+                      <div class="service-card">
+                        <div class="service-icon orange"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 7h8"/><path d="M6 15h12"/><path d="M8 19h8"/></svg></div>
+                        <div class="service-text">安全投诉</div>
+                      </div>
+                      <div class="service-card delay-card" data-page-target="p2">
+                        <div class="service-icon teal"><svg viewBox="0 0 24 24"><path d="M12 5v7"/><path d="M8 3h8"/><path d="M7 14a5 5 0 0 0 10 0c0-2.2-1.4-3.6-3.1-4.7"/></svg></div>
+                        <div class="service-text">申请延期</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="home-content">
+                  <div class="home-search-row">
+                    <div class="home-search-box">
+                      <span>搜索工程名称或地址</span>
+                      <span class="nav-icon" style="color:#36a167"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.2-4.2"></path></svg></span>
+                    </div>
+                    <div class="home-filter-box">
+                      <span>工程状态</span>
+                      <span class="nav-icon" style="color:#b3b5bb"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span>
+                    </div>
+                  </div>
+
+                  <div class="home-tabs">
+                    <div class="home-tab active">小型工程(1)</div>
+                    <div class="home-tab">住宅装修(1)</div>
+                    <div class="home-tab">零星作业(2)</div>
+                  </div>
+
+                  <div class="project-list">
+                    <div class="project-card">
+                      <div class="project-head">
+                        <div class="project-title">测试#0526</div>
+                        <div class="project-status">已核销</div>
+                      </div>
+                      <div class="meta-row"><span class="meta-icon"><svg viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg></span><span>农副产品永发什货批发</span></div>
+                      <div class="meta-row"><span class="meta-icon"><svg viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18"></path><rect x="3" y="4" width="18" height="17" rx="2"></rect></svg></span><span>2026-05-26至2026-11-26</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bottom-nav">
+                  <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M3 7V5a2 2 0 0 1 2-2h4l2 2h4"></path></svg></span><span>项目中心</span></div>
+                  <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 12l6-6 6 6"></path><path d="M6 12v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-5"></path></svg></span><span>更多服务</span></div>
+                </div>
+              </div>
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+          <div class="phone-label">P1 首页</div>
+          <div class="phone-sub">沿用现有施工端首页骨架，只在原业务区新增“申请延期”入口。</div>
+        </div>
+
+        <div class="phone-wrap" data-page="p2">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">申请延期</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="tab-shell">
+                <div class="primary-tabs"><div class="tab-pill active">小型工程</div><div class="tab-pill">住宅装修</div><div class="tab-pill">零星作业</div></div>
+                <div class="secondary-tabs">
+                  <button class="tab-pill active" data-board="contractor-status" data-pane="contractor-overdue">已逾期</button>
+                  <button class="tab-pill" data-board="contractor-status" data-pane="contractor-pending">待审核</button>
+                  <button class="tab-pill" data-board="contractor-status" data-pane="contractor-rejected">已驳回</button>
+                  <button class="tab-pill" data-board="contractor-status" data-pane="contractor-approved">已通过</button>
+                </div>
+              </div>
+              <div class="search-box">搜索工程名称 / 工程地址</div>
+              <div class="section-note">“已逾期”仅展示已经逾期但还未申请延期的工程，待审核项目不混在这里。</div>
+              <div class="status-pane active" data-board-pane="contractor-overdue">
+                <div class="list-stack">
+                  <div class="list-card"><div class="list-head"><div class="list-title">幸福小区外墙翻新及绿化提升工程</div><span class="tag tag-orange">已逾期</span></div><div class="list-meta">工程地址：南山区科技南路 18 号<br>计划施工时间：2026.06.01 - 2026.08.15<br>逾期天数：12 天<br>当前延期状态：未申请</div><div class="list-footer"><span class="status-text status-pending">小型工程</span><span class="primary-btn" data-page-target="p3">申请延期</span></div></div>
+                  <div class="list-card"><div class="list-head"><div class="list-title">前海花园屋面修缮工程</div><span class="tag tag-orange">已逾期</span></div><div class="list-meta">工程地址：前海路 210 号<br>计划施工时间：2026.07.05 - 2026.08.24<br>逾期天数：5 天<br>当前延期状态：未申请</div><div class="list-footer"><span class="status-text status-pending">小型工程</span><span class="primary-btn" data-page-target="p3">申请延期</span></div></div>
+                </div>
+              </div>
+              <div class="status-pane" data-board-pane="contractor-pending"><div class="list-stack"><div class="list-card"><div class="list-head"><div class="list-title">万科家园连廊修缮与栏杆更换</div><span class="tag tag-orange">待审核</span></div><div class="list-meta">工程地址：宝安区创业二路 56 号<br>计划施工时间：2026.06.10 - 2026.08.20<br>逾期天数：8 天<br>当前延期状态：待审核</div><div class="list-footer"><span class="status-text status-pending">住宅装修</span><span class="warn-btn">审核中</span></div></div></div></div>
+              <div class="status-pane" data-board-pane="contractor-rejected"><div class="list-stack"><div class="list-card"><div class="list-head"><div class="list-title">高新园广告牌拆装作业</div><span class="tag tag-red">已驳回</span></div><div class="list-meta">工程地址：高新南一道 9 号<br>计划施工时间：2026.08.01 - 2026.08.21<br>逾期天数：4 天<br>当前延期状态：已驳回</div><div class="list-footer"><span class="status-text status-rejected">驳回原因：保单止期未覆盖完整延期周期</span><span class="ghost-btn" data-page-target="p3">重新申请</span></div></div></div></div>
+              <div class="status-pane" data-board-pane="contractor-approved"><div class="list-stack"><div class="list-card"><div class="list-head"><div class="list-title">科苑一路沿街店招修缮作业</div><span class="tag tag-green">已通过</span></div><div class="list-meta">工程地址：科苑一路 66 号<br>计划施工时间：2026.05.20 - 2026.08.08<br>逾期天数：20 天<br>当前延期状态：已通过</div><div class="list-footer"><span class="status-text status-approved">新完工时间：2026-09-15</span><span class="ghost-btn" data-page-target="p5">查看记录</span></div></div></div></div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P2 延期申请工程列表页</div><div class="phone-sub">三类工程 + 四类状态分层，已逾期和待审核真正拆开。</div>
+        </div>
+
+        <div class="phone-wrap" data-page="p3">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">填写延期申请</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="card"><div class="card-head"><strong>工程基本信息</strong><span class="card-link" data-page-target="p4">查看完整工程详情</span></div>
+                <div class="field-row"><span class="field-label">工程名称</span><span class="field-value">幸福小区外墙翻新及绿化提升工程</span></div>
+                <div class="field-row"><span class="field-label">工程地址</span><span class="field-value">南山区科技南路 18 号</span></div>
+                <div class="field-row"><span class="field-label">具体工程类型</span><span class="field-value">园林绿化工程</span></div>
+                <div class="field-row"><span class="field-label">施工内容</span><span class="field-value">外墙翻新、脚手架施工、地面修补</span></div>
+                <div class="field-row"><span class="field-label">原计划施工时间</span><span class="field-value emph">2026.06.01 - 2026.08.15</span></div>
+              </div>
+              <div class="card"><div class="card-head"><strong>延期信息</strong></div>
+                <div class="input-group"><div class="input-label required">延期后完工日期</div><div class="input-box">2026-09-12</div></div>
+                <div class="input-group"><div class="input-label required">延期原因</div><div class="textarea-box">连续降雨导致脚手架与外墙翻新工序被迫顺延，现场无法按原计划完成。</div></div>
+                <div class="input-group"><div class="input-label required">是否涉及暂停施工</div><div class="radio-row"><div class="radio-chip active">是</div><div class="radio-chip">否</div></div></div>
+                <div class="input-group"><div class="input-label required">暂停施工开始日期</div><div class="input-box">2026-08-26</div></div>
+                <div class="input-group"><div class="input-label required">预计恢复施工日期</div><div class="input-box">2026-09-02</div></div>
+              </div>
+              <div class="tip-card">该工程属于小型工程，延期后将超出当前保单止期，请线下办理续保后，在本申请单内补充续保保单信息，保单需覆盖完整延期施工周期。</div>
+              <div class="card"><div class="card-head"><strong>保险补充信息</strong><span class="tag tag-red">超保必填</span></div>
+                <div class="input-group"><div class="input-label required">保险公司</div><div class="select-box">中国平安财产保险股份有限公司</div></div>
+                <div class="input-group"><div class="input-label required">险种</div><div class="select-box">建筑工程一切险</div></div>
+                <div class="input-group"><div class="input-label required">保单号</div><div class="input-box">PAIC2026SZ123456789</div></div>
+                <div class="input-group"><div class="input-label required">保单起期</div><div class="input-box">2026-08-16</div></div>
+                <div class="input-group"><div class="input-label required">保单止期</div><div class="input-box">2026-09-15</div></div>
+                <div class="input-group"><div class="input-label required">保单附件</div><div class="upload-box">已上传：续保保单扫描件.pdf</div></div>
+              </div>
+              <div class="bottom-actions"><div class="ghost-btn">返回列表</div><div class="primary-btn">提交申请</div></div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P3 延期申请填写页</div><div class="phone-sub">延期信息与续保保单信息都在同一张申请单内填写。</div>
+        </div>
+
+        <div class="phone-wrap" data-page="p4">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">工程详情</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="map-box"><div class="map-grid"></div><div class="map-road r1"></div><div class="map-road r2"></div><div class="map-pin"></div></div>
+              <div class="hero-card"><div class="hero-title">幸福小区外墙翻新及绿化提升工程</div><div class="tag-row"><span class="tag tag-orange">延期待审核</span><span class="tag tag-blue">在建工程</span><span class="tag tag-green">园林绿化工程</span></div><div class="hero-sub">工程地址：南山区科技南路 18 号<br>计划施工时间：2026.06.01 - 2026.08.15</div></div>
+              <div class="card"><div class="card-head"><strong>工程概览</strong><span class="card-link" data-page-target="p5">延期申请记录</span></div>
+                <div class="field-row"><span class="field-label">施工内容</span><span class="field-value">外墙翻新、脚手架施工、地面修补</span></div>
+                <div class="field-row"><span class="field-label">建设单位</span><span class="field-value">幸福家园物业管理有限公司</span></div>
+                <div class="field-row"><span class="field-label">施工单位</span><span class="field-value">深圳市宏远建设有限公司</span></div>
+                <div class="field-row"><span class="field-label">当前完工日期</span><span class="field-value emph">2026-08-15</span></div>
+              </div>
+              <div class="card"><div class="card-head"><strong>延期状态摘要</strong></div>
+                <div class="field-row"><span class="field-label">当前状态</span><span class="field-value danger">待审核</span></div>
+                <div class="field-row"><span class="field-label">申请时间</span><span class="field-value">2026-08-27 10:15</span></div>
+                <div class="field-row"><span class="field-label">申请人</span><span class="field-value">施工单位经办人 张工</span></div>
+                <div class="field-row"><span class="field-label">申请后完工日期</span><span class="field-value emph">2026-09-12</span></div>
+              </div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P4 工程详情页</div><div class="phone-sub">沿用现有工程详情骨架，补延期状态摘要与延期记录入口。</div>
+        </div>
+
+        <div class="phone-wrap" data-page="p5">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">延期申请记录</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="card"><div class="card-head"><strong>当前有效完工日期</strong></div><div class="field-row"><span class="field-label">最新完工日期</span><span class="field-value emph">2026-09-12</span></div><div class="field-row"><span class="field-label">当前状态</span><span class="field-value danger">待审核</span></div></div>
+              <div class="section-label">历史申请时间线</div>
+              <div class="record-line">
+                <div class="record-item"><div class="record-dot" style="background:#fa8c16"></div><div class="record-content"><div class="record-title">2026-08-27 提交延期申请</div><div class="record-sub">申请人：张工<br>延期前完工日期：2026-08-15 → 延期后完工日期：2026-09-12<br>审核状态：待审核</div></div></div>
+                <div class="record-item"><div class="record-dot" style="background:#ff4d4f"></div><div class="record-content"><div class="record-title">2026-08-18 延期申请被驳回</div><div class="record-sub">申请人：张工<br>驳回原因：续保保单止期未覆盖完整延期周期</div></div></div>
+              </div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P5 延期申请记录页</div><div class="phone-sub">查看当前有效完工日期、历史申请记录与驳回原因。</div>
+        </div>
+      </div>
+
+      <div class="group-title">二、巡检端（APP）</div>
+      <div class="screens">
+        <div class="phone-wrap" data-page="p6">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">巡检工作台</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="summary-row"><div class="summary-card"><div class="summary-num">18</div><div class="summary-text">今日待巡查</div></div><div class="summary-card"><div class="summary-num">6</div><div class="summary-text">待整改复核</div></div><div class="summary-card"><div class="summary-num">3</div><div class="summary-text">延期待审核</div></div></div>
+              <div class="tip-card blue">今日有 3 条延期申请待审核，建议优先处理逾期天数较长且已上传续保保单的小型工程。</div>
+              <div class="card"><div class="card-head"><strong>延期申请待办</strong><span class="tag tag-orange">3条</span></div><div class="list-stack"><div class="list-card" data-page-target="p7"><div class="list-head"><div class="list-title">幸福小区外墙翻新及绿化提升工程</div><span class="tag tag-orange">待审核</span></div><div class="list-meta">工程地址：南山区科技南路 18 号<br>逾期天数：12 天<br>当前延期状态：待审核</div><div class="list-footer"><span class="status-text status-pending">已补充续保材料</span><span class="card-link">进入审核列表</span></div></div></div></div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P6 巡检端首页</div><div class="phone-sub">按工作台结构进入延期审核流程，不从备案端承接。</div>
+        </div>
+
+        <div class="phone-wrap" data-page="p7">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">延期申请</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="tab-shell"><div class="primary-tabs"><div class="tab-pill active">小型工程</div><div class="tab-pill">住宅装修</div><div class="tab-pill">零星作业</div></div><div class="secondary-tabs"><button class="tab-pill active" data-board="inspector-status" data-pane="inspector-pending">待审核</button><button class="tab-pill" data-board="inspector-status" data-pane="inspector-rejected">已驳回</button><button class="tab-pill" data-board="inspector-status" data-pane="inspector-approved">已通过</button><button class="tab-pill" data-board="inspector-status" data-pane="inspector-all">全部</button></div></div>
+              <div class="search-box">搜索工程名称 / 备案编号</div>
+              <div class="status-pane active" data-board-pane="inspector-pending"><div class="list-stack"><div class="list-card"><div class="list-head"><div class="list-title">幸福小区外墙翻新及绿化提升工程</div><span class="tag tag-orange">待审核</span></div><div class="list-meta">工程地址：南山区科技南路 18 号<br>计划施工时间：2026.06.01 - 2026.08.15<br>逾期天数：12 天<br>当前延期状态：待审核</div><div class="list-footer"><span class="status-text status-pending">提交时间：2026-08-27 10:15</span><span class="primary-btn" data-page-target="p8">去审核</span></div></div></div></div>
+              <div class="status-pane" data-board-pane="inspector-rejected"><div class="list-stack"><div class="list-card"><div class="list-head"><div class="list-title">高新园广告牌拆装作业</div><span class="tag tag-red">已驳回</span></div><div class="list-meta">工程地址：高新南一道 9 号<br>逾期天数：4 天<br>当前延期状态：已驳回</div><div class="list-footer"><span class="status-text status-rejected">处理时间：2026-08-26 15:20</span><span class="ghost-btn" data-page-target="p8">查看详情</span></div></div></div></div>
+              <div class="status-pane" data-board-pane="inspector-approved"><div class="list-stack"><div class="list-card"><div class="list-head"><div class="list-title">科苑一路沿街店招修缮作业</div><span class="tag tag-green">已通过</span></div><div class="list-meta">工程地址：科苑一路 66 号<br>逾期天数：20 天<br>当前延期状态：已通过</div><div class="list-footer"><span class="status-text status-approved">处理时间：2026-08-25 09:30</span><span class="ghost-btn" data-page-target="p8">查看详情</span></div></div></div></div>
+              <div class="status-pane" data-board-pane="inspector-all"><div class="list-stack"><div class="list-card"><div class="list-head"><div class="list-title">幸福小区外墙翻新及绿化提升工程</div><span class="tag tag-orange">待审核</span></div><div class="list-meta">工程地址：南山区科技南路 18 号<br>逾期天数：12 天<br>当前延期状态：待审核</div></div></div></div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P7 延期申请待审核列表页</div><div class="phone-sub">巡检端按三类工程与状态列表分层，待审核优先处理。</div>
+        </div>
+
+        <div class="phone-wrap" data-page="p8">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">审核延期申请</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="tip-card blue">巡检端审核的是整张延期申请单，不拆“延期审核”和“保险审核”两个动作。小型工程超保时必须同时核对续保保单信息。</div>
+              <div class="card"><div class="card-head"><strong>工程基本信息</strong></div><div class="field-row"><span class="field-label">工程名称</span><span class="field-value">幸福小区外墙翻新及绿化提升工程</span></div><div class="field-row"><span class="field-label">工程地址</span><span class="field-value">南山区科技南路 18 号</span></div><div class="field-row"><span class="field-label">具体工程类型</span><span class="field-value">园林绿化工程</span></div></div>
+              <div class="card"><div class="card-head"><strong>延期申请信息</strong></div><div class="field-row"><span class="field-label">延期后完工日期</span><span class="field-value emph">2026-09-12</span></div><div class="field-row"><span class="field-label">延期原因</span><span class="field-value">连续降雨导致脚手架与外墙翻新工序被迫顺延</span></div><div class="field-row"><span class="field-label">暂停施工</span><span class="field-value">是，2026-08-26 至 2026-09-02</span></div></div>
+              <div class="card"><div class="card-head"><strong>保险补充信息</strong><span class="tag tag-red">超保必核</span></div><div class="field-row"><span class="field-label">保险公司</span><span class="field-value">中国平安财产保险股份有限公司</span></div><div class="field-row"><span class="field-label">险种</span><span class="field-value">建筑工程一切险</span></div><div class="field-row"><span class="field-label">保单号</span><span class="field-value">PAIC2026SZ123456789</span></div><div class="field-row"><span class="field-label">保单起止时间</span><span class="field-value">2026-08-16 至 2026-09-15</span></div></div>
+              <div class="card"><div class="card-head"><strong>审核意见</strong></div><div class="textarea-box">通过时可不填写；驳回时必须填写明确原因，例如“保单止期不足”。</div></div>
+              <div class="bottom-actions"><div class="ghost-btn">驳回</div><div class="primary-btn">审核通过</div></div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P8 延期申请审核页</div><div class="phone-sub">审核页同页核对工程、延期、保险信息，底部执行通过或驳回。</div>
+        </div>
+
+        <div class="phone-wrap" data-page="p9">
+          <div class="phone"><div class="notch"></div><div class="screen">
+            <div class="status-bar"><span>9:41</span><div class="status-icons"><span class="status-line l1"></span><span class="status-line l2"></span><span class="status-line l3"></span><span class="status-line l4"></span><span class="status-dot"></span><span class="status-battery"></span></div></div>
+            <div class="header"><div class="header-row"><div class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></div><div class="header-title">直接延期</div><div class="header-menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div></div></div>
+            <div class="body-area">
+              <div class="tip-card blue">用于巡检人员在线下已确认需延期的场景。提交成功后立即生效，并写入延期申请记录。</div>
+              <div class="card"><div class="card-head"><strong>工程基本信息</strong></div><div class="field-row"><span class="field-label">工程名称</span><span class="field-value">幸福小区外墙翻新及绿化提升工程</span></div><div class="field-row"><span class="field-label">工程地址</span><span class="field-value">南山区科技南路 18 号</span></div><div class="field-row"><span class="field-label">计划施工时间</span><span class="field-value emph">2026.06.01 - 2026.08.15</span></div></div>
+              <div class="card"><div class="card-head"><strong>延期信息</strong></div><div class="input-group"><div class="input-label required">延期后完工日期</div><div class="input-box">2026-09-12</div></div><div class="input-group"><div class="input-label required">延期原因</div><div class="textarea-box">现场高处作业调整，巡检确认实际施工无法在原计划内完成。</div></div></div>
+              <div class="card"><div class="card-head"><strong>保险补充信息</strong><span class="tag tag-red">超保必填</span></div><div class="input-group"><div class="input-label required">保险公司</div><div class="select-box">中国平安财产保险股份有限公司</div></div><div class="input-group"><div class="input-label required">险种</div><div class="select-box">建筑工程一切险</div></div><div class="input-group"><div class="input-label required">保单号</div><div class="input-box">PAIC2026SZ123456789</div></div></div>
+              <div class="bottom-actions"><div class="ghost-btn">取消</div><div class="primary-btn">提交并生效</div></div>
+            </div><div class="home-indicator"></div></div></div>
+          <div class="phone-label">P9 直接延期页</div><div class="phone-sub">作为巡检端补充能力存在，不替代主审核流程。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-area">
+      <div class="annotation-panel">
+        <div class="annotation-title">原型说明</div>
+        <div class="annotation-guide">右侧说明随页面切换同步展示。施工端首页按你提供的现有首页样式搭建，只在原业务区新增“申请延期”；施工端与巡检端的延期主流程仍保持为 P2-P9。</div>
+
+        <div class="annotation-section active" data-page="p1"><div class="annotation-page-title">P1 首页</div><div class="annotation-block"><h3>页面状态规则</h3><ul><li>首页沿用现有施工端首页骨架：顶部欢迎区、四个业务卡、搜索区、三类工程 Tab、工程列表、底部导航。</li><li>“申请延期”作为新增快捷入口加在原业务区内，不替换现有四个入口。</li></ul></div><div class="annotation-block"><h3>交互规则</h3><ul><li>点击“申请延期”后进入 P2 延期申请工程列表页。</li><li>首页工程列表仍展示项目中心原有工程数据，不直接承接延期办理。</li></ul></div></div>
+        <div class="annotation-section" data-page="p2"><div class="annotation-page-title">P2 延期申请工程列表页</div><div class="annotation-block"><h3>页面状态规则</h3><ul><li>顶部先按三大类工程切换，再按“已逾期 / 待审核 / 已驳回 / 已通过”分层。</li><li>“已逾期”仅展示已经逾期但还没有申请延期的项目。</li></ul></div><div class="annotation-block"><h3>字段规则</h3><ul><li>列表卡片至少展示：工程名称、工程地址、计划施工时间、逾期天数、当前延期状态。</li><li>状态不同，卡片主按钮分别为“申请延期 / 审核中 / 重新申请 / 查看记录”。</li></ul></div></div>
+        <div class="annotation-section" data-page="p3"><div class="annotation-page-title">P3 延期申请填写页</div><div class="annotation-block"><h3>字段规则</h3><ul><li>工程基本信息只读展示工程名称、工程地址、具体工程类型、施工内容、原计划施工时间。</li><li>延期原因手填，不做枚举。</li></ul></div><div class="annotation-block"><h3>业务规则</h3><ul><li>延期与保险补充信息属于同一张申请单，不拆独立续保流程。</li><li>小型工程延期超保时必须补齐保险公司、险种、保单号、起止日期和附件。</li></ul></div></div>
+        <div class="annotation-section" data-page="p4"><div class="annotation-page-title">P4 工程详情页</div><div class="annotation-block"><h3>页面结构规则</h3><ul><li>沿用工程详情页骨架，不再做独立简化表单详情页。</li><li>详情页内补“延期申请记录”入口和延期状态摘要。</li></ul></div></div>
+        <div class="annotation-section" data-page="p5"><div class="annotation-page-title">P5 延期申请记录页</div><div class="annotation-block"><h3>数据规则</h3><ul><li>页面展示当前有效完工日期和历史延期申请时间线。</li><li>驳回记录必须展示驳回原因。</li></ul></div></div>
+        <div class="annotation-section" data-page="p6"><div class="annotation-page-title">P6 巡检端首页</div><div class="annotation-block"><h3>页面状态规则</h3><ul><li>巡检端首页按工作台待办结构组织，延期审核入口挂在待办区。</li><li>延期属于备案完成后的在建过程事项，不放在备案审核端处理。</li></ul></div></div>
+        <div class="annotation-section" data-page="p7"><div class="annotation-page-title">P7 延期申请待审核列表页</div><div class="annotation-block"><h3>页面状态规则</h3><ul><li>巡检端同样使用三大类工程 Tab，并区分“待审核 / 已驳回 / 已通过 / 全部”。</li><li>默认进入“待审核”。</li></ul></div></div>
+        <div class="annotation-section" data-page="p8"><div class="annotation-page-title">P8 延期申请审核页</div><div class="annotation-block"><h3>业务规则</h3><ul><li>审核对象是整张延期申请单，不拆成延期审核和保险审核两次动作。</li><li>小型工程超保时，续保保单信息和附件都必须核对。</li></ul></div></div>
+        <div class="annotation-section" data-page="p9"><div class="annotation-page-title">P9 直接延期页</div><div class="annotation-block"><h3>业务规则</h3><ul><li>直接延期为巡检端补充能力，不替代首页进入待审核列表的主流程。</li><li>表单结构与申请填写页保持基本一致。</li></ul></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="floating-nav" id="floatingNav">
+    <button type="button" class="nav-toggle" id="navToggle">页面导航 · F8</button>
+    <div class="floating-nav-panel">
+      <button class="page-pill active" data-page="p1">P1 首页</button>
+      <button class="page-pill" data-page="p2">P2 列表</button>
+      <button class="page-pill" data-page="p3">P3 填写页</button>
+      <button class="page-pill" data-page="p4">P4 详情页</button>
+      <button class="page-pill" data-page="p5">P5 记录页</button>
+      <button class="page-pill" data-page="p6">P6 巡检首页</button>
+      <button class="page-pill" data-page="p7">P7 待审核</button>
+      <button class="page-pill" data-page="p8">P8 审核页</button>
+      <button class="page-pill" data-page="p9">P9 直接延期</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const wraps = [...document.querySelectorAll('.phone-wrap')];
+  const pills = [...document.querySelectorAll('.page-pill')];
+  const sections = [...document.querySelectorAll('.annotation-section')];
+  const navTriggers = [...document.querySelectorAll('[data-page-target]')];
+  const boardTabs = [...document.querySelectorAll('[data-board][data-pane]')];
+  const floatingNav = document.getElementById('floatingNav');
+  const navToggle = document.getElementById('navToggle');
+
+  function setActive(page) {
+    wraps.forEach((item) => item.classList.toggle('active', item.dataset.page === page));
+    pills.forEach((item) => item.classList.toggle('active', item.dataset.page === page));
+    sections.forEach((item) => item.classList.toggle('active', item.dataset.page === page));
+    if (floatingNav) floatingNav.classList.remove('show');
+  }
+
+  function setBoard(boardName, paneName) {
+    boardTabs.forEach((item) => {
+      if (item.dataset.board === boardName) item.classList.toggle('active', item.dataset.pane === paneName);
+    });
+    document.querySelectorAll('[data-board-pane]').forEach((item) => {
+      const belongs = (boardName === 'contractor-status' && item.dataset.boardPane.startsWith('contractor-')) || (boardName === 'inspector-status' && item.dataset.boardPane.startsWith('inspector-'));
+      if (belongs) item.classList.toggle('active', item.dataset.boardPane === paneName);
+    });
+  }
+
+  wraps.forEach((item) => item.addEventListener('click', () => setActive(item.dataset.page)));
+  pills.forEach((item) => item.addEventListener('click', () => setActive(item.dataset.page)));
+  navTriggers.forEach((item) => item.addEventListener('click', (event) => {
+    event.stopPropagation();
+    setActive(item.dataset.pageTarget);
+  }));
+  boardTabs.forEach((item) => item.addEventListener('click', (event) => {
+    event.stopPropagation();
+    setBoard(item.dataset.board, item.dataset.pane);
+  }));
+
+  if (navToggle && floatingNav) navToggle.addEventListener('click', () => floatingNav.classList.toggle('show'));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'F8') {
+      event.preventDefault();
+      if (floatingNav) floatingNav.classList.toggle('show');
+    }
+  });
+})();
+</script>
+</body>
+</html>

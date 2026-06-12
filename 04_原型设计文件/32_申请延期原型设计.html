@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>32_申请延期原型设计</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  background: #e8edf2; color: #333; font-size: 13px;
+  overflow-x: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   主布局
+   ═══════════════════════════════════════════════════════════════ */
+.main-container {
+  display: flex; flex-direction: row; flex-wrap: nowrap;
+  min-width: fit-content; margin: 0 auto; gap: 24px;
+  padding: 24px 28px 40px;
+  justify-content: center;
+}
+.prototype-area {
+  flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 28px;
+}
+.annotation-area {
+  width: 420px; flex-shrink: 0; position: sticky; top: 24px;
+  height: calc(100vh - 48px); overflow-y: auto;
+}
+.annotation-area::-webkit-scrollbar { width: 4px; }
+.annotation-area::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   分组标题
+   ═══════════════════════════════════════════════════════════════ */
+.group-title {
+  font-size: 14px; font-weight: 600; color: #666;
+  margin-bottom: 14px; padding-left: 10px;
+  border-left: 3px solid #00B578;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   手机外壳
+   ═══════════════════════════════════════════════════════════════ */
+.screens-row {
+  display: flex; flex-wrap: wrap; gap: 28px;
+  align-items: flex-start;
+}
+.phone-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+}
+.phone-label {
+  font-size: 11px; color: #888;
+  text-align: center; line-height: 1.5;
+}
+.phone {
+  width: 320px; background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+  overflow: hidden; position: relative;
+}
+.phone-notch { height: 28px; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.phone-notch-inner { width: 80px; height: 14px;
+  background: #f5f5f5; border-radius: 8px;
+}
+.phone-screen {
+  background: #f5f5f5; min-height: 560px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.phone-home { height: 20px; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.phone-home-bar { width: 80px; height: 4px;
+  background: #e0e0e0; border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   状态栏 + 导航栏
+   ═══════════════════════════════════════════════════════════════ */
+.status-bar {
+  background: linear-gradient(90deg, #35ad73, #58b8d7);
+  padding: 6px 16px 4px;
+  display: flex; justify-content: space-between;
+  align-items: center; font-size: 10px;
+  color: #fff; font-weight: 800; flex-shrink: 0;
+}
+.nav-bar {
+  background: linear-gradient(90deg, #35ad73, #58b8d7);
+  padding: 10px 16px 14px;
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.nav-back {
+  font-size: 32px; color: #fff;
+  line-height: 1; flex-shrink: 0;
+  font-weight: 300; cursor: pointer;
+  width: 34px; text-align: center;
+}
+.nav-title {
+  font-size: 18px; font-weight: 800;
+  color: #fff; flex: 1; text-align: center;
+}
+.nav-action {
+  font-size: 13px; color: #fff;
+  flex-shrink: 0; min-width: 34px;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   底部Tab导航
+   ═══════════════════════════════════════════════════════════════ */
+.app-tab-bar {
+  position: absolute; bottom: 24px; left: 0; right: 0;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0,0,0,0.05);
+  display: flex; height: 56px; z-index: 10;
+}
+.app-tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer;
+}
+.app-tab-item .icon {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+}
+.app-tab-item .icon svg { stroke: #8E8E93; }
+.app-tab-item.active .icon svg { stroke: #00B578; }
+.app-tab-item .text { font-size: 10px; color: #8E8E93; }
+.app-tab-item.active .text { color: #00B578; }
+
+/* ═══════════════════════════════════════════════════════════════
+   滚动区 + 内容背景
+   ═══════════════════════════════════════════════════════════════ */
+.scroll-area {
+  flex: 1; overflow-y: auto; padding-bottom: 80px;
+}
+.content-bg {
+  background:
+    linear-gradient(180deg, rgba(89,183,216,0.04) 0%, transparent 180px),
+    linear-gradient(180deg, #f6fbf8 0%, #ffffff 100%);
+  min-height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   卡片
+   ═══════════════════════════════════════════════════════════════ */
+.card {
+  background: #fff; border-radius: 12px;
+  margin: 10px 12px 0; overflow: hidden;
+  border: 1px solid #d7e3db;
+  box-shadow: 0 12px 28px rgba(26,41,32,0.05);
+}
+.card-header {
+  padding: 10px 14px 8px; font-size: 13px;
+  font-weight: 600; color: #333;
+  border-bottom: 1px solid #f5f5f5;
+  display: flex; align-items: center;
+  justify-content: space-between;
+}
+.card-body { padding: 10px 14px; }
+.card-primary {
+  background: linear-gradient(180deg, #ebf8f1 0%, #ffffff 100%);
+  border: 2px solid rgba(34,166,109,0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   标签
+   ═══════════════════════════════════════════════════════════════ */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 500;
+  line-height: 1.6; white-space: nowrap;
+}
+.tag-green  { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag-orange { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+.tag-red    { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.tag-gray   { background: #f5f5f5; color: #888;    border: 1px solid #d9d9d9; }
+.tag-blue   { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+
+/* ═══════════════════════════════════════════════════════════════
+   字段行
+   ═══════════════════════════════════════════════════════════════ */
+.field-row {
+  display: flex; gap: 6px;
+  margin-bottom: 6px; align-items: flex-start;
+  font-size: 12px;
+}
+.field-row:last-child { margin-bottom: 0; }
+.field-label { color: #999; flex-shrink: 0; min-width: 70px; }
+.field-value { color: #333; flex: 1; line-height: 1.5; }
+.field-value.green { color: #00B578; font-weight: 500; }
+.field-value.red { color: #cf1322; }
+
+/* ═══════════════════════════════════════════════════════════════
+   按钮
+   ═══════════════════════════════════════════════════════════════ */
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px 16px; border-radius: 6px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none; line-height: 1.4;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #27a66d, #4fb3d7);
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(34,166,109,0.24);
+}
+.btn-success { background: #00B578; color: #fff; }
+.btn-danger  { background: #ff4d4f; color: #fff; }
+.btn-default {
+  background: #fff; color: #333;
+  border: 1px solid #d9d9d9;
+}
+.btn-block { width: 100%; }
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: absolute; bottom: 24px; left: 0; right: 0;
+  padding: 10px 16px; background: #fff;
+  border-top: 1px solid #f0f0f0;
+  display: flex; gap: 8px; z-index: 5;
+}
+.bottom-bar .btn { flex: 1; }
+
+/* ═══════════════════════════════════════════════════════════════
+   表单
+   ═══════════════════════════════════════════════════════════════ */
+.input-field {
+  width: 100%; padding: 8px 10px;
+  border: 1px solid #d9d9d9; border-radius: 6px;
+  font-size: 12px; color: #333;
+  background: #fafafa; line-height: 1.5;
+}
+.input-textarea {
+  width: 100%; padding: 8px 10px;
+  border: 1px solid #d9d9d9; border-radius: 6px;
+  font-size: 12px; color: #333;
+  background: #fafafa; min-height: 60px;
+  resize: none; line-height: 1.5;
+}
+.input-label { font-size: 12px; color: #555;
+  margin-bottom: 5px; font-weight: 500;
+}
+.input-required::after { content: ' *'; color: #ff4d4f; }
+.input-group { margin-bottom: 12px; }
+.input-hint { font-size: 11px; color: #999; margin-top: 3px; }
+.input-hint.green { color: #00B578; }
+
+/* 单选 */
+.radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 6px;
+  border: 1px solid #d9d9d9; background: #fff;
+  font-size: 12px; color: #333; cursor: pointer;
+}
+.radio-item.active {
+  border-color: #00B578;
+  background: #e6f7f0;
+  color: #00B578;
+}
+
+/* 上传 */
+.upload-box {
+  border: 1px dashed #00B578; border-radius: 8px;
+  padding: 16px; text-align: center;
+  background: #fafafa; cursor: pointer;
+}
+.upload-box .upload-icon {
+  width: 24px; height: 24px; margin: 0 auto 4px;
+  border: 2px solid #ccc; border-radius: 4px;
+  position: relative;
+}
+.upload-box .upload-icon::after {
+  content: '+'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px; color: #999; font-weight: 300;
+}
+.upload-box .text { font-size: 12px; color: #999; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Tab栏
+   ═══════════════════════════════════════════════════════════════ */
+.tab-bar {
+  display: flex; background: #f1f3f1;
+  border-radius: 30px 30px 0 0;
+  padding: 18px 4px 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.32);
+  flex-shrink: 0; overflow-x: auto;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-item {
+  flex: 1; text-align: center;
+  padding: 8px 4px; font-size: 14px;
+  color: #303631; font-weight: 700;
+  white-space: nowrap; cursor: pointer;
+  border-radius: 26px 0 0 0;
+}
+.tab-item.active {
+  background: linear-gradient(135deg, #ffffff 0%, #eef9f3 60%, #f4fcff 100%);
+  color: #1a8f62; font-weight: 800;
+  box-shadow: -10px 0 20px rgba(83,183,216,0.08);
+}
+
+/* 子Tab（状态筛选） */
+.sub-tab-bar {
+  display: flex; gap: 8px;
+  padding: 10px 12px; background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  overflow-x: auto; flex-shrink: 0;
+}
+.sub-tab-bar::-webkit-scrollbar { display: none; }
+.sub-tab-item {
+  padding: 5px 12px; border-radius: 12px;
+  font-size: 12px; color: #666;
+  white-space: nowrap; cursor: pointer;
+  border: 1px solid #e8e8e8; background: #fff;
+}
+.sub-tab-item.active {
+  background: #00B578; color: #fff;
+  border-color: #00B578;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   搜索栏
+   ═══════════════════════════════════════════════════════════════ */
+.search-bar {
+  background: #fff; padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%; padding: 7px 10px 7px 30px;
+  border: 1px solid #e8e8e8; border-radius: 18px;
+  font-size: 12px; color: #333; background: #f5f7fa;
+}
+.search-icon {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px; color: #bbb;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   列表卡片
+   ═══════════════════════════════════════════════════════════════ */
+.list-card {
+  background: #fff; border-radius: 10px;
+  margin: 0 12px 10px; padding: 12px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+.list-card-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 8px;
+}
+.list-card-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.list-card-row {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: #666; padding: 3px 0;
+}
+.list-card-row .label { color: #999; }
+.list-card-footer {
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid #f5f5f5;
+  display: flex; justify-content: space-between;
+  align-items: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   快捷入口
+   ═══════════════════════════════════════════════════════════════ */
+.quick-btns {
+  display: flex; gap: 10px;
+  padding: 10px 12px 0;
+}
+.quick-btn {
+  flex: 1; background: #fff;
+  border-radius: 10px; padding: 14px 8px;
+  text-align: center; border: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+.quick-btn .icon {
+  width: 28px; height: 28px; margin: 0 auto 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.quick-btn .icon svg { stroke: #00B578; }
+.quick-btn .text { font-size: 12px; color: #333; }
+
+/* ═══════════════════════════════════════════════════════════════
+   首页Banner
+   ═══════════════════════════════════════════════════════════════ */
+.hero-banner {
+  background: linear-gradient(135deg, #00B578 0%, #00A86B 100%);
+  padding: 16px 16px 20px;
+  color: white; flex-shrink: 0;
+}
+.hero-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.hero-stats { display: flex; gap: 12px; }
+.hero-stat {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px; padding: 10px 14px;
+  flex: 1; text-align: center;
+}
+.hero-stat-num { font-size: 22px; font-weight: 700; line-height: 1; }
+.hero-stat-label { font-size: 11px; opacity: 0.85; margin-top: 3px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   服务网格（首页）
+   ═══════════════════════════════════════════════════════════════ */
+.service-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; padding: 12px;
+}
+.service-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  padding: 12px 4px; cursor: pointer;
+}
+.service-item .icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ebf8f1 0%, #e6f4ff 100%);
+}
+.service-item .icon svg { stroke: #00B578; }
+.service-item .text { font-size: 12px; color: #333; }
+.service-item .badge {
+  position: relative; top: -2px;
+  background: #ff4d4f; color: #fff;
+  font-size: 10px; padding: 1px 5px;
+  border-radius: 8px; font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   提示条
+   ═══════════════════════════════════════════════════════════════ */
+.tip-bar {
+  margin: 10px 12px 0; padding: 8px 12px;
+  border-radius: 6px; font-size: 12px;
+  line-height: 1.6; display: flex;
+  gap: 6px; align-items: flex-start;
+}
+.tip-bar.orange {
+  background: #fff7e6; color: #d46b08;
+  border: 1px solid #ffd591;
+}
+.tip-bar.blue {
+  background: #e6f4ff; color: #0958d9;
+  border: 1px solid #91caff;
+}
+.tip-bar .icon { flex-shrink: 0;
+  font-size: 14px; margin-top: 1px;
+  width: 16px; text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   时间线
+   ═══════════════════════════════════════════════════════════════ */
+.timeline { position: relative; padding-left: 20px; }
+.timeline::before {
+  content:''; position: absolute;
+  left: 5px; top: 4px; bottom: 4px;
+  width: 2px; background: #e5e5e5;
+}
+.timeline-item { position: relative; padding-bottom: 12px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  position: absolute; left: -17px; top: 3px;
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #e5e5e5;
+}
+.timeline-dot.green { background: #00B578; }
+.timeline-dot.red { background: #ff4d4f; }
+.timeline-dot.gray { background: #bfbfbf; }
+.timeline-title { font-size: 13px; font-weight: 500; color: #333; }
+.timeline-time { font-size: 11px; color: #999; margin-top: 2px; }
+.timeline-desc { font-size: 12px; color: #666;
+  margin-top: 4px; line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   图片占位
+   ═══════════════════════════════════════════════════════════════ */
+.img-thumb {
+  width: 56px; height: 56px; border-radius: 4px;
+  border: 1px solid #e8e8e8; background: #f5f5f5;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #bbb;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   地图占位
+   ═══════════════════════════════════════════════════════════════ */
+.map-placeholder {
+  height: 120px; background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%);
+  margin: 0 12px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #999;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   分割线
+   ═══════════════════════════════════════════════════════════════ */
+.divider { height: 1px; background: #f0f0f0; margin: 8px 0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   右侧标注
+   ═══════════════════════════════════════════════════════════════ */
+.anno-box {
+  background: #FFFBE6;
+  border: 2px dashed #FFC53D;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.anno-box-title {
+  font-size: 14px; font-weight: 600;
+  color: #1a1a1a; margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,197,61,0.3);
+}
+.anno-section { margin-bottom: 14px; }
+.anno-section:last-child { margin-bottom: 0; }
+.anno-section-title {
+  font-size: 12px; font-weight: 600;
+  color: #d46b08; margin-bottom: 4px;
+}
+.anno-section-content {
+  font-size: 12px; color: #666;
+  line-height: 1.7;
+}
+.anno-section-content ul { margin-left: 16px; }
+.anno-section-content li { margin-bottom: 2px; }
+.anno-check {
+  display: flex; align-items: flex-start;
+  gap: 6px; margin-bottom: 4px;
+}
+.anno-check .chk {
+  width: 14px; height: 14px;
+  border: 2px solid #00B578;
+  border-radius: 3px;
+  display: flex; align-items: center;
+  justify-content: center;
+  font-size: 9px; color: #00B578;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   弹窗
+   ═══════════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  display: none; align-items: center;
+  justify-content: center; z-index: 3000;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 8px;
+  width: 260px; text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.modal-box .modal-icon {
+  width: 48px; height: 48px; margin: 20px auto 8px;
+  border-radius: 50%; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 24px; color: #fff;
+}
+.modal-box .modal-icon.success { background: #00B578; }
+.modal-box .modal-icon.fail { background: #ff4d4f; }
+.modal-box .modal-title { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+.modal-box .modal-desc { font-size: 12px; color: #666; padding: 8px 20px 16px; }
+.modal-box .modal-actions { padding: 0 20px 16px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   浮动导航
+   ═══════════════════════════════════════════════════════════════ */
+.float-nav {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26,41,32,0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 24px; padding: 8px 16px;
+  display: none; gap: 6px; z-index: 2000;
+  align-items: center;
+}
+.float-nav.show { display: flex; }
+.float-nav-btn {
+  padding: 6px 12px; border-radius: 16px;
+  font-size: 12px; color: #fff;
+  background: transparent; border: none;
+  cursor: pointer; white-space: nowrap;
+}
+.float-nav-btn:hover { background: rgba(255,255,255,0.15); }
+.float-nav-btn.active { background: #00B578; }
+.float-nav-hint {
+  font-size: 10px; color: rgba(255,255,255,0.5);
+  padding: 0 4px; border-left: 1px solid rgba(255,255,255,0.2);
+  margin-left: 4px;
+}
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- 浮动导航栏 -->
+<div class="float-nav" id="floatNav">
+  <button class="float-nav-btn active" onclick="goto('p0', false)">施工首页</button>
+  <button class="float-nav-btn" onclick="goto('p1', false)">逾期列表</button>
+  <button class="float-nav-btn" onclick="goto('p8', false)">施工待审</button>
+  <button class="float-nav-btn" onclick="goto('p9', false)">施工已驳回</button>
+  <button class="float-nav-btn" onclick="goto('p10', false)">施工已通过</button>
+  <button class="float-nav-btn" onclick="goto('p2', false)">申请表单</button>
+  <button class="float-nav-btn" onclick="goto('p3', false)">工程详情</button>
+  <button class="float-nav-btn" onclick="goto('p4', false)">延期记录</button>
+  <button class="float-nav-btn" onclick="goto('p5', false)">巡检首页</button>
+  <button class="float-nav-btn" onclick="goto('p6', false)">巡检待审</button>
+  <button class="float-nav-btn" onclick="goto('p11', false)">巡检已驳回</button>
+  <button class="float-nav-btn" onclick="goto('p12', false)">巡检已通过</button>
+  <button class="float-nav-btn" onclick="goto('p13', false)">巡检全部</button>
+  <button class="float-nav-btn" onclick="goto('p7', false)">审核详情</button>
+  <span class="float-nav-hint">F8</span>
+</div>
+
+<div class="main-container">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     左侧：原型区域
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="prototype-area">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     一、施工端 / 业主端
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="group-title">一、施工端 / 业主端（小程序）</div>
+<div class="screens-row">
+
+  <!-- P0: 施工端首页 -->
+  <div class="phone-wrap" id="p0">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar"><span class="nav-title" style="text-align:left;padding-left:8px;">小型工程监管</span><span></span></div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <!-- Banner -->
+            <div class="hero-banner">
+              <div class="hero-title">欢迎，张三</div>
+              <div class="hero-stats">
+                <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">逾期工程</div></div>
+                <div class="hero-stat"><div class="hero-stat-num">1</div><div class="hero-stat-label">待审核</div></div>
+                <div class="hero-stat"><div class="hero-stat-num">12</div><div class="hero-stat-label">我的工程</div></div>
+              </div>
+            </div>
+            <!-- 服务入口 -->
+            <div class="service-grid">
+              <div class="service-item">
+                <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="text">备案申请</div>
+              </div>
+              <div class="service-item">
+                <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                <div class="text">我的工程</div>
+              </div>
+              <div class="service-item">
+                <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="text">完工核销</div>
+              </div>
+              <div class="service-item">
+                <div class="icon" style="position:relative;" data-goto="p1">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span class="badge">3</span>
+                </div>
+                <div class="text" style="color:#00B578;font-weight:600;" data-goto="p1">申请延期</div>
+              </div>
+            </div>
+            <!-- 最近工程 -->
+            <div class="card" style="margin-top:12px;">
+              <div class="card-header">最近工程</div>
+              <div class="card-body">
+                <div style="font-size:13px;font-weight:500;color:#333;margin-bottom:6px;">幸福小区外墙翻新工程</div>
+                <div style="font-size:11px;color:#999;margin-bottom:4px;">深圳市南山区沙河街道XX路12号</div>
+                <div style="display:flex;gap:6px;">
+                  <span class="tag tag-blue">小型工程</span>
+                  <span class="tag tag-green">施工中</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 底部Tab -->
+        <div class="app-tab-bar">
+          <div class="app-tab-item active">
+            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <div class="text">首页</div>
+          </div>
+          <div class="app-tab-item">
+            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            <div class="text">工程</div>
+          </div>
+          <div class="app-tab-item">
+            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="text">我的</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P1 施工端-首页<br>申请延期入口（角标3）</div>
+  </div>
+
+  <!-- P1: 逾期工程列表 -->
+  <div class="phone-wrap" id="p1">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">申请延期</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <!-- 搜索 -->
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <!-- 工程类型Tab -->
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <!-- 状态子Tab -->
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item active" data-goto="p1">已逾期</div>
+              <div class="sub-tab-item" data-goto="p8">待审核</div>
+              <div class="sub-tab-item" data-goto="p9">已驳回</div>
+              <div class="sub-tab-item" data-goto="p10">已通过</div>
+            </div>
+            <!-- 已逾期列表 -->
+            <div class="list-card" data-goto="p2">
+              <div class="list-card-header">
+                <span class="list-card-title">幸福小区外墙翻新工程</span>
+                <span class="tag tag-red">逾期15天</span>
+              </div>
+              <div class="list-card-row"><span class="label">备案编号</span><span>BA20250601001</span></div>
+              <div class="list-card-row"><span class="label">工程地址</span><span>深圳市南山区沙河街道XX路12号</span></div>
+              <div class="list-card-row"><span class="label">原计划完工</span><span style="color:#cf1322;font-weight:500;">2026-08-15</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-blue">小型工程</span>
+                <span style="color:#00B578;font-size:12px;">申请延期 &rarr;</span>
+              </div>
+            </div>
+            <div class="list-card">
+              <div class="list-card-header">
+                <span class="list-card-title">科技园A栋外墙翻新</span>
+                <span class="tag tag-red">逾期8天</span>
+              </div>
+              <div class="list-card-row"><span class="label">备案编号</span><span>BA20250601002</span></div>
+              <div class="list-card-row"><span class="label">工程地址</span><span>深圳市南山区科技园A栋</span></div>
+              <div class="list-card-row"><span class="label">原计划完工</span><span style="color:#cf1322;font-weight:500;">2026-08-22</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-blue">小型工程</span>
+                <span style="color:#00B578;font-size:12px;">申请延期 &rarr;</span>
+              </div>
+            </div>
+            <div class="list-card">
+              <div class="list-card-header">
+                <span class="list-card-title">道路指示牌更换作业</span>
+                <span class="tag tag-red">逾期3天</span>
+              </div>
+              <div class="list-card-row"><span class="label">备案编号</span><span>BA20250601003</span></div>
+              <div class="list-card-row"><span class="label">工程地址</span><span>深圳市南山区XX大道与YY路交叉口</span></div>
+              <div class="list-card-row"><span class="label">原计划完工</span><span style="color:#cf1322;font-weight:500;">2026-08-27</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-blue">小型工程</span>
+                <span style="color:#00B578;font-size:12px;">申请延期 &rarr;</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P2 施工端-逾期工程列表<br>三类工程Tab + 四类状态Tab</div>
+  </div>
+
+  <!-- P2: 申请延期表单页 -->
+  <div class="phone-wrap" id="p2">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">申请延期</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <!-- 跳转按钮区 -->
+            <div style="display:flex;gap:8px;padding:10px 12px 0;">
+              <button class="btn btn-default" style="flex:1;font-size:12px;padding:6px;" data-goto="p3">查看工程详情</button>
+              <button class="btn btn-default" style="flex:1;font-size:12px;padding:6px;" data-goto="p4">查看延期记录</button>
+            </div>
+            <!-- 超保提示 -->
+            <div class="tip-bar orange">
+              <span class="icon">!</span>
+              <span>当前工程为<strong>小型工程</strong>，延期后完工日期超出原保单保障期（2026-08-10），须在下方补充新的保险信息。</span>
+            </div>
+            <!-- 工程基本信息 -->
+            <div class="card">
+              <div class="card-header">工程基本信息</div>
+              <div class="card-body">
+                <div class="field-row"><span class="field-label">工程名称</span><span class="field-value">幸福小区外墙翻新工程</span></div>
+                <div class="field-row"><span class="field-label">工程地址</span><span class="field-value">深圳市南山区沙河街道XX路12号</span></div>
+                <div class="field-row"><span class="field-label">工程所属大类</span><span class="field-value green">小型工程</span></div>
+                <div class="field-row"><span class="field-label">具体工程类型</span><span class="field-value">园林绿化工程</span></div>
+                <div class="field-row"><span class="field-label">原计划完工</span><span class="field-value">2026-08-15</span></div>
+              </div>
+            </div>
+            <!-- 延期信息 -->
+            <div class="card">
+              <div class="card-header">延期信息</div>
+              <div class="card-body">
+                <div class="input-group">
+                  <div class="input-label input-required">延期后完工日期</div>
+                  <input type="date" class="input-field" value="2026-09-30">
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">延期原因</div>
+                  <textarea class="input-textarea">因近期连续暴雨天气影响，外墙防水施工无法正常进行，需延期施工。</textarea>
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">是否涉及暂停施工</div>
+                  <div class="radio-group">
+                    <div class="radio-item active">是</div>
+                    <div class="radio-item">否</div>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">暂停施工开始日期</div>
+                  <input type="date" class="input-field" value="2026-07-15">
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">预计恢复施工日期</div>
+                  <input type="date" class="input-field" value="2026-07-25">
+                </div>
+              </div>
+            </div>
+            <!-- 保险补充信息 -->
+            <div class="card">
+              <div class="card-header" style="color:#cf1322;">保险补充信息 <span style="font-size:11px;color:#cf1322;font-weight:500;">（必填）</span></div>
+              <div class="card-body">
+                <div class="input-group">
+                  <div class="input-label input-required">保险公司</div>
+                  <select class="input-field">
+                    <option>请选择保险公司</option>
+                    <option selected>中国平安财产保险股份有限公司</option>
+                    <option>中国人民财产保险股份有限公司</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">险种</div>
+                  <select class="input-field">
+                    <option>请选择险种</option>
+                    <option selected>安全生产责任险</option>
+                    <option>建筑工程一切险</option>
+                    <option>建筑工程团体意外险</option>
+                    <option>雇主责任险</option>
+                    <option>工伤保险</option>
+                    <option>其他险种</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">保单号</div>
+                  <input type="text" class="input-field" value="PAIC2026SZ123456789">
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">保单起期</div>
+                  <input type="date" class="input-field" value="2026-08-11">
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">保单止期</div>
+                  <input type="date" class="input-field" value="2026-09-30">
+                  <div class="input-hint green">保单止期必须 &gt;= 延期后完工日期</div>
+                </div>
+                <div class="input-group">
+                  <div class="input-label input-required">保单材料</div>
+                  <div class="upload-box">
+                    <div class="upload-icon"></div>
+                    <div class="text">点击上传保单材料（图片/PDF）</div>
+                    <div class="text" style="font-size:11px;margin-top:4px;">已上传：保单扫描件.jpg</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 办理提示 -->
+            <div class="tip-bar blue">
+              <span class="icon">i</span>
+              <span>请先联系保险公司线下办理续保/展期，并在本申请单中补充新的保单信息，保障期需覆盖完整延期施工周期。</span>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <button class="btn btn-primary btn-block" onclick="showModal('modalSubmit')">提交申请</button>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P3 施工端-申请延期表单<br>含跳转工程详情/延期记录按钮</div>
+  </div>
+
+  <!-- P3: 工程详情页 -->
+  <div class="phone-wrap" id="p3">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">工程详情</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="card card-primary">
+              <div class="card-body">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <div style="font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:3px;">幸福小区外墙翻新工程</div>
+                    <div style="font-size:11px;color:#999;">备案编号：BA20250601001</div>
+                  </div>
+                  <span class="tag tag-green">施工中</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">工程基本信息</div>
+              <div class="card-body">
+                <div class="field-row"><span class="field-label">工程地址</span><span class="field-value">深圳市南山区沙河街道XX路12号</span></div>
+                <div class="field-row"><span class="field-label">工程所属大类</span><span class="field-value green">小型工程</span></div>
+                <div class="field-row"><span class="field-label">具体工程类型</span><span class="field-value">园林绿化工程</span></div>
+                <div class="field-row"><span class="field-label">施工内容</span><span class="field-value">小区外墙粉刷、防水处理及景观绿化改造</span></div>
+                <div class="field-row"><span class="field-label">原计划开工</span><span class="field-value">2026-06-01</span></div>
+                <div class="field-row"><span class="field-label">原计划完工</span><span class="field-value">2026-08-15</span></div>
+                <div class="field-row"><span class="field-label">建设单位</span><span class="field-value">深圳市XX建设有限公司</span></div>
+                <div class="field-row"><span class="field-label">施工单位</span><span class="field-value">深圳市YY装饰工程有限公司</span></div>
+                <div class="field-row"><span class="field-label">负责人</span><span class="field-value">张三 138****8888</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P4 施工端-工程详情<br>从表单页跳转查看完整信息</div>
+  </div>
+
+  <!-- P4: 延期申请记录页 -->
+  <div class="phone-wrap" id="p4">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">延期申请记录</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="card">
+              <div class="card-header">当前工期信息</div>
+              <div class="card-body">
+                <div class="field-row"><span class="field-label">原计划完工</span><span class="field-value">2026-08-15</span></div>
+                <div class="field-row"><span class="field-label">当前有效完工</span><span class="field-value green">2026-09-30</span></div>
+                <div class="field-row"><span class="field-label">延期次数</span><span class="field-value">1 次</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">延期记录</div>
+              <div class="card-body">
+                <div class="timeline">
+                  <div class="timeline-item">
+                    <div class="timeline-dot green"></div>
+                    <div class="timeline-title">延期已通过</div>
+                    <div class="timeline-time">2026-07-10 14:32</div>
+                    <div class="timeline-desc">
+                      发起方式：施工方申请<br>
+                      发起人：张三<br>
+                      原计划：2026-08-15 --&gt; 延期后：2026-09-30<br>
+                      <span class="tag tag-blue" style="margin-top:4px;">已补充保险</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="opacity:0.7;">
+              <div class="card-body">
+                <div class="timeline">
+                  <div class="timeline-item" style="padding-bottom:0;">
+                    <div class="timeline-dot red"></div>
+                    <div class="timeline-title">延期已驳回</div>
+                    <div class="timeline-time">2026-07-08 10:15</div>
+                    <div class="timeline-desc">
+                      发起方式：业主申请<br>
+                      发起人：李四<br>
+                      <span style="color:#cf1322;">驳回原因：延期时间过长</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P5 施工端-延期申请记录<br>从表单页跳转查看</div>
+  </div>
+
+  <!-- P8: 施工端-待审核列表 -->
+  <div class="phone-wrap" id="p8">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">申请延期</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item" data-goto="p1">已逾期</div>
+              <div class="sub-tab-item active" data-goto="p8">待审核</div>
+              <div class="sub-tab-item" data-goto="p9">已驳回</div>
+              <div class="sub-tab-item" data-goto="p10">已通过</div>
+            </div>
+            <div class="list-card">
+              <div class="list-card-header">
+                <span class="list-card-title">幸福小区外墙翻新工程</span>
+                <span class="tag tag-orange">待审核</span>
+              </div>
+              <div class="list-card-row"><span class="label">备案编号</span><span>BA20250601001</span></div>
+              <div class="list-card-row"><span class="label">工程地址</span><span>深圳市南山区沙河街道XX路12号</span></div>
+              <div class="list-card-row"><span class="label">原计划完工</span><span>2026-08-15</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-09-30</span></div>
+              <div class="list-card-row"><span class="label">申请时间</span><span>2026-08-28 09:15</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-blue">小型工程</span>
+                <span style="color:#FF9500;font-size:12px;">审核中</span>
+              </div>
+            </div>
+            <div class="list-card">
+              <div class="list-card-header">
+                <span class="list-card-title">道路指示牌更换作业</span>
+                <span class="tag tag-orange">待审核</span>
+              </div>
+              <div class="list-card-row"><span class="label">备案编号</span><span>BA20250601003</span></div>
+              <div class="list-card-row"><span class="label">工程地址</span><span>深圳市南山区XX大道与YY路交叉口</span></div>
+              <div class="list-card-row"><span class="label">原计划完工</span><span>2026-08-27</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-09-10</span></div>
+              <div class="list-card-row"><span class="label">申请时间</span><span>2026-08-29 16:42</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-blue">小型工程</span>
+                <span style="color:#FF9500;font-size:12px;">审核中</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P8 施工端-待审核列表<br>三类工程Tab + 状态子Tab切换</div>
+  </div>
+
+  <!-- P9: 施工端-已驳回列表 -->
+  <div class="phone-wrap" id="p9">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">申请延期</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item" data-goto="p1">已逾期</div>
+              <div class="sub-tab-item" data-goto="p8">待审核</div>
+              <div class="sub-tab-item active" data-goto="p9">已驳回</div>
+              <div class="sub-tab-item" data-goto="p10">已通过</div>
+            </div>
+            <div class="list-card" data-goto="p2">
+              <div class="list-card-header">
+                <span class="list-card-title">科技园A栋外墙翻新</span>
+                <span class="tag tag-red">已驳回</span>
+              </div>
+              <div class="list-card-row"><span class="label">备案编号</span><span>BA20250601002</span></div>
+              <div class="list-card-row"><span class="label">工程地址</span><span>深圳市南山区科技园A栋</span></div>
+              <div class="list-card-row"><span class="label">原计划完工</span><span>2026-08-22</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span>2026-10-15</span></div>
+              <div class="list-card-row"><span class="label">驳回原因</span><span style="color:#cf1322;">延期时间过长，缺乏详细施工计划说明</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-blue">小型工程</span>
+                <span style="color:#00B578;font-size:12px;">重新申请 &rarr;</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P9 施工端-已驳回列表<br>可点击卡片重新申请</div>
+  </div>
+
+  <!-- P10: 施工端-已通过列表 -->
+  <div class="phone-wrap" id="p10">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">申请延期</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item" data-goto="p1">已逾期</div>
+              <div class="sub-tab-item" data-goto="p8">待审核</div>
+              <div class="sub-tab-item" data-goto="p9">已驳回</div>
+              <div class="sub-tab-item active" data-goto="p10">已通过</div>
+            </div>
+            <div class="list-card" data-goto="p4">
+              <div class="list-card-header">
+                <span class="list-card-title">市政公园景观改造</span>
+                <span class="tag tag-green">已通过</span>
+              </div>
+              <div class="list-card-row"><span class="label">备案编号</span><span>BA20250601005</span></div>
+              <div class="list-card-row"><span class="label">工程地址</span><span>深圳市南山区市政公园东侧</span></div>
+              <div class="list-card-row"><span class="label">原计划完工</span><span>2026-07-30</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-08-20</span></div>
+              <div class="list-card-row"><span class="label">通过时间</span><span>2026-07-25 11:08</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-blue">小型工程</span>
+                <span style="color:#00B578;font-size:12px;">查看记录 &rarr;</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P10 施工端-已通过列表<br>点击卡片查看延期记录</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     二、巡检端
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="group-title">二、巡检端（监管端 APP）</div>
+<div class="screens-row">
+
+  <!-- P5: 巡检端首页 -->
+  <div class="phone-wrap" id="p5">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar"><span class="nav-title" style="text-align:left;padding-left:8px;">巡检工作台</span><span></span></div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="hero-banner">
+              <div class="hero-title">欢迎，王监管员</div>
+              <div class="hero-stats">
+                <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">延期待审</div></div>
+                <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">待巡查</div></div>
+                <div class="hero-stat"><div class="hero-stat-num">2</div><div class="hero-stat-label">待整改</div></div>
+              </div>
+            </div>
+            <div class="service-grid">
+              <div class="service-item">
+                <div class="icon" style="position:relative;" data-goto="p6">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span class="badge">3</span>
+                </div>
+                <div class="text" style="color:#00B578;font-weight:600;" data-goto="p6">延期申请</div>
+              </div>
+              <div class="service-item">
+                <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                <div class="text">巡查检查</div>
+              </div>
+              <div class="service-item">
+                <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                <div class="text">隐患整改</div>
+              </div>
+              <div class="service-item">
+                <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="text">完工核销</div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:12px;">
+              <div class="card-header">待处理提醒</div>
+              <div class="card-body">
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f5f5;">
+                  <span class="tag tag-orange">延期</span>
+                  <span style="font-size:12px;color:#333;flex:1;">幸福小区外墙翻新工程 申请延期至2026-09-30</span>
+                  <span style="font-size:11px;color:#999;">14:32</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 0;">
+                  <span class="tag tag-orange">延期</span>
+                  <span style="font-size:12px;color:#333;flex:1;">科技园A栋室内装修 申请延期至2026-08-05</span>
+                  <span style="font-size:11px;color:#999;">昨天</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app-tab-bar">
+          <div class="app-tab-item active">
+            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+            <div class="text">首页</div>
+          </div>
+          <div class="app-tab-item">
+            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="text">巡查</div>
+          </div>
+          <div class="app-tab-item">
+            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="text">我的</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P6 巡检端-首页<br>延期申请入口（角标3）</div>
+  </div>
+
+  <!-- P6: 延期申请待审核列表 -->
+  <div class="phone-wrap" id="p6">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">延期申请审核</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item active" data-goto="p6">待审核</div>
+              <div class="sub-tab-item" data-goto="p11">已驳回</div>
+              <div class="sub-tab-item" data-goto="p12">已通过</div>
+              <div class="sub-tab-item" data-goto="p13">全部</div>
+            </div>
+            <div class="list-card" data-goto="p7">
+              <div class="list-card-header">
+                <span class="list-card-title">幸福小区外墙翻新工程</span>
+                <span class="tag tag-orange">待审核</span>
+              </div>
+              <div class="list-card-row"><span class="label">申请编号</span><span>YQ20260710001</span></div>
+              <div class="list-card-row"><span class="label">工程类型</span><span class="tag tag-blue">小型工程</span></div>
+              <div class="list-card-row"><span class="label">发起方式</span><span>施工方申请 - 张三</span></div>
+              <div class="list-card-row"><span class="label">原完工日期</span><span>2026-08-15</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-09-30</span></div>
+              <div class="list-card-row"><span class="label">申请时间</span><span>2026-07-10 14:32</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-red">需补充保险</span>
+                <span style="color:#00B578;font-size:12px;">去审核 &rarr;</span>
+              </div>
+            </div>
+            <div class="list-card" data-goto="p7">
+              <div class="list-card-header">
+                <span class="list-card-title">科技园A栋室内装修</span>
+                <span class="tag tag-orange">待审核</span>
+              </div>
+              <div class="list-card-row"><span class="label">申请编号</span><span>YQ20260709002</span></div>
+              <div class="list-card-row"><span class="label">工程类型</span><span class="tag tag-gray">住宅装修</span></div>
+              <div class="list-card-row"><span class="label">发起方式</span><span>业主申请 - 李四</span></div>
+              <div class="list-card-row"><span class="label">原完工日期</span><span>2026-07-20</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-08-05</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-green">无需补充保险</span>
+                <span style="color:#00B578;font-size:12px;">去审核 &rarr;</span>
+              </div>
+            </div>
+            <div class="list-card" data-goto="p7">
+              <div class="list-card-header">
+                <span class="list-card-title">道路指示牌更换作业</span>
+                <span class="tag tag-orange">待审核</span>
+              </div>
+              <div class="list-card-row"><span class="label">申请编号</span><span>YQ20260708003</span></div>
+              <div class="list-card-row"><span class="label">工程类型</span><span class="tag tag-blue">小型工程</span></div>
+              <div class="list-card-row"><span class="label">发起方式</span><span>施工方申请 - 赵六</span></div>
+              <div class="list-card-row"><span class="label">原完工日期</span><span>2026-07-15</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-08-10</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-red">需补充保险</span>
+                <span style="color:#00B578;font-size:12px;">去审核 &rarr;</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P7 巡检端-延期申请待审核列表<br>按工程类型筛选 + 卡片列表</div>
+  </div>
+
+  <!-- P7: 延期申请审核详情 -->
+  <div class="phone-wrap" id="p7">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">延期申请审核</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="card">
+              <div class="card-header">工程基本信息</div>
+              <div class="card-body">
+                <div class="field-row"><span class="field-label">工程名称</span><span class="field-value">幸福小区外墙翻新工程</span></div>
+                <div class="field-row"><span class="field-label">工程地址</span><span class="field-value">深圳市南山区沙河街道XX路12号</span></div>
+                <div class="field-row"><span class="field-label">工程所属大类</span><span class="field-value green">小型工程</span></div>
+                <div class="field-row"><span class="field-label">具体工程类型</span><span class="field-value">园林绿化工程</span></div>
+                <div class="field-row"><span class="field-label">施工内容</span><span class="field-value">小区外墙粉刷、防水处理及景观绿化改造</span></div>
+                <div class="field-row"><span class="field-label">原计划完工</span><span class="field-value">2026-08-15</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span>延期申请信息</span><span class="tag tag-orange">待审核</span></div>
+              <div class="card-body">
+                <div class="field-row"><span class="field-label">申请编号</span><span class="field-value">YQ20260710001</span></div>
+                <div class="field-row"><span class="field-label">发起方式</span><span class="field-value">施工方申请</span></div>
+                <div class="field-row"><span class="field-label">发起人</span><span class="field-value">张三（施工负责人）</span></div>
+                <div class="field-row"><span class="field-label">申请时间</span><span class="field-value">2026-07-10 14:32</span></div>
+                <div class="field-row"><span class="field-label">延期后完工</span><span class="field-value green">2026-09-30</span></div>
+                <div class="field-row"><span class="field-label">是否暂停施工</span><span class="field-value">是</span></div>
+                <div class="field-row"><span class="field-label">暂停开始</span><span class="field-value">2026-07-15</span></div>
+                <div class="field-row"><span class="field-label">预计恢复</span><span class="field-value">2026-07-25</span></div>
+                <div class="field-row"><span class="field-label">延期原因</span><span class="field-value">因近期连续暴雨天气影响，外墙防水施工无法正常进行，需延期施工。</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span>保险补充信息</span><span class="tag tag-green">已补充</span></div>
+              <div class="card-body">
+                <div class="tip-bar orange" style="margin:0 0 10px 0;">
+                  <span class="icon">!</span>
+                  <span>延期后完工日期（2026-09-30）超出原保单止期（2026-08-10），已要求补充新的保险信息。</span>
+                </div>
+                <div class="field-row"><span class="field-label">保险公司</span><span class="field-value">中国平安财产保险股份有限公司</span></div>
+                <div class="field-row"><span class="field-label">险种</span><span class="field-value">安全生产责任险</span></div>
+                <div class="field-row"><span class="field-label">保单号</span><span class="field-value">PAIC2026SZ123456789</span></div>
+                <div class="field-row"><span class="field-label">保单起期</span><span class="field-value">2026-08-11</span></div>
+                <div class="field-row"><span class="field-label">保单止期</span><span class="field-value" style="color:#389e0d;font-weight:500;">2026-09-30 [v] 已覆盖</span></div>
+                <div style="margin-top:8px;">
+                  <span style="font-size:12px;color:#666;">保单材料：</span>
+                  <div style="display:flex;gap:8px;margin-top:6px;">
+                    <div class="img-thumb">保单首页</div>
+                    <div class="img-thumb">保单详情</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">历史延期记录</div>
+              <div class="card-body">
+                <div style="font-size:12px;color:#666;">
+                  <div>第1次 - 业主申请</div>
+                  <div>原计划：2026-08-15 --&gt; 申请：2026-12-31</div>
+                  <div style="color:#cf1322;margin-top:3px;">已驳回：延期时间过长，缺乏详细施工计划说明</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">审核操作</div>
+              <div class="card-body">
+                <div class="input-group">
+                  <div class="input-label">审核意见</div>
+                  <textarea class="input-textarea" placeholder="请输入审核意见（通过时可不填，驳回时必填）"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <button class="btn btn-success" onclick="showModal('modalAuditPass')" style="flex:1;">通过</button>
+          <button class="btn btn-danger" onclick="showModal('modalAuditReject')" style="flex:1;">驳回</button>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P8 巡检端-延期申请审核详情<br>工程+延期+保险信息 + 通过/驳回</div>
+  </div>
+
+  <!-- P11: 巡检端-已驳回列表 -->
+  <div class="phone-wrap" id="p11">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">延期申请审核</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item" data-goto="p6">待审核</div>
+              <div class="sub-tab-item active" data-goto="p11">已驳回</div>
+              <div class="sub-tab-item" data-goto="p12">已通过</div>
+              <div class="sub-tab-item" data-goto="p13">全部</div>
+            </div>
+            <div class="list-card" data-goto="p7">
+              <div class="list-card-header">
+                <span class="list-card-title">社区活动中心装修</span>
+                <span class="tag tag-red">已驳回</span>
+              </div>
+              <div class="list-card-row"><span class="label">申请编号</span><span>YQ20260705008</span></div>
+              <div class="list-card-row"><span class="label">工程类型</span><span class="tag tag-blue">小型工程</span></div>
+              <div class="list-card-row"><span class="label">发起方式</span><span>施工方申请 - 钱七</span></div>
+              <div class="list-card-row"><span class="label">原完工日期</span><span>2026-07-20</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span>2026-09-01</span></div>
+              <div class="list-card-row"><span class="label">驳回原因</span><span style="color:#cf1322;">延期理由不充分</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-gray">无需补充保险</span>
+                <span style="color:#00B578;font-size:12px;">查看原因 &rarr;</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P11 巡检端-已驳回列表<br>三类工程Tab + 状态子Tab切换</div>
+  </div>
+
+  <!-- P12: 巡检端-已通过列表 -->
+  <div class="phone-wrap" id="p12">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">延期申请审核</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item" data-goto="p6">待审核</div>
+              <div class="sub-tab-item" data-goto="p11">已驳回</div>
+              <div class="sub-tab-item active" data-goto="p12">已通过</div>
+              <div class="sub-tab-item" data-goto="p13">全部</div>
+            </div>
+            <div class="list-card" data-goto="p7">
+              <div class="list-card-header">
+                <span class="list-card-title">市政道路围挡维护</span>
+                <span class="tag tag-green">已通过</span>
+              </div>
+              <div class="list-card-row"><span class="label">申请编号</span><span>YQ20260702012</span></div>
+              <div class="list-card-row"><span class="label">工程类型</span><span class="tag tag-blue">小型工程</span></div>
+              <div class="list-card-row"><span class="label">发起方式</span><span>业主申请 - 孙八</span></div>
+              <div class="list-card-row"><span class="label">原完工日期</span><span>2026-07-18</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-08-10</span></div>
+              <div class="list-card-row"><span class="label">通过时间</span><span>2026-07-03 09:20</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-green">已补充保险</span>
+                <span style="color:#00B578;font-size:12px;">查看详情 &rarr;</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P12 巡检端-已通过列表<br>展示已生效的延期申请</div>
+  </div>
+
+  <!-- P13: 巡检端-全部列表 -->
+  <div class="phone-wrap" id="p13">
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-inner"></div></div>
+      <div class="phone-screen">
+        <div class="status-bar"><span>9:41</span><span>5G</span></div>
+        <div class="nav-bar">
+          <span class="nav-back" data-back>&lsaquo;</span>
+          <span class="nav-title">延期申请审核</span>
+          <span></span>
+        </div>
+        <div class="scroll-area">
+          <div class="content-bg">
+            <div class="search-bar">
+              <div class="search-wrap">
+                <span class="search-icon">&#9906;</span>
+                <input type="text" class="search-input" placeholder="搜索工程名称/备案编号">
+              </div>
+            </div>
+            <div class="tab-bar" style="border-radius:0;padding:12px 4px 10px;background:#fff;border-bottom:1px solid #f0f0f0;">
+              <div class="tab-item active">小型工程</div>
+              <div class="tab-item">住宅装修</div>
+              <div class="tab-item">零星作业</div>
+            </div>
+            <div class="sub-tab-bar">
+              <div class="sub-tab-item" data-goto="p6">待审核</div>
+              <div class="sub-tab-item" data-goto="p11">已驳回</div>
+              <div class="sub-tab-item" data-goto="p12">已通过</div>
+              <div class="sub-tab-item active" data-goto="p13">全部</div>
+            </div>
+            <div class="list-card" data-goto="p7">
+              <div class="list-card-header">
+                <span class="list-card-title">幸福小区外墙翻新工程</span>
+                <span class="tag tag-orange">待审核</span>
+              </div>
+              <div class="list-card-row"><span class="label">申请编号</span><span>YQ20260710001</span></div>
+              <div class="list-card-row"><span class="label">工程类型</span><span class="tag tag-blue">小型工程</span></div>
+              <div class="list-card-row"><span class="label">发起方式</span><span>施工方申请 - 张三</span></div>
+              <div class="list-card-row"><span class="label">原完工日期</span><span>2026-08-15</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span style="color:#00B578;font-weight:500;">2026-09-30</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-red">需补充保险</span>
+                <span style="color:#00B578;font-size:12px;">去审核 &rarr;</span>
+              </div>
+            </div>
+            <div class="list-card" data-goto="p7">
+              <div class="list-card-header">
+                <span class="list-card-title">社区活动中心装修</span>
+                <span class="tag tag-red">已驳回</span>
+              </div>
+              <div class="list-card-row"><span class="label">申请编号</span><span>YQ20260705008</span></div>
+              <div class="list-card-row"><span class="label">工程类型</span><span class="tag tag-blue">小型工程</span></div>
+              <div class="list-card-row"><span class="label">发起方式</span><span>施工方申请 - 钱七</span></div>
+              <div class="list-card-row"><span class="label">原完工日期</span><span>2026-07-20</span></div>
+              <div class="list-card-row"><span class="label">申请延期至</span><span>2026-09-01</span></div>
+              <div class="list-card-footer">
+                <span class="tag tag-gray">无需补充保险</span>
+                <span style="color:#00B578;font-size:12px;">查看原因 &rarr;</span>
+              </div>
+            </div>
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:11px;">没有更多了</div>
+          </div>
+        </div>
+        <div class="phone-home"><div class="phone-home-bar"></div></div>
+      </div>
+    </div>
+    <div class="phone-label">P13 巡检端-全部列表<br>混合展示所有状态申请</div>
+  </div>
+
+</div>
+
+</div><!-- /prototype-area -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     右侧：标注区域
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="annotation-area">
+
+  <div class="anno-box" id="anno0">
+    <div class="anno-box-title">P1 施工端-首页 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>首页展示"申请延期"快捷入口，角标显示当前逾期工程数量</li>
+          <li>角标数字 = 当前用户名下已逾期且未提交延期申请的工程数</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>逾期判断：当前日期 &gt; 当前有效完工日期，且未完工核销</li>
+          <li>统计口径：按当前登录用户关联的工程筛选</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">交互分支规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>点击"申请延期"入口：进入逾期工程列表页</li>
+          <li>角标为0时：入口正常显示，角标隐藏</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno1">
+    <div class="anno-box-title">P2 施工端-逾期工程列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>顶部Tab：小型工程 / 住宅装修 / 零星作业（三类工程强制区分）</li>
+          <li>子Tab：已逾期 / 待审核 / 已驳回 / 已通过，点击切换对应状态列表页</li>
+          <li>已逾期列表按逾期天数倒序排列，逾期天数多的排前</li>
+          <li>已逾期卡片显示红色"逾期N天"标签，不展示"当前日期"字段</li>
+          <li>已核销工程置灰展示，不可点击申请</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>已逾期：当前日期 &gt; 有效完工日期，未核销，无待审核申请</li>
+          <li>待审核：已提交延期申请，状态=待审核</li>
+          <li>已驳回：延期申请被驳回</li>
+          <li>已通过：延期申请审核通过</li>
+          <li>逾期天数 = 当前日期 - 原计划完工日期</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">交互分支规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>点击已逾期工程卡片：进入申请延期表单页</li>
+          <li>点击待审核/已驳回/已通过卡片：查看延期申请详情（只读）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno2">
+    <div class="anno-box-title">P3 施工端-申请延期表单 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>顶部提供"查看工程详情"和"查看延期记录"跳转按钮</li>
+          <li>小型工程+延期超保时自动展开保险补充区</li>
+          <li>非小型工程只显示提醒，不强制补传保险</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">字段规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>延期后完工日期：必填，必须晚于原计划完工日期</li>
+          <li>是否暂停施工：必填，选"是"展开暂停日期</li>
+          <li>保险字段：小型工程超保时条件必填</li>
+          <li>保单止期必须 &gt;= 延期后完工日期</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">交互分支规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>提交成功：状态变为待审核，短信通知监管人员</li>
+          <li>提交失败：提示具体错误，留在编辑页</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno3">
+    <div class="anno-box-title">P4 施工端-工程详情 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>从申请延期表单页跳转进入，展示完整工程基本信息</li>
+          <li>只读展示，不可编辑</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno4">
+    <div class="anno-box-title">P5 施工端-延期申请记录 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>展示当前工程的全部延期申请记录（时间线）</li>
+          <li>当前有效完工日期取最后一次已通过记录</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno5">
+    <div class="anno-box-title">P6 巡检端-首页 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>首页展示"延期申请"快捷入口，角标显示待审核数量</li>
+          <li>待处理提醒区展示最近的延期申请待审核项</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">交互分支规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>点击"延期申请"入口：进入延期申请待审核列表</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno6">
+    <div class="anno-box-title">P7 巡检端-待审核列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>顶部为三类工程主Tab：小型工程 / 住宅装修 / 零星作业</li>
+          <li>二级状态Tab：待审核 / 已驳回 / 已通过 / 全部，点击切换对应状态列表页</li>
+          <li>待审核卡片展示橙色"待审核"标签，底部显示"去审核"</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>仅展示状态=待审核的延期申请</li>
+          <li>按三类工程主Tab过滤当前工程类型数据</li>
+          <li>支持按工程名称/备案编号搜索</li>
+          <li>待审核按申请提交时间升序排列，提交更早的排前</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno7">
+    <div class="anno-box-title">P8 巡检端-审核详情 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>同页展示工程基本信息+延期申请信息+保险补充信息</li>
+          <li>底部提供"通过"和"驳回"两个操作按钮</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">交互分支规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>通过：延期生效，新完工日期写回工程主数据，通知申请人</li>
+          <li>驳回：状态变为已驳回，通知申请人，申请人可修改重提</li>
+          <li>审核时工程已核销：不允许通过，提示状态变化</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno8">
+    <div class="anno-box-title">P8 施工端-待审核列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>顶部为三类工程主Tab：小型工程 / 住宅装修 / 零星作业</li>
+          <li>二级状态Tab：已逾期 / 待审核 / 已驳回 / 已通过</li>
+          <li>待审核卡片展示橙色"待审核"标签，底部显示"审核中"，不可重复发起申请</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>待审核：当前工程已提交延期申请且申请单状态=待审核</li>
+          <li>同一工程存在待审核申请单时，不允许再次发起延期申请</li>
+          <li>列表按申请提交时间倒序排列，最新提交的排在最前</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno9">
+    <div class="anno-box-title">P9 施工端-已驳回列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>已驳回卡片展示红色"已驳回"标签</li>
+          <li>卡片需展示驳回原因，底部提供"重新申请"入口</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>已驳回：延期申请被巡检端退回，申请人尚未重新提交</li>
+          <li>重新提交后，原已驳回记录保留在历史延期记录中</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno10">
+    <div class="anno-box-title">P10 施工端-已通过列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>已通过卡片展示绿色"已通过"标签</li>
+          <li>底部提供"查看记录"入口，点击进入该工程的延期申请记录页</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>已通过：延期申请审核通过，工程主数据的完工日期已更新</li>
+          <li>列表按通过时间倒序排列</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno11">
+    <div class="anno-box-title">P11 巡检端-已驳回列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>顶部为三类工程主Tab，二级状态Tab切换待审核/已驳回/已通过/全部</li>
+          <li>已驳回卡片展示红色标签，展示驳回原因摘要</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>仅展示当前监管人员权限范围内、状态=已驳回的延期申请</li>
+          <li>列表按处理时间倒序排列</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno12">
+    <div class="anno-box-title">P12 巡检端-已通过列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>已通过卡片展示绿色标签，展示通过时间</li>
+          <li>卡片显示"已补充保险/无需补充保险"等保险状态摘要</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>仅展示状态=已通过的延期申请</li>
+          <li>列表按处理时间倒序排列</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box hidden" id="anno13">
+    <div class="anno-box-title">P13 巡检端-全部列表 — 需求说明</div>
+    <div class="anno-section">
+      <div class="anno-section-title">页面状态规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>全部列表混合展示待审核、已驳回、已通过三种状态</li>
+          <li>不同状态使用对应颜色标签区分</li>
+        </ul>
+      </div>
+    </div>
+    <div class="anno-section">
+      <div class="anno-section-title">数据规则</div>
+      <div class="anno-section-content">
+        <ul>
+          <li>全部列表按状态分组：待审核在前，已处理在后</li>
+          <li>待审核按申请时间升序，已处理按处理时间倒序</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="anno-box" style="margin-top:20px;">
+    <div class="anno-box-title">原型对照清单覆盖情况（14/14）</div>
+    <div class="anno-section-content" style="font-size:12px;color:#666;margin-bottom:10px;">
+      本次优化新增施工端待审核/已驳回/已通过列表页（P8/P9/P10）及巡检端已驳回/已通过/全部列表页（P11/P12/P13），R12 状态展示已完整覆盖。
+    </div>
+    <div class="anno-check"><span class="chk">v</span>R01 延期申请单同时包含延期和保险信息（一页表单）</div>
+    <div class="anno-check"><span class="chk">v</span>R02 施工方/业主可见"申请延期"入口</div>
+    <div class="anno-check"><span class="chk">v</span>R03 巡检端可见"直接延期"入口（工程详情页保留）</div>
+    <div class="anno-check"><span class="chk">v</span>R04 延期后完工日期为必填主字段</div>
+    <div class="anno-check"><span class="chk">v</span>R05 选"是"后显示暂停施工日期</div>
+    <div class="anno-check"><span class="chk">v</span>R06 小型工程超保时自动展开保险补充区</div>
+    <div class="anno-check"><span class="chk">v</span>R07 保险公司为选择器</div>
+    <div class="anno-check"><span class="chk">v</span>R08 险种展示固定6项</div>
+    <div class="anno-check"><span class="chk">v</span>R09 页面有保单号字段</div>
+    <div class="anno-check"><span class="chk">v</span>R10 保单止期需覆盖延期后完工日期</div>
+    <div class="anno-check"><span class="chk">v</span>R11 监管审核页同页查看延期和保险信息</div>
+    <div class="anno-check"><span class="chk">v</span>R12 列表中出现待审核/已通过/已驳回</div>
+    <div class="anno-check"><span class="chk">v</span>R13 监管直接延期受超保校验（工程详情页入口）</div>
+    <div class="anno-check"><span class="chk">v</span>R14 延期记录页可查看历史记录</div>
+  </div>
+
+</div><!-- /annotation-area -->
+
+</div><!-- /main-container -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     弹窗
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalSubmit">
+  <div class="modal-box">
+    <div class="modal-icon success">v</div>
+    <div class="modal-title">提交成功</div>
+    <div class="modal-desc">延期申请已提交，请等待监管审核</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-block" onclick="closeModal()">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalAuditPass">
+  <div class="modal-box">
+    <div class="modal-icon success">v</div>
+    <div class="modal-title">审核已通过</div>
+    <div class="modal-desc">延期申请审核通过，延期正式生效</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-block" onclick="closeModal()">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalAuditReject">
+  <div class="modal-box">
+    <div class="modal-icon fail">x</div>
+    <div class="modal-title">已驳回</div>
+    <div class="modal-desc">延期申请已驳回，申请人可修改后重新提交</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-block" onclick="closeModal()">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 弹窗控制
+// ═══════════════════════════════════════════════════════════════
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show')); }
+
+// ═══════════════════════════════════════════════════════════════
+// 页面导航（含历史栈）
+// ═══════════════════════════════════════════════════════════════
+let navHistory = [];
+
+function goto(pageId, pushHistory) {
+  if (pushHistory !== false) navHistory.push(pageId);
+  const n = parseInt(pageId.replace('p', ''));
+
+  // 滚动到目标页面
+  const el = document.getElementById(pageId);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // 切换右侧标注
+  document.querySelectorAll('[id^="anno"]').forEach(box => box.classList.add('hidden'));
+  const anno = document.getElementById('anno' + n);
+  if (anno) anno.classList.remove('hidden');
+
+  // 更新浮动导航高亮
+  document.querySelectorAll('.float-nav-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === n);
+  });
+}
+
+function goBack() {
+  if (navHistory.length > 1) {
+    navHistory.pop(); // 移除当前页
+    const prevPage = navHistory[navHistory.length - 1];
+    goto(prevPage, false);
+  }
+}
+
+// F8 浮动导航栏
+let navVisible = false;
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F8') {
+    navVisible = !navVisible;
+    document.getElementById('floatNav').classList.toggle('show', navVisible);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 全局点击事件委托（跳转 + 返回）
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('click', function(e) {
+  // data-goto 跳转
+  const gotoTarget = e.target.closest('[data-goto]');
+  if (gotoTarget) {
+    goto(gotoTarget.dataset.goto);
+    return;
+  }
+  // data-back 返回
+  const backTarget = e.target.closest('[data-back]');
+  if (backTarget) {
+    goBack();
+    return;
+  }
+});
+
+// 初始化：记录首页
+navHistory.push('p0');
+</script>
+
+</body>
+</html>
